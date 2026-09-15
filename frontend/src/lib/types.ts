@@ -246,3 +246,180 @@ export interface OrdemServicoStatusData {
   observacoes?: string;
 }
 
+// =============================================================================
+// FASE 6 — MÓDULO DE PRODUTOS, FORNECEDORES, ESTOQUE E ITENS DE OS
+// =============================================================================
+
+export interface Fornecedor {
+  id: number;
+  razaoSocial: string;
+  nomeFantasia?: string | null;
+  cnpj?: string | null;
+  inscricaoEstadual?: string | null;
+  telefone?: string | null;
+  celular?: string | null;
+  email?: string | null;
+  contatoPrincipal?: string | null;
+  ativo: boolean;
+  observacoes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FornecedorFormData {
+  razaoSocial: string;
+  nomeFantasia?: string;
+  cnpj?: string;
+  inscricaoEstadual?: string;
+  telefone?: string;
+  celular?: string;
+  email?: string;
+  contatoPrincipal?: string;
+  observacoes?: string;
+}
+
+export type TipoProduto = 'PRODUTO' | 'PECA' | 'SERVICO' | 'CONSUMIVEL';
+
+export const TIPO_PRODUTO_LABELS: Record<TipoProduto, string> = {
+  PRODUTO: 'Produto',
+  PECA: 'Peça / Componente',
+  SERVICO: 'Serviço',
+  CONSUMIVEL: 'Consumível',
+};
+
+export interface Produto {
+  id: number;
+  codigo: string;
+  codigoBarras?: string | null;
+  nome: string;
+  descricao?: string | null;
+  tipo: TipoProduto;
+  tipoDescricao: string;
+  unidadeMedida: string;
+  precoCusto: number;
+  precoVenda: number;
+  margemLucro?: number | null;
+  estoqueAtual: number;
+  estoqueMinimo: number;
+  estoqueMaximo?: number | null;
+  localizacao?: string | null;
+  ativo: boolean;
+  fornecedorId?: number | null;
+  fornecedorNome?: string | null;
+  estoqueBaixo: boolean;
+  semEstoque: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProdutoFormData {
+  codigo: string;
+  codigoBarras?: string;
+  nome: string;
+  descricao?: string;
+  tipo: TipoProduto;
+  unidadeMedida?: string;
+  precoCusto: number;
+  precoVenda: number;
+  estoqueMinimo?: number;
+  estoqueInicial?: number;
+  localizacao?: string;
+  fornecedorId?: number;
+}
+
+export interface Compatibilidade {
+  id: number;
+  maquinaId: number;
+  maquinaTipoEquipamento: string;
+  maquinaMarca: string;
+  maquinaModelo: string;
+  maquinaNumeroSerie?: string | null;
+  observacaoCompatibilidade?: string | null;
+  createdAt: string;
+}
+
+export type TipoMovimentacaoEstoque =
+  | 'ENTRADA'
+  | 'SAIDA'
+  | 'AJUSTE_POSITIVO'
+  | 'AJUSTE_NEGATIVO'
+  | 'DEVOLUCAO';
+
+export const TIPO_MOVIMENTACAO_ESTOQUE_LABELS: Record<TipoMovimentacaoEstoque, string> = {
+  ENTRADA: 'Entrada',
+  SAIDA: 'Saída',
+  AJUSTE_POSITIVO: 'Ajuste (+)',
+  AJUSTE_NEGATIVO: 'Ajuste (-)',
+  DEVOLUCAO: 'Devolução',
+};
+
+export const TIPO_MOVIMENTACAO_ESTOQUE_BADGES: Record<
+  TipoMovimentacaoEstoque,
+  { bg: string; text: string; border: string }
+> = {
+  ENTRADA: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+  SAIDA: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30' },
+  AJUSTE_POSITIVO: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+  AJUSTE_NEGATIVO: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30' },
+  DEVOLUCAO: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
+};
+
+export interface EstoqueMovimentacao {
+  id: number;
+  produtoId: number;
+  produtoCodigo: string;
+  produtoNome: string;
+  usuarioId?: number | null;
+  usuarioNome?: string | null;
+  ordemServicoId?: number | null;
+  ordemServicoNumero?: string | null;
+  tipoMovimentacao: TipoMovimentacaoEstoque;
+  tipoDescricao: string;
+  quantidade: number;
+  valorUnitario?: number | null;
+  quantidadeAnterior: number;
+  quantidadePosterior: number;
+  motivo: string;
+  dataMovimentacao: string;
+}
+
+export interface EstoqueResumo {
+  totalProdutos: number;
+  itensSemEstoque: number;
+  itensEstoqueBaixo: number;
+  valorTotalEstoque: number;
+}
+
+export interface MovimentacaoManualFormData {
+  produtoId: number;
+  tipoMovimentacao: TipoMovimentacaoEstoque;
+  quantidade: number;
+  valorUnitario?: number;
+  motivo: string;
+}
+
+export type TipoItemOrdemServico = 'PECA' | 'SERVICO';
+
+export interface OrdemServicoItem {
+  id: number;
+  ordemServicoId: number;
+  produtoId: number;
+  produtoCodigo: string;
+  produtoNome: string;
+  tipoItem: TipoItemOrdemServico;
+  tipoItemDescricao: string;
+  quantidade: number;
+  valorUnitario: number;
+  valorDesconto: number;
+  valorTotal: number;
+  observacoes?: string | null;
+  createdAt: string;
+}
+
+export interface OrdemServicoItemFormData {
+  produtoId: number;
+  quantidade: number;
+  valorDesconto?: number;
+  observacoes?: string;
+}
+

@@ -17,6 +17,11 @@ import {
   DollarSign,
   Ban,
   CheckCircle,
+  Package,
+  Plus,
+  Trash2,
+  Boxes,
+  Loader2,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import {
@@ -27,8 +32,18 @@ import {
   StatusOrdemServico,
   STATUS_ORDEM_SERVICO_BADGES,
   STATUS_ORDEM_SERVICO_LABELS,
+  OrdemServicoItem,
+  OrdemServicoItemFormData,
+  Produto,
 } from '@/lib/types';
-import { apiFetch, formatarMoeda, formatarDataHora, formatarDocumento, formatarTelefone } from '@/lib/api';
+import {
+  apiFetch,
+  apiFetchJson,
+  formatarMoeda,
+  formatarDataHora,
+  formatarDocumento,
+  formatarTelefone,
+} from '@/lib/api';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -94,6 +109,21 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     };
   }, [router]);
 
+  // Estados para Peças e Itens da OS
+  const [itens, setItens] = useState<OrdemServicoItem[]>([]);
+  const [isLoadingItens, setIsLoadingItens] = useState(false);
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [produtosDisponiveis, setProdutosDisponiveis] = useState<Produto[]>([]);
+  const [produtoSelecionadoParaItem, setProdutoSelecionadoParaItem] = useState<Produto | null>(null);
+  const [itemForm, setItemForm] = useState<OrdemServicoItemFormData>({
+    produtoId: 0,
+    quantidade: 1,
+    valorDesconto: 0,
+    observacoes: '',
+  });
+  const [isSubmittingItem, setIsSubmittingItem] = useState(false);
+  const [itemError, setItemError] = useState<string | null>(null);
+
   // Carrega Dados da OS
   const fetchOs = useCallback(async () => {
     setIsLoading(true);
@@ -128,9 +158,123 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   }, [osId]);
 
+  const fetchItens = useCallback(async () => {
+    setIsLoadingItens(true);
+    try {
+      const data = await apiFetchJson<OrdemServicoItem[]>(`/api/ordens-servico/${osId}/itens`);
+      setItens(data || []);
+    } catch {
+      // Ignora erro
+    } finally {
+      setIsLoadingItens(false);
+    }
+  }, [osId]);
+
   useEffect(() => {
     fetchOs();
-  }, [fetchOs]);
+    fetchItens();
+  }, [fetchOs, fetchItens]);
+
+  const carregarProdutosDisponiveis = async () => {
+    try {
+      const data = await apiFetchJson<{ content: Produto[] }>('/api/produtos?ativo=true&size=100');
+      setProdutosDisponiveis(data.content || []);
+    } catch {
+      // Ignora erro
+    }
+  };
+
+  const handleOpenItemModal = () => {
+    carregarProdutosDisponiveis();
+    setProdutoSelecionadoParaItem(null);
+    setItemForm({
+      produtoId: 0,
+      quantidade: 1,
+      valorDesconto: 0,
+      observacoes: '',
+    });
+    setItemError(null);
+    setIsItemModalOpen(true);
+  };
+
+  const handleSelectProduto = (prodId: number) => {
+    const p = produtosDisponiveis.find((item) => item.id === prodId) || null;
+    setProdutoSelecionadoParaItem(p);
+    setItemForm((prev) => ({
+      ...prev,
+      produtoId: prodId,
+      quantidade: 1,
+    }));
+  };
+
+  const handleAdicionarItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setItemError(null);
+
+    if (!itemForm.produtoId) {
+      setItemError('Selecione uma peça/produto.');
+      return;
+    }
+
+    if (itemForm.quantidade <= 0) {
+      setItemError('A quantidade deve ser superior a zero.');
+      return;
+    }
+
+    if (produtoSelecionadoParaItem && itemForm.quantidade > produtoSelecionadoParaItem.estoqueAtual) {
+      setItemError(
+        `Saldo insuficiente em estoque! Disponível: ${produtoSelecionadoParaItem.estoqueAtual} ${produtoSelecionadoParaItem.unidadeMedida}`
+      );
+      return;
+    }
+
+    setIsSubmittingItem(true);
+    try {
+      await apiFetchJson(`/api/ordens-servico/${osId}/itens`, {
+        method: 'POST',
+        body: JSON.stringify({
+          produtoId: itemForm.produtoId,
+          quantidade: itemForm.quantidade,
+          valorDesconto: itemForm.valorDesconto || 0,
+          observacoes: itemForm.observacoes?.trim() || null,
+        }),
+      });
+
+      setIsItemModalOpen(false);
+      setSuccessMessage('Peça adicionada e estoque deduzido com sucesso!');
+      setTimeout(() => setSuccessMessage(null), 4000);
+      fetchItens();
+      fetchOs();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao adicionar peça';
+      setItemError(msg);
+    } finally {
+      setIsSubmittingItem(false);
+    }
+  };
+
+  const handleRemoverItem = async (item: OrdemServicoItem) => {
+    if (
+      !confirm(
+        `Deseja remover '${item.produtoNome}' da OS? A quantidade (${item.quantidade}) será estornada ao estoque.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await apiFetchJson(`/api/ordens-servico/${osId}/itens/${item.id}`, {
+        method: 'DELETE',
+      });
+      setSuccessMessage('Peça removida e saldo estornado ao estoque com sucesso!');
+      setTimeout(() => setSuccessMessage(null), 4000);
+      fetchItens();
+      fetchOs();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao remover peça';
+      alert(msg);
+    }
+  };
 
   // Abertura do Modal de Transição de Status
   const handleOpenStatusModal = (novoStatus: StatusOrdemServico) => {
@@ -706,6 +850,112 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
               </div>
             )}
           </div>
+
+          {/* Card 4: Peças e Componentes Utilizados na OS (Integração com Estoque) */}
+          <div className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-amber-400" />
+                <h3 className="text-base font-bold text-white">Peças & Componentes Utilizados</h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  {itens.length} {itens.length === 1 ? 'item' : 'itens'}
+                </span>
+                {itens.length > 0 && (
+                  <span className="text-xs font-bold text-slate-300">
+                    Total: {formatarMoeda(os.valorPecas)}
+                  </span>
+                )}
+              </div>
+
+              {!isTerminal && (
+                <button
+                  type="button"
+                  id="adicionar-peca-os-btn"
+                  onClick={handleOpenItemModal}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-amber-500/10 cursor-pointer self-start sm:self-auto"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Adicionar Peça</span>
+                </button>
+              )}
+            </div>
+
+            {isLoadingItens ? (
+              <div className="py-8 flex justify-center text-slate-400">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+              </div>
+            ) : itens.length === 0 ? (
+              <div className="p-6 rounded-xl bg-slate-950/60 border border-dashed border-slate-800 text-center">
+                <Package className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                <p className="text-xs text-slate-400">
+                  Nenhuma peça ou componente vinculado a esta Ordem de Serviço até o momento.
+                </p>
+                {!isTerminal && (
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Clique em &quot;Adicionar Peça&quot; para registrar componentes técnicos (IGBTs, diodos, AVR, etc.) e baixar o estoque automaticamente.
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-800 bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
+                      <th className="py-2.5 px-3">Código</th>
+                      <th className="py-2.5 px-3">Peça / Componente</th>
+                      <th className="py-2.5 px-3 text-center">Qtd</th>
+                      <th className="py-2.5 px-3 text-right">Preço Unit.</th>
+                      <th className="py-2.5 px-3 text-right">Desconto</th>
+                      <th className="py-2.5 px-3 text-right">Subtotal</th>
+                      <th className="py-2.5 px-3">Observações</th>
+                      {!isTerminal && <th className="py-2.5 px-3 text-right">Ação</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60">
+                    {itens.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
+                        <td className="py-2.5 px-3 whitespace-nowrap">
+                          <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px]">
+                            {item.produtoCodigo}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-white">
+                          {item.produtoNome}
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-bold text-slate-200">
+                          {item.quantidade}
+                        </td>
+                        <td className="py-2.5 px-3 text-right text-slate-300">
+                          {formatarMoeda(item.valorUnitario)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right text-red-400">
+                          {item.valorDesconto > 0 ? `- ${formatarMoeda(item.valorDesconto)}` : '-'}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-bold text-emerald-400">
+                          {formatarMoeda(item.valorTotal)}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-400 text-[11px]">
+                          {item.observacoes || '-'}
+                        </td>
+                        {!isTerminal && (
+                          <td className="py-2.5 px-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoverItem(item)}
+                              className="p-1 text-slate-500 hover:text-rose-400 rounded hover:bg-rose-500/10 transition-colors cursor-pointer"
+                              title="Remover peça e devolver ao estoque"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
@@ -948,6 +1198,181 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                   className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 text-xs font-bold transition-all"
                 >
                   {isSubmittingEdit ? 'Salvando...' : 'Salvar Alterações'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: ADICIONAR PEÇA / COMPONENTE NA OS */}
+      {isItemModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Package className="w-5 h-5 text-amber-400" />
+                <span>Adicionar Peça à Ordem de Serviço</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsItemModalOpen(false)}
+                className="text-slate-400 hover:text-white text-xs font-semibold cursor-pointer"
+              >
+                ✕ Fechar
+              </button>
+            </div>
+
+            <form onSubmit={handleAdicionarItem} className="p-5 space-y-4">
+              {itemError && (
+                <div className="flex items-start gap-2 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{itemError}</span>
+                </div>
+              )}
+
+              {/* Seleção do Produto */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Selecione a Peça / Componente *
+                </label>
+                <select
+                  value={itemForm.produtoId || ''}
+                  onChange={(e) => handleSelectProduto(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  required
+                >
+                  <option value="">Selecione uma peça...</option>
+                  {produtosDisponiveis.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      [{p.codigo}] {p.nome} — Saldo: {p.estoqueAtual} {p.unidadeMedida} — {formatarMoeda(p.precoVenda)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Painel de Saldo e Preço da Peça Selecionada */}
+              {produtoSelecionadoParaItem && (
+                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Saldo Disponível:</span>
+                    <span
+                      className={`font-bold text-sm ${
+                        produtoSelecionadoParaItem.estoqueAtual === 0
+                          ? 'text-rose-400'
+                          : produtoSelecionadoParaItem.estoqueAtual <= produtoSelecionadoParaItem.estoqueMinimo
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                      }`}
+                    >
+                      {produtoSelecionadoParaItem.estoqueAtual} {produtoSelecionadoParaItem.unidadeMedida}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Preço Unitário Atual:</span>
+                    <span className="font-bold text-white text-sm">
+                      {formatarMoeda(produtoSelecionadoParaItem.precoVenda)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Quantidade e Desconto */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Quantidade *
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    max={produtoSelecionadoParaItem ? produtoSelecionadoParaItem.estoqueAtual : undefined}
+                    value={itemForm.quantidade}
+                    onChange={(e) =>
+                      setItemForm({ ...itemForm, quantidade: Number(e.target.value) || 0 })
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Desconto no Item (R$)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={itemForm.valorDesconto ?? 0}
+                    onChange={(e) =>
+                      setItemForm({ ...itemForm, valorDesconto: parseFloat(e.target.value) || 0 })
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  />
+                </div>
+              </div>
+
+              {/* Total Previsto do Item */}
+              {produtoSelecionadoParaItem && (
+                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between text-xs">
+                  <span className="text-slate-400">Subtotal a ser adicionado na OS:</span>
+                  <span className="font-bold text-emerald-400 text-sm">
+                    {formatarMoeda(
+                      Math.max(
+                        0,
+                        produtoSelecionadoParaItem.precoVenda * itemForm.quantidade -
+                          (itemForm.valorDesconto || 0)
+                      )
+                    )}
+                  </span>
+                </div>
+              )}
+
+              {/* Observações */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Observações Técnicas do Componente
+                </label>
+                <input
+                  type="text"
+                  value={itemForm.observacoes}
+                  onChange={(e) => setItemForm({ ...itemForm, observacoes: e.target.value })}
+                  placeholder="Ex: Substituição preventiva; Canal de potência primário"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                />
+              </div>
+
+              {/* Ações */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsItemModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={
+                    isSubmittingItem ||
+                    !itemForm.produtoId ||
+                    itemForm.quantidade <= 0 ||
+                    (produtoSelecionadoParaItem != null &&
+                      itemForm.quantidade > produtoSelecionadoParaItem.estoqueAtual)
+                  }
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  {isSubmittingItem ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Adicionando...</span>
+                    </>
+                  ) : (
+                    <span>Adicionar Peça</span>
+                  )}
                 </button>
               </div>
             </form>

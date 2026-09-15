@@ -388,4 +388,148 @@ Retorna o histórico técnico completo e cronológico de um equipamento específ
 - **Query Params**: `page`, `size`, `sort`.
 - **Resposta Sucesso (200 OK)**: `PageResponse<OrdemServicoResponseDTO>`.
 
+---
+
+## 11. Módulo de Peças, Produtos, Estoque e Fornecedores (Fase 6)
+
+### 11.1. Fornecedores
+
+#### `POST /api/fornecedores`
+Cadastra um fornecedor técnico de peças e insumos.
+- **Validações**: `razaoSocial` obrigatória, `cnpj` único (quando informado).
+- **Resposta Sucesso (201 Created)**: `FornecedorResponseDTO`.
+
+#### `GET /api/fornecedores`
+Lista paginada de fornecedores com filtro textual opcional (`termo`) e status `ativo`.
+
+#### `GET /api/fornecedores/{id}`
+Detalhes do fornecedor pelo ID.
+
+#### `PUT /api/fornecedores/{id}`
+Atualiza os dados cadastrais do fornecedor.
+
+#### `PATCH /api/fornecedores/{id}/status`
+Ativa ou inativa o fornecedor.
+
+---
+
+### 11.2. Produtos e Peças de Reposição
+
+#### `POST /api/produtos`
+Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, reguladores AVR, pontes retificadoras).
+- **Regra**: `codigo` único obrigatório, `precoVenda >= 0`, `estoqueMinimo >= 0`.
+- **Payload**:
+  ```json
+  {
+    "codigo": "IGBT-60N100",
+    "codigoBarras": "7891234567890",
+    "nome": "Módulo IGBT 60N100 60A 1000V",
+    "descricao": "Módulo de potência para inversores de solda TIG/MIG",
+    "tipo": "PECA",
+    "unidadeMedida": "UN",
+    "precoCusto": 45.00,
+    "precoVenda": 85.00,
+    "estoqueInicial": 10,
+    "estoqueMinimo": 2,
+    "localizacao": "Prateleira B3",
+    "fornecedorId": 1
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `ProdutoResponseDTO`.
+
+#### `GET /api/produtos`
+Lista produtos com paginação e filtros combinados:
+- `termo`: Busca por código, nome ou código de barras.
+- `tipo`: `PRODUTO`, `PECA`, `SERVICO`, `CONSUMIVEL`.
+- `estoqueBaixo`: `true` filtra apenas itens em que `estoqueAtual <= estoqueMinimo`.
+- `ativo`: `true` ou `false`.
+
+#### `GET /api/produtos/{id}`
+Retorna a ficha cadastral do produto.
+
+#### `PUT /api/produtos/{id}`
+Atualiza preços, descrições, estoque mínimo e localização do produto.
+
+#### `PATCH /api/produtos/{id}/status`
+Ativa ou inativa o produto.
+
+#### `GET /api/produtos/{id}/compatibilidades`
+Lista as máquinas e equipamentos compatíveis com a peça (`produto_maquina`).
+
+#### `POST /api/produtos/{id}/compatibilidades`
+Vincula um equipamento compatível à peça técnica.
+- **Payload**: `{ "maquinaId": 2, "observacaoCompatibilidade": "Aplicar pasta térmica de prata" }`
+
+#### `DELETE /api/produtos/{id}/compatibilidades/{maquinaId}`
+Remove o vínculo de compatibilidade entre a peça e a máquina.
+
+---
+
+### 11.3. Gestão e Movimentações de Estoque
+
+#### `GET /api/estoque/resumo`
+Retorna indicadores consolidados de inventário:
+- `totalProdutos`: Total de itens cadastrados e ativos.
+- `itensSemEstoque`: Produtos com saldo zero.
+- `itensEstoqueBaixo`: Produtos com saldo `<= estoqueMinimo`.
+- `valorTotalEstoque`: Valorização física total calculada a preço de custo.
+
+#### `POST /api/estoque/movimentar`
+Registra movimentação manual no estoque em transação atômica com bloqueio pessimista (`SELECT ... FOR UPDATE`):
+- **Tipos Suportados**: `ENTRADA`, `SAIDA`, `AJUSTE_POSITIVO`, `AJUSTE_NEGATIVO`.
+- **Regra Fundamental**: O saldo nunca pode se tornar negativo (`saldoPosterior >= 0`).
+- **Payload**:
+  ```json
+  {
+    "produtoId": 1,
+    "tipoMovimentacao": "ENTRADA",
+    "quantidade": 15,
+    "valorUnitario": 45.00,
+    "motivo": "Nota Fiscal 4591 - Reposição de estoque Boxer"
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `EstoqueMovimentacaoResponseDTO`.
+
+#### `GET /api/estoque/movimentacoes`
+Auditoria completa de histórico de movimentações paginadas.
+- **Query Params**: `produtoId`, `tipo`, `page`, `size`.
+
+---
+
+### 11.4. Peças e Itens de Ordem de Serviço (Baixa Atômica)
+
+#### `GET /api/ordens-servico/{id}/itens`
+Lista todas as peças vinculadas à Ordem de Serviço.
+- **Resposta Sucesso (200 OK)**: Lista de `OrdemServicoItemResponseDTO` com código, nome, quantidade, preço unitário congelado na data do atendimento, desconto e subtotal.
+
+#### `POST /api/ordens-servico/{id}/itens`
+Adiciona uma peça à Ordem de Serviço em transação atômica e concorrência segura:
+1. Bloqueia o produto via Pessimistic Lock (`findByIdWithLock`).
+2. Valida saldo disponível (`estoqueAtual >= quantidade`).
+3. Deduz fisicamente a quantidade do estoque (`estoque_atual -= quantidade`).
+4. Congela o preço unitário histórico do produto naquele exato momento.
+5. Cria o registro em `ordem_servico_itens`.
+6. Registra movimentação de estoque tipo `SAIDA` vinculada à OS.
+7. Recalcula `valorPecas` e `valorTotal` da Ordem de Serviço.
+- **Payload**:
+  ```json
+  {
+    "produtoId": 1,
+    "quantidade": 2,
+    "valorDesconto": 0.00,
+    "observacoes": "Substituição preventiva do canal A"
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `OrdemServicoItemResponseDTO`.
+
+#### `DELETE /api/ordens-servico/{id}/itens/{itemId}`
+Remove uma peça da Ordem de Serviço com estorno automático:
+1. Bloqueia o produto via Pessimistic Lock.
+2. Devolve a quantidade física ao saldo do produto (`estoque_atual += quantidade`).
+3. Registra movimentação de estoque tipo `DEVOLUCAO` vinculada à OS.
+4. Remove a linha de `ordem_servico_itens`.
+5. Recalcula `valorPecas` e `valorTotal` da Ordem de Serviço.
+- **Resposta Sucesso (204 No Content)**.
+
+
 

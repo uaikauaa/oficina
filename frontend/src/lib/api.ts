@@ -33,6 +33,22 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   return response;
 }
 
+export async function apiFetchJson<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const res = await apiFetch(endpoint, options);
+  if (!res.ok) {
+    let errorMsg = `Erro na requisição (${res.status})`;
+    try {
+      const errBody = await res.json();
+      if (errBody?.message) errorMsg = errBody.message;
+    } catch {
+      // Ignora erro de parse
+    }
+    throw new Error(errorMsg);
+  }
+  if (res.status === 204) return {} as T;
+  return res.json() as Promise<T>;
+}
+
 export function formatarDocumento(doc?: string | null): string {
   if (!doc) return '-';
   const limpo = doc.replace(/\D/g, '');

@@ -22,6 +22,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import com.oficinagestao.ordem.dto.OrdemServicoItemCreateDTO;
+import com.oficinagestao.ordem.dto.OrdemServicoItemResponseDTO;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @RestController
 @Tag(name = "Ordens de Serviço", description = "Fluxo central de atendimento técnico para máquinas de solda e geradores de energia")
@@ -40,10 +44,16 @@ import java.time.OffsetDateTime;
 public class OrdemServicoController {
 
     private final OrdemServicoService ordemServicoService;
+    private final OrdemServicoItemService ordemServicoItemService;
     private final UsuarioRepository usuarioRepository;
 
-    public OrdemServicoController(OrdemServicoService ordemServicoService, UsuarioRepository usuarioRepository) {
+    public OrdemServicoController(
+            OrdemServicoService ordemServicoService,
+            OrdemServicoItemService ordemServicoItemService,
+            UsuarioRepository usuarioRepository
+    ) {
         this.ordemServicoService = ordemServicoService;
+        this.ordemServicoItemService = ordemServicoItemService;
         this.usuarioRepository = usuarioRepository;
     }
 
@@ -180,6 +190,56 @@ public class OrdemServicoController {
             Pageable pageable
     ) {
         return ResponseEntity.ok(ordemServicoService.listarPorMaquina(maquinaId, pageable));
+    }
+
+    // =========================================================================
+    // Endpoints de Peças Utilizadas na Ordem de Serviço
+    // =========================================================================
+
+    @GetMapping("/api/ordens-servico/{id}/itens")
+    @Operation(summary = "Listar peças e serviços utilizados na Ordem de Serviço")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de itens retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
+    })
+    public ResponseEntity<List<OrdemServicoItemResponseDTO>> listarItens(@PathVariable Long id) {
+        return ResponseEntity.ok(ordemServicoItemService.listarItens(id));
+    }
+
+    @PostMapping("/api/ordens-servico/{id}/itens")
+    @Operation(summary = "Adicionar peça à Ordem de Serviço", description = "Realiza baixa atômica no estoque com congelamento de preço histórico e recalculo da OS.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Peça adicionada à OS com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Estoque insuficiente ou OS em status terminal"),
+            @ApiResponse(responseCode = "404", description = "OS ou produto não encontrado")
+    })
+    public ResponseEntity<OrdemServicoItemResponseDTO> adicionarPeca(
+            @PathVariable Long id,
+            @Valid @RequestBody OrdemServicoItemCreateDTO dto,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        OrdemServicoItemResponseDTO response = ordemServicoItemService.adicionarPeca(id, dto, usuarioId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/api/ordens-servico/{id}/itens/{itemId}")
+    @Operation(summary = "Remover peça da Ordem de Serviço", description = "Remove o item da OS e estorna a quantidade para o estoque.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Item removido e estoque estornado"),
+            @ApiResponse(responseCode = "400", description = "OS em status terminal"),
+            @ApiResponse(responseCode = "404", description = "Item ou OS não encontrado")
+    })
+    public ResponseEntity<Void> removerItem(
+            @PathVariable Long id,
+            @PathVariable Long itemId,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        ordemServicoItemService.removerItem(id, itemId, usuarioId, request);
+        return ResponseEntity.noContent().build();
     }
 
     // =========================================================================
