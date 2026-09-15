@@ -160,7 +160,58 @@ Retorna informações operacionais do sistema backend, status do banco de dados 
 
 ---
 
-## 5. Contrato Padrão de Erro (`ApiErrorResponse`)
+## 5. Endpoints da Fase 4A (Módulo de Clientes)
+
+Todos os endpoints abaixo exigem autenticação ativa com o perfil `ROLE_ADMIN`.
+
+### `POST /api/clientes`
+Cadastra um novo cliente (Pessoa Física ou Pessoa Jurídica) e seu endereço.
+
+- **Método**: `POST`
+- **URL**: `/api/clientes`
+- **Resposta Sucesso (201 Created)**: Retorna `ClienteResponseDTO`
+- **Respostas de Erro**:
+  - `400 Bad Request`: Dados obrigatórios ausentes ou e-mail inválido.
+  - `401 Unauthorized`: Sessão ausente.
+  - `409 Conflict`: CPF, CNPJ, telefone, celular ou razão social já existente.
+
+### `GET /api/clientes`
+Pesquisa paginada de clientes com filtros opcionais.
+
+- **Método**: `GET`
+- **URL**: `/api/clientes?termo={termo}&tipoPessoa={FISICA|JURIDICA}&ativo={true|false}&page=0&size=10`
+- **Resposta Sucesso (200 OK)**: `PageResponse<ClienteResponseDTO>`
+
+### `GET /api/clientes/{id}`
+Consulta detalhada de um cliente específico por ID.
+
+- **Método**: `GET`
+- **URL**: `/api/clientes/{id}`
+- **Resposta Sucesso (200 OK)**: `ClienteResponseDTO`
+- **Respostas de Erro**:
+  - `404 Not Found`: Cliente não localizado.
+
+### `PUT /api/clientes/{id}`
+Atualização cadastral e de endereço do cliente.
+
+- **Método**: `PUT`
+- **URL**: `/api/clientes/{id}`
+- **Resposta Sucesso (200 OK)**: `ClienteResponseDTO` atualizado.
+- **Respostas de Erro**:
+  - `404 Not Found`: Cliente não localizado.
+  - `409 Conflict`: Conflito de duplicidade com outro cliente existente.
+
+### `PATCH /api/clientes/{id}/status`
+Ativação ou inativação rápida do cliente.
+
+- **Método**: `PATCH`
+- **URL**: `/api/clientes/{id}/status`
+- **Payload**: `{ "ativo": false }`
+- **Resposta Sucesso (200 OK)**: `ClienteResponseDTO` com status atualizado.
+
+---
+
+## 6. Contrato Padrão de Erro (`ApiErrorResponse`)
 
 Todas as respostas de erro da API (4xx e 5xx) seguem estritamente a seguinte estrutura JSON:
 
@@ -188,7 +239,7 @@ Todas as respostas de erro da API (4xx e 5xx) seguem estritamente a seguinte est
 
 ---
 
-## 6. Contrato Padrão de Paginação (`PageResponse<T>`)
+## 7. Contrato Padrão de Paginação (`PageResponse<T>`)
 
 Para listagens paginadas nos módulos de negócio, a resposta padronizada encapsula os dados e metadados de paginação:
 
@@ -208,7 +259,7 @@ Para listagens paginadas nos módulos de negócio, a resposta padronizada encaps
 
 ---
 
-## 7. Documentação OpenAPI 3 / Swagger UI
+## 8. Documentação OpenAPI 3 / Swagger UI
 
 A documentação interativa e a especificação JSON estão disponíveis nos seguintes endpoints públicos:
 

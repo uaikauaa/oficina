@@ -5,7 +5,7 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const { pathname } = request.nextUrl;
 
-  const isProtectedRoute = pathname.startsWith('/dashboard');
+  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/clientes');
   const isAuthRoute = pathname === '/login';
 
   // Se tentar acessar rota protegida sem token, redireciona para o login
@@ -24,5 +24,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login'],
+  matcher: ['/dashboard/:path*', '/clientes/:path*', '/clientes', '/login'],
 };

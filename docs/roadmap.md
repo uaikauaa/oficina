@@ -54,9 +54,22 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Migration Flyway `V4__correct_equipment_domain.sql` aplicada no Neon: remoção de colunas e índices automotivos, adição de atributos técnicos (`potencia`, `tensao`, `especificacoes_tecnicas`, `tipo_equipamento`, `numero_serie`, `horimetro`) e índices otimizados para histórico.
 - Atualização e aprovação de 41 testes automatizados.
 
-### Fase 4 — Cadastros Base
-- Gestão de Clientes (Pessoa Física, Empresas, Indústrias, Parceiros).
-- Gestão de Máquinas e Equipamentos (Máquinas de Solda MIG/MAG/TIG/Eletrodo/Inversoras e Geradores a Diesel/Gasolina).
+### Fase 4A — Módulo de Clientes (Concluída)
+- Cadastro de Clientes Pessoa Física (PF) e Pessoa Jurídica (PJ) da oficina técnica.
+- Gestão completa de endereços principais e dados de contato (telefone, celular, e-mail).
+- Prevenção rigorosa de duplicidades (CPF, CNPJ, telefone, celular, nome/razão social).
+- Pesquisa paginada flexível e eficiente por ID, nome, razão social, documento ou contato.
+- Arquitetura estrita `Controller -> DTO -> Service -> Repository -> Entity` sem exposição de entidades JPA.
+- Frontend Next.js com páginas `/clientes` e `/clientes/[id]` (tabela responsiva, filtros, modais, feedback visual e confirmação de ações).
+- Estrutura preparada para relacionar máquinas e geradores futuramente.
+- 53 testes automatizados no backend e builds 100% aprovados.
+
+### Fase 4B — Máquinas e Equipamentos Técnicos (Pendente)
+- Gestão de Máquinas de Solda (MIG/MAG, TIG, Eletrodo Revestido, Inversoras, Corte Plasma) e Geradores de Energia (Diesel e Gasolina).
+- Vínculo relacional com clientes (histórico de manutenções e ordens de serviço).
+- Cadastro de especificações técnicas (potência kVA/kW, tensão 110V/220V/380V/440V, corrente máxima, número de série e horímetro).
+
+### Fase 4C — Fornecedores, Peças, Insumos e Serviços (Pendente)
 - Gestão de Fornecedores de Peças, Componentes Eletrônicos e Consumíveis.
 - Gestão de Peças, Insumos e Estoque Técnico.
 - Gestão de Serviços e Diagnósticos Técnicos.
