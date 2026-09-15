@@ -2,6 +2,47 @@ export type TipoPessoa = 'FISICA' | 'JURIDICA';
 
 export type TipoEndereco = 'PRINCIPAL' | 'COBRANCA' | 'ENTREGA' | 'OUTRO';
 
+export type TipoEquipamento = 'MAQUINA_SOLDA' | 'GERADOR_ENERGIA' | 'OUTRO_EQUIPAMENTO';
+
+export const TIPO_EQUIPAMENTO_LABELS: Record<TipoEquipamento, string> = {
+  MAQUINA_SOLDA: 'Máquina de Solda',
+  GERADOR_ENERGIA: 'Gerador de Energia',
+  OUTRO_EQUIPAMENTO: 'Outro Equipamento',
+};
+
+export interface Maquina {
+  id: number;
+  clienteId: number;
+  clienteNome: string;
+  tipoEquipamento: TipoEquipamento;
+  tipoEquipamentoDescricao: string;
+  marca: string;
+  modelo: string;
+  anoFabricacao?: number | null;
+  numeroSerie?: string | null;
+  horimetro?: number | null;
+  potencia?: string | null;
+  tensao?: string | null;
+  especificacoesTecnicas?: string | null;
+  observacoes?: string | null;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MaquinaFormData {
+  clienteId: number;
+  tipoEquipamento: TipoEquipamento;
+  marca: string;
+  modelo: string;
+  anoFabricacao?: string;
+  numeroSerie?: string;
+  horimetro?: string;
+  potencia?: string;
+  tensao?: string;
+  observacoes?: string;
+}
+
 export interface Endereco {
   id?: number;
   cep?: string;

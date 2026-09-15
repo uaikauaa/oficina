@@ -7,6 +7,7 @@ import com.oficinagestao.cliente.dto.ClienteUpdateDTO;
 import com.oficinagestao.common.PageResponse;
 import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
+import com.oficinagestao.maquina.MaquinaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,29 +19,34 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
     private final AuditoriaService auditoriaService;
+    private final MaquinaRepository maquinaRepository;
 
     public ClienteService(
             ClienteRepository clienteRepository,
             ClienteMapper clienteMapper,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            MaquinaRepository maquinaRepository
     ) {
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
         this.auditoriaService = auditoriaService;
+        this.maquinaRepository = maquinaRepository;
     }
 
     @Transactional(readOnly = true)
     public PageResponse<ClienteResponseDTO> listar(String termo, TipoPessoa tipoPessoa, Boolean ativo, Pageable pageable) {
         String termoNormalizado = (termo != null && !termo.isBlank()) ? termo.trim() : null;
         Page<Cliente> page = clienteRepository.pesquisar(termoNormalizado, tipoPessoa, ativo, pageable);
-        return PageResponse.from(page.map(cliente -> clienteMapper.toResponseDTO(cliente, 0L)));
+        return PageResponse.from(page.map(cliente ->
+                clienteMapper.toResponseDTO(cliente, maquinaRepository.countByClienteId(cliente.getId()))));
     }
 
     @Transactional(readOnly = true)
     public ClienteResponseDTO buscarPorId(Long id) {
         Cliente cliente = clienteRepository.findByIdWithEnderecos(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + id));
-        return clienteMapper.toResponseDTO(cliente, 0L);
+        long totalEquipamentos = maquinaRepository.countByClienteId(id);
+        return clienteMapper.toResponseDTO(cliente, totalEquipamentos);
     }
 
     @Transactional
@@ -54,7 +60,7 @@ public class ClienteService {
             auditoriaService.registrar(usuarioId, "Cliente", String.valueOf(salvo.getId()), "INSERT", ipOrigem);
         }
 
-        return clienteMapper.toResponseDTO(salvo, 0L);
+        return clienteMapper.toResponseDTO(salvo, 0L); // Recém criado, sem equipamentos
     }
 
     @Transactional
@@ -71,7 +77,8 @@ public class ClienteService {
             auditoriaService.registrar(usuarioId, "Cliente", String.valueOf(atualizado.getId()), "UPDATE", ipOrigem);
         }
 
-        return clienteMapper.toResponseDTO(atualizado, 0L);
+        long totalEquipamentos = maquinaRepository.countByClienteId(atualizado.getId());
+        return clienteMapper.toResponseDTO(atualizado, totalEquipamentos);
     }
 
     @Transactional
@@ -92,7 +99,8 @@ public class ClienteService {
             );
         }
 
-        return clienteMapper.toResponseDTO(atualizado, 0L);
+        long totalEquipamentos = maquinaRepository.countByClienteId(atualizado.getId());
+        return clienteMapper.toResponseDTO(atualizado, totalEquipamentos);
     }
 
     private void validarDuplicidadeCriacao(ClienteCreateDTO dto) {

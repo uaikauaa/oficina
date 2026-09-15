@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,11 +17,17 @@ import {
   FileText,
   Clock,
   ShieldAlert,
+  Plus,
+  Zap,
+  Hash,
+  Gauge,
+  AlertTriangle,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
 import ConfirmModal from '@/components/ConfirmModal';
-import { Cliente, CurrentUser } from '@/lib/types';
+import MaquinaModal from '@/components/MaquinaModal';
+import { Cliente, CurrentUser, Maquina, TIPO_EQUIPAMENTO_LABELS } from '@/lib/types';
 import { apiFetch, formatarDocumento, formatarTelefone, formatarCep } from '@/lib/api';
 
 interface PageProps {
@@ -40,10 +46,19 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  // Estado de equipamentos
+  const [maquinas, setMaquinas] = useState<Maquina[]>([]);
+  const [maquinasLoading, setMaquinasLoading] = useState(false);
+  const [maquinasError, setMaquinasError] = useState<string | null>(null);
+
   // Modais
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+
+  // Modal de equipamentos
+  const [isMaquinaModalOpen, setIsMaquinaModalOpen] = useState(false);
+  const [editingMaquina, setEditingMaquina] = useState<Maquina | null>(null);
 
   // Carrega Usuário da Sessão
   useEffect(() => {
@@ -106,6 +121,50 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
       ignore = true;
     };
   }, [clienteId, refreshTrigger]);
+
+  // Carrega equipamentos do cliente
+  const fetchMaquinas = useCallback(async () => {
+    setMaquinasLoading(true);
+    setMaquinasError(null);
+    try {
+      const res = await apiFetch(`/api/clientes/${clienteId}/maquinas?size=50&sort=marca,asc`);
+      if (!res.ok) {
+        throw new Error('Erro ao carregar equipamentos.');
+      }
+      const data = await res.json();
+      setMaquinas(data.content ?? []);
+    } catch {
+      setMaquinasError('Não foi possível carregar os equipamentos.');
+    } finally {
+      setMaquinasLoading(false);
+    }
+  }, [clienteId]);
+
+  useEffect(() => {
+    if (clienteId) {
+      fetchMaquinas();
+    }
+  }, [clienteId, fetchMaquinas]);
+
+  const handleAlterarStatusMaquina = async (maquina: Maquina) => {
+    const novoStatus = !maquina.ativo;
+    try {
+      const res = await apiFetch(`/api/maquinas/${maquina.id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ ativo: novoStatus }),
+      });
+      if (!res.ok) throw new Error('Falha ao alterar status do equipamento.');
+      setSuccessMessage(
+        novoStatus
+          ? `Equipamento "${maquina.marca} ${maquina.modelo}" reativado.`
+          : `Equipamento "${maquina.marca} ${maquina.modelo}" inativado.`
+      );
+      fetchMaquinas();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erro ao alterar status.';
+      setErrorMessage(msg);
+    }
+  };
 
   // Alterar Status
   const handleAlterarStatus = async () => {
@@ -366,35 +425,156 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* Estrutura Preparada para Histórico Futuro de Equipamentos */}
+        {/* Seção de Equipamentos */}
         <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <Wrench className="w-4 h-4 text-amber-400" />
-              <h2 className="text-sm font-bold text-white">Máquinas & Equipamentos Vinculados</h2>
+              <h2 className="text-sm font-bold text-white">Máquinas &amp; Equipamentos Vinculados</h2>
+              {maquinas.length > 0 && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  {maquinas.length}
+                </span>
+              )}
             </div>
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-              Módulo de Equipamentos — Fase 4B
-            </span>
+            <button
+              onClick={() => { setEditingMaquina(null); setIsMaquinaModalOpen(true); }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-colors cursor-pointer shadow-lg shadow-amber-500/20"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Novo Equipamento</span>
+            </button>
           </div>
 
-          <div className="p-8 rounded-xl bg-slate-950/60 border border-slate-800/80 text-center space-y-3">
-            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto">
-              <Wrench className="w-6 h-6" />
+          {/* Estado de carregamento */}
+          {maquinasLoading && (
+            <div className="flex items-center gap-3 py-6 justify-center text-slate-400 text-xs">
+              <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <span>Carregando equipamentos...</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-white">
-                Nenhum equipamento técnico associado no momento
-              </p>
-              <p className="text-xs text-slate-400 max-w-lg mx-auto mt-1 leading-relaxed">
-                A estrutura do cliente está pronta para vincular máquinas de solda (MIG, TIG, Eletrodo, Inversoras) e geradores de energia (diesel e gasolina). O gerenciamento de equipamentos será ativado no módulo seguinte (Fase 4B).
-              </p>
+          )}
+
+          {/* Erro */}
+          {!maquinasLoading && maquinasError && (
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{maquinasError}</span>
             </div>
-          </div>
+          )}
+
+          {/* Lista de equipamentos */}
+          {!maquinasLoading && !maquinasError && maquinas.length === 0 && (
+            <div className="p-8 rounded-xl bg-slate-950/60 border border-slate-800/80 text-center space-y-3">
+              <div className="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto">
+                <Wrench className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Nenhum equipamento cadastrado</p>
+                <p className="text-xs text-slate-400 max-w-lg mx-auto mt-1 leading-relaxed">
+                  Clique em &quot;Novo Equipamento&quot; para registrar uma máquina de solda ou gerador de energia deste cliente.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!maquinasLoading && !maquinasError && maquinas.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {maquinas.map((maq) => (
+                <div
+                  key={maq.id}
+                  className={`p-4 rounded-xl border transition-colors ${
+                    maq.ativo
+                      ? 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                      : 'bg-slate-950/30 border-slate-800/50 opacity-60'
+                  }`}
+                >
+                  {/* Header do card */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                        <Wrench className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white">
+                          {maq.marca} — {maq.modelo}
+                        </p>
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700 mt-0.5">
+                          {TIPO_EQUIPAMENTO_LABELS[maq.tipoEquipamento]}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          maq.ativo
+                            ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                            : 'bg-slate-800 text-slate-500 border border-slate-700'
+                        }`}
+                      >
+                        {maq.ativo ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Detalhes técnicos */}
+                  <div className="space-y-1 text-[11px]">
+                    {maq.numeroSerie && (
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <Hash className="w-3 h-3 text-slate-500" />
+                        <span>N/S: <span className="text-slate-200 font-mono">{maq.numeroSerie}</span></span>
+                      </div>
+                    )}
+                    {maq.anoFabricacao && (
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <Calendar className="w-3 h-3 text-slate-500" />
+                        <span>Fabricação: <span className="text-slate-200">{maq.anoFabricacao}</span></span>
+                      </div>
+                    )}
+                    {(maq.potencia || maq.tensao) && (
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <Zap className="w-3 h-3 text-slate-500" />
+                        <span>
+                          {[maq.potencia, maq.tensao].filter(Boolean).join(' / ')}
+                        </span>
+                      </div>
+                    )}
+                    {maq.horimetro != null && (
+                      <div className="flex items-center gap-1.5 text-slate-400">
+                        <Gauge className="w-3 h-3 text-slate-500" />
+                        <span>Horímetro: <span className="text-slate-200">{maq.horimetro}h</span></span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Ações do card */}
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800/60">
+                    <button
+                      onClick={() => { setEditingMaquina(maq); setIsMaquinaModalOpen(true); }}
+                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-blue-500/20 hover:text-blue-400 text-slate-300 text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-700 hover:border-blue-500/30 transition-all cursor-pointer"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      <span>Editar</span>
+                    </button>
+                    <button
+                      onClick={() => handleAlterarStatusMaquina(maq)}
+                      className={`flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
+                        maq.ativo
+                          ? 'bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 border-slate-700 hover:border-red-500/30'
+                          : 'bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-400 border-slate-700 hover:border-emerald-500/30'
+                      }`}
+                    >
+                      <Power className="w-3 h-3" />
+                      <span>{maq.ativo ? 'Inativar' : 'Reativar'}</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Modal de Edição */}
+      {/* Modal de Edição do Cliente */}
       <ClienteModal
         isOpen={isEditModalOpen}
         cliente={cliente}
@@ -405,7 +585,24 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
         }}
       />
 
-      {/* Modal de Confirmação de Alteração de Status */}
+      {/* Modal de Equipamento (Cadastro e Edição) */}
+      {cliente && (
+        <MaquinaModal
+          isOpen={isMaquinaModalOpen}
+          clienteId={cliente.id}
+          clienteNome={cliente.nomeRazaoSocial}
+          maquina={editingMaquina}
+          onClose={() => { setIsMaquinaModalOpen(false); setEditingMaquina(null); }}
+          onSuccess={(salva) => {
+            const action = editingMaquina ? 'atualizado' : 'cadastrado';
+            setSuccessMessage(`Equipamento "${salva.marca} ${salva.modelo}" ${action} com sucesso!`);
+            fetchMaquinas();
+            setRefreshTrigger((prev) => prev + 1); // atualiza totalEquipamentos do cliente
+          }}
+        />
+      )}
+
+      {/* Modal de Confirmação de Alteração de Status do Cliente */}
       <ConfirmModal
         isOpen={isConfirmModalOpen}
         title={cliente.ativo ? 'Inativar Cliente?' : 'Reativar Cliente?'}
