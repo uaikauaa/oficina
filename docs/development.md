@@ -36,14 +36,23 @@ oficina-gestao/
    cp .env.example .env
    # No Windows PowerShell: Copy-Item .env.example .env
    ```
-4. Preencha as variáveis com as credenciais do seu banco Neon:
+4. Preencha as variáveis com as credenciais do seu banco Neon e configurações de segurança:
    ```env
    DB_URL=jdbc:postgresql://<neon-host>/neondb?sslmode=require
    DB_USERNAME=neondb_owner
    DB_PASSWORD=sua_senha_neon
    SERVER_PORT=8080
+
+   # Segurança JWT
+   JWT_SECRET=chave_secreta_jwt_de_pelo_menos_32_caracteres_aleatorios
+   JWT_EXPIRATION_MS=86400000
+
+   # Bootstrap da Proprietária (executado apenas se a tabela usuarios estiver vazia)
+   INITIAL_ADMIN_NAME=Proprietária Oficina
+   INITIAL_ADMIN_EMAIL=admin@oficina.com
+   INITIAL_ADMIN_PASSWORD=sua_senha_segura
    ```
-   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git.
+   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` não forem fornecidos, nenhuma conta fictícia é criada.
 
 ---
 

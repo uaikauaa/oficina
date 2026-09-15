@@ -21,10 +21,13 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Criação e aplicação da migration `V2__simplify_initial_roles.sql` (ajuste para modelo de usuária única com `ROLE_ADMIN`).
 - Validação automatizada da integridade relacional e conexão real com o banco Neon.
 
-### Fase 2 — Autenticação e Segurança
-- Implementação de Spring Security e autenticação JWT.
-- Configuração de acesso administrativo completo para a proprietária da oficina (`ROLE_ADMIN`).
-- Integração de login no frontend Next.js.
+### Fase 2 — Autenticação e Segurança (Concluída)
+- Implementação de Spring Security e autenticação stateless com JWT.
+- Tokens assinados com HMAC-SHA256 e transmitidos via cookie `HttpOnly` com `SameSite=Lax` e header `Authorization: Bearer`.
+- Controle de acesso restrito à proprietária da oficina (`ROLE_ADMIN`) sem permissões fictícias ou múltiplos níveis no MVP.
+- Inicialização segura da conta administrativa da proprietária via variáveis de ambiente (`INITIAL_ADMIN_*`), sem credenciais hardcoded.
+- Registro de auditoria (`auditoria`) para eventos de login e logout com endereço IP.
+- Frontend Next.js com tela de login responsiva (React Hook Form + Zod), middleware para proteção de rotas privadas (`/dashboard`) e dashboard inicial protegido.
 
 ### Fase 3 — Cadastros Base
 - Gestão de Clientes e Veículos.

@@ -46,5 +46,5 @@ oficina-gestao/
 
 ## 🚀 Status do Projeto
 
-- **Fase Atual**: Fase 1 — Fundação de Banco de Dados com Neon
-- **Status da Fase 1**: Conexão com PostgreSQL Neon configurada via variáveis de ambiente seguras, Spring Data JPA / Hibernate com validação estrita, Flyway configurado e migration `V1__create_initial_schema.sql` aplicada com sucesso (14 tabelas principais, índices e integridade relacional). Testes automatizados validados.
+- **Fase Atual**: Fase 2 — Autenticação da Proprietária e Segurança (Concluída)
+- **Status da Fase 2**: Implementado Spring Security com autenticação stateless JWT transmitido via cookie `HttpOnly` e header `Bearer`. Controle de acesso unificado para a proprietária (`ROLE_ADMIN`). Inicialização da conta via variáveis de ambiente (`INITIAL_ADMIN_*`). Registro de auditoria (`auditoria`) em login e logout. Frontend Next.js com tela de login responsiva (React Hook Form + Zod), middleware para proteção de rotas privadas (`/dashboard`) e dashboard inicial. Testes automatizados e builds validados com sucesso.

@@ -18,6 +18,15 @@ export default function Home() {
           Fundação da arquitetura WebApp inicializada com sucesso. Ambiente técnico validado (Fase 0 — Fundação).
         </p>
 
+        <div className="pt-2 flex justify-center">
+          <a
+            href="/login"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-all shadow-lg shadow-amber-500/20"
+          >
+            Acessar Sistema (Login)
+          </a>
+        </div>
+
         <div className="pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-center gap-3 text-xs text-zinc-500 font-mono">
           <span className="px-2.5 py-1 rounded bg-zinc-800/50 text-zinc-300">Next.js (App Router)</span>
           <span className="px-2.5 py-1 rounded bg-zinc-800/50 text-zinc-300">React & TypeScript</span>
