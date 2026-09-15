@@ -1,6 +1,6 @@
 # Guia de Desenvolvimento — Oficina Gestão
 
-Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local.
+Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local do projeto **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda e geradores de energia).
 
 ## 1. Pré-Requisitos
 

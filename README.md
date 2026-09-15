@@ -1,6 +1,6 @@
 # Oficina Gestão
 
-Sistema web moderno e integrado para gestão de oficinas mecânicas e manutenção automotiva.
+Sistema web moderno e integrado para gestão de oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda e geradores de energia.
 
 ## 🏛 Arquitetura
 

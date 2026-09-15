@@ -1,5 +1,7 @@
 # Padrões e Especificação de API — Oficina Gestão
 
+Documentação de contratos REST e especificações de endpoints para a plataforma **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda e geradores de energia).
+
 ## 1. Padrões REST
 
 - **Formato**: JSON (`application/json; charset=UTF-8`)

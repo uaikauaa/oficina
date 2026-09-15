@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-O projeto **Oficina Gestão** foi concebido exclusivamente sob a arquitetura **WebApp**. Está vedado o uso de qualquer tecnologia desktop (JavaFX, FXML, Scene Builder, jpackage, etc.).
+O projeto **Oficina Gestão** foi concebido exclusivamente sob a arquitetura **WebApp** para atendimento a uma **oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda e geradores de energia**. Está vedado o uso de qualquer tecnologia desktop (JavaFX, FXML, Scene Builder, jpackage, etc.), assim como qualquer modelagem ou terminologia automotiva (veículos, placas, chassis).
 
 A solução é distribuída em três níveis principais:
 

@@ -49,10 +49,17 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Preservação da integridade e isolamento de banco de dados (zero alteração em migrations Flyway existentes).
 - 40 testes automatizados no backend e builds 100% verdes no frontend e backend.
 
+### Correção Crítica de Domínio — Máquinas de Solda e Geradores (Concluída)
+- Eliminação definitiva de conceitos e terminologias automotivas (veículos, placas, chassis).
+- Migration Flyway `V4__correct_equipment_domain.sql` aplicada no Neon: remoção de colunas e índices automotivos, adição de atributos técnicos (`potencia`, `tensao`, `especificacoes_tecnicas`, `tipo_equipamento`, `numero_serie`, `horimetro`) e índices otimizados para histórico.
+- Atualização e aprovação de 41 testes automatizados.
+
 ### Fase 4 — Cadastros Base
-- Gestão de Clientes e Veículos.
-- Gestão de Fornecedores e Peças/Estoque básico.
-- Gestão de Serviços.
+- Gestão de Clientes (Pessoa Física, Empresas, Indústrias, Parceiros).
+- Gestão de Máquinas e Equipamentos (Máquinas de Solda MIG/MAG/TIG/Eletrodo/Inversoras e Geradores a Diesel/Gasolina).
+- Gestão de Fornecedores de Peças, Componentes Eletrônicos e Consumíveis.
+- Gestão de Peças, Insumos e Estoque Técnico.
+- Gestão de Serviços e Diagnósticos Técnicos.
 
 ### Fase 5 — Ordens de Serviço (Core do Negócio)
 - Ciclo de vida da Ordem de Serviço (Abertura, Orçamento, Aprovação, Execução, Conclusão).

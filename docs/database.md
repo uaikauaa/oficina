@@ -50,10 +50,10 @@ Provisiona as 14 tabelas centrais:
 - `clientes`: Dados cadastrais de clientes PF e PJ.
 - `fornecedores`: Parceiros e fornecedores de peças e insumos.
 - `enderecos`: Endereços vinculados a clientes ou fornecedores.
-- `maquinas`: Veículos, equipamentos e maquinários sob manutenção.
+- `maquinas`: Máquinas e equipamentos técnicos (máquinas de solda, geradores de energia e componentes) sob manutenção.
 - `categorias`: Categorização de produtos, peças e serviços.
 - `produtos`: Peças, insumos e serviços prestados.
-- `produto_maquina`: Matriz de compatibilidade entre peças e máquinas.
+- `produto_maquina`: Matriz de compatibilidade entre peças e máquinas/equipamentos.
 - `ordens_servico`: Cabeçalho e fluxo da Ordem de Serviço.
 - `ordem_servico_itens`: Peças e serviços adicionados à OS.
 - `estoque_movimentacoes`: Histórico detalhado de movimentações de estoque.
@@ -71,6 +71,18 @@ Provisiona as 14 tabelas centrais:
 - **Campos**: `id`, `usuario_id` (FK -> `usuarios(id)` ON DELETE CASCADE), `token` (VARCHAR(255) UNIQUE), `data_expiracao` (TIMESTAMPTZ), `revogado` (BOOLEAN DEFAULT FALSE), `criado_em` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP).
 - **Índices**: `idx_refresh_tokens_token` e `idx_refresh_tokens_usuario`.
 - **Objetivo**: Armazenar tokens de renovação opacos (UUID), permitindo rotação obrigatória a cada uso e revogação real no logout sem necessidade de blocklist.
+
+### Migration V4 — Correção do Domínio de Equipamentos (`V4__correct_equipment_domain.sql`)
+- **Contexto de Negócio**: Correção crítica de domínio para eliminar conceitos e terminologias automotivas e alinhar o modelo relacional estritamente com o negócio de oficina técnica de máquinas de solda e geradores de energia.
+- **Alterações em `maquinas`**:
+  - Remoção de índices automotivos: `DROP INDEX idx_maquinas_placa`, `DROP INDEX idx_maquinas_chassi`.
+  - Renomeação de colunas: `tipo` -> `tipo_equipamento`, `numero_serie_chassi` -> `numero_serie`, `horimetro_quilometragem` -> `horimetro`.
+  - Exclusão de coluna automotiva: `placa_identificacao` removida.
+  - Novos campos técnicos: `potencia VARCHAR(50)`, `tensao VARCHAR(50)`, `especificacoes_tecnicas JSONB`.
+  - Novos índices técnicos: `idx_maquinas_tipo_equipamento`, `idx_maquinas_numero_serie` (sem unicidade global), `idx_maquinas_cliente_numero_serie`.
+- **Alterações em `ordens_servico`**:
+  - Renomeação de coluna: `horimetro_quilometragem_atual` -> `horimetro_atual`.
+- **Preservação de Dados**: 100% dos dados, chaves primárias e relacionamentos com clientes e ordens de serviço preservados.
 
 ---
 

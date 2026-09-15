@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Oficina Gestão | Sistema de Gestão Automotiva",
-  description: "Plataforma WebApp para gestão integrada de oficinas mecânicas.",
+  title: "Oficina Gestão | Oficina Técnica de Máquinas de Solda e Geradores",
+  description: "Plataforma WebApp especializada na gestão e manutenção de máquinas de solda e geradores de energia.",
 };
 
 export default function RootLayout({
