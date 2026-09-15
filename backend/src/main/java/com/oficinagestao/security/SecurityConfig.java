@@ -1,7 +1,7 @@
 package com.oficinagestao.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oficinagestao.dto.ApiErrorResponse;
+import com.oficinagestao.exception.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -68,11 +68,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoint de health check público
                         .requestMatchers("/api/health").permitAll()
+                        // Documentação Swagger / OpenAPI pública
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Endpoints de autenticação abertos
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
-                        // Qualquer outro endpoint da API exige autenticação
+                        // Qualquer outro endpoint da API exige autenticação com ROLE_ADMIN
                         .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -82,7 +84,9 @@ public class SecurityConfig {
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                             ApiErrorResponse error = ApiErrorResponse.of(
                                     HttpServletResponse.SC_UNAUTHORIZED,
-                                    "Acesso não autorizado. Autenticação necessária."
+                                    "UNAUTHORIZED",
+                                    "Acesso não autorizado. Autenticação necessária.",
+                                    request.getRequestURI()
                             );
                             response.getOutputStream().write(objectMapper.writeValueAsBytes(error));
                         })
@@ -91,7 +95,9 @@ public class SecurityConfig {
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                             ApiErrorResponse error = ApiErrorResponse.of(
                                     HttpServletResponse.SC_FORBIDDEN,
-                                    "Acesso negado. Permissão insuficiente."
+                                    "FORBIDDEN",
+                                    "Acesso negado. Permissão insuficiente.",
+                                    request.getRequestURI()
                             );
                             response.getOutputStream().write(objectMapper.writeValueAsBytes(error));
                         })

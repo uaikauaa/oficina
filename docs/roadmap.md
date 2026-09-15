@@ -39,17 +39,27 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Frontend adaptado com renovação silenciosa no dashboard ao detectar access token expirado (401).
 - 29 testes automatizados no backend e build limpo no frontend Next.js.
 
-### Fase 3 — Cadastros Base
+### Fase 3 — Fundação da API e Padrões do Backend (Concluída)
+- Reorganização modular da estrutura de pacotes: `config`, `security`, `auth`, `usuario`, `auditoria`, `exception`, `common` e reserva dos pacotes de domínio (`cliente`, `maquina`, `produto`, `estoque`, `fornecedor`, `ordem`, `relatorio`).
+- Estabelecimento do fluxo em camadas estrito: `Controller -> DTO -> Service -> Repository -> Entity`.
+- Contrato padronizado de tratamento global de exceções via `GlobalExceptionHandler` e `ApiErrorResponse`, com segurança contra vazamento de stack traces, queries SQL ou segredos.
+- Contrato genérico de paginação via `PageResponse<T>`.
+- Integração do SpringDoc OpenAPI 3 / Swagger UI com suporte a esquemas de autenticação via Cookie e Bearer token.
+- Endpoint autenticado de diagnóstico `GET /api/system/status` restrito à `ROLE_ADMIN`.
+- Preservação da integridade e isolamento de banco de dados (zero alteração em migrations Flyway existentes).
+- 40 testes automatizados no backend e builds 100% verdes no frontend e backend.
+
+### Fase 4 — Cadastros Base
 - Gestão de Clientes e Veículos.
 - Gestão de Fornecedores e Peças/Estoque básico.
-- Gestão de Serviços e Mecânicos/Técnicos.
+- Gestão de Serviços.
 
-### Fase 4 — Ordens de Serviço (Core do Negócio)
+### Fase 5 — Ordens de Serviço (Core do Negócio)
 - Ciclo de vida da Ordem de Serviço (Abertura, Orçamento, Aprovação, Execução, Conclusão).
 - Adição de itens de peças e mão de obra com baixa em estoque.
 - Impressão e exportação de relatórios da OS.
 
-### Fase 5 — Financeiro e Relatórios
+### Fase 6 — Financeiro e Relatórios
 - Contas a pagar e receber vinculadas às Ordens de Serviço.
 - Formas de pagamento e controle de caixa.
 - Dashboard com indicadores operacionais e financeiros.

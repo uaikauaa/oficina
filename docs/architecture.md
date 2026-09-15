@@ -74,3 +74,61 @@ Browser                       Next.js (BFF / Proxy)                Spring Boot A
 3. **CORS Restritivo**: Configurado exclusivamente com as origens autorizadas da aplicação frontend e `allowCredentials(true)`.
 4. **Sem Exposição em JavaScript**: Nenhum token (access ou refresh) é retornado no corpo do response ou salvo em `localStorage` / `sessionStorage`, eliminando vetores de roubo via XSS.
 5. **Invalidação Real**: No logout (`POST /api/auth/logout`), o refresh token correspondente é revogado no PostgreSQL Neon e ambos os cookies são imediatamente expirados no navegador.
+
+---
+
+## 4. Arquitetura da API e Padrões do Backend (Fase 3)
+
+### 4.1. Fluxo em Camadas Obrigatório
+
+```text
+Requisição HTTP (JSON / Cookies)
+              ↓
+[ Controller ]  (Validação Bean Validation / DTOs de entrada, status HTTP)
+              ↓
+    [ DTO ]     (Objetos de transferência imutáveis / Java Records)
+              ↓
+  [ Service ]   (Regras de negócio, demarcação transacional, auditoria)
+              ↓
+[ Repository ]  (Spring Data JPA, interfaces tipadas)
+              ↓
+  [ Entity ]    (Mapeamento ORM Hibernate validado contra Neon)
+```
+
+#### Responsabilidades por Camada:
+- **Controller**: Trata exclusivamente o protocolo HTTP, extrai headers/cookies/parâmetros, aciona validações de entrada (`@Valid`), delega ao Service e retorna DTOs tipados com códigos HTTP semânticos (200, 201, 204).
+- **DTO**: Records imutáveis para transferência de dados. Nenhuma entidade JPA vaza para o cliente através do Controller.
+- **Service**: Concentra toda a lógica de negócio, orquestração e demarcação de transações. Nunca recebe `HttpServletRequest` ou `HttpServletResponse` diretamente para lógica funcional (apenas para auditoria quando aplicável).
+- **Repository**: Interfaces estendendo `JpaRepository`, consultas derivadas e JPQL seguro com binds parametrizados contra SQL Injection.
+- **Entity**: Modelos JPA mapeados rigorosamente contra as tabelas gerenciadas pelo Flyway no PostgreSQL Neon.
+
+### 4.2. Limites Transacionais
+- **Leituras**: Métodos de leitura utilizam `@Transactional(readOnly = true)` para otimizar conexões JDBC, evitar dirty-checking desnecessário e permitir réplicas de leitura.
+- **Escritas**: Métodos de criação, atualização ou exclusão utilizam `@Transactional` explícito, garantindo atomicidade estrita e rollback em falhas de execução.
+
+### 4.3. Estrutura Modular de Pacotes
+A aplicação foi reorganizada em pacotes modulares coesos:
+- `com.oficinagestao.config`: Configurações do framework (OpenAPI/Swagger, bootstrap).
+- `com.oficinagestao.security`: Filtros JWT, codificação BCrypt, CORS e SecurityFilterChain.
+- `com.oficinagestao.auth`: DTOs, controllers e serviços de autenticação, rotação e encerramento de sessão.
+- `com.oficinagestao.usuario`: Entidades (`Usuario`, `Role`, `RefreshToken`) e repositórios de usuários.
+- `com.oficinagestao.auditoria`: Entidade, repositório e serviço desacoplado de auditoria de eventos.
+- `com.oficinagestao.exception`: Hierarquia de exceções de negócio e `GlobalExceptionHandler`.
+- `com.oficinagestao.common`: Contratos genéricos como `PageResponse<T>`, `SystemController` e endpoints utilitários.
+- **Pacotes de Domínio Reservados**: `cliente`, `maquina`, `produto`, `estoque`, `fornecedor`, `ordem`, `relatorio`.
+
+### 4.4. Tratamento Global de Exceções e Segurança de Informação
+O `GlobalExceptionHandler` intercepta todas as exceções e produz respostas padronizadas via `ApiErrorResponse`:
+- `MethodArgumentNotValidException` → `400 Bad Request` com mapa de campos inválidos.
+- `BadCredentialsException` / `AuthenticationException` → `401 Unauthorized` com mensagem genérica (evita enumeração).
+- `AccessDeniedException` → `403 Forbidden`.
+- `ResourceNotFoundException` → `404 Not Found`.
+- `ConflictException` → `409 Conflict`.
+- `BusinessException` → `400 Bad Request`.
+- `Exception` (inesperado) → `500 Internal Server Error` com mensagem genérica amigável. **Nenhum stack trace, detalhe SQL, schema de banco ou segredo é exposto**.
+
+### 4.5. Documentação OpenAPI 3 / Swagger
+Documentação interativa gerada automaticamente pelo SpringDoc OpenAPI (`/swagger-ui.html` e `/v3/api-docs`):
+- Suporte a autenticação mista: Cookie `access_token` e Header `Authorization: Bearer <token>`.
+- Modelagem precisa dos contratos de erro e paginação.
+

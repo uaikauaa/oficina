@@ -130,3 +130,89 @@ Encerra a sessão, revoga o refresh token correspondente no banco de dados, expi
   - **Set-Cookie**: `access_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`
   - **Set-Cookie**: `refresh_token=; Path=/api/auth; Max-Age=0; HttpOnly; SameSite=Strict`
   - **Body**: Vazio (200 OK)
+
+---
+
+## 4. Endpoints de Diagnóstico e Sistema (Fase 3)
+
+### `GET /api/system/status`
+
+Retorna informações operacionais do sistema backend, status do banco de dados e ambiente em execução.
+
+- **Método**: `GET`
+- **URL**: `/api/system/status`
+- **Autenticação**: Requerida (perfil `ROLE_ADMIN`)
+- **Resposta Sucesso (200 OK)**:
+  ```json
+  {
+    "status": "UP",
+    "timestamp": "2026-09-15T01:00:00Z",
+    "database": "CONNECTED",
+    "environment": "dev",
+    "version": "1.0.0"
+  }
+  ```
+- **Respostas de Erro**:
+  - `401 Unauthorized`: Usuário não autenticado.
+  - `403 Forbidden`: Usuário sem a autoridade `ROLE_ADMIN`.
+
+---
+
+## 5. Contrato Padrão de Erro (`ApiErrorResponse`)
+
+Todas as respostas de erro da API (4xx e 5xx) seguem estritamente a seguinte estrutura JSON:
+
+```json
+{
+  "timestamp": "2026-09-15T01:00:00.000Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Erro de validação nos campos informados.",
+  "path": "/api/exemplo",
+  "details": {
+    "campo": "mensagem específica de validação"
+  }
+}
+```
+
+- **Campos**:
+  - `timestamp`: Data/hora ISO-8601 da ocorrência do erro.
+  - `status`: Código HTTP semântico (400, 401, 403, 404, 409, 500).
+  - `error`: Nome resumido do erro HTTP.
+  - `message`: Descrição amigável e segura da causa.
+  - `path`: URI requisitada.
+  - `details`: Mapa opcional com detalhes de validação por campo (omitido quando vazio).
+- **Segurança de Dados**: O contrato garante que **nenhuma** stack trace, comando SQL, nome interno de constraint ou segredo seja divulgado ao cliente.
+
+---
+
+## 6. Contrato Padrão de Paginação (`PageResponse<T>`)
+
+Para listagens paginadas nos módulos de negócio, a resposta padronizada encapsula os dados e metadados de paginação:
+
+```json
+{
+  "content": [
+    { "id": 1, "nome": "Exemplo" }
+  ],
+  "pageNumber": 0,
+  "pageSize": 20,
+  "totalElements": 1,
+  "totalPages": 1,
+  "first": true,
+  "last": true
+}
+```
+
+---
+
+## 7. Documentação OpenAPI 3 / Swagger UI
+
+A documentação interativa e a especificação JSON estão disponíveis nos seguintes endpoints públicos:
+
+- **Swagger UI (Interface Web)**: `http://localhost:8080/swagger-ui/index.html` (ou `/swagger-ui.html`)
+- **OpenAPI JSON Spec**: `http://localhost:8080/v3/api-docs`
+- **Esquemas de Autenticação Suportados**:
+  - `cookieAuth`: Cookie `access_token` (padrão do navegador).
+  - `bearerAuth`: Header `Authorization: Bearer <token>` (para testes via Swagger UI ou integrações).
+

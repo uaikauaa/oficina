@@ -73,7 +73,10 @@ oficina-gestao/
    ```
    *(No Windows PowerShell: `.\mvnw.cmd spring-boot:run`)*
 4. A API estará acessível em `http://localhost:8080`.
-   - Endpoint de verificação: `http://localhost:8080/api/health`
+   - Endpoint de verificação pública: `http://localhost:8080/api/health`
+   - Documentação interativa Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+   - Especificação OpenAPI (JSON): `http://localhost:8080/v3/api-docs`
+   - Endpoint autenticado de status (requer `ROLE_ADMIN`): `http://localhost:8080/api/system/status`
 5. Na inicialização, o Flyway executa automaticamente as migrations pendentes localizadas em `src/main/resources/db/migration/` e o Hibernate valida o schema (`validate`).
 
 ---

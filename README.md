@@ -46,5 +46,5 @@ oficina-gestao/
 
 ## 🚀 Status do Projeto
 
-- **Fase Atual**: Fase 2 — Autenticação da Proprietária e Segurança (Concluída)
-- **Status da Fase 2**: Implementado Spring Security com autenticação stateless JWT transmitido via cookie `HttpOnly` e header `Bearer`. Controle de acesso unificado para a proprietária (`ROLE_ADMIN`). Inicialização da conta via variáveis de ambiente (`INITIAL_ADMIN_*`). Registro de auditoria (`auditoria`) em login e logout. Frontend Next.js com tela de login responsiva (React Hook Form + Zod), middleware para proteção de rotas privadas (`/dashboard`) e dashboard inicial. Testes automatizados e builds validados com sucesso.
+- **Fase Atual**: Fase 3 — Fundação da API e Padrões do Backend (Concluída)
+- **Status da Fase 3**: Fundação arquitetural e padrões de API do Spring Boot estabelecidos. Reorganização modular em pacotes coesos (`config`, `security`, `auth`, `usuario`, `auditoria`, `exception`, `common` e pacotes de domínio reservados). Estabelecido o fluxo estrito `Controller -> DTO -> Service -> Repository -> Entity` com demarcação transacional (`@Transactional`). Padronização de respostas de erro sem vazamento de detalhes internos via `GlobalExceptionHandler` e `ApiErrorResponse`. Contrato genérico de paginação via `PageResponse<T>`. Documentação interativa via SpringDoc OpenAPI 3 / Swagger UI (`/swagger-ui.html` e `/v3/api-docs`) com suporte a Cookie e Bearer tokens. Endpoint autenticado de status `/api/system/status` restrito a `ROLE_ADMIN`. 40 testes automatizados no backend e builds 100% validados.

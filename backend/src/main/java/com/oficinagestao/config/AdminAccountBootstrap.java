@@ -1,9 +1,9 @@
 package com.oficinagestao.config;
 
-import com.oficinagestao.model.Role;
-import com.oficinagestao.model.Usuario;
-import com.oficinagestao.repository.RoleRepository;
-import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.usuario.Role;
+import com.oficinagestao.usuario.Usuario;
+import com.oficinagestao.usuario.RoleRepository;
+import com.oficinagestao.usuario.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
