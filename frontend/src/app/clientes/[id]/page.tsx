@@ -22,13 +22,28 @@ import {
   Hash,
   Gauge,
   AlertTriangle,
+  ArrowUpRight,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import MaquinaModal from '@/components/MaquinaModal';
-import { Cliente, CurrentUser, Maquina, TIPO_EQUIPAMENTO_LABELS } from '@/lib/types';
-import { apiFetch, formatarDocumento, formatarTelefone, formatarCep } from '@/lib/api';
+import {
+  Cliente,
+  CurrentUser,
+  Maquina,
+  OrdemServico,
+  STATUS_ORDEM_SERVICO_BADGES,
+  TIPO_EQUIPAMENTO_LABELS,
+} from '@/lib/types';
+import {
+  apiFetch,
+  formatarDocumento,
+  formatarTelefone,
+  formatarCep,
+  formatarMoeda,
+  formatarDataHora,
+} from '@/lib/api';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -50,6 +65,10 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
   const [maquinas, setMaquinas] = useState<Maquina[]>([]);
   const [maquinasLoading, setMaquinasLoading] = useState(false);
   const [maquinasError, setMaquinasError] = useState<string | null>(null);
+
+  // Estado de Ordens de Serviço do Cliente
+  const [ordensCliente, setOrdensCliente] = useState<OrdemServico[]>([]);
+  const [ordensLoading, setOrdensLoading] = useState(false);
 
   // Modais
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -140,11 +159,27 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
     }
   }, [clienteId]);
 
+  const fetchOrdensCliente = useCallback(async () => {
+    setOrdensLoading(true);
+    try {
+      const res = await apiFetch(`/api/clientes/${clienteId}/ordens-servico?size=50`);
+      if (res.ok) {
+        const data = await res.json();
+        setOrdensCliente(data.content ?? []);
+      }
+    } catch {
+      // Ignora erro
+    } finally {
+      setOrdensLoading(false);
+    }
+  }, [clienteId]);
+
   useEffect(() => {
     if (clienteId) {
       fetchMaquinas();
+      fetchOrdensCliente();
     }
-  }, [clienteId, fetchMaquinas]);
+  }, [clienteId, fetchMaquinas, fetchOrdensCliente]);
 
   const handleAlterarStatusMaquina = async (maquina: Maquina) => {
     const novoStatus = !maquina.ativo;
@@ -547,20 +582,34 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                   </div>
 
                   {/* Ações do card */}
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800/60">
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-800/60">
+                    <Link
+                      href={`/ordens-servico/nova?clienteId=${cliente.id}&maquinaId=${maq.id}`}
+                      className="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 text-[11px] font-bold flex items-center justify-center gap-1 border border-amber-500/30 transition-all cursor-pointer"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>Abrir OS</span>
+                    </Link>
+                    <Link
+                      href={`/maquinas/${maq.id}`}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-700 transition-all cursor-pointer"
+                    >
+                      <span>Histórico</span>
+                      <ArrowUpRight className="w-3 h-3" />
+                    </Link>
                     <button
                       onClick={() => { setEditingMaquina(maq); setIsMaquinaModalOpen(true); }}
-                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-blue-500/20 hover:text-blue-400 text-slate-300 text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-700 hover:border-blue-500/30 transition-all cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-800/80 hover:bg-blue-500/20 hover:text-blue-400 text-slate-400 text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-700 hover:border-blue-500/30 transition-all cursor-pointer"
                     >
                       <Edit2 className="w-3 h-3" />
                       <span>Editar</span>
                     </button>
                     <button
                       onClick={() => handleAlterarStatusMaquina(maq)}
-                      className={`flex-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
+                      className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1 border transition-all cursor-pointer ${
                         maq.ativo
-                          ? 'bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 border-slate-700 hover:border-red-500/30'
-                          : 'bg-slate-800 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-400 border-slate-700 hover:border-emerald-500/30'
+                          ? 'bg-slate-800/80 hover:bg-red-500/20 hover:text-red-400 text-slate-400 border-slate-700 hover:border-red-500/30'
+                          : 'bg-slate-800/80 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-400 border-slate-700 hover:border-emerald-500/30'
                       }`}
                     >
                       <Power className="w-3 h-3" />
@@ -569,6 +618,120 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* SEÇÃO: HISTÓRICO DE ORDENS DE SERVIÇO DO CLIENTE (FASE 5)                 */}
+        {/* ========================================================================= */}
+        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase">
+                  Histórico Operacional
+                </span>
+                <span className="text-xs text-slate-400 font-mono">
+                  {ordensCliente.length} {ordensCliente.length === 1 ? 'OS registrada' : 'OS registradas'}
+                </span>
+              </div>
+              <h2 className="text-lg font-bold text-white mt-1 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-amber-500" />
+                <span>Ordens de Serviço do Cliente</span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Histórico completo de atendimentos, manutenções e faturamentos vinculados a este cliente.
+              </p>
+            </div>
+
+            <Link
+              href={`/ordens-servico/nova?clienteId=${cliente.id}`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/10 transition-all cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nova Ordem de Serviço</span>
+            </Link>
+          </div>
+
+          {ordensLoading ? (
+            <div className="p-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+              <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+              <span>Carregando histórico de ordens de serviço...</span>
+            </div>
+          ) : ordensCliente.length === 0 ? (
+            <div className="p-8 rounded-xl bg-slate-950/60 border border-slate-800/80 text-center space-y-2">
+              <FileText className="w-8 h-8 mx-auto text-slate-600" />
+              <p className="text-sm font-medium text-white">Nenhuma Ordem de Serviço aberta para este cliente</p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Quando este cliente levar um equipamento para manutenção ou conserto, a OS aparecerá aqui.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="py-2.5 px-3">Nº da OS</th>
+                    <th className="py-2.5 px-3">Equipamento</th>
+                    <th className="py-2.5 px-3">Data Entrada</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3 text-right">Valor Total</th>
+                    <th className="py-2.5 px-3 text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 text-xs">
+                  {ordensCliente.map((os) => {
+                    const badge = STATUS_ORDEM_SERVICO_BADGES[os.status] || {
+                      bg: 'bg-slate-800',
+                      text: 'text-slate-300',
+                      border: 'border-slate-700',
+                    };
+
+                    return (
+                      <tr key={os.id} className="hover:bg-slate-800/20 transition-colors">
+                        <td className="py-3 px-3">
+                          <span className="font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 text-xs">
+                            {os.numeroOs}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3">
+                          <div className="font-semibold text-white">
+                            {os.maquinaMarca} {os.maquinaModelo}
+                          </div>
+                          {os.maquinaNumeroSerie && (
+                            <span className="text-[11px] text-slate-500 font-mono">
+                              Série: {os.maquinaNumeroSerie}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-slate-400 whitespace-nowrap">
+                          {formatarDataHora(os.dataEntrada)}
+                        </td>
+                        <td className="py-3 px-3">
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.bg} ${badge.text} ${badge.border}`}
+                          >
+                            {os.statusDescricao}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-right font-bold text-slate-200">
+                          {formatarMoeda(os.valorTotal)}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          <Link
+                            href={`/ordens-servico/${os.id}`}
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-800 hover:bg-amber-500/20 hover:text-amber-400 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+                          >
+                            <span>Ver OS</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

@@ -14,6 +14,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -67,6 +69,7 @@ public class Maquina {
     private String tensao;
 
     /** Especificações técnicas adicionais em formato JSON livre (persiste como JSONB). */
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "especificacoes_tecnicas", columnDefinition = "jsonb")
     private String especificacoesTecnicas;
 

@@ -13,7 +13,7 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { Maquina, MaquinaFormData, TipoEquipamento, TIPO_EQUIPAMENTO_LABELS } from '@/lib/types';
+import { Maquina, MaquinaFormData, TipoEquipamento } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 
 interface MaquinaModalProps {

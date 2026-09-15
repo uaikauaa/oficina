@@ -289,4 +289,103 @@ O campo `testes_realizados` na Ordem de Serviço armazena o histórico técnico 
 - **Máquinas de Solda**: Teste de abertura de arco elétrico sob carga, estabilidade de corrente (A), ciclo de trabalho e verificação de aquecimento térmico.
 - **Geradores de Energia**: Teste sob carga resistiva/indutiva, rotação (RPM/Hz), aferição de tensão nas fases (110V/220V/380V) e atuação do regulador automático de voltagem (AVR).
 
+---
+
+## 10. Endpoints da Fase 5 (Ordens de Serviço e Histórico Técnico)
+
+Todos os endpoints abaixo exigem autenticação ativa (`ROLE_ADMIN` ou `ROLE_USER`).
+
+### `POST /api/ordens-servico`
+Abre uma nova Ordem de Serviço.
+- **Regra de Domínio**: O equipamento (`maquinaId`) deve pertencer estritamente ao cliente informado (`clienteId`). Se pertencer a outro cliente, a API retorna `400 Bad Request` com código de erro de validação.
+- **Geração de Número**: Caso `numeroOs` não seja fornecido, o backend gera automaticamente o formato sequencial anual `OS-YYYY-XXXX`.
+- **Payload**:
+  ```json
+  {
+    "clienteId": 1,
+    "maquinaId": 2,
+    "numeroOs": "OS-2026-0001",
+    "dataEntrada": "2026-09-15T10:30:00Z",
+    "problemaRelatado": "Máquina não abre arco elétrico na soldagem TIG",
+    "horimetroAtual": "1450.5",
+    "observacoes": "Acompanha tocha TIG e regulador de gás argônio"
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `OrdemServicoResponseDTO` com status inicial `ABERTA`.
+
+---
+
+### `GET /api/ordens-servico`
+Consulta paginada de Ordens de Serviço com filtros combinados.
+- **Query Params**:
+  - `termo`: Busca textual por número da OS, nome do cliente, documento (CPF/CNPJ), marca ou modelo do equipamento.
+  - `status`: Filtro por enum `StatusOrdemServico` (`ABERTA`, `EM_DIAGNOSTICO`, etc.).
+  - `dataInicio` / `dataFim`: Intervalo de data de entrada (ISO-8601).
+  - `clienteId`: Filtro opcional por cliente.
+  - `maquinaId`: Filtro opcional por equipamento.
+  - `page` (default 0), `size` (default 20), `sort` (default `dataEntrada,desc`).
+- **Resposta Sucesso (200 OK)**: `PageResponse<OrdemServicoResponseDTO>`.
+
+---
+
+### `GET /api/ordens-servico/{id}`
+Recupera os detalhes completos de uma Ordem de Serviço pelo seu ID.
+- **Resposta Sucesso (200 OK)**: `OrdemServicoResponseDTO`.
+- **Resposta de Erro**: `404 Not Found` se a OS não existir.
+
+---
+
+### `PUT /api/ordens-servico/{id}`
+Atualiza dados técnicos e financeiros da Ordem de Serviço.
+- **Regra de Bloqueio**: Ordens com status `CONCLUIDA` ou `CANCELADA` estão travadas para edição (`400 Bad Request`).
+- **Regra Financeira**: Os valores de serviços, peças e descontos não podem ser negativos (`valorTotal` recalculado automaticamente como `servicos + pecas - desconto >= 0`).
+- **Payload**:
+  ```json
+  {
+    "problemaRelatado": "Defeito atualizado",
+    "diagnostico": "Placa inversora com IGBTs em curto circuito",
+    "solucaoAplicada": "Substituição dos módulos IGBT e resistores de shunt",
+    "testesRealizados": "Teste em bancada a 180A por 15 minutos com arco estável",
+    "horimetroAtual": "1452.0",
+    "valorMaoObra": 450.00,
+    "valorPecas": 780.00,
+    "valorDesconto": 30.00,
+    "observacoes": "Equipamento limpo e revisado"
+  }
+  ```
+- **Resposta Sucesso (200 OK)**: `OrdemServicoResponseDTO` atualizado.
+
+---
+
+### `PATCH /api/ordens-servico/{id}/status`
+Avança ou altera o status operacional da Ordem de Serviço.
+- **Regras de Negócio**:
+  - Transição para `PRONTA` exige obrigatoriamente o preenchimento do campo `testesRealizados` (ou no payload do PATCH ou já registrado na OS).
+  - Transição para `CONCLUIDA` preenche automaticamente `dataConclusao` com a data/hora atual.
+  - Ordens em status terminal (`CONCLUIDA`, `CANCELADA`) não aceitam nova alteração de status.
+- **Payload**:
+  ```json
+  {
+    "status": "PRONTA",
+    "testesRealizados": "Teste de carga resistiva a 100% de potência por 30min sem oscilação",
+    "observacoes": "Aprovado em bancada técnica"
+  }
+  ```
+- **Resposta Sucesso (200 OK)**: `OrdemServicoResponseDTO` com novo status.
+
+---
+
+### `GET /api/clientes/{clienteId}/ordens-servico`
+Retorna o histórico de todas as Ordens de Serviço vinculadas ao cliente especificado.
+- **Query Params**: `page`, `size`, `sort`.
+- **Resposta Sucesso (200 OK)**: `PageResponse<OrdemServicoResponseDTO>`.
+
+---
+
+### `GET /api/maquinas/{maquinaId}/ordens-servico`
+Retorna o histórico técnico completo e cronológico de um equipamento específico.
+- **Propósito Central**: Responder: *"Quantas vezes essa máquina já veio para a oficina e o que foi feito nela ao longo do tempo?"*
+- **Query Params**: `page`, `size`, `sort`.
+- **Resposta Sucesso (200 OK)**: `PageResponse<OrdemServicoResponseDTO>`.
+
 

@@ -65,3 +65,27 @@ export function formatarCep(cep?: string | null): string {
   }
   return cep;
 }
+
+export function formatarMoeda(valor?: number | string | null): string {
+  if (valor === undefined || valor === null || valor === '') return 'R$ 0,00';
+  const num = typeof valor === 'string' ? parseFloat(valor) : valor;
+  if (isNaN(num)) return 'R$ 0,00';
+  return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export function formatarDataHora(dataStr?: string | null): string {
+  if (!dataStr) return '-';
+  try {
+    const data = new Date(dataStr);
+    if (isNaN(data.getTime())) return dataStr;
+    return data.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return dataStr;
+  }
+}

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Wrench, Users, LayoutDashboard, LogOut } from 'lucide-react';
+import { Wrench, Users, LayoutDashboard, LogOut, FileText } from 'lucide-react';
 import { CurrentUser } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 
@@ -28,6 +28,7 @@ export default function Header({ user }: HeaderProps) {
 
   const isDashboardActive = pathname === '/dashboard';
   const isClientesActive = pathname.startsWith('/clientes');
+  const isOsActive = pathname.startsWith('/ordens-servico');
 
   return (
     <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 py-3.5">
@@ -68,6 +69,18 @@ export default function Header({ user }: HeaderProps) {
             >
               <Users className="w-4 h-4" />
               <span>Clientes</span>
+            </Link>
+
+            <Link
+              href="/ordens-servico"
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+                isOsActive
+                  ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Ordens de Serviço</span>
             </Link>
           </nav>
         </div>
@@ -119,6 +132,17 @@ export default function Header({ user }: HeaderProps) {
         >
           <Users className="w-3.5 h-3.5" />
           <span>Clientes</span>
+        </Link>
+        <Link
+          href="/ordens-servico"
+          className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-2 ${
+            isOsActive
+              ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+              : 'text-slate-400 bg-slate-900/80 border border-slate-800'
+          }`}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span>OS</span>
         </Link>
       </div>
     </header>

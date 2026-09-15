@@ -10,6 +10,11 @@ import {
   CheckCircle2,
   UserCheck,
   ArrowRight,
+  FileText,
+  Clock,
+  Wrench,
+  Zap,
+  Plus,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { CurrentUser } from '@/lib/types';
@@ -19,6 +24,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [totalClientes, setTotalClientes] = useState<number | null>(null);
+  const [totalOs, setTotalOs] = useState<number | null>(null);
+  const [totalOsAbertas, setTotalOsAbertas] = useState<number | null>(null);
+  const [totalOsManutencao, setTotalOsManutencao] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -31,11 +39,29 @@ export default function DashboardPage() {
         const userData = await userRes.json();
         setUser(userData);
 
-        // Carrega contagem de clientes
-        const clientesRes = await apiFetch('/api/clientes?size=1');
-        if (clientesRes.ok) {
-          const clientesData = await clientesRes.json();
-          setTotalClientes(clientesData.totalElements ?? 0);
+        // Carrega contagens operacionais
+        const [cliRes, osTotRes, osAbertaRes, osManutRes] = await Promise.all([
+          apiFetch('/api/clientes?size=1'),
+          apiFetch('/api/ordens-servico?size=1'),
+          apiFetch('/api/ordens-servico?status=ABERTA&size=1'),
+          apiFetch('/api/ordens-servico?status=EM_MANUTENCAO&size=1'),
+        ]);
+
+        if (cliRes.ok) {
+          const d = await cliRes.json();
+          setTotalClientes(d.totalElements ?? 0);
+        }
+        if (osTotRes.ok) {
+          const d = await osTotRes.json();
+          setTotalOs(d.totalElements ?? 0);
+        }
+        if (osAbertaRes.ok) {
+          const d = await osAbertaRes.json();
+          setTotalOsAbertas(d.totalElements ?? 0);
+        }
+        if (osManutRes.ok) {
+          const d = await osManutRes.json();
+          setTotalOsManutencao(d.totalElements ?? 0);
         }
       } catch {
         router.push('/login');
@@ -78,40 +104,94 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Card em Destaque: Módulo de Clientes (Fase 4A) */}
-        <div className="p-6 rounded-2xl bg-slate-900 border border-amber-500/30 shadow-xl relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* CARD EM DESTAQUE PRINCIPAL: ORDENS DE SERVIÇO (FASE 5) */}
+        <div className="p-6 rounded-2xl bg-slate-900 border border-amber-500/40 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-                <Users className="w-6 h-6" />
+              <div className="h-14 w-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                <FileText className="w-7 h-7" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase">
-                    Fase 4A Disponível
+                    Fase 5 — Coração da Oficina
                   </span>
-                  <span className="text-xs text-slate-400">Base de Cadastros</span>
+                  <span className="text-xs text-slate-400">Fluxo Operacional Técnico</span>
                 </div>
-                <h3 className="text-lg font-bold text-white mt-1">Gestão de Clientes</h3>
+                <h3 className="text-xl font-bold text-white mt-1">Ordens de Serviço</h3>
                 <p className="text-xs text-slate-400 mt-0.5 max-w-xl">
-                  Cadastro de Pessoa Física e Jurídica, pesquisa paginada, controle de duplicidade (CPF/CNPJ, telefone, razão social) e estrutura pronta para equipamentos.
+                  Recepção de máquinas, diagnóstico de bancada, validação técnica sob carga e histórico completo por cliente e equipamento.
                 </p>
+
+                <div className="flex items-center gap-4 mt-3 text-xs">
+                  <span className="text-amber-400 font-semibold flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    <strong>{totalOsAbertas ?? 0}</strong> Abertas
+                  </span>
+                  <span className="text-blue-400 font-semibold flex items-center gap-1.5">
+                    <Wrench className="w-3.5 h-3.5" />
+                    <strong>{totalOsManutencao ?? 0}</strong> Em Manutenção
+                  </span>
+                  <span className="text-slate-400 font-medium">
+                    Total: <strong className="text-white">{totalOs ?? 0}</strong> atendimentos
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 sm:self-center shrink-0">
+            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
               <Link
-                href="/clientes"
+                href="/ordens-servico/nova"
                 className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
               >
-                <span>Acessar Módulo</span>
+                <Plus className="w-4 h-4" />
+                <span>Nova Ordem de Serviço</span>
+              </Link>
+              <Link
+                href="/ordens-servico"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 border border-slate-700 transition-all cursor-pointer"
+              >
+                <span>Ver Todas as OS</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
         </div>
 
-        {/* Grade de Indicadores de Infraestrutura e Operação */}
+        {/* Card Secundário: Clientes e Equipamentos */}
+        <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="h-12 w-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shrink-0">
+                <Users className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 uppercase">
+                    Fases 4A & 4B
+                  </span>
+                  <span className="text-xs text-slate-400">Cadastros Permanentes</span>
+                </div>
+                <h3 className="text-lg font-bold text-white mt-1">Clientes & Equipamentos</h3>
+                <p className="text-xs text-slate-400 mt-0.5 max-w-xl">
+                  Base de clientes (Pessoa Física e Jurídica) e máquinas vinculadas (soldas MIG/TIG/Eletrodo e geradores de energia).
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <Link
+                href="/clientes"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-2 border border-slate-700 transition-all cursor-pointer"
+              >
+                <span>Acessar Clientes ({totalClientes ?? '-'})</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Grade de Indicadores de Infraestrutura */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Total de Clientes */}
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
@@ -142,15 +222,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Modelo de Acesso */}
+          {/* Total de Ordens */}
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Modelo de Acesso</span>
-              <UserCheck className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ordens de Serviço</span>
+              <FileText className="w-4 h-4 text-amber-400" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">Usuária Única</div>
-              <p className="text-xs text-slate-500 mt-1">Acesso exclusivo da proprietária (MVP)</p>
+              <div className="text-3xl font-bold text-white">
+                {totalOs !== null ? totalOs : '0'}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">Atendimentos registrados no total</p>
             </div>
           </div>
         </div>
