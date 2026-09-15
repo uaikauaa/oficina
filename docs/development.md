@@ -7,7 +7,8 @@ Este documento descreve os pré-requisitos e os passos para configurar o ambient
 - **Java JDK**: Versão 21 (LTS) instalada e configurada no PATH (`JAVA_HOME`).
 - **Node.js**: Versão >= 20.x (recomendado LTS) e npm >= 10.x.
 - **Git**: Versão recente.
-- **Docker & Docker Compose**: Para execução de serviços auxiliares locais quando necessário.
+- **Banco de Dados**: Conta e projeto no **Neon** (PostgreSQL Serverless).
+- **Docker & Docker Compose**: Exclusivamente para execução de Testcontainers e serviços auxiliares locais. **O banco de desenvolvimento principal roda no Neon.**
 
 ---
 
@@ -15,22 +16,44 @@ Este documento descreve os pré-requisitos e os passos para configurar o ambient
 
 ```text
 oficina-gestao/
-├── frontend/             # Next.js
-├── backend/              # Spring Boot (Maven Wrapper)
-├── database/migrations/  # Migrations Flyway
-├── docs/                 # Documentação
-└── scripts/              # Utilitários de desenvolvimento
+├── frontend/             # Next.js (App Router, Tailwind)
+├── backend/              # Spring Boot (Java 21, JPA, Flyway, Maven Wrapper)
+├── database/migrations/  # Espelho das migrations Flyway
+├── docs/                 # Documentação técnica
+├── scripts/              # Utilitários de desenvolvimento
+├── .env.example          # Modelo de variáveis de ambiente
+└── .env                  # Variáveis locais com credenciais (ignorado no Git)
 ```
 
 ---
 
-## 3. Executando o Backend (Spring Boot)
+## 3. Configuração do Banco de Dados (Neon)
+
+1. Crie ou acesse seu projeto no [Neon](https://neon.tech).
+2. Obtenha a connection string do banco de desenvolvimento.
+3. Copie o arquivo `.env.example` para `.env` na raiz do projeto:
+   ```bash
+   cp .env.example .env
+   # No Windows PowerShell: Copy-Item .env.example .env
+   ```
+4. Preencha as variáveis com as credenciais do seu banco Neon:
+   ```env
+   DB_URL=jdbc:postgresql://<neon-host>/neondb?sslmode=require
+   DB_USERNAME=neondb_owner
+   DB_PASSWORD=sua_senha_neon
+   SERVER_PORT=8080
+   ```
+   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git.
+
+---
+
+## 4. Executando o Backend (Spring Boot)
 
 1. Acesse o diretório do backend:
    ```bash
    cd backend
    ```
-2. Compile e execute os testes:
+2. Compile e execute os testes automatizados (valida compilação, conexão com Neon e migrations Flyway):
    ```bash
    ./mvnw clean test
    ```
@@ -41,11 +64,12 @@ oficina-gestao/
    ```
    *(No Windows PowerShell: `.\mvnw.cmd spring-boot:run`)*
 4. A API estará acessível em `http://localhost:8080`.
-   - Endpoint de saúde: `http://localhost:8080/api/health`
+   - Endpoint de verificação: `http://localhost:8080/api/health`
+5. Na inicialização, o Flyway executa automaticamente as migrations pendentes localizadas em `src/main/resources/db/migration/` e o Hibernate valida o schema (`validate`).
 
 ---
 
-## 4. Executando o Frontend (Next.js)
+## 5. Executando o Frontend (Next.js)
 
 1. Acesse o diretório do frontend:
    ```bash
@@ -65,7 +89,8 @@ oficina-gestao/
 
 ---
 
-## 5. Padrões de Qualidade e Boas Práticas
+## 6. Padrões de Qualidade e Boas Práticas
 
-- Sempre rode os testes e valide o build antes de submeter alterações.
+- Sempre execute os testes (`.\mvnw.cmd clean test`) e valide o build antes de submeter alterações.
 - Nunca commite arquivos `.env`, credenciais ou arquivos gerados em diretórios de build (`target/`, `.next/`).
+- O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway.

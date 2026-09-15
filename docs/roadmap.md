@@ -6,7 +6,7 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 
 ## 📌 Fases do Projeto
 
-### Fase 0 — Fundação (Atual)
+### Fase 0 — Fundação (Concluída)
 - Auditoria do ambiente e ferramentas de desenvolvimento.
 - Estrutura de diretórios e governança (`AGENTS.md`, documentação inicial).
 - Setup do Frontend (Next.js, TypeScript, Tailwind CSS) com build validado.
@@ -14,10 +14,11 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Configuração de versionamento e `.gitignore`.
 - Validação técnica da fundação.
 
-### Fase 1 — Modelagem e Banco de Dados
+### Fase 1 — Modelagem e Banco de Dados (Concluída)
 - Configuração da conexão com PostgreSQL / Neon via variáveis de ambiente seguras.
-- Criação das primeiras migrations Flyway para criação de schemas e tabelas.
-- Mapeamento de entidades JPA base e auditoria de entidades.
+- Integração de Spring Data JPA, Hibernate (modo `validate`) e Flyway.
+- Criação e aplicação da migration `V1__create_initial_schema.sql` (14 tabelas, constraints, índices e roles iniciais).
+- Validação automatizada da integridade relacional e conexão real com o banco Neon.
 
 ### Fase 2 — Autenticação e Segurança
 - Implementação de Spring Security e autenticação JWT.

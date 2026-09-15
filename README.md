@@ -46,5 +46,5 @@ oficina-gestao/
 
 ## 🚀 Status do Projeto
 
-- **Fase Atual**: Fase 0 — Fundação
-- **Status da Fase 0**: Estrutura base, documentação técnica, setup do frontend (Next.js) e backend (Spring Boot) com endpoint de verificação `/api/health`.
+- **Fase Atual**: Fase 1 — Fundação de Banco de Dados com Neon
+- **Status da Fase 1**: Conexão com PostgreSQL Neon configurada via variáveis de ambiente seguras, Spring Data JPA / Hibernate com validação estrita, Flyway configurado e migration `V1__create_initial_schema.sql` aplicada com sucesso (14 tabelas principais, índices e integridade relacional). Testes automatizados validados.
