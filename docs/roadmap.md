@@ -29,6 +29,16 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Registro de auditoria (`auditoria`) para eventos de login e logout com endereço IP.
 - Frontend Next.js com tela de login responsiva (React Hook Form + Zod), middleware para proteção de rotas privadas (`/dashboard`) e dashboard inicial protegido.
 
+### Fase 2.1 — Hardening da Autenticação (Concluída)
+- Redução da exposição de tokens: JWT completamente removido do corpo da resposta do login (`LoginResponse` retorna exclusivamente dados da usuária).
+- Par de tokens: Access Token curto (15 minutos, JWT) + Refresh Token de longa duração (7 dias, UUID opaco armazenado no PostgreSQL Neon).
+- Migration Flyway `V3__add_refresh_tokens.sql` criando a tabela `refresh_tokens` com índices e integridade referencial em cascata.
+- Rotação estrita de tokens: a cada renovação silenciosa (`POST /api/auth/refresh`), o token anterior é revogado e um novo par é gerado.
+- Proteção CSRF aprofundada: Access Token com `SameSite=Lax` (Path `/`) e Refresh Token com `SameSite=Strict` (Path restrito `/api/auth`).
+- Revogação ativa no logout (`POST /api/auth/logout` revoga o refresh token no banco de dados e expira ambos os cookies).
+- Frontend adaptado com renovação silenciosa no dashboard ao detectar access token expirado (401).
+- 29 testes automatizados no backend e build limpo no frontend Next.js.
+
 ### Fase 3 — Cadastros Base
 - Gestão de Clientes e Veículos.
 - Gestão de Fornecedores e Peças/Estoque básico.

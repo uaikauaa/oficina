@@ -65,6 +65,13 @@ Provisiona as 14 tabelas centrais:
 - **Extensibilidade**: A estrutura relacional RBAC (`roles`, `usuario_roles`) é mantida íntegra, permitindo que novos papéis e operadores sejam cadastrados futuramente sem qualquer alteração estrutural no banco de dados.
 - **Segurança**: Nenhum usuário padrão ou senha hardcoded é inserido nas migrations; a conta da proprietária será criada na Fase 2 de autenticação de forma segura.
 
+### Migration V3 — Tabela de Refresh Tokens (`V3__add_refresh_tokens.sql`)
+- **Contexto de Segurança**: Hardening da autenticação da Fase 2.1.
+- **Tabela Criada**: `refresh_tokens` (15ª tabela da aplicação).
+- **Campos**: `id`, `usuario_id` (FK -> `usuarios(id)` ON DELETE CASCADE), `token` (VARCHAR(255) UNIQUE), `data_expiracao` (TIMESTAMPTZ), `revogado` (BOOLEAN DEFAULT FALSE), `criado_em` (TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP).
+- **Índices**: `idx_refresh_tokens_token` e `idx_refresh_tokens_usuario`.
+- **Objetivo**: Armazenar tokens de renovação opacos (UUID), permitindo rotação obrigatória a cada uso e revogação real no logout sem necessidade de blocklist.
+
 ---
 
 ## 5. Inspeção e Validação com DBeaver

@@ -92,6 +92,21 @@ public class JwtService {
                 .getPayload();
     }
 
+    public boolean isTokenExpired(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return claims.getExpiration().before(new Date());
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     public long getExpirationMs() {
         return expirationMs;
     }

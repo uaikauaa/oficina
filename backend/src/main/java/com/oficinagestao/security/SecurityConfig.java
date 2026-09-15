@@ -56,6 +56,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Justificativa CSRF:
+                // 1. Arquitetura SPA/WebApp stateless com Spring Boot REST API
+                // 2. Access token transportado via cookie HttpOnly com SameSite=Lax (bloqueia requisições cross-site mutantes)
+                // 3. Refresh token (7 dias) transportado via cookie HttpOnly com SameSite=Strict e path restrito (/api/auth)
+                // 4. CORS configurado com lista explícita de origens e allowCredentials(true)
+                // 5. A ausência de tokens válidos resulta em 401 Unauthorized
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/health").permitAll()
                         // Endpoints de autenticação abertos
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         // Qualquer outro endpoint da API exige autenticação
                         .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")

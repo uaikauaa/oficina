@@ -34,11 +34,11 @@ Verifica a disponibilidade do serviço backend.
 
 ---
 
-## 3. Endpoints da Fase 2 (Autenticação da Proprietária)
+## 3. Endpoints da Fase 2 e 2.1 (Autenticação da Proprietária e Hardening)
 
 ### `POST /api/auth/login`
 
-Autentica a proprietária via e-mail e senha, retornando os dados do usuário, token JWT no corpo da resposta e definindo o cookie `HttpOnly` `access_token`. Registra auditoria com ação `LOGIN`.
+Autentica a proprietária via e-mail e senha. Define cookies `HttpOnly` seguros para access token e refresh token. **Não expõe tokens JWT no corpo da resposta**. Registra auditoria com ação `LOGIN`.
 
 - **Método**: `POST`
 - **URL**: `/api/auth/login`
@@ -52,15 +52,14 @@ Autentica a proprietária via e-mail e senha, retornando os dados do usuário, t
   }
   ```
 - **Resposta Sucesso (200 OK)**:
-  - **Set-Cookie**: `access_token=<JWT>; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax`
+  - **Set-Cookie (Access)**: `access_token=<JWT>; Path=/; Max-Age=900; HttpOnly; SameSite=Lax`
+  - **Set-Cookie (Refresh)**: `refresh_token=<UUID>; Path=/api/auth; Max-Age=604800; HttpOnly; SameSite=Strict`
   - **Body**:
     ```json
     {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      "tipo": "Bearer",
-      "usuario": {
+      "user": {
         "id": 1,
-        "nome": "Proprietária Oficina",
+        "nome": "Proprietária",
         "email": "admin@oficina.com",
         "roles": ["ROLE_ADMIN"]
       }
@@ -69,6 +68,33 @@ Autentica a proprietária via e-mail e senha, retornando os dados do usuário, t
 - **Respostas de Erro**:
   - `400 Bad Request`: E-mail ou senha em branco/inválido.
   - `401 Unauthorized`: "Credenciais inválidas." (Protegido contra enumeração de usuários).
+
+---
+
+### `POST /api/auth/refresh`
+
+Renova silenciosamente a sessão ativa utilizando o cookie `refresh_token`. Aplica rotação de token: invalida o refresh token utilizado e emite um novo par de tokens.
+
+- **Método**: `POST`
+- **URL**: `/api/auth/refresh`
+- **Autenticação**: Não requerida via Authorization Header (controlada estritamente via Cookie `refresh_token`)
+- **Headers**: Nenhum header adicional obrigatório (navegador anexa cookies automaticamente)
+- **Resposta Sucesso (200 OK)**:
+  - **Set-Cookie (Novo Access)**: `access_token=<Novo JWT>; Path=/; Max-Age=900; HttpOnly; SameSite=Lax`
+  - **Set-Cookie (Novo Refresh)**: `refresh_token=<Novo UUID>; Path=/api/auth; Max-Age=604800; HttpOnly; SameSite=Strict`
+  - **Body**:
+    ```json
+    {
+      "user": {
+        "id": 1,
+        "nome": "Proprietária",
+        "email": "admin@oficina.com",
+        "roles": ["ROLE_ADMIN"]
+      }
+    }
+    ```
+- **Respostas de Erro**:
+  - `401 Unauthorized`: Refresh token ausente, expirado ou revogado.
 
 ---
 
@@ -83,7 +109,7 @@ Retorna os dados cadastrais e permissões do usuário logado na sessão atual.
   ```json
   {
     "id": 1,
-    "nome": "Proprietária Oficina",
+    "nome": "Proprietária",
     "email": "admin@oficina.com",
     "roles": ["ROLE_ADMIN"]
   }
@@ -95,16 +121,12 @@ Retorna os dados cadastrais e permissões do usuário logado na sessão atual.
 
 ### `POST /api/auth/logout`
 
-Invalida a sessão no cliente limpando o cookie `access_token` e registra a auditoria com ação `LOGOUT`.
+Encerra a sessão, revoga o refresh token correspondente no banco de dados, expira ambos os cookies (`access_token` e `refresh_token`) e registra a auditoria com ação `LOGOUT`.
 
 - **Método**: `POST`
 - **URL**: `/api/auth/logout`
-- **Autenticação**: Requerida (ou pública para limpeza de cookie)
+- **Autenticação**: Opcional (pública para limpeza de cookies; autenticada para auditoria vinculada)
 - **Resposta Sucesso (200 OK)**:
   - **Set-Cookie**: `access_token=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`
-  - **Body**:
-    ```json
-    {
-      "message": "Logout realizado com sucesso."
-    }
-    ```
+  - **Set-Cookie**: `refresh_token=; Path=/api/auth; Max-Age=0; HttpOnly; SameSite=Strict`
+  - **Body**: Vazio (200 OK)

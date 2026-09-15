@@ -21,9 +21,23 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadCurrentUser() {
       try {
-        const response = await fetch(`${apiUrl}/api/auth/me`, {
+        let response = await fetch(`${apiUrl}/api/auth/me`, {
           credentials: 'include',
         });
+
+        // Se o access_token expirou (401), tenta renovar silenciosamente com refresh token
+        if (response.status === 401) {
+          const refreshRes = await fetch(`${apiUrl}/api/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (refreshRes.ok) {
+            response = await fetch(`${apiUrl}/api/auth/me`, {
+              credentials: 'include',
+            });
+          }
+        }
+
         if (!response.ok) {
           throw new Error('Não autenticado');
         }

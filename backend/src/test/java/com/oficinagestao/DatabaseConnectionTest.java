@@ -47,24 +47,25 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 e V2 foram aplicadas e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1, V2 e V3 foram aplicadas e as tabelas essenciais existem")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("2", current.getVersion().getVersion(), "A versão atual da migration deve ser 2.");
-        assertEquals("simplify initial roles", current.getDescription());
+        assertEquals("3", current.getVersion().getVersion(), "A versão atual da migration deve ser 3.");
+        assertEquals("add refresh tokens", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 14 tabelas no banco de dados
+        // Validar existência das 15 tabelas no banco de dados (14 anteriores + refresh_tokens)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
-                "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria"
+                "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
+                "refresh_tokens"
         );
 
         try (Connection connection = dataSource.getConnection();
