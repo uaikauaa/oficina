@@ -64,22 +64,36 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Estrutura preparada para relacionar máquinas e geradores futuramente.
 - 53 testes automatizados no backend e builds 100% aprovados.
 
-### Fase 4B — Máquinas e Equipamentos Técnicos (Pendente)
-- Gestão de Máquinas de Solda (MIG/MAG, TIG, Eletrodo Revestido, Inversoras, Corte Plasma) e Geradores de Energia (Diesel e Gasolina).
-- Vínculo relacional com clientes (histórico de manutenções e ordens de serviço).
-- Cadastro de especificações técnicas (potência kVA/kW, tensão 110V/220V/380V/440V, corrente máxima, número de série e horímetro).
+### Fase 4B — Máquinas e Equipamentos Técnicos (Próxima Fase)
+- Modelagem e gestão de equipamentos: Máquinas de Solda (MIG/MAG, TIG, Eletrodo Revestido, Inversoras, Corte Plasma) e Geradores de Energia (Diesel e Gasolina).
+- Vínculo relacional N:1 com clientes (`cliente_id`) e histórico completo de manutenções.
+- Especificações técnicas: tipo, marca, modelo, número de série (sem constraint UNIQUE global), potência (kVA/kW), tensão de operação (110V, 220V, 380V, 440V, bivolt, trifásico), horímetro e especificações complementares em JSONB.
+- Backend (Controller, Service, Repository, DTOs, Validações) e Frontend (listagem, filtros, formulário de cadastro/edição, visualização por cliente).
 
-### Fase 4C — Fornecedores, Peças, Insumos e Serviços (Pendente)
-- Gestão de Fornecedores de Peças, Componentes Eletrônicos e Consumíveis.
-- Gestão de Peças, Insumos e Estoque Técnico.
-- Gestão de Serviços e Diagnósticos Técnicos.
+### Fase 4C — Ordens de Serviço (Fluxo Central de Assistência Técnica)
+- Fluxo de trabalho técnico completo: Abertura -> Diagnóstico -> Orçamento/Aprovação -> Manutenção -> Peças -> Testes Técnicos em Bancada -> Conclusão.
+- Ciclo de status oficiais: `ABERTA`, `EM_DIAGNOSTICO`, `AGUARDANDO_APROVACAO`, `EM_MANUTENCAO`, `AGUARDANDO_PECA`, `PRONTA`, `CONCLUIDA`, `CANCELADA`.
+- Registro de testes realizados (arco elétrico, estabilidade de rotação, tensão e amperagem).
+- Vínculo atômico com peças/serviços e baixa automática de estoque com bloqueio de saldo negativo.
 
-### Fase 5 — Ordens de Serviço (Core do Negócio)
-- Ciclo de vida da Ordem de Serviço (Abertura, Orçamento, Aprovação, Execução, Conclusão).
-- Adição de itens de peças e mão de obra com baixa em estoque.
-- Impressão e exportação de relatórios da OS.
+### Fase 5 — Produtos, Peças, Insumos e Fornecedores
+- Cadastro de peças e componentes eletrônicos (placas inversoras, pontes retificadoras, IGBTs, tiristores, capacitores, cabos, tochas, bicos, filtros, reguladores AVR).
+- Matriz de compatibilidade entre peças e máquinas/equipamentos (`produto_maquina`).
+- Cadastro de fornecedores de componentes e insumos.
 
-### Fase 6 — Financeiro e Relatórios
-- Contas a pagar e receber vinculadas às Ordens de Serviço.
-- Formas de pagamento e controle de caixa.
-- Dashboard com indicadores operacionais e financeiros.
+### Fase 6 — Controle de Estoque Técnico
+- Movimentações de estoque: Entradas por compra, Saídas vinculadas a Ordens de Serviço, Ajustes manuais com justificativa obrigatória e rastreabilidade por auditoria.
+- Prevenção rigorosa de estoque negativo.
+
+### Fase 7 — Histórico e Consultas Rápidas
+- Busca ágil por cliente, número de série do equipamento ou número da OS para atendimento em balcão.
+- Linha do tempo de manutenções anteriores por equipamento.
+
+### Fase 8 — Relatórios Gerenciais
+- Faturamento de serviços e peças, equipamentos mais atendidos, produtividade e consumo de peças em garantia.
+
+### Fase 9 — Auditoria e Segurança
+- Log detalhado de operações críticas (alterações em OS, movimentações de estoque, cancelamentos).
+
+### Fase 10 — Melhorias Administrativas e Multi-usuário
+- Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.

@@ -132,3 +132,45 @@ Documentação interativa gerada automaticamente pelo SpringDoc OpenAPI (`/swagg
 - Suporte a autenticação mista: Cookie `access_token` e Header `Authorization: Bearer <token>`.
 - Modelagem precisa dos contratos de erro e paginação.
 
+---
+
+## 5. Fluxo Técnico Central de Assistência Técnica
+
+A arquitetura do sistema é desenhada em torno de dois pilares centrais:
+1. **Controle de Clientes e Histórico de Manutenção de Equipamentos**
+2. **Controle de Estoque de Peças e Insumos Técnicos**
+
+### 5.1. Rastreabilidade Relacional
+```text
+[ Cliente (PF / PJ) ]
+        │ 1:N
+        ▼
+[ Máquina / Equipamento Técnico ]  (Máquinas de Solda ou Geradores)
+        │ 1:N
+        ▼
+[ Ordem de Serviço ] ───────────► [ Registro de Testes Realizados ]
+        │ 1:N
+        ▼
+[ Ordem Serviço Itens ] (Preço congelado no momento da inclusão)
+        │
+        ├──► Tipo SERVICO (Mão de obra técnica / Diagnóstico)
+        └──► Tipo PRODUTO (Peça / Insumo) ──► Baixa atômica em [ estoque_movimentacoes ]
+```
+
+### 5.2. Ciclo de Vida da Ordem de Serviço
+O ciclo de vida da OS reflete com fidelidade as etapas práticas da oficina especializada:
+- `ABERTA`: Entrada do equipamento na oficina com descrição inicial do problema relatado pelo cliente, horímetro atual e checklist visual.
+- `EM_DIAGNOSTICO`: Avaliação técnica em bancada pelo técnico (desmontagem, medição de componentes, teste de placas/gerador).
+- `AGUARDANDO_APROVACAO`: Orçamento gerado com peças e mão de obra, aguardando autorização do cliente.
+- `EM_MANUTENCAO`: Orçamento aprovado, técnico executando o reparo, substituição de componentes ou rebobinamento/ajuste de motor.
+- `AGUARDANDO_PECA`: Manutenção pausada aguardando entrega de componentes por fornecedores.
+- `PRONTA`: Manutenção concluída e aprovada na etapa de **Testes Técnicos** (arco elétrico sob carga, estabilidade de rotação do gerador, tensão de saída em 110V/220V/380V e corrente máxima aferida).
+- `CONCLUIDA`: Equipamento retirado pelo cliente, faturamento consolidado e garantia iniciada.
+- `CANCELADA`: Orçamento recusado pelo cliente ou inviabilidade técnica; peças reservadas/baixadas são estornadas ao estoque.
+
+### 5.3. Garantia de Integridade de Estoque
+- Toda saída de peça associada a uma Ordem de Serviço gera um registro em `estoque_movimentacoes` vinculado ao item da OS.
+- Bloqueio estrito de estoque negativo: uma peça não pode ser consumida se o saldo disponível for insuficiente.
+- O preço unitário da peça na OS é gravado no momento da inclusão em `ordem_servico_itens`, protegendo o valor orçado/faturado contra variações cadastrais futuras no preço de custo ou venda.
+
+

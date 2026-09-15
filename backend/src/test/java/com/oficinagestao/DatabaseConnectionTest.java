@@ -53,23 +53,23 @@ class DatabaseConnectionTest {
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("4", current.getVersion().getVersion(), "A versão atual da migration deve ser 4.");
-        assertEquals("correct equipment domain", current.getDescription());
+        assertEquals("5", current.getVersion().getVersion(), "A versão atual da migration deve ser 5.");
+        assertEquals("align service order domain", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 15 tabelas no banco de dados (14 anteriores + refresh_tokens)
+        // Validar existência das 15 tabelas no banco de dados (14 anteriores +
+        // refresh_tokens)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens"
-        );
+                "refresh_tokens");
 
         try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement()) {
+                Statement stmt = connection.createStatement()) {
 
             List<String> existingTables = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery(
@@ -92,7 +92,7 @@ class DatabaseConnectionTest {
         assertNotNull(dataSource, "O DataSource deve estar presente.");
 
         try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement()) {
+                Statement stmt = connection.createStatement()) {
 
             // 1. Validar colunas de 'maquinas'
             List<String> colunasMaquinas = new ArrayList<>();
@@ -104,17 +104,22 @@ class DatabaseConnectionTest {
             }
 
             // Colunas de equipamento técnico que DEVEM existir
-            assertTrue(colunasMaquinas.contains("tipo_equipamento"), "Coluna 'tipo_equipamento' deve existir em maquinas.");
+            assertTrue(colunasMaquinas.contains("tipo_equipamento"),
+                    "Coluna 'tipo_equipamento' deve existir em maquinas.");
             assertTrue(colunasMaquinas.contains("numero_serie"), "Coluna 'numero_serie' deve existir em maquinas.");
             assertTrue(colunasMaquinas.contains("horimetro"), "Coluna 'horimetro' deve existir em maquinas.");
             assertTrue(colunasMaquinas.contains("potencia"), "Coluna 'potencia' deve existir em maquinas.");
             assertTrue(colunasMaquinas.contains("tensao"), "Coluna 'tensao' deve existir em maquinas.");
-            assertTrue(colunasMaquinas.contains("especificacoes_tecnicas"), "Coluna 'especificacoes_tecnicas' deve existir em maquinas.");
+            assertTrue(colunasMaquinas.contains("especificacoes_tecnicas"),
+                    "Coluna 'especificacoes_tecnicas' deve existir em maquinas.");
 
             // Colunas automotivas que NÃO DEVEM existir
-            assertFalse(colunasMaquinas.contains("placa_identificacao"), "Coluna automotiva 'placa_identificacao' não deve existir em maquinas.");
-            assertFalse(colunasMaquinas.contains("numero_serie_chassi"), "Coluna automotiva 'numero_serie_chassi' não deve existir em maquinas.");
-            assertFalse(colunasMaquinas.contains("horimetro_quilometragem"), "Coluna 'horimetro_quilometragem' não deve existir em maquinas.");
+            assertFalse(colunasMaquinas.contains("placa_identificacao"),
+                    "Coluna automotiva 'placa_identificacao' não deve existir em maquinas.");
+            assertFalse(colunasMaquinas.contains("numero_serie_chassi"),
+                    "Coluna automotiva 'numero_serie_chassi' não deve existir em maquinas.");
+            assertFalse(colunasMaquinas.contains("horimetro_quilometragem"),
+                    "Coluna 'horimetro_quilometragem' não deve existir em maquinas.");
 
             // 2. Validar colunas de 'ordens_servico'
             List<String> colunasOs = new ArrayList<>();
@@ -125,8 +130,12 @@ class DatabaseConnectionTest {
                 }
             }
 
-            assertTrue(colunasOs.contains("horimetro_atual"), "Coluna 'horimetro_atual' deve existir em ordens_servico.");
-            assertFalse(colunasOs.contains("horimetro_quilometragem_atual"), "Coluna automotiva 'horimetro_quilometragem_atual' não deve existir em ordens_servico.");
+            assertTrue(colunasOs.contains("horimetro_atual"),
+                    "Coluna 'horimetro_atual' deve existir em ordens_servico.");
+            assertTrue(colunasOs.contains("testes_realizados"),
+                    "Coluna 'testes_realizados' deve existir em ordens_servico.");
+            assertFalse(colunasOs.contains("horimetro_quilometragem_atual"),
+                    "Coluna automotiva 'horimetro_quilometragem_atual' não deve existir em ordens_servico.");
 
             // 3. Validar índices
             List<String> indices = new ArrayList<>();
@@ -138,13 +147,18 @@ class DatabaseConnectionTest {
             }
 
             // Índices que DEVEM existir
-            assertTrue(indices.contains("idx_maquinas_tipo_equipamento"), "Índice 'idx_maquinas_tipo_equipamento' deve existir.");
-            assertTrue(indices.contains("idx_maquinas_numero_serie"), "Índice 'idx_maquinas_numero_serie' deve existir.");
-            assertTrue(indices.contains("idx_maquinas_cliente_numero_serie"), "Índice 'idx_maquinas_cliente_numero_serie' deve existir.");
+            assertTrue(indices.contains("idx_maquinas_tipo_equipamento"),
+                    "Índice 'idx_maquinas_tipo_equipamento' deve existir.");
+            assertTrue(indices.contains("idx_maquinas_numero_serie"),
+                    "Índice 'idx_maquinas_numero_serie' deve existir.");
+            assertTrue(indices.contains("idx_maquinas_cliente_numero_serie"),
+                    "Índice 'idx_maquinas_cliente_numero_serie' deve existir.");
 
             // Índices automotivos que NÃO DEVEM existir
-            assertFalse(indices.contains("idx_maquinas_placa"), "Índice automotivo 'idx_maquinas_placa' não deve existir.");
-            assertFalse(indices.contains("idx_maquinas_chassi"), "Índice automotivo 'idx_maquinas_chassi' não deve existir.");
+            assertFalse(indices.contains("idx_maquinas_placa"),
+                    "Índice automotivo 'idx_maquinas_placa' não deve existir.");
+            assertFalse(indices.contains("idx_maquinas_chassi"),
+                    "Índice automotivo 'idx_maquinas_chassi' não deve existir.");
         }
     }
 
@@ -154,7 +168,7 @@ class DatabaseConnectionTest {
         assertNotNull(dataSource, "O DataSource deve estar presente.");
 
         try (Connection connection = dataSource.getConnection();
-             Statement stmt = connection.createStatement()) {
+                Statement stmt = connection.createStatement()) {
 
             // Validar roles existentes
             List<String> existingRoles = new ArrayList<>();

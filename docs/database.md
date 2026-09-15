@@ -84,6 +84,14 @@ Provisiona as 14 tabelas centrais:
   - Renomeação de coluna: `horimetro_quilometragem_atual` -> `horimetro_atual`.
 - **Preservação de Dados**: 100% dos dados, chaves primárias e relacionamentos com clientes e ordens de serviço preservados.
 
+### Migration V5 — Alinhamento do Domínio de Ordens de Serviço (`V5__align_service_order_domain.sql`)
+- **Contexto de Negócio**: Alinhamento do ciclo de vida das Ordens de Serviço ao fluxo real de assistência técnica de máquinas de solda e geradores de energia (Diagnóstico -> Peças -> Mão de Obra -> Testes Técnicos -> Conclusão).
+- **Alterações em `ordens_servico`**:
+  - Nova coluna: `testes_realizados TEXT` (registro dos testes em bancada: arco elétrico, ciclo de trabalho, amperagem, tensão e estabilidade).
+  - Atualização da constraint de status para os 8 status do fluxo técnico real:
+    `status IN ('ABERTA', 'EM_DIAGNOSTICO', 'AGUARDANDO_APROVACAO', 'EM_MANUTENCAO', 'AGUARDANDO_PECA', 'PRONTA', 'CONCLUIDA', 'CANCELADA')`.
+  - Valor padrão da coluna `status` atualizado para `'ABERTA'`.
+
 ---
 
 ## 5. Inspeção e Validação com DBeaver

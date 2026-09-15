@@ -269,3 +269,24 @@ A documentação interativa e a especificação JSON estão disponíveis nos seg
   - `cookieAuth`: Cookie `access_token` (padrão do navegador).
   - `bearerAuth`: Header `Authorization: Bearer <token>` (para testes via Swagger UI ou integrações).
 
+---
+
+## 9. Padrões de Ordem de Serviço e Ciclo Técnico (Máquinas de Solda e Geradores)
+
+### 9.1. Ciclo de Vida e Transições de Status
+Os status permitidos no fluxo técnico real da oficina são:
+- `ABERTA`: Entrada do equipamento na oficina.
+- `EM_DIAGNOSTICO`: Avaliação técnica em bancada.
+- `AGUARDANDO_APROVACAO`: Orçamento gerado com peças e mão de obra, aguardando aval do cliente.
+- `EM_MANUTENCAO`: Orçamento aprovado, técnico realizando conserto ou substituição de peças.
+- `AGUARDANDO_PECA`: Manutenção pausada por falta de insumo em estoque.
+- `PRONTA`: Manutenção finalizada e validada na etapa de **Testes Técnicos em Bancada**.
+- `CONCLUIDA`: Equipamento retirado pelo cliente, faturado e garantia iniciada.
+- `CANCELADA`: Orçamento recusado ou inviabilidade técnica constatada.
+
+### 9.2. Registro de Testes Técnicos
+O campo `testes_realizados` na Ordem de Serviço armazena o histórico técnico mandatório antes da liberação para `PRONTA`:
+- **Máquinas de Solda**: Teste de abertura de arco elétrico sob carga, estabilidade de corrente (A), ciclo de trabalho e verificação de aquecimento térmico.
+- **Geradores de Energia**: Teste sob carga resistiva/indutiva, rotação (RPM/Hz), aferição de tensão nas fases (110V/220V/380V) e atuação do regulador automático de voltagem (AVR).
+
+
