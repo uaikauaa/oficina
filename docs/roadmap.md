@@ -17,12 +17,13 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 ### Fase 1 — Modelagem e Banco de Dados (Concluída)
 - Configuração da conexão com PostgreSQL / Neon via variáveis de ambiente seguras.
 - Integração de Spring Data JPA, Hibernate (modo `validate`) e Flyway.
-- Criação e aplicação da migration `V1__create_initial_schema.sql` (14 tabelas, constraints, índices e roles iniciais).
+- Criação e aplicação da migration `V1__create_initial_schema.sql` (14 tabelas, constraints e índices).
+- Criação e aplicação da migration `V2__simplify_initial_roles.sql` (ajuste para modelo de usuária única com `ROLE_ADMIN`).
 - Validação automatizada da integridade relacional e conexão real com o banco Neon.
 
 ### Fase 2 — Autenticação e Segurança
 - Implementação de Spring Security e autenticação JWT.
-- Controle de acessos e perfis de usuário (RBAC).
+- Configuração de acesso administrativo completo para a proprietária da oficina (`ROLE_ADMIN`).
 - Integração de login no frontend Next.js.
 
 ### Fase 3 — Cadastros Base

@@ -47,14 +47,18 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que a migration Flyway V1 foi aplicada e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1 e V2 foram aplicadas e as tabelas essenciais existem")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("1", current.getVersion().getVersion(), "A versão atual da migration deve ser 1.");
-        assertEquals("create initial schema", current.getDescription());
+        assertEquals("2", current.getVersion().getVersion(), "A versão atual da migration deve ser 2.");
+        assertEquals("simplify initial roles", current.getDescription());
+
+        // Validar que a V1 também consta no histórico
+        MigrationInfo v1 = flyway.info().applied()[0];
+        assertEquals("1", v1.getVersion().getVersion());
 
         // Validar existência das 14 tabelas no banco de dados
         List<String> expectedTables = List.of(
@@ -77,6 +81,37 @@ class DatabaseConnectionTest {
             for (String table : expectedTables) {
                 assertTrue(existingTables.contains(table),
                         "A tabela '" + table + "' deveria ter sido criada pela migration Flyway.");
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Deve validar que apenas ROLE_ADMIN existe e nenhum usuário fictício foi criado")
+    void shouldValidateSingleAdminRoleAndNoUsers() throws Exception {
+        assertNotNull(dataSource, "O DataSource deve estar presente.");
+
+        try (Connection connection = dataSource.getConnection();
+             Statement stmt = connection.createStatement()) {
+
+            // Validar roles existentes
+            List<String> existingRoles = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery("SELECT nome FROM roles")) {
+                while (rs.next()) {
+                    existingRoles.add(rs.getString("nome"));
+                }
+            }
+
+            assertEquals(1, existingRoles.size(), "A tabela roles deve conter exatamente 1 papel no MVP.");
+            assertTrue(existingRoles.contains("ROLE_ADMIN"), "O papel ROLE_ADMIN deve existir.");
+            assertFalse(existingRoles.contains("ROLE_GERENTE"), "ROLE_GERENTE não deve existir no MVP.");
+            assertFalse(existingRoles.contains("ROLE_MECANICO"), "ROLE_MECANICO não deve existir no MVP.");
+            assertFalse(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE não deve existir no MVP.");
+
+            // Validar que nenhum usuário fictício foi criado
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios")) {
+                assertTrue(rs.next());
+                int userCount = rs.getInt(1);
+                assertEquals(0, userCount, "Nenhum usuário fictício deve existir na tabela usuarios.");
             }
         }
     }

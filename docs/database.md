@@ -40,11 +40,12 @@ A conexão com o Neon é configurada estritamente via variáveis de ambiente ou 
 
 ---
 
-## 4. Schema Inicial (Migration V1)
+## 4. Schemas e Migrations
 
-A migration `V1__create_initial_schema.sql` provisiona as seguintes tabelas centrais:
-- `usuarios`: Usuários do sistema e credenciais.
-- `roles`: Perfis de acesso (`ROLE_ADMIN`, `ROLE_GERENTE`, `ROLE_MECANICO`, `ROLE_ATENDENTE`).
+### Migration V1 — Schema Inicial (`V1__create_initial_schema.sql`)
+Provisiona as 14 tabelas centrais:
+- `usuarios`: Usuários do sistema e credenciais (sem usuários fictícios).
+- `roles`: Perfis de acesso da aplicação.
 - `usuario_roles`: Associação N:N entre usuários e perfis.
 - `clientes`: Dados cadastrais de clientes PF e PJ.
 - `fornecedores`: Parceiros e fornecedores de peças e insumos.
@@ -57,6 +58,12 @@ A migration `V1__create_initial_schema.sql` provisiona as seguintes tabelas cent
 - `ordem_servico_itens`: Peças e serviços adicionados à OS.
 - `estoque_movimentacoes`: Histórico detalhado de movimentações de estoque.
 - `auditoria`: Rastreabilidade de ações críticas em formato JSONB.
+
+### Migration V2 — Simplificação de Papéis para o MVP (`V2__simplify_initial_roles.sql`)
+- **Contexto de Negócio**: O sistema será utilizado inicialmente por uma única usuária (proprietária da oficina), com acesso administrativo irrestrito.
+- **Papel Disponível**: Exclusivamente `ROLE_ADMIN`. Os papéis `ROLE_GERENTE`, `ROLE_MECANICO` e `ROLE_ATENDENTE` foram removidos nesta migration.
+- **Extensibilidade**: A estrutura relacional RBAC (`roles`, `usuario_roles`) é mantida íntegra, permitindo que novos papéis e operadores sejam cadastrados futuramente sem qualquer alteração estrutural no banco de dados.
+- **Segurança**: Nenhum usuário padrão ou senha hardcoded é inserido nas migrations; a conta da proprietária será criada na Fase 2 de autenticação de forma segura.
 
 ---
 
