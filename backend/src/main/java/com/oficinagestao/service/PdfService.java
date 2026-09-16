@@ -288,8 +288,8 @@ public class PdfService {
     private void adicionarTermosEAssinaturas(Document document, OrdemServico os) throws DocumentException {
         // Termos Legais e Condições de Garantia
         Paragraph pTermos = new Paragraph(
-                "Garantia legal de 90 (noventa) dias sobre os serviços executados e componentes substituídos, respeitadas as condições " +
-                "normais de uso e operação do equipamento (CDC Art. 26). A garantia não cobre danos por sobretensão de rede, uso indevido, " +
+                "Condições de garantia conforme política da oficina sobre os serviços executados e componentes substituídos, respeitadas as condições " +
+                "normais de uso e operação do equipamento. A garantia não cobre danos por sobretensão de rede, uso indevido, " +
                 "quedas ou abertura por terceiros. O equipamento poderá ser retirado somente mediante a apresentação desta via ou documento oficial.",
                 FONT_FOOTER
         );

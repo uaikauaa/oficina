@@ -231,8 +231,8 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
       {/* 7. Termos Legais e Assinaturas */}
       <div className="border-t border-slate-300 pt-3">
         <p className="text-[9px] text-slate-600 leading-tight mb-8">
-          Garantia legal de 90 (noventa) dias sobre os serviços executados e componentes substituídos, respeitadas as condições
-          normais de operação do equipamento (CDC Art. 26). A garantia não cobre danos por sobretensão de rede, quedas, uso
+          Condições de garantia conforme política da oficina sobre os serviços executados e componentes substituídos, respeitadas as condições
+          normais de operação do equipamento. A garantia não cobre danos por sobretensão de rede, quedas, uso
           indevido ou intervenção de terceiros. O equipamento poderá ser retirado somente mediante a apresentação desta via.
         </p>
 

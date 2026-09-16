@@ -36,7 +36,7 @@ PostgreSQL / Neon (Banco de Dados)
 | **Consultas e operações no banco** | `backend/src/main/java/com/oficinagestao/repository/` | `OrdemServicoRepository.java` |
 | **Estrutura das tabelas (ORM / Entidades)** | `backend/src/main/java/com/oficinagestao/entity/` | `OrdemServico.java` |
 | **Contratos de entrada/saída (DTOs / Records)** | `backend/src/main/java/com/oficinagestao/dto/` | `OrdemServicoCreateDTO.java` |
-| **Scripts e migrações do banco (Flyway)** | `backend/src/main/resources/db/migration/` | `V5__create_ordens_servico_and_itens.sql` |
+| **Scripts e migrações do banco (Flyway)** | `backend/src/main/resources/db/migration/` | `V9__add_produto_marca_and_seed_categorias.sql` |
 | **Segurança, JWT e autenticação** | `backend/src/main/java/com/oficinagestao/security/` | `SecurityConfig.java`, `JwtService.java` |
 
 ---
@@ -65,9 +65,9 @@ oficina-gestao/
 │       │   │   └── OficinaGestaoApplication.java
 │       │   └── resources/
 │       │       ├── application.properties
-│       │       └── db/migration/ # Migrations SQL do Flyway (V1 a V6)
+│       │       └── db/migration/ # Migrations SQL do Flyway (V1 a V9)
 │       └── test/                 # Testes unitários e de integração
-├── docs/                         # Documentação técnica e arquitetural
+├── docs/                         # Documentação técnica e operacional
 ├── AGENTS.md                     # Regras fundamentais do projeto
 └── README.md                     # Visão geral do projeto
 ```
@@ -76,6 +76,9 @@ oficina-gestao/
 
 ## 🚀 Status do Projeto
 
-- **Refatoração Estrutural**: Concluída com sucesso. O backend foi simplificado para a arquitetura tradicional em camadas (`controller`, `service`, `repository`, `entity`, `dto`, `exception`, `security`, `config`), eliminando classes `*Mapper` intermediárias e unificando a navegação.
-- **Testes Automatizados**: 105 testes executados e aprovados (100% de aprovação, 0 falhas, 0 erros, 0 avisos de compilação).
-- **Próximo Passo**: Fase 6 (Gestão de Estoque) no roadmap oficial.
+- **Versão Atual**: Release 1.0.0 (Fases 0 a 9 concluídas).
+- **Domínio Especializado**: Manutenção, conserto e reparo de máquinas de solda e geradores de energia.
+- **Módulos Entregues**: Autenticação stateless, Gestão de Clientes, Equipamentos, Ordens de Serviço (ciclo completo de 8 etapas), Produtos/Peças, Controle Atômico de Estoque com Lock Pessimista, Busca Rápida Global (`Ctrl+K`), Histórico Técnico Linear, Geração de PDF Oficial A4, Impressão de Balcão e Relatórios Gerenciais (6 abas).
+- **Testes Automatizados**: 151 testes automatizados no backend aprovados com 100% de sucesso (0 falhas, 0 erros, 0 ignorados).
+- **Frontend**: 0 erros de lint (`eslint`) e build de produção Next.js 16.3.5 / Turbopack concluído com êxito em 15 rotas otimizadas.
+

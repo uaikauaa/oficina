@@ -126,9 +126,18 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - 151 testes automatizados no backend aprovados com 100% de sucesso.
 - Frontend com 0 erros de lint e build de produção Next.js 16.3.5 / Turbopack concluído com êxito.
 
-### Fase 9 — Auditoria e Segurança (Próxima Fase)
-- Log detalhado de operações críticas (alterações em OS, movimentações de estoque, cancelamentos).
+### Fase 9 — Hardening, Homologação e Preparação para Release 1.0 (Concluída)
+- Revisão de segurança e conformidade jurídica dos textos de garantia do PDF e impressão de balcão (redação neutra adotada).
+- Parametrização da flag `Secure` em cookies HttpOnly via variável `SECURITY_COOKIE_SECURE` para suporte estrito a HTTPS em produção.
+- Automação de CI/CD através do GitHub Actions (`.github/workflows/ci.yml`) cobrindo testes de backend e lint/build de frontend.
+- Documentação operacional completa elaborada:
+  - `docs/deployment.md`: Guia passo a passo de implantação em produção (Vercel/Railway/Neon);
+  - `docs/backup.md`: Procedimentos detalhados de backup lógico (`pg_dump`), restauração (`pg_restore`) e PITR no Neon;
+  - `docs/release.md`: Changelog consolidado da Release 1.0.0, instrução de corte de tag Git e checklist para a proprietária da oficina.
+- Elaboração do relatório executivo de homologação `QA-RELEASE-1.0-REPORT.md` com matriz de riscos e veredito GO/NO-GO.
+- 151 testes automatizados no backend com 100% de sucesso e build limpo no frontend.
 
-### Fase 10 — Melhorias Administrativas e Multi-usuário
+### Fase 10 — Melhorias Administrativas e Multi-usuário (Próxima Fase)
 - Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.
+
 
