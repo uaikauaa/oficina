@@ -113,8 +113,10 @@ function NovaOrdemServicoContent() {
     if (clienteSelecionado) return; // Se já selecionou, não busca
 
     if (!termoCliente.trim() || termoCliente.trim().length < 2) {
-      setClientesEncontrados([]);
-      return;
+      const resetTimer = setTimeout(() => {
+        setClientesEncontrados([]);
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
     const timer = setTimeout(async () => {
@@ -138,9 +140,11 @@ function NovaOrdemServicoContent() {
   // Ao selecionar um cliente, busca reativamente os equipamentos cadastrados daquele cliente
   useEffect(() => {
     if (!clienteSelecionado) {
-      setMaquinasCliente([]);
-      setMaquinaSelecionadaId('');
-      return;
+      const resetTimer = setTimeout(() => {
+        setMaquinasCliente([]);
+        setMaquinaSelecionadaId('');
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
     let ignore = false;
@@ -170,9 +174,13 @@ function NovaOrdemServicoContent() {
       }
     }
 
-    carregarEquipamentosDoCliente();
+    const fetchTimer = setTimeout(() => {
+      carregarEquipamentosDoCliente();
+    }, 0);
+
     return () => {
       ignore = true;
+      clearTimeout(fetchTimer);
     };
   }, [clienteSelecionado, preMaquinaId]);
 

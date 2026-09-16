@@ -61,18 +61,21 @@ export default function CompatibilidadeModal({
   }, []);
 
   useEffect(() => {
-    if (isOpen && produto) {
-      carregarCompatibilidades();
-      carregarMaquinas();
-    } else {
-      setCompatibilidades([]);
-      setMaquinas([]);
-      setBuscaMaquina('');
-      setMaquinaSelecionadaId('');
-      setObservacao('');
-      setError(null);
-      setSuccessMsg(null);
-    }
+    const timer = setTimeout(() => {
+      if (isOpen && produto) {
+        carregarCompatibilidades();
+        carregarMaquinas();
+      } else {
+        setCompatibilidades([]);
+        setMaquinas([]);
+        setBuscaMaquina('');
+        setMaquinaSelecionadaId('');
+        setObservacao('');
+        setError(null);
+        setSuccessMsg(null);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isOpen, produto, carregarCompatibilidades, carregarMaquinas]);
 
   const handleAdicionar = async (e: React.FormEvent) => {

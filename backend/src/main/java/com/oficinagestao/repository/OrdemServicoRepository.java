@@ -26,6 +26,9 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
 
     boolean existsByNumeroOs(String numeroOs);
 
+    @Query(value = "SELECT nextval('ordens_servico_seq')", nativeQuery = true)
+    Long getProximoSequencialOs();
+
     @Query("SELECT COUNT(os) FROM OrdemServico os WHERE os.numeroOs LIKE :prefixo%")
     long countByPrefixo(@Param("prefixo") String prefixo);
 

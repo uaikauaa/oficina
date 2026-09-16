@@ -20,7 +20,6 @@ import {
   Package,
   Plus,
   Trash2,
-  Boxes,
   Loader2,
 } from 'lucide-react';
 import Header from '@/components/Header';
@@ -151,8 +150,8 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
         valorPecas: data.valorPecas || 0,
         valorDesconto: data.valorDesconto || 0,
       });
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Falha ao buscar OS.');
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : 'Falha ao buscar OS.');
     } finally {
       setIsLoading(false);
     }
@@ -171,8 +170,11 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   }, [osId]);
 
   useEffect(() => {
-    fetchOs();
-    fetchItens();
+    const timer = setTimeout(() => {
+      fetchOs();
+      fetchItens();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchOs, fetchItens]);
 
   const carregarProdutosDisponiveis = async () => {
@@ -320,8 +322,8 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
       setIsStatusModalOpen(false);
       setSuccessMessage(`Status alterado com sucesso para ${atualizada.statusDescricao}!`);
       setTimeout(() => setSuccessMessage(null), 4000);
-    } catch (err: any) {
-      alert(err.message || 'Erro ao alterar status.');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao alterar status.');
     } finally {
       setIsSubmittingStatus(false);
     }
@@ -1135,9 +1137,20 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     step="0.01"
                     min="0"
                     value={editForm.valorPecas}
+                    disabled={itens.length > 0}
+                    readOnly={itens.length > 0}
                     onChange={(e) => setEditForm({ ...editForm, valorPecas: Number(e.target.value) })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs text-white focus:outline-none ${
+                      itens.length > 0
+                        ? 'bg-slate-900/50 border-slate-800/80 text-slate-400 cursor-not-allowed'
+                        : 'bg-slate-950 border-slate-800 focus:border-amber-500/50'
+                    }`}
                   />
+                  {itens.length > 0 && (
+                    <p className="mt-1 text-[11px] text-amber-400/90 flex items-center gap-1">
+                      <span>ℹ️</span> Valor calculado a partir das peças lançadas.
+                    </p>
+                  )}
                 </div>
 
                 <div>

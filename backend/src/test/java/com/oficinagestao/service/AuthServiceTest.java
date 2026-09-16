@@ -171,15 +171,17 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar BadCredentialsException quando o refresh token já estiver revogado")
-    void shouldThrowWhenRefreshTokenIsRevoked() {
+    @DisplayName("RISK-005: Deve revogar todos os tokens do usuário (família de tokens) e lançar BadCredentialsException ao tentar reutilizar token revogado")
+    void shouldThrowAndRevokeAllTokensWhenRefreshTokenIsRevoked() {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_senha", true);
-        RefreshToken revokedToken = new RefreshToken(usuario, "revoked-token", OffsetDateTime.now().plusDays(3));
-        revokedToken.setRevogado(true);
+        usuario.setId(1L);
+        RefreshToken revokedToken = new RefreshToken(usuario, "revoked-token", OffsetDateTime.now().plusDays(2));
+        revokedToken.revoke();
 
         when(refreshTokenRepository.findByToken("revoked-token")).thenReturn(Optional.of(revokedToken));
 
         assertThrows(BadCredentialsException.class, () -> authService.refresh("revoked-token", httpRequest));
+        verify(refreshTokenRepository, times(1)).revokeAllByUsuarioId(1L);
     }
 
     @Test

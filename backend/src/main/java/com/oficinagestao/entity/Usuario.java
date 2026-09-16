@@ -138,11 +138,14 @@ public class Usuario {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Usuario usuario)) return false;
-        return Objects.equals(id, usuario.id) || Objects.equals(email, usuario.email);
+        if (this.id != null && usuario.id != null) {
+            return Objects.equals(this.id, usuario.id);
+        }
+        return this.email != null && this.email.equalsIgnoreCase(usuario.email);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(email);
+        return email != null ? Objects.hash(email.toLowerCase()) : (id != null ? Objects.hash(id) : 0);
     }
 }

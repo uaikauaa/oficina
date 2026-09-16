@@ -2,6 +2,7 @@ package com.oficinagestao.service;
 
 import com.oficinagestao.dto.*;
 import com.oficinagestao.entity.*;
+import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.ClienteRepository;
@@ -164,18 +165,48 @@ public class ClienteService {
         );
     }
 
+    public static String apenasDigitos(String valor) {
+        if (valor == null || valor.isBlank()) {
+            return null;
+        }
+        String digitos = valor.replaceAll("\\D", "");
+        return digitos.isBlank() ? null : digitos;
+    }
+
+    private void validarFormatoCpfCnpj(String doc, TipoPessoa tipoPessoa) {
+        if (doc == null) return;
+        if (tipoPessoa == TipoPessoa.FISICA) {
+            if (doc.length() != 11) {
+                throw new BusinessException("CPF deve conter exatamente 11 dígitos numéricos.");
+            }
+            if (doc.chars().distinct().count() == 1) {
+                throw new BusinessException("CPF inválido (sequência de dígitos idênticos).");
+            }
+        } else if (tipoPessoa == TipoPessoa.JURIDICA) {
+            if (doc.length() != 14) {
+                throw new BusinessException("CNPJ deve conter exatamente 14 dígitos numéricos.");
+            }
+            if (doc.chars().distinct().count() == 1) {
+                throw new BusinessException("CNPJ inválido (sequência de dígitos idênticos).");
+            }
+        }
+    }
+
     private Cliente toEntity(ClienteCreateDTO dto) {
         if (dto == null) {
             return null;
         }
+        String cpfCnpjNormalizado = apenasDigitos(dto.cpfCnpj());
+        validarFormatoCpfCnpj(cpfCnpjNormalizado, dto.tipoPessoa());
+
         Cliente cliente = new Cliente(
                 dto.tipoPessoa(),
                 dto.nomeRazaoSocial().trim(),
                 dto.nomeFantasia() != null ? dto.nomeFantasia().trim() : null,
-                dto.cpfCnpj() != null && !dto.cpfCnpj().isBlank() ? dto.cpfCnpj().trim() : null,
+                cpfCnpjNormalizado,
                 dto.rgIe() != null && !dto.rgIe().isBlank() ? dto.rgIe().trim() : null,
-                dto.telefone() != null && !dto.telefone().isBlank() ? dto.telefone().trim() : null,
-                dto.celular() != null && !dto.celular().isBlank() ? dto.celular().trim() : null,
+                apenasDigitos(dto.telefone()),
+                apenasDigitos(dto.celular()),
                 dto.email() != null && !dto.email().isBlank() ? dto.email().trim().toLowerCase() : null,
                 dto.observacoes()
         );
@@ -189,13 +220,16 @@ public class ClienteService {
     }
 
     private void updateEntity(Cliente cliente, ClienteUpdateDTO dto) {
+        String cpfCnpjNormalizado = apenasDigitos(dto.cpfCnpj());
+        validarFormatoCpfCnpj(cpfCnpjNormalizado, dto.tipoPessoa());
+
         cliente.setTipoPessoa(dto.tipoPessoa());
         cliente.setNomeRazaoSocial(dto.nomeRazaoSocial().trim());
         cliente.setNomeFantasia(dto.nomeFantasia() != null ? dto.nomeFantasia().trim() : null);
-        cliente.setCpfCnpj(dto.cpfCnpj() != null && !dto.cpfCnpj().isBlank() ? dto.cpfCnpj().trim() : null);
+        cliente.setCpfCnpj(cpfCnpjNormalizado);
         cliente.setRgIe(dto.rgIe() != null && !dto.rgIe().isBlank() ? dto.rgIe().trim() : null);
-        cliente.setTelefone(dto.telefone() != null && !dto.telefone().isBlank() ? dto.telefone().trim() : null);
-        cliente.setCelular(dto.celular() != null && !dto.celular().isBlank() ? dto.celular().trim() : null);
+        cliente.setTelefone(apenasDigitos(dto.telefone()));
+        cliente.setCelular(apenasDigitos(dto.celular()));
         cliente.setEmail(dto.email() != null && !dto.email().isBlank() ? dto.email().trim().toLowerCase() : null);
         if (dto.ativo() != null) {
             cliente.setAtivo(dto.ativo());
@@ -231,20 +265,24 @@ public class ClienteService {
             }
         }
 
-        if (dto.cpfCnpj() != null && !dto.cpfCnpj().isBlank()) {
-            if (clienteRepository.existsByCpfCnpj(dto.cpfCnpj().trim())) {
+        String cpfCnpjNorm = apenasDigitos(dto.cpfCnpj());
+        if (cpfCnpjNorm != null) {
+            validarFormatoCpfCnpj(cpfCnpjNorm, dto.tipoPessoa());
+            if (clienteRepository.existsByCpfCnpj(cpfCnpjNorm)) {
                 throw new ConflictException("Já existe um cliente cadastrado com este CPF/CNPJ.");
             }
         }
 
-        if (dto.telefone() != null && !dto.telefone().isBlank()) {
-            if (clienteRepository.existsByTelefoneOuCelular(dto.telefone().trim())) {
+        String telNorm = apenasDigitos(dto.telefone());
+        if (telNorm != null) {
+            if (clienteRepository.existsByTelefoneOuCelular(telNorm)) {
                 throw new ConflictException("Já existe um cliente cadastrado com este Telefone/Celular.");
             }
         }
 
-        if (dto.celular() != null && !dto.celular().isBlank()) {
-            if (clienteRepository.existsByTelefoneOuCelular(dto.celular().trim())) {
+        String celNorm = apenasDigitos(dto.celular());
+        if (celNorm != null) {
+            if (clienteRepository.existsByTelefoneOuCelular(celNorm)) {
                 throw new ConflictException("Já existe um cliente cadastrado com este Telefone/Celular.");
             }
         }
@@ -257,20 +295,24 @@ public class ClienteService {
             }
         }
 
-        if (dto.cpfCnpj() != null && !dto.cpfCnpj().isBlank()) {
-            if (clienteRepository.existsByCpfCnpjAndIdNot(dto.cpfCnpj().trim(), id)) {
+        String cpfCnpjNorm = apenasDigitos(dto.cpfCnpj());
+        if (cpfCnpjNorm != null) {
+            validarFormatoCpfCnpj(cpfCnpjNorm, dto.tipoPessoa());
+            if (clienteRepository.existsByCpfCnpjAndIdNot(cpfCnpjNorm, id)) {
                 throw new ConflictException("Já existe outro cliente cadastrado com este CPF/CNPJ.");
             }
         }
 
-        if (dto.telefone() != null && !dto.telefone().isBlank()) {
-            if (clienteRepository.existsByTelefoneOuCelularAndIdNot(dto.telefone().trim(), id)) {
+        String telNorm = apenasDigitos(dto.telefone());
+        if (telNorm != null) {
+            if (clienteRepository.existsByTelefoneOuCelularAndIdNot(telNorm, id)) {
                 throw new ConflictException("Já existe outro cliente cadastrado com este Telefone/Celular.");
             }
         }
 
-        if (dto.celular() != null && !dto.celular().isBlank()) {
-            if (clienteRepository.existsByTelefoneOuCelularAndIdNot(dto.celular().trim(), id)) {
+        String celNorm = apenasDigitos(dto.celular());
+        if (celNorm != null) {
+            if (clienteRepository.existsByTelefoneOuCelularAndIdNot(celNorm, id)) {
                 throw new ConflictException("Já existe outro cliente cadastrado com este Telefone/Celular.");
             }
         }

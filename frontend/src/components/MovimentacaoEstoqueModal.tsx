@@ -87,17 +87,20 @@ export default function MovimentacaoEstoqueModal({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (produto) {
-      setFormData({
-        produtoId: produto.id,
-        tipoMovimentacao: 'ENTRADA',
-        quantidade: 1,
-        valorUnitario: produto.precoCusto || 0,
-        motivo: '',
-      });
-    }
-    setError(null);
-    setSuccessMsg(null);
+    const timer = setTimeout(() => {
+      if (produto) {
+        setFormData({
+          produtoId: produto.id,
+          tipoMovimentacao: 'ENTRADA',
+          quantidade: 1,
+          valorUnitario: produto.precoCusto || 0,
+          motivo: '',
+        });
+      }
+      setError(null);
+      setSuccessMsg(null);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [produto, isOpen]);
 
   if (!isOpen || !produto) return null;

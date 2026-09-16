@@ -17,4 +17,6 @@ public interface OrdemServicoItemRepository extends JpaRepository<OrdemServicoIt
     List<OrdemServicoItem> findByOrdemServicoIdComProduto(@Param("ordemServicoId") Long ordemServicoId);
 
     Optional<OrdemServicoItem> findByIdAndOrdemServicoId(Long id, Long ordemServicoId);
+
+    boolean existsByOrdemServicoIdAndTipoItem(Long ordemServicoId, TipoItemOrdemServico tipoItem);
 }

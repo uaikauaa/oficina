@@ -9,10 +9,8 @@ import {
   Wrench,
   Boxes,
   AlertTriangle,
-  CheckCircle2,
   Edit2,
   Power,
-  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -24,7 +22,6 @@ import {
   CurrentUser,
   Produto,
   Fornecedor,
-  TipoProduto,
   TIPO_PRODUTO_LABELS,
 } from '@/lib/types';
 import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
@@ -72,8 +69,11 @@ export default function ProdutosPage() {
   }, []);
 
   useEffect(() => {
-    carregarUsuario();
-    carregarFornecedores();
+    const timer = setTimeout(() => {
+      carregarUsuario();
+      carregarFornecedores();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarUsuario, carregarFornecedores]);
 
   const carregarProdutos = useCallback(async () => {
@@ -107,7 +107,10 @@ export default function ProdutosPage() {
   }, [page, termo, tipo, estoqueBaixo, status]);
 
   useEffect(() => {
-    carregarProdutos();
+    const timer = setTimeout(() => {
+      carregarProdutos();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarProdutos]);
 
   const handleToggleStatus = async (produto: Produto) => {

@@ -7,8 +7,6 @@ import {
   ArrowLeft,
   Wrench,
   Zap,
-  Clock,
-  CheckCircle2,
   AlertCircle,
   FileText,
   Plus,
@@ -24,7 +22,7 @@ import {
   STATUS_ORDEM_SERVICO_BADGES,
   TIPO_EQUIPAMENTO_LABELS,
 } from '@/lib/types';
-import { apiFetch, formatarMoeda, formatarDataHora, formatarDocumento, formatarTelefone } from '@/lib/api';
+import { apiFetch, formatarMoeda, formatarDataHora } from '@/lib/api';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -88,15 +86,18 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
         const dataOs: PageResponse<OrdemServico> = await resOs.json();
         setOrdens(dataOs.content || []);
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Erro ao consultar equipamento.');
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : 'Erro ao consultar equipamento.');
     } finally {
       setIsLoading(false);
     }
   }, [maquinaId]);
 
   useEffect(() => {
-    carregarDados();
+    const timer = setTimeout(() => {
+      carregarDados();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarDados]);
 
   if (isLoading) {

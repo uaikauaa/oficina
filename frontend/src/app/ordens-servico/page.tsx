@@ -135,9 +135,12 @@ export default function OrdensServicoPage() {
   }, [page, size, termoDebounced, statusFiltro, dataInicio, dataFim]);
 
   useEffect(() => {
-    if (!isLoadingUser) {
-      fetchOrdens();
-    }
+    const timer = setTimeout(() => {
+      if (!isLoadingUser) {
+        fetchOrdens();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchOrdens, isLoadingUser]);
 
   // Carrega contadores globais rápidos

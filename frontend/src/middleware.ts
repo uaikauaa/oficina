@@ -5,7 +5,13 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const { pathname } = request.nextUrl;
 
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/clientes');
+  const isProtectedRoute =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/clientes') ||
+    pathname.startsWith('/ordens-servico') ||
+    pathname.startsWith('/maquinas') ||
+    pathname.startsWith('/produtos') ||
+    pathname.startsWith('/estoque');
   const isAuthRoute = pathname === '/login';
 
   // Se tentar acessar rota protegida sem token, redireciona para o login
@@ -24,5 +30,18 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/clientes/:path*', '/clientes', '/login'],
+  matcher: [
+    '/dashboard/:path*',
+    '/clientes/:path*',
+    '/clientes',
+    '/ordens-servico/:path*',
+    '/ordens-servico',
+    '/maquinas/:path*',
+    '/maquinas',
+    '/produtos/:path*',
+    '/produtos',
+    '/estoque/:path*',
+    '/estoque',
+    '/login',
+  ],
 };

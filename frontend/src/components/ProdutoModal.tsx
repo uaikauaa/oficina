@@ -67,38 +67,41 @@ export default function ProdutoModal({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (produto) {
-      setFormData({
-        codigo: produto.codigo,
-        codigoBarras: produto.codigoBarras || '',
-        nome: produto.nome,
-        descricao: produto.descricao || '',
-        tipo: produto.tipo,
-        unidadeMedida: produto.unidadeMedida || 'UN',
-        precoCusto: produto.precoCusto,
-        precoVenda: produto.precoVenda,
-        estoqueMinimo: produto.estoqueMinimo,
-        localizacao: produto.localizacao || '',
-        fornecedorId: produto.fornecedorId || undefined,
-      });
-    } else {
-      setFormData({
-        codigo: '',
-        codigoBarras: '',
-        nome: '',
-        descricao: '',
-        tipo: 'PECA',
-        unidadeMedida: 'UN',
-        precoCusto: 0,
-        precoVenda: 0,
-        estoqueInicial: 0,
-        estoqueMinimo: 1,
-        localizacao: '',
-        fornecedorId: undefined,
-      });
-    }
-    setError(null);
-    setSuccessMsg(null);
+    const timer = setTimeout(() => {
+      if (produto) {
+        setFormData({
+          codigo: produto.codigo,
+          codigoBarras: produto.codigoBarras || '',
+          nome: produto.nome,
+          descricao: produto.descricao || '',
+          tipo: produto.tipo,
+          unidadeMedida: produto.unidadeMedida || 'UN',
+          precoCusto: produto.precoCusto,
+          precoVenda: produto.precoVenda,
+          estoqueMinimo: produto.estoqueMinimo,
+          localizacao: produto.localizacao || '',
+          fornecedorId: produto.fornecedorId || undefined,
+        });
+      } else {
+        setFormData({
+          codigo: '',
+          codigoBarras: '',
+          nome: '',
+          descricao: '',
+          tipo: 'PECA',
+          unidadeMedida: 'UN',
+          precoCusto: 0,
+          precoVenda: 0,
+          estoqueInicial: 0,
+          estoqueMinimo: 1,
+          localizacao: '',
+          fornecedorId: undefined,
+        });
+      }
+      setError(null);
+      setSuccessMsg(null);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [produto, isOpen]);
 
   if (!isOpen) return null;

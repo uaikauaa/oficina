@@ -10,8 +10,12 @@ import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.ClienteRepository;
+import com.oficinagestao.repository.EstoqueMovimentacaoRepository;
 import com.oficinagestao.repository.MaquinaRepository;
+import com.oficinagestao.repository.OrdemServicoItemRepository;
 import com.oficinagestao.repository.OrdemServicoRepository;
+import com.oficinagestao.repository.ProdutoRepository;
+import com.oficinagestao.repository.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,6 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.Year;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrdemServicoService {
@@ -28,17 +35,29 @@ public class OrdemServicoService {
     private final ClienteRepository clienteRepository;
     private final MaquinaRepository maquinaRepository;
     private final AuditoriaService auditoriaService;
+    private final OrdemServicoItemRepository ordemServicoItemRepository;
+    private final ProdutoRepository produtoRepository;
+    private final EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public OrdemServicoService(
             OrdemServicoRepository ordemServicoRepository,
             ClienteRepository clienteRepository,
             MaquinaRepository maquinaRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            OrdemServicoItemRepository ordemServicoItemRepository,
+            ProdutoRepository produtoRepository,
+            EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
+            UsuarioRepository usuarioRepository
     ) {
         this.ordemServicoRepository = ordemServicoRepository;
         this.clienteRepository = clienteRepository;
         this.maquinaRepository = maquinaRepository;
         this.auditoriaService = auditoriaService;
+        this.ordemServicoItemRepository = ordemServicoItemRepository;
+        this.produtoRepository = produtoRepository;
+        this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
@@ -188,6 +207,48 @@ public class OrdemServicoService {
             os.setDataConclusao(OffsetDateTime.now());
         }
 
+        if (novoStatus == StatusOrdemServico.CANCELADA) {
+            // P0 — BUG-001: Estorno atômico de peças de volta ao estoque físico
+            List<OrdemServicoItem> itens = ordemServicoItemRepository.findByOrdemServicoIdComProduto(os.getId());
+            Map<Produto, BigDecimal> pecasAgrupadas = itens.stream()
+                    .filter(i -> i.getTipoItem() == TipoItemOrdemServico.PECA)
+                    .collect(Collectors.groupingBy(
+                            OrdemServicoItem::getProduto,
+                            Collectors.reducing(BigDecimal.ZERO, OrdemServicoItem::getQuantidade, BigDecimal::add)
+                    ));
+
+            Usuario usuario = usuarioId != null ? usuarioRepository.findById(usuarioId).orElse(null) : null;
+
+            for (Map.Entry<Produto, BigDecimal> entry : pecasAgrupadas.entrySet()) {
+                Produto produtoRef = entry.getKey();
+                BigDecimal qtdDevolvida = entry.getValue();
+
+                Produto produto = produtoRepository.findByIdWithLock(produtoRef.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto vinculado à OS não encontrado. ID: " + produtoRef.getId()));
+
+                BigDecimal saldoAnterior = produto.getEstoqueAtual() != null ? produto.getEstoqueAtual() : BigDecimal.ZERO;
+                BigDecimal saldoPosterior = saldoAnterior.add(qtdDevolvida);
+                produto.setEstoqueAtual(saldoPosterior);
+                produtoRepository.save(produto);
+
+                EstoqueMovimentacao mov = new EstoqueMovimentacao(
+                        produto,
+                        usuario,
+                        os,
+                        TipoMovimentacaoEstoque.DEVOLUCAO,
+                        qtdDevolvida,
+                        produtoRef.getPrecoVenda(),
+                        saldoAnterior,
+                        saldoPosterior,
+                        "Estorno por cancelamento da OS " + os.getNumeroOs()
+                );
+                estoqueMovimentacaoRepository.save(mov);
+            }
+
+            os.setValorPecas(BigDecimal.ZERO);
+            os.recalcularTotal();
+        }
+
         if (dto.observacoes() != null && !dto.observacoes().isBlank()) {
             String obsExistente = os.getObservacoes() != null ? os.getObservacoes() + "\n" : "";
             os.setObservacoes(obsExistente + "[Status " + novoStatus.getDescricao() + "]: " + dto.observacoes().trim());
@@ -295,7 +356,16 @@ public class OrdemServicoService {
             entity.setValorMaoObra(dto.valorMaoObra());
         }
         if (dto.valorPecas() != null) {
-            entity.setValorPecas(dto.valorPecas());
+            // P1 — BUG-002: Se a OS possuir peças cadastradas em ordem_servico_itens,
+            // valorPecas é estritamente derivado dos itens e não aceita override manual.
+            boolean possuiPecasLancadas = ordemServicoItemRepository.existsByOrdemServicoIdAndTipoItem(entity.getId(), TipoItemOrdemServico.PECA);
+            if (possuiPecasLancadas) {
+                if (entity.getValorPecas() == null || dto.valorPecas().compareTo(entity.getValorPecas()) != 0) {
+                    throw new BusinessException("O valor das peças é recalculado automaticamente a partir dos itens lançados na Ordem de Serviço e não pode ser alterado manualmente.");
+                }
+            } else {
+                entity.setValorPecas(dto.valorPecas());
+            }
         }
         if (dto.valorDesconto() != null) {
             entity.setValorDesconto(dto.valorDesconto());
@@ -311,9 +381,13 @@ public class OrdemServicoService {
             return null;
         }
         try {
-            return new BigDecimal(value.trim().replace(",", "."));
+            BigDecimal val = new BigDecimal(value.trim().replace(",", "."));
+            if (val.compareTo(BigDecimal.ZERO) < 0) {
+                throw new BusinessException("O horímetro não pode ser negativo.");
+            }
+            return val;
         } catch (NumberFormatException e) {
-            return null;
+            throw new BusinessException("Valor numérico inválido informado para o horímetro: " + value);
         }
     }
 
@@ -327,19 +401,38 @@ public class OrdemServicoService {
         if (desconto != null && desconto.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessException("O valor do desconto não pode ser negativo.");
         }
+        // RISK-003: Desconto não pode exceder o total de serviços e peças
+        BigDecimal subtotal = (maoObra != null ? maoObra : BigDecimal.ZERO).add(pecas != null ? pecas : BigDecimal.ZERO);
+        if (desconto != null && desconto.compareTo(subtotal) > 0) {
+            throw new BusinessException("O valor do desconto não pode ser superior ao subtotal de serviços e peças.");
+        }
     }
 
     private String gerarProximoNumeroOs() {
         int ano = Year.now().getValue();
-        String prefixo = "OS-" + ano + "-";
-        long totalNoAno = ordemServicoRepository.countByPrefixo(prefixo);
-
-        int sequencial = (int) totalNoAno + 1;
-        String numeroGerado = String.format("OS-%d-%04d", ano, sequencial);
+        Long seq = null;
+        try {
+            seq = ordemServicoRepository.getProximoSequencialOs();
+        } catch (Exception ignored) {
+        }
+        if (seq == null || seq <= 0) {
+            long totalNoAno = ordemServicoRepository.countByPrefixo("OS-" + ano + "-");
+            seq = totalNoAno + 1;
+        }
+        String numeroGerado = String.format("OS-%d-%04d", ano, seq);
 
         while (ordemServicoRepository.existsByNumeroOs(numeroGerado)) {
-            sequencial++;
-            numeroGerado = String.format("OS-%d-%04d", ano, sequencial);
+            Long nextSeq = null;
+            try {
+                nextSeq = ordemServicoRepository.getProximoSequencialOs();
+            } catch (Exception ignored) {
+            }
+            if (nextSeq != null && nextSeq > 0) {
+                seq = nextSeq;
+            } else {
+                seq++;
+            }
+            numeroGerado = String.format("OS-%d-%04d", ano, seq);
         }
 
         return numeroGerado;

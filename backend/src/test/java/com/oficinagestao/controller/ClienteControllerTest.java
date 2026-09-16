@@ -393,4 +393,94 @@ class ClienteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ativo").value(true));
     }
+
+    @Test
+    @DisplayName("BUG-003: Deve rejeitar cliente com CPF duplicado mesmo que um esteja formatado e outro apenas números")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void deveRejeitarCpfDuplicadoMesmoComMascaraDiferente() throws Exception {
+        ClienteCreateDTO cliente1 = new ClienteCreateDTO(
+                TipoPessoa.FISICA,
+                "Cliente Original",
+                null,
+                "112.233.445-56",
+                null,
+                "(31) 98888-1111",
+                null,
+                "original@email.com",
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cliente1)))
+                .andExpect(status().isCreated());
+
+        ClienteCreateDTO cliente2 = new ClienteCreateDTO(
+                TipoPessoa.FISICA,
+                "Cliente Duplicado Sem Pontos",
+                null,
+                "11223344556",
+                null,
+                "(31) 98888-2222",
+                null,
+                "duplicado@email.com",
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cliente2)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("CONFLICT"));
+    }
+
+    @Test
+    @DisplayName("BUG-003: Deve rejeitar CPF com todos os dígitos iguais")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void deveRejeitarCpfComTodosDigitosIguais() throws Exception {
+        ClienteCreateDTO cliente = new ClienteCreateDTO(
+                TipoPessoa.FISICA,
+                "Cliente Invalido",
+                null,
+                "111.111.111-11",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cliente)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BUSINESS_ERROR"));
+    }
+
+    @Test
+    @DisplayName("BUG-003: Deve rejeitar CPF com quantidade de dígitos incorreta")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void deveRejeitarCpfComTamanhoInvalido() throws Exception {
+        ClienteCreateDTO cliente = new ClienteCreateDTO(
+                TipoPessoa.FISICA,
+                "Cliente Invalido Tamanho",
+                null,
+                "123.456",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/clientes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(cliente)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("BUSINESS_ERROR"));
+    }
 }

@@ -7,6 +7,7 @@ import com.oficinagestao.dto.PageResponse;
 import com.oficinagestao.entity.Cliente;
 import com.oficinagestao.entity.Maquina;
 import com.oficinagestao.entity.TipoEquipamento;
+import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.ClienteRepository;
 import com.oficinagestao.repository.MaquinaRepository;
@@ -191,9 +192,13 @@ public class MaquinaService {
             return null;
         }
         try {
-            return new BigDecimal(value.replace(",", ".").trim());
+            BigDecimal val = new BigDecimal(value.replace(",", ".").trim());
+            if (val.compareTo(BigDecimal.ZERO) < 0) {
+                throw new BusinessException("O horímetro não pode ser negativo.");
+            }
+            return val;
         } catch (NumberFormatException e) {
-            return null;
+            throw new BusinessException("Valor de horímetro inválido: " + value);
         }
     }
 }

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/fornecedores")
@@ -108,13 +107,12 @@ public class FornecedorController {
     })
     public ResponseEntity<FornecedorResponseDTO> alterarStatus(
             @PathVariable Long id,
-            @RequestBody Map<String, Boolean> body,
+            @Valid @RequestBody StatusUpdateDTO dto,
             Authentication authentication,
             HttpServletRequest request
     ) {
-        boolean ativo = body.getOrDefault("ativo", true);
         Long usuarioId = extrairUsuarioId(authentication);
-        return ResponseEntity.ok(fornecedorService.alterarStatus(id, ativo, usuarioId, request));
+        return ResponseEntity.ok(fornecedorService.alterarStatus(id, dto.ativo(), usuarioId, request));
     }
 
     private Long extrairUsuarioId(Authentication authentication) {

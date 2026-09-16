@@ -8,12 +8,10 @@ import {
   ShieldCheck,
   Database,
   CheckCircle2,
-  UserCheck,
   ArrowRight,
   FileText,
   Clock,
   Wrench,
-  Zap,
   Plus,
 } from 'lucide-react';
 import Header from '@/components/Header';

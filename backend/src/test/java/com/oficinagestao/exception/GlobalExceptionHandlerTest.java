@@ -1,6 +1,5 @@
 package com.oficinagestao.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ class GlobalExceptionHandlerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @TestConfiguration
     static class ExceptionTestEndpointsConfig {
         @RestController
@@ -52,6 +48,11 @@ class GlobalExceptionHandlerTest {
             @GetMapping("/internal")
             public void throwInternal() {
                 throw new RuntimeException("Falha inesperada de I/O de teste");
+            }
+
+            @GetMapping("/data-integrity")
+            public void throwDataIntegrity() {
+                throw new org.springframework.dao.DataIntegrityViolationException("violacao de chave única de teste");
             }
         }
     }
@@ -127,5 +128,16 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.message").value("Ocorreu um erro interno no servidor."))
                 .andExpect(jsonPath("$.stackTrace").doesNotExist())
                 .andExpect(jsonPath("$.trace").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("RISK-002: Deve retornar 409 CONFLICT para DataIntegrityViolationException")
+    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    void shouldReturn409OnDataIntegrityViolation() throws Exception {
+        mockMvc.perform(get("/api/test-exceptions/data-integrity"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("CONFLICT"))
+                .andExpect(jsonPath("$.message").value("Conflito de integridade de dados ou registro duplicado."));
     }
 }

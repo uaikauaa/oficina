@@ -9,10 +9,7 @@ import {
   ArrowDownRight,
   SlidersHorizontal,
   RotateCcw,
-  Boxes,
   Package,
-  Search,
-  Filter,
   FileText,
   User,
   ChevronLeft,
@@ -26,7 +23,7 @@ import {
   TIPO_MOVIMENTACAO_ESTOQUE_LABELS,
   TIPO_MOVIMENTACAO_ESTOQUE_BADGES,
 } from '@/lib/types';
-import { apiFetch, apiFetchJson, formatarDataHora, formatarMoeda } from '@/lib/api';
+import { apiFetchJson, formatarDataHora } from '@/lib/api';
 
 export default function MovimentacoesEstoquePage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
@@ -52,7 +49,10 @@ export default function MovimentacoesEstoquePage() {
   }, []);
 
   useEffect(() => {
-    carregarUsuario();
+    const timer = setTimeout(() => {
+      carregarUsuario();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarUsuario]);
 
   const carregarMovimentacoes = useCallback(async () => {
@@ -83,7 +83,10 @@ export default function MovimentacoesEstoquePage() {
   }, [page, tipo]);
 
   useEffect(() => {
-    carregarMovimentacoes();
+    const timer = setTimeout(() => {
+      carregarMovimentacoes();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarMovimentacoes]);
 
   const getTipoIcon = (tipoMov: TipoMovimentacaoEstoque) => {

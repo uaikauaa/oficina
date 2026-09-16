@@ -11,9 +11,6 @@ import {
   SlidersHorizontal,
   History,
   Search,
-  Plus,
-  ArrowUpRight,
-  ArrowDownRight,
   ChevronLeft,
   ChevronRight,
   MapPin,
@@ -21,7 +18,7 @@ import {
 import Header from '@/components/Header';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
 import { CurrentUser, Produto, EstoqueResumo } from '@/lib/types';
-import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
+import { apiFetchJson, formatarMoeda } from '@/lib/api';
 
 export default function EstoquePage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
@@ -62,8 +59,11 @@ export default function EstoquePage() {
   }, []);
 
   useEffect(() => {
-    carregarUsuario();
-    carregarResumo();
+    const timer = setTimeout(() => {
+      carregarUsuario();
+      carregarResumo();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarUsuario, carregarResumo]);
 
   const carregarProdutos = useCallback(async () => {
@@ -96,7 +96,10 @@ export default function EstoquePage() {
   }, [page, termo, apenasCritico]);
 
   useEffect(() => {
-    carregarProdutos();
+    const timer = setTimeout(() => {
+      carregarProdutos();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarProdutos]);
 
   const handleAbrirMovimentacao = (prod?: Produto) => {

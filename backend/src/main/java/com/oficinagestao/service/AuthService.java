@@ -104,6 +104,9 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Refresh token não encontrado."));
 
         if (Boolean.TRUE.equals(oldToken.getRevogado())) {
+            if (oldToken.getUsuario() != null) {
+                refreshTokenRepository.revokeAllByUsuarioId(oldToken.getUsuario().getId());
+            }
             throw new BadCredentialsException("Refresh token revogado.");
         }
 

@@ -41,6 +41,18 @@ class OrdemServicoServiceTest {
     @Mock
     private AuditoriaService auditoriaService;
 
+    @Mock
+    private OrdemServicoItemRepository ordemServicoItemRepository;
+
+    @Mock
+    private ProdutoRepository produtoRepository;
+
+    @Mock
+    private EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
     @InjectMocks
     private OrdemServicoService ordemServicoService;
 
@@ -550,5 +562,137 @@ class OrdemServicoServiceTest {
         assertThrows(BusinessException.class, () ->
                 ordemServicoService.alterarStatus(20L, statusDTO, null, "127.0.0.1")
         );
+    }
+
+    @Test
+    @DisplayName("BUG-001 (P0): Deve estornar peças fisicamente para o estoque com movimentação DEVOLUCAO ao cancelar OS")
+    void deveEstornarPecasParaEstoqueAoCancelarOrdemServico() {
+        OrdemServico os = new OrdemServico();
+        os.setId(50L);
+        os.setNumeroOs("OS-2026-0050");
+        os.setCliente(clienteA);
+        os.setMaquina(maquinaClienteA);
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+        os.setValorPecas(BigDecimal.valueOf(100.00));
+        os.setValorTotal(BigDecimal.valueOf(200.00));
+
+        Produto produto = new Produto();
+        produto.setId(101L);
+        produto.setNome("Diodo de Potência");
+        produto.setPrecoVenda(BigDecimal.valueOf(50.00));
+        produto.setEstoqueAtual(BigDecimal.valueOf(8.00));
+
+        OrdemServicoItem itemPeca = new OrdemServicoItem();
+        itemPeca.setId(501L);
+        itemPeca.setOrdemServico(os);
+        itemPeca.setProduto(produto);
+        itemPeca.setTipoItem(TipoItemOrdemServico.PECA);
+        itemPeca.setQuantidade(BigDecimal.valueOf(2.00));
+        itemPeca.setValorUnitario(BigDecimal.valueOf(50.00));
+        itemPeca.setValorTotal(BigDecimal.valueOf(100.00));
+
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNome("Técnico Responsável");
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(50L)).thenReturn(Optional.of(os));
+        when(ordemServicoItemRepository.findByOrdemServicoIdComProduto(50L)).thenReturn(List.of(itemPeca));
+        when(produtoRepository.findByIdWithLock(101L)).thenReturn(Optional.of(produto));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
+                StatusOrdemServico.CANCELADA, null, "Cancelamento solicitado pelo cliente"
+        );
+
+        OrdemServicoResponseDTO response = ordemServicoService.alterarStatus(50L, statusDTO, 1L, "127.0.0.1");
+
+        assertNotNull(response);
+        assertEquals(StatusOrdemServico.CANCELADA, response.status());
+        // Saldo físico anterior (8) + estorno (2) = 10
+        assertEquals(0, BigDecimal.valueOf(10.00).compareTo(produto.getEstoqueAtual()));
+        verify(produtoRepository).save(produto);
+        verify(estoqueMovimentacaoRepository).save(argThat(mov ->
+                mov.getTipoMovimentacao() == TipoMovimentacaoEstoque.DEVOLUCAO &&
+                mov.getQuantidade().compareTo(BigDecimal.valueOf(2.00)) == 0 &&
+                mov.getQuantidadeAnterior().compareTo(BigDecimal.valueOf(8.00)) == 0 &&
+                mov.getQuantidadePosterior().compareTo(BigDecimal.valueOf(10.00)) == 0
+        ));
+    }
+
+    @Test
+    @DisplayName("BUG-002 (P1): Não deve permitir alterar valorPecas manualmente quando OS possui itens de peças lançados")
+    void naoDevePermitirAlterarValorPecasManualmenteQuandoOsPossuiItens() {
+        OrdemServico os = new OrdemServico();
+        os.setId(60L);
+        os.setNumeroOs("OS-2026-0060");
+        os.setCliente(clienteA);
+        os.setMaquina(maquinaClienteA);
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+        os.setValorPecas(BigDecimal.valueOf(100.00));
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(60L)).thenReturn(Optional.of(os));
+        when(ordemServicoItemRepository.existsByOrdemServicoIdAndTipoItem(60L, TipoItemOrdemServico.PECA)).thenReturn(true);
+
+        OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
+                null, null, null, null, null, null,
+                BigDecimal.valueOf(80.00), BigDecimal.valueOf(150.00), BigDecimal.ZERO, null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.atualizar(60L, updateDTO, 1L, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("recalculado automaticamente"));
+    }
+
+    @Test
+    @DisplayName("RISK-003: Não deve permitir desconto superior ao subtotal da OS")
+    void naoDevePermitirDescontoMaiorQueSubtotal() {
+        OrdemServico os = new OrdemServico();
+        os.setId(70L);
+        os.setNumeroOs("OS-2026-0070");
+        os.setCliente(clienteA);
+        os.setMaquina(maquinaClienteA);
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+        os.setValorMaoObra(BigDecimal.valueOf(50.00));
+        os.setValorPecas(BigDecimal.valueOf(50.00));
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(70L)).thenReturn(Optional.of(os));
+
+        OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
+                null, null, null, null, null, null,
+                BigDecimal.valueOf(50.00), BigDecimal.valueOf(50.00), BigDecimal.valueOf(150.00), null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.atualizar(70L, updateDTO, 1L, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("não pode ser superior ao subtotal"));
+    }
+
+    @Test
+    @DisplayName("BUG-006: Não deve aceitar horímetro negativo")
+    void naoDeveAceitarHorimetroNegativo() {
+        OrdemServico os = new OrdemServico();
+        os.setId(80L);
+        os.setNumeroOs("OS-2026-0080");
+        os.setCliente(clienteA);
+        os.setMaquina(maquinaClienteA);
+        os.setStatus(StatusOrdemServico.ABERTA);
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(80L)).thenReturn(Optional.of(os));
+
+        OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
+                null, null, null, null, null, "-15.5",
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.atualizar(80L, updateDTO, 1L, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("não pode ser negativo"));
     }
 }

@@ -175,10 +175,13 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
   }, [clienteId]);
 
   useEffect(() => {
-    if (clienteId) {
-      fetchMaquinas();
-      fetchOrdensCliente();
-    }
+    const timer = setTimeout(() => {
+      if (clienteId) {
+        fetchMaquinas();
+        fetchOrdensCliente();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [clienteId, fetchMaquinas, fetchOrdensCliente]);
 
   const handleAlterarStatusMaquina = async (maquina: Maquina) => {

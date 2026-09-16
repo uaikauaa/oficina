@@ -65,37 +65,40 @@ export default function MaquinaModal({
 
   // Popula o form ao abrir em modo edição
   useEffect(() => {
-    if (isOpen) {
-      if (maquina) {
-        setFormData({
-          clienteId: maquina.clienteId,
-          tipoEquipamento: maquina.tipoEquipamento,
-          marca: maquina.marca,
-          modelo: maquina.modelo,
-          anoFabricacao: maquina.anoFabricacao?.toString() ?? '',
-          numeroSerie: maquina.numeroSerie ?? '',
-          horimetro: maquina.horimetro?.toString() ?? '',
-          potencia: maquina.potencia ?? '',
-          tensao: maquina.tensao ?? '',
-          observacoes: maquina.observacoes ?? '',
-        });
-      } else {
-        setFormData({
-          clienteId,
-          tipoEquipamento: 'MAQUINA_SOLDA',
-          marca: '',
-          modelo: '',
-          anoFabricacao: '',
-          numeroSerie: '',
-          horimetro: '',
-          potencia: '',
-          tensao: '',
-          observacoes: '',
-        });
+    const timer = setTimeout(() => {
+      if (isOpen) {
+        if (maquina) {
+          setFormData({
+            clienteId: maquina.clienteId,
+            tipoEquipamento: maquina.tipoEquipamento,
+            marca: maquina.marca,
+            modelo: maquina.modelo,
+            anoFabricacao: maquina.anoFabricacao?.toString() ?? '',
+            numeroSerie: maquina.numeroSerie ?? '',
+            horimetro: maquina.horimetro?.toString() ?? '',
+            potencia: maquina.potencia ?? '',
+            tensao: maquina.tensao ?? '',
+            observacoes: maquina.observacoes ?? '',
+          });
+        } else {
+          setFormData({
+            clienteId,
+            tipoEquipamento: 'MAQUINA_SOLDA',
+            marca: '',
+            modelo: '',
+            anoFabricacao: '',
+            numeroSerie: '',
+            horimetro: '',
+            potencia: '',
+            tensao: '',
+            observacoes: '',
+          });
+        }
+        setErrorMessage(null);
+        setFieldErrors({});
       }
-      setErrorMessage(null);
-      setFieldErrors({});
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [isOpen, maquina, clienteId]);
 
   const handleChange = (

@@ -47,14 +47,14 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V7 foram aplicadas e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V8 foram aplicadas e as tabelas essenciais existem")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("7", current.getVersion().getVersion(), "A versão atual da migration deve ser 7.");
-        assertEquals("add stock constraints and indices", current.getDescription());
+        assertEquals("8", current.getVersion().getVersion(), "A versão atual da migration deve ser 8.");
+        assertEquals("add ordem servico sequence", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
