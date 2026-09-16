@@ -50,11 +50,11 @@ public class EstoqueController {
     }
 
     @PostMapping("/movimentar")
-    @Operation(summary = "Registrar movimentaÃƒÂ§ÃƒÂ£o manual de estoque (Entrada, SaÃƒÂ­da, Ajuste)")
+    @Operation(summary = "Registrar movimentação manual de estoque (Entrada, Saída, Ajuste)")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "MovimentaÃƒÂ§ÃƒÂ£o registrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou estoque insuficiente"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "201", description = "Movimentação registrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou estoque insuficiente"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
     public ResponseEntity<EstoqueMovimentacaoResponseDTO> movimentar(
             @Valid @RequestBody MovimentacaoManualDTO dto,
@@ -63,6 +63,78 @@ public class EstoqueController {
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
         EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(dto, usuarioId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/entrada")
+    @Operation(summary = "Registrar entrada de peças/produtos no estoque")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Entrada registrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
+    public ResponseEntity<EstoqueMovimentacaoResponseDTO> registrarEntrada(
+            @Valid @RequestBody EstoqueEntradaDTO dto,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
+                dto.produtoId(),
+                TipoMovimentacaoEstoque.ENTRADA,
+                dto.quantidade(),
+                dto.valorUnitario(),
+                dto.motivo()
+        );
+        EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(movDTO, usuarioId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/saida")
+    @Operation(summary = "Registrar saída manual de peças/produtos do estoque")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Saída registrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou estoque insuficiente"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
+    public ResponseEntity<EstoqueMovimentacaoResponseDTO> registrarSaida(
+            @Valid @RequestBody EstoqueSaidaDTO dto,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
+                dto.produtoId(),
+                TipoMovimentacaoEstoque.SAIDA,
+                dto.quantidade(),
+                null,
+                dto.motivo()
+        );
+        EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(movDTO, usuarioId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/ajuste")
+    @Operation(summary = "Registrar ajuste de inventário (positivo ou negativo) no estoque")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Ajuste registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou saldo insuficiente para ajuste negativo"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
+    public ResponseEntity<EstoqueMovimentacaoResponseDTO> registrarAjuste(
+            @Valid @RequestBody EstoqueAjusteDTO dto,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
+                dto.produtoId(),
+                dto.tipoMovimentacao(),
+                dto.quantidade(),
+                null,
+                dto.motivo()
+        );
+        EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(movDTO, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

@@ -9,17 +9,20 @@ import {
   Boxes,
   MapPin,
   Building2,
+  Tag,
+  Award,
   AlertCircle,
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { Produto, ProdutoFormData, TipoProduto, Fornecedor } from '@/lib/types';
+import { Produto, ProdutoFormData, TipoProduto, Fornecedor, Categoria } from '@/lib/types';
 import { apiFetchJson } from '@/lib/api';
 
 interface ProdutoModalProps {
   isOpen: boolean;
   produto?: Produto | null;
   fornecedores: Fornecedor[];
+  categorias?: Categoria[];
   onClose: () => void;
   onSuccess: (produto: Produto) => void;
 }
@@ -42,16 +45,20 @@ export default function ProdutoModal({
   isOpen,
   produto,
   fornecedores,
+  categorias: categoriasProp,
   onClose,
   onSuccess,
 }: ProdutoModalProps) {
   const isEditing = !!produto;
 
+  const [categoriasLocais, setCategoriasLocais] = useState<Categoria[]>([]);
+  const categorias = categoriasProp && categoriasProp.length > 0 ? categoriasProp : categoriasLocais;
   const [formData, setFormData] = useState<Partial<ProdutoFormData>>({
     codigo: '',
     codigoBarras: '',
     nome: '',
     descricao: '',
+    marca: '',
     tipo: 'PECA',
     unidadeMedida: 'UN',
     precoCusto: 0,
@@ -59,12 +66,21 @@ export default function ProdutoModal({
     estoqueInicial: 0,
     estoqueMinimo: 1,
     localizacao: '',
+    categoriaId: undefined,
     fornecedorId: undefined,
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!categoriasProp || categoriasProp.length === 0) {
+      apiFetchJson<Categoria[]>('/api/categorias/ativas')
+        .then((cats) => setCategoriasLocais(cats || []))
+        .catch(() => {});
+    }
+  }, [categoriasProp, isOpen]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -74,12 +90,14 @@ export default function ProdutoModal({
           codigoBarras: produto.codigoBarras || '',
           nome: produto.nome,
           descricao: produto.descricao || '',
+          marca: produto.marca || '',
           tipo: produto.tipo,
           unidadeMedida: produto.unidadeMedida || 'UN',
           precoCusto: produto.precoCusto,
           precoVenda: produto.precoVenda,
           estoqueMinimo: produto.estoqueMinimo,
           localizacao: produto.localizacao || '',
+          categoriaId: produto.categoriaId || undefined,
           fornecedorId: produto.fornecedorId || undefined,
         });
       } else {
@@ -88,6 +106,7 @@ export default function ProdutoModal({
           codigoBarras: '',
           nome: '',
           descricao: '',
+          marca: '',
           tipo: 'PECA',
           unidadeMedida: 'UN',
           precoCusto: 0,
@@ -95,6 +114,7 @@ export default function ProdutoModal({
           estoqueInicial: 0,
           estoqueMinimo: 1,
           localizacao: '',
+          categoriaId: undefined,
           fornecedorId: undefined,
         });
       }
@@ -110,18 +130,28 @@ export default function ProdutoModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-    if (type === 'number') {
-      const parsed = parseFloat(value);
-      setFormData((prev) => ({ ...prev, [name]: isNaN(parsed) ? 0 : parsed }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === 'number'
+          ? value === ''
+            ? 0
+            : Number(value)
+          : name === 'fornecedorId' || name === 'categoriaId'
+            ? value === ''
+              ? undefined
+              : Number(value)
+            : value,
+    }));
   };
 
   const handleGerarCodigo = () => {
-    const prefix = formData.tipo === 'PECA' ? 'PEC' : formData.tipo === 'CONSUMIVEL' ? 'CON' : 'PRD';
-    const rand = Math.floor(1000 + Math.random() * 9000);
-    setFormData((prev) => ({ ...prev, codigo: `${prefix}-${rand}` }));
+    const prefixo = formData.tipo === 'PECA' ? 'PEC' : formData.tipo === 'CONSUMIVEL' ? 'CON' : 'PRD';
+    const aleatorio = Math.floor(1000 + Math.random() * 9000);
+    setFormData((prev) => ({
+      ...prev,
+      codigo: `${prefixo}-${aleatorio}`,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -135,12 +165,12 @@ export default function ProdutoModal({
     }
 
     if (!formData.nome?.trim()) {
-      setError('O nome/descrição da peça é obrigatório.');
+      setError('O nome da peça/produto é obrigatório.');
       return;
     }
 
-    if (formData.precoVenda === undefined || formData.precoVenda < 0) {
-      setError('O preço de venda deve ser igual ou superior a zero.');
+    if (formData.precoVenda == null || formData.precoVenda < 0) {
+      setError('O preço de venda não pode ser negativo.');
       return;
     }
 
@@ -148,36 +178,37 @@ export default function ProdutoModal({
 
     try {
       const payload = {
-        codigo: formData.codigo.trim().toUpperCase(),
+        ...formData,
+        codigo: formData.codigo.trim(),
         codigoBarras: formData.codigoBarras?.trim() || null,
         nome: formData.nome.trim(),
         descricao: formData.descricao?.trim() || null,
-        tipo: formData.tipo,
-        unidadeMedida: formData.unidadeMedida || 'UN',
-        precoCusto: formData.precoCusto ?? 0,
-        precoVenda: formData.precoVenda ?? 0,
-        estoqueMinimo: formData.estoqueMinimo ?? 0,
+        marca: formData.marca?.trim() || null,
         localizacao: formData.localizacao?.trim() || null,
-        fornecedorId: formData.fornecedorId ? Number(formData.fornecedorId) : null,
-        ...(!isEditing && { estoqueInicial: formData.estoqueInicial ?? 0 }),
+        categoriaId: formData.categoriaId || null,
+        fornecedorId: formData.fornecedorId || null,
       };
 
-      const url = isEditing ? `/api/produtos/${produto?.id}` : '/api/produtos';
-      const method = isEditing ? 'PUT' : 'POST';
+      let salvo: Produto;
 
-      const res = await apiFetchJson<Produto>(url, {
-        method,
-        body: JSON.stringify(payload),
-      });
+      if (isEditing && produto) {
+        salvo = await apiFetchJson<Produto>(`/api/produtos/${produto.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
+        setSuccessMsg('Peça/produto atualizado com sucesso!');
+      } else {
+        salvo = await apiFetchJson<Produto>('/api/produtos', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        setSuccessMsg('Peça/produto cadastrado com sucesso!');
+      }
 
-      setSuccessMsg(
-        isEditing
-          ? 'Produto/peça atualizado com sucesso!'
-          : 'Peça cadastrada com sucesso!'
-      );
       setTimeout(() => {
-        onSuccess(res);
-      }, 500);
+        onSuccess(salvo);
+        onClose();
+      }, 700);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro ao salvar peça/produto';
       setError(msg);
@@ -187,10 +218,10 @@ export default function ProdutoModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Package className="w-5 h-5" />
@@ -260,7 +291,7 @@ export default function ProdutoModal({
                 <button
                   type="button"
                   onClick={handleGerarCodigo}
-                  className="text-[11px] text-amber-400 hover:text-amber-300 transition-colors"
+                  className="text-[11px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
                 >
                   Gerar automático
                 </button>
@@ -292,18 +323,78 @@ export default function ProdutoModal({
             </div>
           </div>
 
-          {/* Nome da Peça */}
-          <div>
-            <label className={LABEL_CLASS}>Nome / Descrição Resumida *</label>
-            <input
-              type="text"
-              name="nome"
-              value={formData.nome || ''}
-              onChange={handleChange}
-              placeholder="Ex: Módulo IGBT 60N100 60A 1000V, Regulador AVR Gerador 5kVA"
-              className={INPUT_CLASS}
-              required
-            />
+          {/* Nome e Marca */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
+              <label className={LABEL_CLASS}>Nome / Descrição Resumida *</label>
+              <input
+                type="text"
+                name="nome"
+                value={formData.nome || ''}
+                onChange={handleChange}
+                placeholder="Ex: Módulo IGBT 60N100 60A 1000V, Regulador AVR Gerador 5kVA"
+                className={INPUT_CLASS}
+                required
+              />
+            </div>
+
+            <div>
+              <label className={LABEL_CLASS}>Marca / Fabricante</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  name="marca"
+                  value={formData.marca || ''}
+                  onChange={handleChange}
+                  placeholder="Ex: Toshiba, ESAB, Stamford"
+                  className={INPUT_CLASS}
+                />
+                <Award className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Categoria e Fornecedor */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL_CLASS}>Categoria Técnica</label>
+              <div className="relative">
+                <select
+                  name="categoriaId"
+                  value={formData.categoriaId || ''}
+                  onChange={handleChange}
+                  className={INPUT_CLASS}
+                >
+                  <option value="">Nenhuma categoria vinculada</option>
+                  {categorias.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
+                <Tag className="w-4 h-4 text-slate-500 absolute right-8 top-3 pointer-events-none" />
+              </div>
+            </div>
+
+            <div>
+              <label className={LABEL_CLASS}>Fornecedor Preferencial</label>
+              <div className="relative">
+                <select
+                  name="fornecedorId"
+                  value={formData.fornecedorId || ''}
+                  onChange={handleChange}
+                  className={INPUT_CLASS}
+                >
+                  <option value="">Nenhum fornecedor vinculado</option>
+                  {fornecedores.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.razaoSocial} {f.nomeFantasia ? `(${f.nomeFantasia})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <Building2 className="w-4 h-4 text-slate-500 absolute right-8 top-3 pointer-events-none" />
+              </div>
+            </div>
           </div>
 
           {/* Preços e Unidade */}
@@ -407,27 +498,6 @@ export default function ProdutoModal({
                 />
                 <MapPin className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
               </div>
-            </div>
-          </div>
-
-          {/* Fornecedor */}
-          <div>
-            <label className={LABEL_CLASS}>Fornecedor Preferencial</label>
-            <div className="relative">
-              <select
-                name="fornecedorId"
-                value={formData.fornecedorId || ''}
-                onChange={handleChange}
-                className={INPUT_CLASS}
-              >
-                <option value="">Nenhum fornecedor vinculado</option>
-                {fornecedores.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.razaoSocial} {f.nomeFantasia ? `(${f.nomeFantasia})` : ''}
-                  </option>
-                ))}
-              </select>
-              <Building2 className="w-4 h-4 text-slate-500 absolute right-8 top-3 pointer-events-none" />
             </div>
           </div>
 

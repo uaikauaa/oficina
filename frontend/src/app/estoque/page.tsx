@@ -17,19 +17,23 @@ import {
 } from 'lucide-react';
 import Header from '@/components/Header';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
-import { CurrentUser, Produto, EstoqueResumo } from '@/lib/types';
+import { CurrentUser, Produto, EstoqueResumo, Categoria, Fornecedor } from '@/lib/types';
 import { apiFetchJson, formatarMoeda } from '@/lib/api';
 
 export default function EstoquePage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [resumo, setResumo] = useState<EstoqueResumo | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
   const [termo, setTermo] = useState('');
-  const [apenasCritico, setApenasCritico] = useState(false);
+  const [categoriaId, setCategoriaId] = useState<string>('');
+  const [fornecedorId, setFornecedorId] = useState<string>('');
+  const [filtroNivel, setFiltroNivel] = useState<'TODOS' | 'CRITICO' | 'ZERADO'>('TODOS');
 
   // Paginação
   const [page, setPage] = useState(0);
@@ -58,13 +62,33 @@ export default function EstoquePage() {
     }
   }, []);
 
+  const carregarCategorias = useCallback(async () => {
+    try {
+      const data = await apiFetchJson<Categoria[]>('/api/categorias/ativas');
+      setCategorias(data || []);
+    } catch {
+      // Ignora erro
+    }
+  }, []);
+
+  const carregarFornecedores = useCallback(async () => {
+    try {
+      const data = await apiFetchJson<{ content: Fornecedor[] }>('/api/fornecedores?size=100');
+      setFornecedores(data.content || []);
+    } catch {
+      // Ignora erro
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       carregarUsuario();
       carregarResumo();
+      carregarCategorias();
+      carregarFornecedores();
     }, 0);
     return () => clearTimeout(timer);
-  }, [carregarUsuario, carregarResumo]);
+  }, [carregarUsuario, carregarResumo, carregarCategorias, carregarFornecedores]);
 
   const carregarProdutos = useCallback(async () => {
     setLoading(true);
@@ -76,7 +100,11 @@ export default function EstoquePage() {
         ativo: 'true',
       });
       if (termo.trim()) params.append('termo', termo.trim());
-      if (apenasCritico) params.append('estoqueBaixo', 'true');
+      if (categoriaId) params.append('categoriaId', categoriaId);
+      if (fornecedorId) params.append('fornecedorId', fornecedorId);
+      if (filtroNivel === 'CRITICO' || filtroNivel === 'ZERADO') {
+        params.append('estoqueBaixo', 'true');
+      }
 
       const res = await apiFetchJson<{
         content: Produto[];
@@ -84,7 +112,14 @@ export default function EstoquePage() {
         totalElements: number;
       }>(`/api/produtos?${params.toString()}`);
 
-      setProdutos(res.content || []);
+      let list = res.content || [];
+      if (filtroNivel === 'ZERADO') {
+        list = list.filter((p) => p.estoqueAtual === 0);
+      } else if (filtroNivel === 'CRITICO') {
+        list = list.filter((p) => p.estoqueAtual > 0 && p.estoqueAtual <= p.estoqueMinimo);
+      }
+
+      setProdutos(list);
       setTotalPages(res.totalPages || 0);
       setTotalElements(res.totalElements || 0);
     } catch (err: unknown) {
@@ -93,7 +128,7 @@ export default function EstoquePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, termo, apenasCritico]);
+  }, [page, termo, categoriaId, fornecedorId, filtroNivel]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -216,37 +251,78 @@ export default function EstoquePage() {
           </div>
         </div>
 
-        {/* Toolbar de Busca */}
-        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full sm:w-96">
-            <input
-              type="text"
-              value={termo}
-              onChange={(e) => {
-                setTermo(e.target.value);
-                setPage(0);
-              }}
-              placeholder="Buscar por código ou descrição da peça..."
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
-            />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
-          </div>
+        {/* Toolbar de Busca e Filtros */}
+        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Campo de Busca Textual */}
+            <div className="relative">
+              <input
+                type="text"
+                value={termo}
+                onChange={(e) => {
+                  setTermo(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Buscar por código, nome ou marca..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+              />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+            </div>
 
-          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
-            <input
-              type="checkbox"
-              checked={apenasCritico}
-              onChange={(e) => {
-                setApenasCritico(e.target.checked);
-                setPage(0);
-              }}
-              className="rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500/20 h-4 w-4"
-            />
-            <span className="text-amber-400 flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              <span>Filtrar apenas estoque baixo / zerado</span>
-            </span>
-          </label>
+            {/* Filtro por Categoria */}
+            <div>
+              <select
+                value={categoriaId}
+                onChange={(e) => {
+                  setCategoriaId(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              >
+                <option value="">Todas as categorias</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro por Fornecedor */}
+            <div>
+              <select
+                value={fornecedorId}
+                onChange={(e) => {
+                  setFornecedorId(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              >
+                <option value="">Todos os fornecedores</option>
+                {fornecedores.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.razaoSocial || f.nomeFantasia}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filtro por Nível de Estoque */}
+            <div>
+              <select
+                value={filtroNivel}
+                onChange={(e) => {
+                  setFiltroNivel(e.target.value as 'TODOS' | 'CRITICO' | 'ZERADO');
+                  setPage(0);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              >
+                <option value="TODOS">Todos os saldos</option>
+                <option value="CRITICO">Apenas estoque crítico (&le; mín)</option>
+                <option value="ZERADO">Apenas estoque zerado (= 0)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Mensagem de Erro */}
@@ -263,6 +339,7 @@ export default function EstoquePage() {
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
                   <th className="py-3.5 px-4">Peça / Componente</th>
+                  <th className="py-3.5 px-4">Categoria</th>
                   <th className="py-3.5 px-4">Localização</th>
                   <th className="py-3.5 px-4 text-center">Nível Físico</th>
                   <th className="py-3.5 px-4 text-center">Saldo Atual</th>
@@ -274,7 +351,7 @@ export default function EstoquePage() {
               <tbody className="divide-y divide-slate-800/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-slate-400">
                       <div className="flex items-center justify-center gap-2">
                         <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
                         <span>Carregando saldos em estoque...</span>
@@ -283,9 +360,9 @@ export default function EstoquePage() {
                   </tr>
                 ) : produtos.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={8} className="py-12 text-center text-slate-500">
                       <Boxes className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p>Nenhuma peça com saldo encontrada.</p>
+                      <p>Nenhuma peça com saldo encontrada com os filtros selecionados.</p>
                     </td>
                   </tr>
                 ) : (
@@ -304,7 +381,7 @@ export default function EstoquePage() {
                         key={p.id}
                         className="hover:bg-slate-800/40 transition-colors group"
                       >
-                        {/* Peça */}
+                        {/* Peça & Marca */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px]">
@@ -313,11 +390,27 @@ export default function EstoquePage() {
                             <span className="font-bold text-white group-hover:text-amber-300 transition-colors">
                               {p.nome}
                             </span>
+                            {p.marca && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-amber-400 border border-amber-500/20">
+                                {p.marca}
+                              </span>
+                            )}
                           </div>
                           {p.fornecedorNome && (
                             <span className="block text-[10px] text-slate-500 mt-0.5">
                               Fornecedor: {p.fornecedorNome}
                             </span>
+                          )}
+                        </td>
+
+                        {/* Categoria */}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          {p.categoriaNome ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                              {p.categoriaNome}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-500">-</span>
                           )}
                         </td>
 

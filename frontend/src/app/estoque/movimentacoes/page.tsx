@@ -12,6 +12,7 @@ import {
   Package,
   FileText,
   User,
+  Search,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -33,6 +34,9 @@ export default function MovimentacoesEstoquePage() {
 
   // Filtros
   const [tipo, setTipo] = useState<string>('');
+  const [numeroOs, setNumeroOs] = useState<string>('');
+  const [dataInicio, setDataInicio] = useState<string>('');
+  const [dataFim, setDataFim] = useState<string>('');
 
   // Paginação
   const [page, setPage] = useState(0);
@@ -64,6 +68,9 @@ export default function MovimentacoesEstoquePage() {
         size: '20',
       });
       if (tipo) params.append('tipo', tipo);
+      if (numeroOs.trim()) params.append('numeroOs', numeroOs.trim());
+      if (dataInicio) params.append('dataInicio', `${dataInicio}T00:00:00Z`);
+      if (dataFim) params.append('dataFim', `${dataFim}T23:59:59Z`);
 
       const res = await apiFetchJson<{
         content: EstoqueMovimentacao[];
@@ -80,7 +87,7 @@ export default function MovimentacoesEstoquePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, tipo]);
+  }, [page, tipo, numeroOs, dataInicio, dataFim]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -144,28 +151,77 @@ export default function MovimentacoesEstoquePage() {
         </div>
 
         {/* Toolbar de Filtros */}
-        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="w-full sm:w-72">
-            <select
-              value={tipo}
-              onChange={(e) => {
-                setTipo(e.target.value);
-                setPage(0);
-              }}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
-            >
-              <option value="">Todas as Movimentações</option>
-              <option value="ENTRADA">Entradas (Compras / Reposições)</option>
-              <option value="SAIDA">Saídas (Utilização em OS / Descartes)</option>
-              <option value="AJUSTE_POSITIVO">Ajustes Positivos (+)</option>
-              <option value="AJUSTE_NEGATIVO">Ajustes Negativos (-)</option>
-              <option value="DEVOLUCAO">Devoluções / Estornos</option>
-            </select>
+        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Filtro por Tipo */}
+            <div>
+              <select
+                value={tipo}
+                onChange={(e) => {
+                  setTipo(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              >
+                <option value="">Todas as Movimentações</option>
+                <option value="ENTRADA">Entradas (Compras / Reposições)</option>
+                <option value="SAIDA">Saídas (Utilização em OS / Descartes)</option>
+                <option value="AJUSTE_POSITIVO">Ajustes Positivos (+)</option>
+                <option value="AJUSTE_NEGATIVO">Ajustes Negativos (-)</option>
+                <option value="DEVOLUCAO">Devoluções / Estornos</option>
+              </select>
+            </div>
+
+            {/* Filtro por Número de OS */}
+            <div className="relative">
+              <input
+                type="text"
+                value={numeroOs}
+                onChange={(e) => {
+                  setNumeroOs(e.target.value);
+                  setPage(0);
+                }}
+                placeholder="Filtrar por Número de OS..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+              />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+            </div>
+
+            {/* Data Início */}
+            <div>
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={(e) => {
+                  setDataInicio(e.target.value);
+                  setPage(0);
+                }}
+                title="Data Inicial"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              />
+            </div>
+
+            {/* Data Fim */}
+            <div>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={(e) => {
+                  setDataFim(e.target.value);
+                  setPage(0);
+                }}
+                title="Data Final"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              />
+            </div>
           </div>
 
-          <span className="text-xs text-slate-400">
-            Total de <strong className="text-white">{totalElements}</strong> operações registradas
-          </span>
+          <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800/60">
+            <span>Filtro de auditoria operacional de estoque</span>
+            <span>
+              Total de <strong className="text-white">{totalElements}</strong> operações registradas
+            </span>
+          </div>
         </div>
 
         {/* Mensagem de Erro */}

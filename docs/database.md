@@ -92,9 +92,43 @@ Provisiona as 14 tabelas centrais:
     `status IN ('ABERTA', 'EM_DIAGNOSTICO', 'AGUARDANDO_APROVACAO', 'EM_MANUTENCAO', 'AGUARDANDO_PECA', 'PRONTA', 'CONCLUIDA', 'CANCELADA')`.
   - Valor padrão da coluna `status` atualizado para `'ABERTA'`.
 
+### Migration V6 — Ajustes e Constraint de Tipo de Equipamento (`V6__maquinas_tipo_check_and_adjustments.sql`)
+- **Contexto de Negócio**: Reforço da restrição de domínio técnico para máquinas cadastradas.
+- **Alterações em `maquinas`**:
+  - Constraint de tipo de equipamento estritamente técnico:
+    `tipo_equipamento IN ('MAQUINA_SOLDA', 'GERADOR_ENERGIA', 'OUTRO')`.
+
+### Migration V7 — Constraints e Índices para Estoque (`V7__add_stock_constraints_and_indices.sql`)
+- **Contexto de Negócio**: Garantia de integridade física e prevenção de saldo negativo a nível de banco de dados.
+- **Alterações em `produtos`**:
+  - Constraint `chk_produtos_estoque_nao_negativo`: `CHECK (estoque_atual >= 0)`.
+  - Constraint `chk_produtos_estoque_minimo_nao_negativo`: `CHECK (estoque_minimo >= 0)`.
+  - Índices `idx_produtos_estoque_baixo`, `idx_produtos_ativo`, `idx_produtos_tipo`.
+- **Alterações em `estoque_movimentacoes`**:
+  - Índice `idx_estoque_mov_tipo`.
+
+### Migration V8 — Sequence Nativa para Ordens de Serviço (`V8__add_ordem_servico_sequence.sql`)
+- **Contexto de Concorrência**: Prevenção de race conditions na geração de numeração amigável de OS (`OS-YYYY-XXXXX`).
+- **Objeto Criado**: Sequence nativa `ordens_servico_seq` no PostgreSQL.
+- **Sincronização**: Script procedural para alinhar o valor inicial com os registros já persistidos no banco.
+
+### Migration V9 — Marca de Produtos e Carga Inicial de Categorias (`V9__add_produto_marca_and_seed_categorias.sql`)
+- **Contexto de Negócio**: Fase 6 — Produtos, Peças e Estoque.
+- **Alterações em `produtos`**:
+  - Nova coluna `marca VARCHAR(100)` com índice `idx_produtos_marca`.
+- **Carga Inicial em `categorias`**:
+  - Inserção idempotente (`ON CONFLICT (nome) DO NOTHING`) das 6 categorias técnicas oficiais:
+    - *Eletrônica* (placas inversoras, IGBTs, diodos, capacitores, controladores);
+    - *Máquina de Solda* (tochas MIG/TIG, tracionadores de arame, roletes, bicos);
+    - *Gerador* (reguladores AVR, escovas de carvão, estatores, rotores);
+    - *Elétrica* (contatores, relés, cabos e conectores);
+    - *Mecânica* (rolamentos, eixos, ventiladores, carcaças);
+    - *Consumíveis* (bicos de contato, bocais cerâmicos, difusores, filtros).
+
 ---
 
 ## 5. Inspeção e Validação com DBeaver
 
 - O **DBeaver** (ou qualquer cliente SQL) deve ser utilizado exclusivamente para **inspeção e consulta** do schema.
 - Nenhuma alteração estrutural deve ser executada diretamente pelo DBeaver; toda alteração deve passar pelo versionamento do Flyway.
+

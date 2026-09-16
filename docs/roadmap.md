@@ -64,28 +64,39 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Estrutura preparada para relacionar máquinas e geradores futuramente.
 - 53 testes automatizados no backend e builds 100% aprovados.
 
-### Fase 4B — Máquinas e Equipamentos Técnicos (Próxima Fase)
+### Fase 4B — Máquinas e Equipamentos Técnicos (Concluída)
 - Modelagem e gestão de equipamentos: Máquinas de Solda (MIG/MAG, TIG, Eletrodo Revestido, Inversoras, Corte Plasma) e Geradores de Energia (Diesel e Gasolina).
 - Vínculo relacional N:1 com clientes (`cliente_id`) e histórico completo de manutenções.
 - Especificações técnicas: tipo, marca, modelo, número de série (sem constraint UNIQUE global), potência (kVA/kW), tensão de operação (110V, 220V, 380V, 440V, bivolt, trifásico), horímetro e especificações complementares em JSONB.
 - Backend (Controller, Service, Repository, DTOs, Validações) e Frontend (listagem, filtros, formulário de cadastro/edição, visualização por cliente).
 
-### Fase 4C — Ordens de Serviço (Fluxo Central de Assistência Técnica)
+### Fase 4C — Ordens de Serviço (Fluxo Central de Assistência Técnica) (Concluída)
 - Fluxo de trabalho técnico completo: Abertura -> Diagnóstico -> Orçamento/Aprovação -> Manutenção -> Peças -> Testes Técnicos em Bancada -> Conclusão.
 - Ciclo de status oficiais: `ABERTA`, `EM_DIAGNOSTICO`, `AGUARDANDO_APROVACAO`, `EM_MANUTENCAO`, `AGUARDANDO_PECA`, `PRONTA`, `CONCLUIDA`, `CANCELADA`.
-- Registro de testes realizados (arco elétrico, estabilidade de rotação, tensão e amperagem).
-- Vínculo atômico com peças/serviços e baixa automática de estoque com bloqueio de saldo negativo.
+- Registro obrigatório de testes técnicos em bancada para transição para `PRONTA` (arco elétrico sob carga, amperagem, tensão, frequência em Hz, etc.).
+- Sequence nativa (`ordens_servico_seq`) para geração concorrente segura de numeração amigável de OS.
 
-### Fase 5 — Produtos, Peças, Insumos e Fornecedores
-- Cadastro de peças e componentes eletrônicos (placas inversoras, pontes retificadoras, IGBTs, tiristores, capacitores, cabos, tochas, bicos, filtros, reguladores AVR).
-- Matriz de compatibilidade entre peças e máquinas/equipamentos (`produto_maquina`).
-- Cadastro de fornecedores de componentes e insumos.
+### Fase 5 — Fornecedores, Produtos, Peças e Compatibilidade (Concluída)
+- Cadastro de fornecedores de componentes e insumos industriais.
+- Catálogo de peças técnicas para máquinas de solda e geradores (IGBTs, diodos, capacitores, placas inversoras, reguladores AVR, escovas, bicos, tochas).
+- Matriz relacional de compatibilidade peça <-> equipamento (`produto_maquina`) com operações de vínculo e desvínculo.
+- Categorização técnica formal de componentes.
 
-### Fase 6 — Controle de Estoque Técnico
-- Movimentações de estoque: Entradas por compra, Saídas vinculadas a Ordens de Serviço, Ajustes manuais com justificativa obrigatória e rastreabilidade por auditoria.
-- Prevenção rigorosa de estoque negativo.
+### Fase 6 — Produtos, Peças e Controle de Estoque (Concluída)
+- Entidade e gestão completa de Categorias (`Categoria`) com endpoints CRUD e listagem de ativas.
+- Adição de marca técnica em produtos e filtros combinados por categoria, fornecedor, tipo e status.
+- Controle atômico de estoque com Lock Pessimista de Escrita (`PESSIMISTIC_WRITE`) para prevenção de concorrência e race conditions.
+- Endpoints dedicados para movimentações: `POST /api/estoque/entrada`, `POST /api/estoque/saida`, `POST /api/estoque/ajuste`.
+- Integração total com Ordem de Serviço (`OrdemServicoItem`):
+  - Baixa atômica de estoque ao adicionar peça na OS;
+  - Congelamento histórico do preço unitário de venda na OS;
+  - Atualização automática do subtotal de peças e total geral da OS;
+  - Estorno automático e devolução física ao estoque em caso de exclusão de item ou cancelamento de OS;
+  - Prevenção rigorosa de estoque negativo a nível de regra de negócio e constraint de banco de dados (`chk_produtos_estoque_nao_negativo`).
+- Frontend com telas completas: `/produtos`, `/estoque`, `/estoque/movimentacoes`, e seção "Peças & Componentes Utilizados" em `/ordens-servico/[id]`.
+- 134 testes automatizados no backend cobrindo 100% dos fluxos e regras.
 
-### Fase 7 — Histórico e Consultas Rápidas
+### Fase 7 — Histórico e Consultas Rápidas (Próxima Fase)
 - Busca ágil por cliente, número de série do equipamento ou número da OS para atendimento em balcão.
 - Linha do tempo de manutenções anteriores por equipamento.
 
@@ -97,3 +108,4 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 
 ### Fase 10 — Melhorias Administrativas e Multi-usuário
 - Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.
+

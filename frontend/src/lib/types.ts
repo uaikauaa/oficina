@@ -250,6 +250,20 @@ export interface OrdemServicoStatusData {
 // FASE 6 — MÓDULO DE PRODUTOS, FORNECEDORES, ESTOQUE E ITENS DE OS
 // =============================================================================
 
+export interface Categoria {
+  id: number;
+  nome: string;
+  descricao?: string | null;
+  ativo: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CategoriaFormData {
+  nome: string;
+  descricao?: string;
+}
+
 export interface Fornecedor {
   id: number;
   razaoSocial: string;
@@ -293,6 +307,7 @@ export interface Produto {
   codigoBarras?: string | null;
   nome: string;
   descricao?: string | null;
+  marca?: string | null;
   tipo: TipoProduto;
   tipoDescricao: string;
   unidadeMedida: string;
@@ -304,6 +319,8 @@ export interface Produto {
   estoqueMaximo?: number | null;
   localizacao?: string | null;
   ativo: boolean;
+  categoriaId?: number | null;
+  categoriaNome?: string | null;
   fornecedorId?: number | null;
   fornecedorNome?: string | null;
   estoqueBaixo: boolean;
@@ -317,6 +334,7 @@ export interface ProdutoFormData {
   codigoBarras?: string;
   nome: string;
   descricao?: string;
+  marca?: string;
   tipo: TipoProduto;
   unidadeMedida?: string;
   precoCusto: number;
@@ -324,6 +342,7 @@ export interface ProdutoFormData {
   estoqueMinimo?: number;
   estoqueInicial?: number;
   localizacao?: string;
+  categoriaId?: number;
   fornecedorId?: number;
 }
 

@@ -24,6 +24,7 @@ import java.util.List;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final CategoriaRepository categoriaRepository;
     private final FornecedorRepository fornecedorRepository;
     private final ProdutoMaquinaRepository produtoMaquinaRepository;
     private final MaquinaRepository maquinaRepository;
@@ -33,6 +34,7 @@ public class ProdutoService {
 
     public ProdutoService(
             ProdutoRepository produtoRepository,
+            CategoriaRepository categoriaRepository,
             FornecedorRepository fornecedorRepository,
             ProdutoMaquinaRepository produtoMaquinaRepository,
             MaquinaRepository maquinaRepository,
@@ -41,6 +43,7 @@ public class ProdutoService {
             AuditoriaService auditoriaService
     ) {
         this.produtoRepository = produtoRepository;
+        this.categoriaRepository = categoriaRepository;
         this.fornecedorRepository = fornecedorRepository;
         this.produtoMaquinaRepository = produtoMaquinaRepository;
         this.maquinaRepository = maquinaRepository;
@@ -56,13 +59,19 @@ public class ProdutoService {
             throw new ConflictException("Já existe um produto/peça cadastrado com o código: " + codigoLimpo);
         }
 
+        Categoria categoria = null;
+        if (dto.categoriaId() != null) {
+            categoria = categoriaRepository.findById(dto.categoriaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com o ID: " + dto.categoriaId()));
+        }
+
         Fornecedor fornecedor = null;
         if (dto.fornecedorId() != null) {
             fornecedor = fornecedorRepository.findById(dto.fornecedorId())
                     .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado com o ID: " + dto.fornecedorId()));
         }
 
-        Produto produto = toEntity(dto, fornecedor);
+        Produto produto = toEntity(dto, categoria, fornecedor);
         Produto salvo = produtoRepository.save(produto);
 
         if (dto.estoqueInicial() != null && dto.estoqueInicial().compareTo(BigDecimal.ZERO) > 0) {
@@ -102,13 +111,19 @@ public class ProdutoService {
             throw new ConflictException("Já existe outro produto/peça cadastrado com o código: " + codigoLimpo);
         }
 
+        Categoria categoria = null;
+        if (dto.categoriaId() != null) {
+            categoria = categoriaRepository.findById(dto.categoriaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada com o ID: " + dto.categoriaId()));
+        }
+
         Fornecedor fornecedor = null;
         if (dto.fornecedorId() != null) {
             fornecedor = fornecedorRepository.findById(dto.fornecedorId())
                     .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado com o ID: " + dto.fornecedorId()));
         }
 
-        updateEntity(produto, dto, fornecedor);
+        updateEntity(produto, dto, categoria, fornecedor);
         Produto salvo = produtoRepository.save(produto);
 
         auditoriaService.registrarComRequest(
@@ -133,13 +148,14 @@ public class ProdutoService {
     public Page<ProdutoResponseDTO> listar(
             String termo,
             TipoProduto tipo,
+            Long categoriaId,
             Long fornecedorId,
             Boolean ativo,
             Boolean estoqueBaixo,
             Pageable pageable
     ) {
         String termoBusca = (termo != null && !termo.isBlank()) ? termo.trim() : null;
-        return produtoRepository.pesquisarGlobal(termoBusca, tipo, fornecedorId, ativo, estoqueBaixo, pageable)
+        return produtoRepository.pesquisarGlobal(termoBusca, tipo, categoriaId, fornecedorId, ativo, estoqueBaixo, pageable)
                 .map(this::toResponseDTO);
     }
 
@@ -225,13 +241,14 @@ public class ProdutoService {
 
     // --- Métodos de Mapeamento Diretos ---
 
-    public Produto toEntity(ProdutoCreateDTO dto, Fornecedor fornecedor) {
+    public Produto toEntity(ProdutoCreateDTO dto, Categoria categoria, Fornecedor fornecedor) {
         if (dto == null) return null;
         Produto p = new Produto();
         p.setCodigo(dto.codigo().trim());
         p.setCodigoBarras(dto.codigoBarras() != null ? dto.codigoBarras().trim() : null);
         p.setNome(dto.nome().trim());
         p.setDescricao(dto.descricao() != null ? dto.descricao().trim() : null);
+        p.setMarca(dto.marca() != null ? dto.marca().trim() : null);
         p.setTipo(dto.tipo() != null ? dto.tipo() : TipoProduto.PECA);
         p.setUnidadeMedida(dto.unidadeMedida() != null && !dto.unidadeMedida().isBlank() ? dto.unidadeMedida().trim() : "UN");
         p.setPrecoCusto(dto.precoCusto());
@@ -240,17 +257,19 @@ public class ProdutoService {
         p.setEstoqueAtual(dto.estoqueInicial() != null ? dto.estoqueInicial() : BigDecimal.ZERO);
         p.setEstoqueMinimo(dto.estoqueMinimo() != null ? dto.estoqueMinimo() : BigDecimal.ZERO);
         p.setLocalizacao(dto.localizacao() != null ? dto.localizacao().trim() : null);
+        p.setCategoria(categoria);
         p.setFornecedor(fornecedor);
         p.setAtivo(true);
         return p;
     }
 
-    public void updateEntity(Produto p, ProdutoUpdateDTO dto, Fornecedor fornecedor) {
+    public void updateEntity(Produto p, ProdutoUpdateDTO dto, Categoria categoria, Fornecedor fornecedor) {
         if (p == null || dto == null) return;
         p.setCodigo(dto.codigo().trim());
         p.setCodigoBarras(dto.codigoBarras() != null ? dto.codigoBarras().trim() : null);
         p.setNome(dto.nome().trim());
         p.setDescricao(dto.descricao() != null ? dto.descricao().trim() : null);
+        p.setMarca(dto.marca() != null ? dto.marca().trim() : null);
         if (dto.tipo() != null) {
             p.setTipo(dto.tipo());
         }
@@ -264,6 +283,7 @@ public class ProdutoService {
             p.setEstoqueMinimo(dto.estoqueMinimo());
         }
         p.setLocalizacao(dto.localizacao() != null ? dto.localizacao().trim() : null);
+        p.setCategoria(categoria);
         p.setFornecedor(fornecedor);
     }
 
@@ -275,6 +295,7 @@ public class ProdutoService {
                 p.getCodigoBarras(),
                 p.getNome(),
                 p.getDescricao(),
+                p.getMarca(),
                 p.getTipo().name(),
                 p.getTipo().getDescricao(),
                 p.getUnidadeMedida(),
@@ -286,6 +307,8 @@ public class ProdutoService {
                 p.getEstoqueMaximo(),
                 p.getLocalizacao(),
                 p.isAtivo(),
+                p.getCategoria() != null ? p.getCategoria().getId() : null,
+                p.getCategoria() != null ? p.getCategoria().getNome() : null,
                 p.getFornecedor() != null ? p.getFornecedor().getId() : null,
                 p.getFornecedor() != null ? p.getFornecedor().getRazaoSocial() : null,
                 p.isEstoqueBaixo(),

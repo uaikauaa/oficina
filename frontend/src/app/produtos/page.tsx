@@ -22,6 +22,7 @@ import {
   CurrentUser,
   Produto,
   Fornecedor,
+  Categoria,
   TIPO_PRODUTO_LABELS,
 } from '@/lib/types';
 import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
@@ -35,9 +36,13 @@ export default function ProdutosPage() {
 
   // Filtros
   const [termo, setTermo] = useState('');
+  const [categoriaId, setCategoriaId] = useState<string>('');
   const [tipo, setTipo] = useState<string>('');
   const [estoqueBaixo, setEstoqueBaixo] = useState(false);
   const [status, setStatus] = useState<string>('true');
+
+  // Categorias
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   // Paginação
   const [page, setPage] = useState(0);
@@ -68,13 +73,23 @@ export default function ProdutosPage() {
     }
   }, []);
 
+  const carregarCategorias = useCallback(async () => {
+    try {
+      const data = await apiFetchJson<Categoria[]>('/api/categorias/ativas');
+      setCategorias(data || []);
+    } catch {
+      // Ignora erro
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       carregarUsuario();
       carregarFornecedores();
+      carregarCategorias();
     }, 0);
     return () => clearTimeout(timer);
-  }, [carregarUsuario, carregarFornecedores]);
+  }, [carregarUsuario, carregarFornecedores, carregarCategorias]);
 
   const carregarProdutos = useCallback(async () => {
     setLoading(true);
@@ -85,6 +100,7 @@ export default function ProdutosPage() {
         size: '15',
       });
       if (termo.trim()) params.append('termo', termo.trim());
+      if (categoriaId) params.append('categoriaId', categoriaId);
       if (tipo) params.append('tipo', tipo);
       if (estoqueBaixo) params.append('estoqueBaixo', 'true');
       if (status !== 'todos') params.append('ativo', status);
@@ -104,7 +120,7 @@ export default function ProdutosPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, termo, tipo, estoqueBaixo, status]);
+  }, [page, termo, categoriaId, tipo, estoqueBaixo, status]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -186,7 +202,7 @@ export default function ProdutosPage() {
 
         {/* Toolbar de Filtros */}
         <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Campo de Busca Textual */}
             <div className="relative">
               <input
@@ -196,10 +212,29 @@ export default function ProdutosPage() {
                   setTermo(e.target.value);
                   setPage(0);
                 }}
-                placeholder="Buscar código, nome ou barras..."
+                placeholder="Buscar código, nome, marca..."
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
               />
               <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+            </div>
+
+            {/* Filtro por Categoria */}
+            <div className="relative">
+              <select
+                value={categoriaId}
+                onChange={(e) => {
+                  setCategoriaId(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+              >
+                <option value="">Todas as categorias</option>
+                {categorias.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nome}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Filtro por Tipo */}
@@ -251,7 +286,7 @@ export default function ProdutosPage() {
                 />
                 <span className="flex items-center gap-1.5 text-amber-400">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Apenas estoque baixo / crítico</span>
+                  <span>Apenas estoque crítico</span>
                 </span>
               </label>
             </div>
@@ -272,8 +307,8 @@ export default function ProdutosPage() {
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
                   <th className="py-3.5 px-4">Código / SKU</th>
-                  <th className="py-3.5 px-4">Nome & Especificação</th>
-                  <th className="py-3.5 px-4">Tipo</th>
+                  <th className="py-3.5 px-4">Nome & Marca</th>
+                  <th className="py-3.5 px-4">Categoria / Tipo</th>
                   <th className="py-3.5 px-4 text-right">Preço Venda</th>
                   <th className="py-3.5 px-4 text-center">Estoque Atual</th>
                   <th className="py-3.5 px-4">Fornecedor</th>
@@ -320,13 +355,20 @@ export default function ProdutosPage() {
                           )}
                         </td>
 
-                        {/* Nome & Descrição */}
+                        {/* Nome & Descrição & Marca */}
                         <td className="py-3.5 px-4">
-                          <span className="font-bold text-white group-hover:text-amber-300 transition-colors block">
-                            {p.nome}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-white group-hover:text-amber-300 transition-colors">
+                              {p.nome}
+                            </span>
+                            {p.marca && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-amber-400 border border-amber-500/20">
+                                {p.marca}
+                              </span>
+                            )}
+                          </div>
                           {p.descricao && (
-                            <span className="text-[11px] text-slate-400 line-clamp-1">
+                            <span className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
                               {p.descricao}
                             </span>
                           )}
@@ -337,9 +379,16 @@ export default function ProdutosPage() {
                           )}
                         </td>
 
-                        {/* Tipo */}
+                        {/* Categoria / Tipo */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                          {p.categoriaNome ? (
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 block w-fit mb-1">
+                              {p.categoriaNome}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 block mb-1">Sem categoria</span>
+                          )}
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-300 border border-slate-700">
                             {p.tipoDescricao || TIPO_PRODUTO_LABELS[p.tipo]}
                           </span>
                         </td>
@@ -471,6 +520,7 @@ export default function ProdutosPage() {
         isOpen={modalProdutoOpen}
         produto={produtoEditando}
         fornecedores={fornecedores}
+        categorias={categorias}
         onClose={() => setModalProdutoOpen(false)}
         onSuccess={() => {
           setModalProdutoOpen(false);

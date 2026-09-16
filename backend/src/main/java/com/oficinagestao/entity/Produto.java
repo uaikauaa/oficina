@@ -41,6 +41,9 @@ public class Produto {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
+    @Column(name = "marca", length = 100)
+    private String marca;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", nullable = false, length = 20)
     private TipoProduto tipo = TipoProduto.PECA;
@@ -71,6 +74,10 @@ public class Produto {
 
     @Column(name = "ativo", nullable = false)
     private boolean ativo = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fornecedor_id")
@@ -243,6 +250,22 @@ public class Produto {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
     }
 
     public Fornecedor getFornecedor() {

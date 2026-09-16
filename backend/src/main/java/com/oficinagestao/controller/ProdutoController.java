@@ -65,16 +65,17 @@ public class ProdutoController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar produtos e peÃƒÂ§as com filtros e paginaÃƒÂ§ÃƒÂ£o")
+    @Operation(summary = "Listar produtos e peças com filtros e paginação")
     public ResponseEntity<PageResponse<ProdutoResponseDTO>> listar(
             @RequestParam(required = false) String termo,
             @RequestParam(required = false) TipoProduto tipo,
+            @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long fornecedorId,
             @RequestParam(required = false) Boolean ativo,
             @RequestParam(required = false) Boolean estoqueBaixo,
             @PageableDefault(size = 20, sort = "nome", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        Page<ProdutoResponseDTO> page = produtoService.listar(termo, tipo, fornecedorId, ativo, estoqueBaixo, pageable);
+        Page<ProdutoResponseDTO> page = produtoService.listar(termo, tipo, categoriaId, fornecedorId, ativo, estoqueBaixo, pageable);
         return ResponseEntity.ok(PageResponse.from(page));
     }
 
@@ -126,18 +127,18 @@ public class ProdutoController {
     // Compatibilidade PeÃƒÂ§a Ã¢â€ â€ MÃƒÂ¡quina
     // =========================================================================
 
-    @GetMapping("/{id}/compatibilidades")
-    @Operation(summary = "Listar equipamentos compatÃƒÂ­veis com a peÃƒÂ§a")
+    @GetMapping(value = {"/{id}/compatibilidades", "/{id}/maquinas"})
+    @Operation(summary = "Listar equipamentos compatíveis com a peça")
     public ResponseEntity<List<CompatibilidadeResponseDTO>> listarCompatibilidades(@PathVariable Long id) {
         return ResponseEntity.ok(produtoService.listarCompatibilidades(id));
     }
 
-    @PostMapping("/{id}/compatibilidades")
-    @Operation(summary = "Vincular equipamento compatÃƒÂ­vel ÃƒÂ  peÃƒÂ§a")
+    @PostMapping(value = {"/{id}/compatibilidades", "/{id}/maquinas"})
+    @Operation(summary = "Vincular equipamento compatível à peça")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Compatibilidade registrada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "MÃƒÂ¡quina jÃƒÂ¡ cadastrada como compatÃƒÂ­vel"),
-            @ApiResponse(responseCode = "404", description = "Produto ou mÃƒÂ¡quina nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "400", description = "Máquina já cadastrada como compatível"),
+            @ApiResponse(responseCode = "404", description = "Produto ou máquina não encontrado")
     })
     public ResponseEntity<CompatibilidadeResponseDTO> adicionarCompatibilidade(
             @PathVariable Long id,
@@ -150,7 +151,7 @@ public class ProdutoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping("/{id}/compatibilidades/{maquinaId}")
+    @DeleteMapping(value = {"/{id}/compatibilidades/{maquinaId}", "/{id}/maquinas/{maquinaId}"})
     @Operation(summary = "Remover vÃƒÂ­nculo de compatibilidade entre peÃƒÂ§a e equipamento")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Compatibilidade removida com sucesso"),

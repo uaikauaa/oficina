@@ -413,7 +413,31 @@ Ativa ou inativa o fornecedor.
 
 ---
 
-### 11.2. Produtos e Peças de Reposição
+### 11.2. Categorias de Peças e Produtos
+
+#### `POST /api/categorias`
+Cadastra uma nova categoria técnica.
+- **Payload**: `{ "nome": "Eletrônica", "descricao": "Placas e semicondutores", "ativo": true }`
+- **Resposta Sucesso (201 Created)**: `CategoriaResponseDTO`.
+
+#### `GET /api/categorias`
+Lista paginada de categorias com ordenação por nome.
+
+#### `GET /api/categorias/ativas`
+Lista todas as categorias ativas em formato simples (`List<CategoriaResponseDTO>`) para preenchimento de dropdowns e filtros.
+
+#### `GET /api/categorias/{id}`
+Busca categoria por ID.
+
+#### `PUT /api/categorias/{id}`
+Atualiza dados da categoria.
+
+#### `PATCH /api/categorias/{id}/status`
+Ativa ou inativa a categoria.
+
+---
+
+### 11.3. Produtos e Peças de Reposição
 
 #### `POST /api/produtos`
 Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, reguladores AVR, pontes retificadoras).
@@ -425,6 +449,7 @@ Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, regulad
     "codigoBarras": "7891234567890",
     "nome": "Módulo IGBT 60N100 60A 1000V",
     "descricao": "Módulo de potência para inversores de solda TIG/MIG",
+    "marca": "Toshiba",
     "tipo": "PECA",
     "unidadeMedida": "UN",
     "precoCusto": 45.00,
@@ -432,15 +457,18 @@ Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, regulad
     "estoqueInicial": 10,
     "estoqueMinimo": 2,
     "localizacao": "Prateleira B3",
+    "categoriaId": 1,
     "fornecedorId": 1
   }
   ```
-- **Resposta Sucesso (201 Created)**: `ProdutoResponseDTO`.
+- **Resposta Sucesso (201 Created)**: `ProdutoResponseDTO` com `categoriaNome` e `marca`.
 
 #### `GET /api/produtos`
 Lista produtos com paginação e filtros combinados:
-- `termo`: Busca por código, nome ou código de barras.
+- `termo`: Busca por código, nome, marca ou código de barras.
 - `tipo`: `PRODUTO`, `PECA`, `SERVICO`, `CONSUMIVEL`.
+- `categoriaId`: ID numérico da categoria.
+- `fornecedorId`: ID numérico do fornecedor.
 - `estoqueBaixo`: `true` filtra apenas itens em que `estoqueAtual <= estoqueMinimo`.
 - `ativo`: `true` ou `false`.
 
@@ -448,24 +476,24 @@ Lista produtos com paginação e filtros combinados:
 Retorna a ficha cadastral do produto.
 
 #### `PUT /api/produtos/{id}`
-Atualiza preços, descrições, estoque mínimo e localização do produto.
+Atualiza preços, descrições, estoque mínimo, categoria, marca e localização do produto.
 
 #### `PATCH /api/produtos/{id}/status`
 Ativa ou inativa o produto.
 
-#### `GET /api/produtos/{id}/compatibilidades`
+#### `GET /api/produtos/{id}/compatibilidades` (ou `/api/produtos/{id}/maquinas`)
 Lista as máquinas e equipamentos compatíveis com a peça (`produto_maquina`).
 
-#### `POST /api/produtos/{id}/compatibilidades`
+#### `POST /api/produtos/{id}/compatibilidades` (ou `/api/produtos/{id}/maquinas`)
 Vincula um equipamento compatível à peça técnica.
 - **Payload**: `{ "maquinaId": 2, "observacaoCompatibilidade": "Aplicar pasta térmica de prata" }`
 
-#### `DELETE /api/produtos/{id}/compatibilidades/{maquinaId}`
+#### `DELETE /api/produtos/{id}/compatibilidades/{maquinaId}` (ou `/api/produtos/{id}/maquinas/{maquinaId}`)
 Remove o vínculo de compatibilidade entre a peça e a máquina.
 
 ---
 
-### 11.3. Gestão e Movimentações de Estoque
+### 11.4. Gestão e Movimentações de Estoque
 
 #### `GET /api/estoque/resumo`
 Retorna indicadores consolidados de inventário:
@@ -474,25 +502,49 @@ Retorna indicadores consolidados de inventário:
 - `itensEstoqueBaixo`: Produtos com saldo `<= estoqueMinimo`.
 - `valorTotalEstoque`: Valorização física total calculada a preço de custo.
 
-#### `POST /api/estoque/movimentar`
-Registra movimentação manual no estoque em transação atômica com bloqueio pessimista (`SELECT ... FOR UPDATE`):
-- **Tipos Suportados**: `ENTRADA`, `SAIDA`, `AJUSTE_POSITIVO`, `AJUSTE_NEGATIVO`.
-- **Regra Fundamental**: O saldo nunca pode se tornar negativo (`saldoPosterior >= 0`).
+#### `POST /api/estoque/entrada`
+Registra entrada manual de mercadorias / reposição por fornecedor com lock pessimista:
 - **Payload**:
   ```json
   {
     "produtoId": 1,
-    "tipoMovimentacao": "ENTRADA",
-    "quantidade": 15,
-    "valorUnitario": 45.00,
-    "motivo": "Nota Fiscal 4591 - Reposição de estoque Boxer"
+    "quantidade": 10,
+    "motivo": "Compra NF 1234 - Reposição"
   }
   ```
 - **Resposta Sucesso (201 Created)**: `EstoqueMovimentacaoResponseDTO`.
 
+#### `POST /api/estoque/saida`
+Registra saída manual de peças (descarte, sucata ou perda técnica):
+- **Payload**:
+  ```json
+  {
+    "produtoId": 1,
+    "quantidade": 2,
+    "motivo": "Descarte de componente danificado em transporte"
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `EstoqueMovimentacaoResponseDTO`.
+
+#### `POST /api/estoque/ajuste`
+Registra balanço/ajuste de inventário (`AJUSTE_POSITIVO` ou `AJUSTE_NEGATIVO`):
+- **Payload**:
+  ```json
+  {
+    "produtoId": 1,
+    "tipoMovimentacao": "AJUSTE_POSITIVO",
+    "quantidade": 3,
+    "motivo": "Ajuste de inventário físico mensal"
+  }
+  ```
+- **Resposta Sucesso (201 Created)**: `EstoqueMovimentacaoResponseDTO`.
+
+#### `POST /api/estoque/movimentar`
+Endpoint genérico de movimentação manual (`MovimentacaoManualDTO`).
+
 #### `GET /api/estoque/movimentacoes`
-Auditoria completa de histórico de movimentações paginadas.
-- **Query Params**: `produtoId`, `tipo`, `page`, `size`.
+Auditoria completa de histórico de movimentações paginadas:
+- **Query Params**: `produtoId`, `tipo`, `dataInicio`, `dataFim`, `numeroOs`, `page`, `size`.
 
 ---
 
