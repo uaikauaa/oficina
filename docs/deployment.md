@@ -12,7 +12,7 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
                    ▼ (HTTPS / TLS 1.3)
       +──────────────────────────+
       │   Frontend (Next.js)     │  Hospedagem: Vercel / Cloudflare / Node
-      │   Domínio: app.oficina...│
+      │   Domínio: app.oficina...│  Next.js 16.3.5 (Turbopack)
       +──────────────────────────+
                    │
                    ▼ (REST JSON / Cookies HttpOnly Secure)
@@ -23,9 +23,9 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
                    │
                    ▼ (TLS com SSLMode=require / PgBouncer Pooler)
       +──────────────────────────+
-      │   PostgreSQL (Neon)      │  Hospedagem: Neon Serverless (Branch: production)
-      │   Schema: neondb         │  Isolado do banco de desenvolvimento
-      +──────────────────────────+
+      │   PostgreSQL (Neon)      │  Projeto: summer-frost-22688608 (aws-sa-east-1)
+      │   Schema: neondb         │  Branch Produção: production (br-wispy-truth-acn1bsbe)
+      +──────────────────────────+  Branch Dev Isolada: development (br-cool-feather-actev7kw)
 ```
 
 ---
@@ -33,7 +33,11 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 ## 2. Requisitos de Infraestrutura
 
 1. **Protocolo HTTPS Estrito**: Toda comunicação externa deve trafegar sobre HTTPS com certificados TLS válidos (emitidos automaticamente via Let's Encrypt / Cloudflare).
-2. **Isolamento de Ambientes**: O banco de dados de produção do Neon deve ser criado em uma branch dedicada (`production` ou projeto separado), nunca compartilhando dados ou conexões com o ambiente de desenvolvimento.
+2. **Isolamento de Ambientes no Neon**:
+   - **Projeto**: `summer-frost-22688608` (Região `aws-sa-east-1` — São Paulo).
+   - **Branch de Produção**: `production` (`br-wispy-truth-acn1bsbe`) — Branch padrão com endpoint dedicado e pooler ativo.
+   - **Branch de Desenvolvimento Isolada**: `development` (`br-cool-feather-actev7kw`) — Criada a partir da produção para experimentos e testes futuros sem qualquer impacto em produção.
+   - **Snapshot de Salvaguarda Pré-Release**: `snap-spring-thunder-acvzytef` (`snapshot-pre-release-1-0-0`) gerado antes do início da operação piloto.
 3. **Gestão Segura de Segredos**: Nenhuma chave, senha ou token deve residir em código. Todas as credenciais são injetadas exclusivamente via painel de variáveis de ambiente do provedor de nuvem.
 
 ---
@@ -46,13 +50,16 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 |---|---|---|
 | `SERVER_PORT` | Porta HTTP interna do container | `8080` |
 | `SPRING_PROFILES_ACTIVE` | Perfil ativo do Spring Boot | `prod` |
-| `DB_URL` | URL JDBC de conexão com o pooler Neon | `jdbc:postgresql://ep-prod-pooler.neon.tech/neondb?sslmode=require` |
+| `DB_URL` | URL JDBC de conexão com o pooler Neon (branch `production`) | `jdbc:postgresql://ep-proud-field-ac7s6w1q-pooler.sa-east-1.aws.neon.tech/neondb?sslmode=require` |
 | `DB_USERNAME` | Usuário administrador do banco Neon | `neondb_owner` |
 | `DB_PASSWORD` | Senha criptografada gerada no Neon | `[SENHA_FORTE_NEON_PROD]` |
 | `JWT_SECRET` | Chave de assinatura HMAC-SHA256 (mínimo 64 caracteres hex/random) | `[CHAVE_ALEATORIA_ALTA_ENTROPIA_PROD]` |
 | `JWT_EXPIRATION_MS` | Validade do Access Token (15 minutos) | `900000` |
 | `SECURITY_COOKIE_SECURE` | Força flag `Secure` nos cookies HttpOnly | `true` |
 | `CORS_ALLOWED_ORIGINS` | Origem autorizada do frontend em produção | `https://app.oficinagestao.com.br` |
+| `INITIAL_ADMIN_EMAIL` | E-mail do usuário administrativo da proprietária | `oficina.soldas@oficinagestao.com.br` |
+| `INITIAL_ADMIN_PASSWORD` | Senha forte inicial (mínimo 8 caracteres) | `[SENHA_INICIAL_ADMIN]` |
+| `INITIAL_ADMIN_NOME` | Nome completo da dona da oficina | `Proprietária Oficina` |
 
 ### 3.2. Frontend (Next.js)
 
@@ -65,15 +72,15 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 
 ## 4. Passo a Passo para Implantação
 
-### Etapa 1: Provisionamento do Banco de Dados Neon (Produção)
+### Etapa 1: Validação do Banco de Dados Neon (Produção)
 1. Acesse o console do [Neon](https://console.neon.tech).
-2. Crie uma branch de produção ou projeto isolado: `oficina-gestao-prod`.
-3. Anote a connection string do **Connection Pooler** (porta 5432 / pooled mode):
-   `postgresql://neondb_owner:[PASSWORD]@[HOST]-pooler.neon.tech/neondb?sslmode=require`
-4. Na inicialização do backend, o Flyway aplicará automaticamente as migrações estruturais `V1` até `V9`.
+2. Verifique a branch padrão `production` (`br-wispy-truth-acn1bsbe`) do projeto `summer-frost-22688608`.
+3. Verifique a existência do snapshot de recuperação `snap-spring-thunder-acvzytef` (`snapshot-pre-release-1-0-0`).
+4. Utilize a connection string do **Connection Pooler** (porta 5432 / pooled mode) com `sslmode=require`.
+5. O Flyway aplica automaticamente todas as migrações estruturais `V1` até `V9` na inicialização do backend.
 
 ### Etapa 2: Implantação do Backend (Spring Boot)
-1. Vincule o repositório GitHub ao serviço de nuvem (ex: Railway, Render ou Docker Hub).
+1. Vincule o repositório GitHub ao serviço de nuvem (ex: Railway, Render ou AWS App Runner).
 2. Configure o comando de build e execução:
    - Build: `./mvnw clean package -DskipTests`
    - Run: `java -Duser.timezone=America/Sao_Paulo -jar target/backend-0.0.1-SNAPSHOT.jar`
@@ -86,8 +93,8 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 1. Vincule o repositório à Vercel ou plataforma de hospedagem Next.js.
 2. Defina o Root Directory como `frontend`.
 3. Configure as variáveis de ambiente da seção 3.2.
-4. Execute o build: `npm run build`.
-5. Valide se a tela de login carrega perfeitamente e se a comunicação com a API backend via HTTPS está operacional.
+4. Execute o build de produção: `npm run build`.
+5. Valide se a tela de login carrega e se os cookies `HttpOnly` com flag `Secure` são configurados no handshake de autenticação.
 
 ---
 
@@ -96,7 +103,5 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 - [ ] Endpoint `/api/health` retornando HTTP 200 e `{"status":"UP"}`.
 - [ ] Cookies `access_token` e `refresh_token` recebendo as flags `HttpOnly`, `Secure` e `SameSite` corretas no navegador.
 - [ ] Login da proprietária realizado com sucesso.
-- [ ] Abertura de OS, inclusão de peça e conferência de dedução no estoque.
+- [ ] Abertura de OS, inclusão de peça e conferência de dedução atômica no estoque.
 - [ ] Download do PDF de Ordem de Serviço (`/api/ordens-servico/{id}/pdf`) abrindo em visualizador A4 sem falhas.
-- [ ] Impressão de balcão (`window.print()`) testada em folha A4.
-- [ ] Consulta aos 6 relatórios em `/relatorios` exibindo dados consolidados.
