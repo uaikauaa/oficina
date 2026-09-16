@@ -9,7 +9,10 @@ import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.repository.RefreshTokenRepository;
 import com.oficinagestao.repository.UsuarioRepository;
 import com.oficinagestao.security.JwtService;
+import com.oficinagestao.security.LoginAttemptService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -26,11 +29,14 @@ import java.util.stream.Collectors;
 @Service
 public class AuthService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuditoriaService auditoriaService;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final LoginAttemptService loginAttemptService;
     private final long refreshExpirationMs;
 
     public AuthService(
@@ -39,6 +45,7 @@ public class AuthService {
             JwtService jwtService,
             AuditoriaService auditoriaService,
             RefreshTokenRepository refreshTokenRepository,
+            LoginAttemptService loginAttemptService,
             @Value("${security.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs
     ) {
         this.usuarioRepository = usuarioRepository;
@@ -46,22 +53,39 @@ public class AuthService {
         this.jwtService = jwtService;
         this.auditoriaService = auditoriaService;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.loginAttemptService = loginAttemptService;
         this.refreshExpirationMs = refreshExpirationMs;
     }
 
     @Transactional
     public LoginResult login(LoginRequest request, HttpServletRequest httpRequest) {
+        String ip = extrairIp(httpRequest);
         String email = request.email() != null ? request.email().trim().toLowerCase() : "";
+
+        // ISSUE-003: Proteção contra força bruta (Rate limiting e lockout temporário)
+        if (loginAttemptService.isBlocked(ip, email)) {
+            long remainingMinutes = loginAttemptService.getRemainingLockMinutes(ip, email);
+            log.warn("Tentativa de login rejeitada por bloqueio temporário (lockout). IP: {}, Email: {}", ip, email);
+            throw new BadCredentialsException("Muitas tentativas incorretas. Conta bloqueada temporariamente. Tente novamente em " + remainingMinutes + " minuto(s).");
+        }
+
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
         // Prevenção contra enumeração de usuários: tempo e mensagem uniformes
         if (usuario == null || !passwordEncoder.matches(request.senha(), usuario.getSenha())) {
+            loginAttemptService.loginFailed(ip, email);
             throw new BadCredentialsException("Credenciais inválidas.");
         }
 
+        // ISSUE-005: Resposta externa uniforme para usuário inativo (HTTP 401 BadCredentialsException)
         if (!Boolean.TRUE.equals(usuario.getAtivo())) {
-            throw new DisabledException("Conta de usuário inativa.");
+            log.warn("Tentativa de login rejeitada para conta inativa: {}", email);
+            loginAttemptService.loginFailed(ip, email);
+            throw new BadCredentialsException("Credenciais inválidas.");
         }
+
+        // Autenticação bem-sucedida: reseta tentativas de falha para IP e Email
+        loginAttemptService.loginSucceeded(ip, email);
 
         // Registrar auditoria reutilizável
         auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "LOGIN", httpRequest);
@@ -186,5 +210,16 @@ public class AuthService {
                 auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "LOGOUT", httpRequest);
             });
         }
+    }
+
+    private String extrairIp(HttpServletRequest request) {
+        if (request == null) {
+            return "127.0.0.1";
+        }
+        String xForwarded = request.getHeader("X-Forwarded-For");
+        if (xForwarded != null && !xForwarded.isBlank()) {
+            return xForwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr() != null ? request.getRemoteAddr() : "127.0.0.1";
     }
 }

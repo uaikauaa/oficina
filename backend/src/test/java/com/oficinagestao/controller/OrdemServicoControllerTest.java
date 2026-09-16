@@ -147,6 +147,58 @@ class OrdemServicoControllerTest {
     }
 
     @Test
+    @DisplayName("ISSUE-001: Criar OS com cliente inativo deve retornar 400 Bad Request")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void naoDeveCriarOrdemServicoComClienteInativo() throws Exception {
+        cliente1.setAtivo(false);
+        clienteRepository.save(cliente1);
+
+        OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
+                cliente1.getId(),
+                maquinaCliente1.getId(),
+                null,
+                null,
+                null,
+                "Tentativa com cliente inativo",
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/ordens-servico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message", containsString("Não é possível abrir Ordem de Serviço para um cliente inativo.")));
+    }
+
+    @Test
+    @DisplayName("ISSUE-001: Criar OS com máquina inativa deve retornar 400 Bad Request")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void naoDeveCriarOrdemServicoComMaquinaInativa() throws Exception {
+        maquinaCliente1.setAtivo(false);
+        maquinaRepository.save(maquinaCliente1);
+
+        OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
+                cliente1.getId(),
+                maquinaCliente1.getId(),
+                null,
+                null,
+                null,
+                "Tentativa com máquina inativa",
+                null,
+                null
+        );
+
+        mockMvc.perform(post("/api/ordens-servico")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message", containsString("Não é possível abrir Ordem de Serviço para um equipamento inativo.")));
+    }
+
+    @Test
     @DisplayName("Listar Ordens de Serviço autenticado deve retornar 200 OK e PageResponse")
     @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
     void deveListarOrdensServico() throws Exception {

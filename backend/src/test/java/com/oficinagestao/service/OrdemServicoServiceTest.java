@@ -74,6 +74,7 @@ class OrdemServicoServiceTest {
         clienteA.setTipoPessoa(TipoPessoa.FISICA);
         clienteA.setCpfCnpj("111.222.333-44");
         clienteA.setCelular("(31) 98888-1111");
+        clienteA.setAtivo(true);
 
         clienteB = new Cliente();
         clienteB.setId(2L);
@@ -81,6 +82,7 @@ class OrdemServicoServiceTest {
         clienteB.setTipoPessoa(TipoPessoa.FISICA);
         clienteB.setCpfCnpj("222.333.444-55");
         clienteB.setCelular("(31) 97777-2222");
+        clienteB.setAtivo(true);
 
         maquinaClienteA = new Maquina();
         maquinaClienteA.setId(10L);
@@ -234,6 +236,70 @@ class OrdemServicoServiceTest {
         assertThrows(ConflictException.class, () ->
                 ordemServicoService.criar(dto, null, "127.0.0.1")
         );
+        verify(ordemServicoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("ISSUE-001: Não deve permitir abertura de OS para cliente inativo")
+    void naoDeveCriarOSSeClienteEstiverInativo() {
+        clienteA.setAtivo(false);
+
+        OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
+                1L, 10L, null, null, null,
+                "Problema de teste", null, null
+        );
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteA));
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.criar(dto, null, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("Não é possível abrir Ordem de Serviço para um cliente inativo."));
+        verify(maquinaRepository, never()).findByIdWithCliente(any());
+        verify(ordemServicoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("ISSUE-001: Não deve permitir abertura de OS para equipamento inativo")
+    void naoDeveCriarOSSeEquipamentoEstiverInativo() {
+        clienteA.setAtivo(true);
+        maquinaClienteA.setAtivo(false);
+
+        OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
+                1L, 10L, null, null, null,
+                "Problema de teste", null, null
+        );
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteA));
+        when(maquinaRepository.findByIdWithCliente(10L)).thenReturn(Optional.of(maquinaClienteA));
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.criar(dto, null, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("Não é possível abrir Ordem de Serviço para um equipamento inativo."));
+        verify(ordemServicoRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("ISSUE-001: Não deve permitir abertura de OS com cliente e equipamento inativos")
+    void naoDeveCriarOSSeClienteEEquipamentoEstiveremInativos() {
+        clienteA.setAtivo(false);
+        maquinaClienteA.setAtivo(false);
+
+        OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
+                1L, 10L, null, null, null,
+                "Problema de teste", null, null
+        );
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteA));
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.criar(dto, null, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("Não é possível abrir Ordem de Serviço para um cliente inativo."));
         verify(ordemServicoRepository, never()).save(any());
     }
 
@@ -475,6 +541,32 @@ class OrdemServicoServiceTest {
         );
 
         assertTrue(ex.getMessage().contains("obrigatório registrar os testes técnicos"));
+    }
+
+    @Test
+    @DisplayName("ISSUE-006: Não deve permitir transição para PRONTA com laudo de teste menor que 15 caracteres")
+    void naoDeveTransicionarParaProntaComTestesMuitoCurtos() {
+        OrdemServico os = new OrdemServico();
+        os.setId(16L);
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(16L)).thenReturn(Optional.of(os));
+
+        OrdemServicoStatusDTO statusDTO1 = new OrdemServicoStatusDTO(
+                StatusOrdemServico.PRONTA, "ok", null
+        );
+        BusinessException ex1 = assertThrows(BusinessException.class, () ->
+                ordemServicoService.alterarStatus(16L, statusDTO1, null, "127.0.0.1")
+        );
+        assertTrue(ex1.getMessage().contains("mínimo de 15 caracteres"));
+
+        OrdemServicoStatusDTO statusDTO2 = new OrdemServicoStatusDTO(
+                StatusOrdemServico.PRONTA, "   12345   ", null
+        );
+        BusinessException ex2 = assertThrows(BusinessException.class, () ->
+                ordemServicoService.alterarStatus(16L, statusDTO2, null, "127.0.0.1")
+        );
+        assertTrue(ex2.getMessage().contains("mínimo de 15 caracteres"));
     }
 
     @Test

@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import com.oficinagestao.security.LoginAttemptService;
+
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
@@ -44,18 +46,21 @@ class AuthServiceTest {
     @Mock
     private HttpServletRequest httpRequest;
 
+    private LoginAttemptService loginAttemptService;
     private AuthService authService;
 
     private static final long REFRESH_EXPIRATION_MS = 604800000L; // 7 dias
 
     @BeforeEach
     void setUp() {
+        loginAttemptService = new LoginAttemptService(5, 15);
         authService = new AuthService(
                 usuarioRepository,
                 passwordEncoder,
                 jwtService,
                 auditoriaService,
                 refreshTokenRepository,
+                loginAttemptService,
                 REFRESH_EXPIRATION_MS
         );
     }
@@ -116,8 +121,8 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar DisabledException quando o usuário estiver inativo no login")
-    void shouldThrowDisabledExceptionWhenUserIsInactive() {
+    @DisplayName("ISSUE-005: Deve lançar BadCredentialsException uniforme quando o usuário estiver inativo no login")
+    void shouldThrowBadCredentialsWhenUserIsInactive() {
         Usuario usuario = new Usuario("Proprietária", "inativa@oficina.com", "hash_senha", false);
 
         when(usuarioRepository.findByEmail("inativa@oficina.com")).thenReturn(Optional.of(usuario));
@@ -125,9 +130,28 @@ class AuthServiceTest {
 
         LoginRequest request = new LoginRequest("inativa@oficina.com", "SenhaValida");
 
-        assertThrows(DisabledException.class, () -> authService.login(request, httpRequest));
+        BadCredentialsException ex = assertThrows(BadCredentialsException.class, () -> authService.login(request, httpRequest));
+        assertEquals("Credenciais inválidas.", ex.getMessage());
         verify(auditoriaService, never()).registrarComRequest(any(), any(), any(), any(), any());
         verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
+    }
+
+    @Test
+    @DisplayName("ISSUE-003: Deve bloquear login após atingir o limite de 5 tentativas consecutivas inválidas")
+    void shouldBlockLoginAfterMaxAttempts() {
+        when(usuarioRepository.findByEmail("admin_brute@oficina.com")).thenReturn(Optional.empty());
+        when(httpRequest.getRemoteAddr()).thenReturn("192.168.1.50");
+
+        LoginRequest request = new LoginRequest("admin_brute@oficina.com", "SenhaErrada");
+
+        // 5 tentativas consecutivas
+        for (int i = 0; i < 5; i++) {
+            assertThrows(BadCredentialsException.class, () -> authService.login(request, httpRequest));
+        }
+
+        // 6ª tentativa deve ser bloqueada por lockout
+        BadCredentialsException ex = assertThrows(BadCredentialsException.class, () -> authService.login(request, httpRequest));
+        assertTrue(ex.getMessage().contains("Muitas tentativas incorretas. Conta bloqueada temporariamente"));
     }
 
     @Test

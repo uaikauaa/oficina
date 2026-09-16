@@ -68,8 +68,16 @@ public class OrdemServicoService {
         Cliente cliente = clienteRepository.findById(dto.clienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + dto.clienteId()));
 
+        if (!Boolean.TRUE.equals(cliente.getAtivo())) {
+            throw new BusinessException("Não é possível abrir Ordem de Serviço para um cliente inativo.");
+        }
+
         Maquina maquina = maquinaRepository.findByIdWithCliente(dto.maquinaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com ID: " + dto.maquinaId()));
+
+        if (!Boolean.TRUE.equals(maquina.getAtivo())) {
+            throw new BusinessException("Não é possível abrir Ordem de Serviço para um equipamento inativo.");
+        }
 
         if (!maquina.getCliente().getId().equals(cliente.getId())) {
             throw new BusinessException("O equipamento informado (ID " + dto.maquinaId() +
@@ -211,9 +219,9 @@ public class OrdemServicoService {
         }
 
         if (novoStatus == StatusOrdemServico.PRONTA) {
-            if (os.getTestesRealizados() == null || os.getTestesRealizados().isBlank()) {
+            if (os.getTestesRealizados() == null || os.getTestesRealizados().trim().length() < 15) {
                 throw new BusinessException("Para liberar a Ordem de Serviço como PRONTA, " +
-                        "é obrigatório registrar os testes técnicos realizados na bancada.");
+                        "é obrigatório registrar os testes técnicos realizados na bancada (mínimo de 15 caracteres).");
             }
         }
 

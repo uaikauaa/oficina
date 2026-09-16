@@ -6,7 +6,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -21,15 +24,50 @@ import java.util.stream.Collectors;
 @Service
 public class JwtService {
 
+    public static final String DEFAULT_DEV_SECRET = "default-secret-key-oficina-gestao-dev-environment-2026-secure-token";
+
     private final SecretKey secretKey;
     private final long expirationMs;
 
+    @Autowired
     public JwtService(
             @Value("${security.jwt.secret:default-secret-key-oficina-gestao-dev-environment-2026-secure-token}") String secret,
-            @Value("${security.jwt.expiration-ms:900000}") long expirationMs // 15 minutos
+            @Value("${security.jwt.expiration-ms:900000}") long expirationMs,
+            Environment environment
     ) {
+        validarSecretParaAmbiente(secret, environment);
         this.secretKey = deriveKey(secret);
         this.expirationMs = expirationMs;
+    }
+
+    // Construtor de conveniência para testes unitários isolados
+    public JwtService(String secret, long expirationMs) {
+        this(secret, expirationMs, null);
+    }
+
+    private void validarSecretParaAmbiente(String secret, Environment environment) {
+        boolean isProduction = false;
+        if (environment != null) {
+            isProduction = environment.acceptsProfiles(Profiles.of("prod", "production"))
+                    || "prod".equalsIgnoreCase(environment.getProperty("environment"))
+                    || "production".equalsIgnoreCase(environment.getProperty("environment"));
+        }
+        if (!isProduction) {
+            String envVar = System.getenv("ENVIRONMENT");
+            isProduction = "prod".equalsIgnoreCase(envVar)
+                    || "production".equalsIgnoreCase(envVar)
+                    || Boolean.parseBoolean(System.getenv("RENDER"))
+                    || System.getenv("RAILWAY_ENVIRONMENT") != null;
+        }
+
+        if (isProduction) {
+            if (secret == null || secret.isBlank() || DEFAULT_DEV_SECRET.equals(secret.trim())) {
+                throw new IllegalStateException("CRITICAL SECURITY CONFIGURATION ERROR: A inicialização em ambiente de produção (prod/production) requer a definição obrigatória da variável de ambiente JWT_SECRET com uma chave segura de produção. O valor padrão de desenvolvimento é estritamente proibido.");
+            }
+            if (secret.trim().length() < 32) {
+                throw new IllegalStateException("CRITICAL SECURITY CONFIGURATION ERROR: A chave JWT_SECRET em produção deve conter pelo menos 32 caracteres (256 bits).");
+            }
+        }
     }
 
     private SecretKey deriveKey(String secret) {

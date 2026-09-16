@@ -45,6 +45,7 @@ import {
 } from '@/lib/types';
 import { gerarCsv, baixarArquivoCsv } from '@/lib/csvHelper';
 import type { ColunaCsv } from '@/lib/csvHelper';
+import { fetchTodosRegistrosRelatorio } from '@/lib/csvExportHelper';
 import {
   apiFetchJson,
   formatarMoeda,
@@ -65,6 +66,7 @@ export default function RelatoriosPage() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [activeTab, setActiveTab] = useState<RelatorioTab>('ordens-servico');
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Categorias e Fornecedores para filtros
@@ -303,144 +305,240 @@ export default function RelatoriosPage() {
   // ----------------------------------------------------
   // EXPORTAÇÃO CSV (FEATURE-004)
   // ----------------------------------------------------
-  const handleExportarCsvOs = () => {
-    const dados = osRelatorio?.itens.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de Ordens de Serviço para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvOs = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<OrdemServico>(async (page, size) => {
+        const params = new URLSearchParams();
+        if (osDataInicio) params.append('dataInicio', `${osDataInicio}T00:00:00Z`);
+        if (osDataFim) params.append('dataFim', `${osDataFim}T23:59:59Z`);
+        if (osStatus) params.append('status', osStatus);
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        const res = await apiFetchJson<RelatorioOsResponse>(`/api/relatorios/ordens-servico?${params.toString()}`);
+        return res.itens;
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de Ordens de Serviço para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<OrdemServico>[] = [
+        { cabecalho: 'Número OS', acessar: (i) => i.numeroOs },
+        { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
+        { cabecalho: 'Documento', acessar: (i) => formatarDocumento(i.clienteCpfCnpj) },
+        { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.clienteTelefone) },
+        { cabecalho: 'Tipo Equipamento', acessar: (i) => i.maquinaTipoDescricao || '' },
+        { cabecalho: 'Marca', acessar: (i) => i.maquinaMarca || '' },
+        { cabecalho: 'Modelo', acessar: (i) => i.maquinaModelo || '' },
+        { cabecalho: 'Nº Série', acessar: (i) => i.maquinaNumeroSerie || '' },
+        { cabecalho: 'Status', acessar: (i) => i.statusDescricao },
+        { cabecalho: 'Data Entrada', acessar: (i) => formatarDataHora(i.dataEntrada) },
+        { cabecalho: 'Data Conclusão', acessar: (i) => i.dataConclusao ? formatarDataHora(i.dataConclusao) : '' },
+        { cabecalho: 'Valor Peças (R$)', acessar: (i) => (i.valorPecas ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Valor Mão de Obra (R$)', acessar: (i) => (i.valorMaoObra ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Desconto (R$)', acessar: (i) => (i.valorDesconto ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Valor Total (R$)', acessar: (i) => (i.valorTotal ?? 0).toFixed(2).replace('.', ',') },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-ordens-servico-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de Ordens de Serviço.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<OrdemServico>[] = [
-      { cabecalho: 'Número OS', acessar: (i) => i.numeroOs },
-      { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
-      { cabecalho: 'Documento', acessar: (i) => formatarDocumento(i.clienteCpfCnpj) },
-      { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.clienteTelefone) },
-      { cabecalho: 'Tipo Equipamento', acessar: (i) => i.maquinaTipoDescricao || '' },
-      { cabecalho: 'Marca', acessar: (i) => i.maquinaMarca || '' },
-      { cabecalho: 'Modelo', acessar: (i) => i.maquinaModelo || '' },
-      { cabecalho: 'Nº Série', acessar: (i) => i.maquinaNumeroSerie || '' },
-      { cabecalho: 'Status', acessar: (i) => i.statusDescricao },
-      { cabecalho: 'Data Entrada', acessar: (i) => formatarDataHora(i.dataEntrada) },
-      { cabecalho: 'Data Conclusão', acessar: (i) => i.dataConclusao ? formatarDataHora(i.dataConclusao) : '' },
-      { cabecalho: 'Valor Peças (R$)', acessar: (i) => (i.valorPecas ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Valor Mão de Obra (R$)', acessar: (i) => (i.valorMaoObra ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Desconto (R$)', acessar: (i) => (i.valorDesconto ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Valor Total (R$)', acessar: (i) => (i.valorTotal ?? 0).toFixed(2).replace('.', ',') },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-ordens-servico-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvEstoque = () => {
-    const dados = estoqueRelatorio?.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de estoque para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvEstoque = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<RelatorioEstoqueItem>(async (page, size) => {
+        const params = new URLSearchParams();
+        if (estoqueCategoriaId) params.append('categoriaId', estoqueCategoriaId);
+        if (estoqueFornecedorId) params.append('fornecedorId', estoqueFornecedorId);
+        if (estoqueBaixo) params.append('estoqueBaixo', 'true');
+        if (estoqueZerado) params.append('zerado', 'true');
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        return await apiFetchJson<PageResponse<RelatorioEstoqueItem>>(`/api/relatorios/estoque?${params.toString()}`);
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de estoque para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<RelatorioEstoqueItem>[] = [
+        { cabecalho: 'ID', acessar: (i) => i.produtoId },
+        { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
+        { cabecalho: 'Produto / Peça', acessar: (i) => i.nome },
+        { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+        { cabecalho: 'Categoria', acessar: (i) => i.categoriaNome || '' },
+        { cabecalho: 'Fornecedor', acessar: (i) => i.fornecedorNome || '' },
+        { cabecalho: 'Estoque Atual', acessar: (i) => (i.estoqueAtual ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Estoque Mínimo', acessar: (i) => (i.estoqueMinimo ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Situação Estoque', acessar: (i) => i.statusEstoque },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-estoque-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de estoque.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<RelatorioEstoqueItem>[] = [
-      { cabecalho: 'ID', acessar: (i) => i.produtoId },
-      { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
-      { cabecalho: 'Produto / Peça', acessar: (i) => i.nome },
-      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
-      { cabecalho: 'Categoria', acessar: (i) => i.categoriaNome || '' },
-      { cabecalho: 'Fornecedor', acessar: (i) => i.fornecedorNome || '' },
-      { cabecalho: 'Estoque Atual', acessar: (i) => (i.estoqueAtual ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Estoque Mínimo', acessar: (i) => (i.estoqueMinimo ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Situação Estoque', acessar: (i) => i.statusEstoque },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-estoque-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvMovimentacoes = () => {
-    const dados = movRelatorio?.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de movimentações para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvMovimentacoes = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<EstoqueMovimentacao>(async (page, size) => {
+        const params = new URLSearchParams();
+        if (movDataInicio) params.append('dataInicio', `${movDataInicio}T00:00:00Z`);
+        if (movDataFim) params.append('dataFim', `${movDataFim}T23:59:59Z`);
+        if (movTipo) params.append('tipo', movTipo);
+        if (movNumeroOs.trim()) params.append('numeroOs', movNumeroOs.trim());
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        return await apiFetchJson<PageResponse<EstoqueMovimentacao>>(`/api/relatorios/movimentacoes?${params.toString()}`);
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de movimentações para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<EstoqueMovimentacao>[] = [
+        { cabecalho: 'ID', acessar: (i) => i.id },
+        { cabecalho: 'Data/Hora', acessar: (i) => formatarDataHora(i.dataMovimentacao) },
+        { cabecalho: 'Tipo', acessar: (i) => i.tipoDescricao || TIPO_MOVIMENTACAO_ESTOQUE_LABELS[i.tipoMovimentacao] || i.tipoMovimentacao },
+        { cabecalho: 'Código Peça', acessar: (i) => i.produtoCodigo || '' },
+        { cabecalho: 'Peça / Produto', acessar: (i) => i.produtoNome },
+        { cabecalho: 'Quantidade', acessar: (i) => (i.quantidade ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Saldo Anterior', acessar: (i) => (i.quantidadeAnterior ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Novo Saldo', acessar: (i) => (i.quantidadePosterior ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'OS Vinculada', acessar: (i) => i.ordemServicoNumero || '' },
+        { cabecalho: 'Motivo / Justificativa', acessar: (i) => i.motivo || '' },
+        { cabecalho: 'Usuário', acessar: (i) => i.usuarioNome || '' },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-movimentacoes-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de movimentações.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<EstoqueMovimentacao>[] = [
-      { cabecalho: 'ID', acessar: (i) => i.id },
-      { cabecalho: 'Data/Hora', acessar: (i) => formatarDataHora(i.dataMovimentacao) },
-      { cabecalho: 'Tipo', acessar: (i) => i.tipoDescricao || TIPO_MOVIMENTACAO_ESTOQUE_LABELS[i.tipoMovimentacao] || i.tipoMovimentacao },
-      { cabecalho: 'Código Peça', acessar: (i) => i.produtoCodigo || '' },
-      { cabecalho: 'Peça / Produto', acessar: (i) => i.produtoNome },
-      { cabecalho: 'Quantidade', acessar: (i) => (i.quantidade ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Saldo Anterior', acessar: (i) => (i.quantidadeAnterior ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Novo Saldo', acessar: (i) => (i.quantidadePosterior ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'OS Vinculada', acessar: (i) => i.ordemServicoNumero || '' },
-      { cabecalho: 'Motivo / Justificativa', acessar: (i) => i.motivo || '' },
-      { cabecalho: 'Usuário', acessar: (i) => i.usuarioNome || '' },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-movimentacoes-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvPecas = () => {
-    const dados = pecasRelatorio?.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de peças para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvPecas = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<PecaMaisUtilizada>(async (page, size) => {
+        const params = new URLSearchParams();
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        return await apiFetchJson<PageResponse<PecaMaisUtilizada>>(`/api/relatorios/pecas-mais-utilizadas?${params.toString()}`);
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de peças para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<PecaMaisUtilizada>[] = [
+        { cabecalho: 'ID', acessar: (i) => i.produtoId },
+        { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
+        { cabecalho: 'Peça', acessar: (i) => i.nome },
+        { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+        { cabecalho: 'Total Utilizado em OS', acessar: (i) => (i.quantidadeTotalUtilizada ?? 0).toFixed(2).replace('.', ',') },
+        { cabecalho: 'Qtd de OS Atendidas', acessar: (i) => i.quantidadeOs ?? 0 },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-pecas-mais-utilizadas-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de peças mais utilizadas.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<PecaMaisUtilizada>[] = [
-      { cabecalho: 'ID', acessar: (i) => i.produtoId },
-      { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
-      { cabecalho: 'Peça', acessar: (i) => i.nome },
-      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
-      { cabecalho: 'Total Utilizado em OS', acessar: (i) => (i.quantidadeTotalUtilizada ?? 0).toFixed(2).replace('.', ',') },
-      { cabecalho: 'Qtd de OS Atendidas', acessar: (i) => i.quantidadeOs ?? 0 },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-pecas-mais-utilizadas-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvClientes = () => {
-    const dados = clientesRelatorio?.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de clientes para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvClientes = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<RelatorioClienteItem>(async (page, size) => {
+        const params = new URLSearchParams();
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        return await apiFetchJson<PageResponse<RelatorioClienteItem>>(`/api/relatorios/clientes?${params.toString()}`);
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de clientes para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<RelatorioClienteItem>[] = [
+        { cabecalho: 'ID', acessar: (i) => i.clienteId },
+        { cabecalho: 'Nome / Razão Social', acessar: (i) => i.nomeRazaoSocial },
+        { cabecalho: 'CPF / CNPJ', acessar: (i) => formatarDocumento(i.cpfCnpj) },
+        { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.telefone) },
+        { cabecalho: 'Qtd Equipamentos', acessar: (i) => i.quantidadeEquipamentos ?? 0 },
+        { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
+        { cabecalho: 'Última Visita', acessar: (i) => i.ultimaVisita ? formatarDataHora(i.ultimaVisita) : '' },
+        { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-clientes-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de clientes.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<RelatorioClienteItem>[] = [
-      { cabecalho: 'ID', acessar: (i) => i.clienteId },
-      { cabecalho: 'Nome / Razão Social', acessar: (i) => i.nomeRazaoSocial },
-      { cabecalho: 'CPF / CNPJ', acessar: (i) => formatarDocumento(i.cpfCnpj) },
-      { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.telefone) },
-      { cabecalho: 'Qtd Equipamentos', acessar: (i) => i.quantidadeEquipamentos ?? 0 },
-      { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
-      { cabecalho: 'Última Visita', acessar: (i) => i.ultimaVisita ? formatarDataHora(i.ultimaVisita) : '' },
-      { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-clientes-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvEquipamentos = () => {
-    const dados = equipamentosRelatorio?.content || [];
-    if (dados.length === 0) {
-      alert('Não há dados de equipamentos para exportar com os filtros atuais.');
-      return;
+  const handleExportarCsvEquipamentos = async () => {
+    setIsExporting(true);
+    try {
+      const dados = await fetchTodosRegistrosRelatorio<RelatorioMaquinaItem>(async (page, size) => {
+        const params = new URLSearchParams();
+        params.append('page', String(page));
+        params.append('size', String(size));
+
+        return await apiFetchJson<PageResponse<RelatorioMaquinaItem>>(`/api/relatorios/equipamentos?${params.toString()}`);
+      });
+
+      if (dados.length === 0) {
+        alert('Não há dados de equipamentos para exportar com os filtros atuais.');
+        return;
+      }
+      const colunas: ColunaCsv<RelatorioMaquinaItem>[] = [
+        { cabecalho: 'ID', acessar: (i) => i.maquinaId },
+        { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
+        { cabecalho: 'Tipo', acessar: (i) => TIPO_EQUIPAMENTO_LABELS[i.tipo] || i.tipo },
+        { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+        { cabecalho: 'Modelo', acessar: (i) => i.modelo || '' },
+        { cabecalho: 'Nº Série', acessar: (i) => i.numeroSerie || '' },
+        { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
+        { cabecalho: 'Última Manutenção', acessar: (i) => i.ultimaManutencao ? formatarDataHora(i.ultimaManutencao) : '' },
+        { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
+      ];
+      const csv = gerarCsv(colunas, dados);
+      baixarArquivoCsv(csv, `relatorio-equipamentos-${new Date().toISOString().split('T')[0]}`);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao exportar relatório de equipamentos.');
+    } finally {
+      setIsExporting(false);
     }
-    const colunas: ColunaCsv<RelatorioMaquinaItem>[] = [
-      { cabecalho: 'ID', acessar: (i) => i.maquinaId },
-      { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
-      { cabecalho: 'Tipo', acessar: (i) => TIPO_EQUIPAMENTO_LABELS[i.tipo] || i.tipo },
-      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
-      { cabecalho: 'Modelo', acessar: (i) => i.modelo || '' },
-      { cabecalho: 'Nº Série', acessar: (i) => i.numeroSerie || '' },
-      { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
-      { cabecalho: 'Última Manutenção', acessar: (i) => i.ultimaManutencao ? formatarDataHora(i.ultimaManutencao) : '' },
-      { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
-    ];
-    const csv = gerarCsv(colunas, dados);
-    baixarArquivoCsv(csv, `relatorio-equipamentos-${new Date().toISOString().split('T')[0]}`);
   };
 
-  const handleExportarCsvAtivo = () => {
+  const handleExportarCsvAtivo = async () => {
     switch (activeTab) {
-      case 'ordens-servico': handleExportarCsvOs(); break;
-      case 'estoque': handleExportarCsvEstoque(); break;
-      case 'movimentacoes': handleExportarCsvMovimentacoes(); break;
-      case 'pecas-mais-utilizadas': handleExportarCsvPecas(); break;
-      case 'clientes': handleExportarCsvClientes(); break;
-      case 'equipamentos': handleExportarCsvEquipamentos(); break;
+      case 'ordens-servico': await handleExportarCsvOs(); break;
+      case 'estoque': await handleExportarCsvEstoque(); break;
+      case 'movimentacoes': await handleExportarCsvMovimentacoes(); break;
+      case 'pecas-mais-utilizadas': await handleExportarCsvPecas(); break;
+      case 'clientes': await handleExportarCsvClientes(); break;
+      case 'equipamentos': await handleExportarCsvEquipamentos(); break;
     }
   };
 
@@ -466,12 +564,12 @@ export default function RelatoriosPage() {
             <button
               type="button"
               onClick={handleExportarCsvAtivo}
-              disabled={isLoading}
+              disabled={isLoading || isExporting}
               className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
               title="Exportar dados filtrados da aba atual em formato CSV"
             >
-              <Download className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Exportar CSV</span>
+              <Download className={`w-3.5 h-3.5 text-emerald-400 ${isExporting ? 'animate-bounce' : ''}`} />
+              <span>{isExporting ? 'Exportando CSV...' : 'Exportar CSV'}</span>
             </button>
 
             <button
