@@ -704,6 +704,41 @@ Relatório consolidado de equipamentos atendidos na oficina:
 - **Query Params**: `page`, `size` (padrão size=20).
 - **Resposta Sucesso (200 OK)**: `Page<RelatorioMaquinaItemDTO>` contendo `{ maquinaId, clienteNome, tipo, marca, modelo, numeroSerie, quantidadeOs, ultimaManutencao, valorAcumulado }`.
 
+---
+
+## 14. Atualizações e Contratos da Versão 1.1
+
+A Versão 1.1 introduz melhorias operacionais mantendo compatibilidade total com os contratos da V1.0 e 0 migrations de banco de dados.
+
+### 14.1. Normalização e Validação do Horímetro (BUG-002)
+- **Endpoints impactados**:
+  - `POST /api/ordens-servico` e `PUT /api/ordens-servico/{id}`
+  - `POST /api/maquinas` e `PUT /api/maquinas/{id}`
+- **Regras de Processamento de Horímetro**:
+  - O campo continua tipado como `BigDecimal` no DTO e persistência.
+  - No frontend e backend, strings de entrada com espaços (`120 , 5`), formatos com vírgula (`120,5`), ponto (`120.5`) ou espaços periféricos (` 120.5 `) são sanitizados: espaços removidos, vírgula convertida para ponto.
+  - Validação estrita de formato numérico regex `^-?\\d+(\\.\\d+)?$`. Valores não numéricos (`abc`, `..`, `12,3,4`) são rejeitados com `400 Bad Request` ("O horímetro informado é inválido.").
+  - Validação de valor negativo: valores `< 0` são rejeitados com `400 Bad Request` ("O horímetro não pode ser negativo.").
+
+### 14.2. Consulta de Ordens de Serviço "Prontas para Retirada" (FEATURE-003)
+- **Endpoint**: `GET /api/ordens-servico`
+- **Query Param**: `status=PRONTA`
+- **Comportamento**: Retorna exclusivamente ordens com o status `PRONTA`, viabilizando o atalho rápido do dashboard e a aba de visualização dedicada no balcão da oficina.
+
+### 14.3. Validação Estrita de Testes de Bancada para Transição `PRONTA` (FEATURE-002)
+- **Endpoint**: `PATCH /api/ordens-servico/{id}/status`
+- **Regra de Negócio**: Quando `novoStatus = PRONTA`, o corpo deve conter `testesRealizados` preenchido. Caso esteja vazio ou em branco, a API rejeita com `400 Bad Request` ("Para marcar a ordem de serviço como PRONTA, é obrigatório registrar os testes realizados em bancada."). O frontend oferece presets rápidos para Solda e Gerador, exigindo revisão manual do operador.
+
+### 14.4. Integração de Comunicação com Cliente via Link WhatsApp (FEATURE-001)
+- **Arquitetura**: Execução 100% no frontend (`wa.me`), sem consumo de APIs externas pagas e sem persistência em banco.
+- **Formato da URL**: `https://wa.me/55[DDD][NUMERO]?text=[MENSAGEM_CODIFICADA]`
+- **Regras**: Normalização para DDI 55 com validação de dígitos telefônicos e sanitização contra injeção de caracteres maliciosos.
+
+### 14.5. Exportação de Relatórios em Formato CSV (FEATURE-004)
+- **Arquitetura**: Client-side stream/blob export a partir dos dados já consumidos dos endpoints de relatórios (`/api/relatorios/*`).
+- **Especificação**: Delimitador `;`, RFC 4180 (aspas duplicadas `""`), quebra `\r\n`, UTF-8 com BOM (`\uFEFF`) para compatibilidade perfeita com Microsoft Excel e Bloco de Notas, respeitando rigorosamente os filtros aplicados pelo usuário em tela.
+
+
 
 
 

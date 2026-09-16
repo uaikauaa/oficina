@@ -137,7 +137,35 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Elaboração do relatório executivo de homologação `QA-RELEASE-1.0-REPORT.md` com matriz de riscos e veredito GO/NO-GO.
 - 151 testes automatizados no backend com 100% de sucesso e build limpo no frontend.
 
-### Fase 10 — Melhorias Administrativas e Multi-usuário (Próxima Fase)
-- Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.
+### Versão 1.1 — Escopo Fechado de Produtividade Operacional (Concluída)
+A V1.1 implementou cirurgicamente 6 melhorias e correções validadas durante o piloto real da V1.0.0, com foco em redução de atrito no balcão e agilidade técnica, mantendo 0 migrations e 100% de estabilidade da V1.0:
+
+1. **BUG-001: Modal de Busca Rápida (`Ctrl+K`) Responsivo**:
+   - Ajuste de padding de viewport (`pt-6 sm:pt-12 pb-6`) e altura máxima dinâmica (`max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]`).
+   - Scroll interno dedicado na lista de resultados (`overflow-y-auto min-h-0`) e rodapé de atalhos fixo (`shrink-0`), eliminando qualquer vazamento em monitores 1366x768 com zoom/escala de 125%.
+2. **BUG-002: Normalização e Sanitização do Horímetro**:
+   - Sanitização unificada em `OrdemServicoService` e `MaquinaService`: remoção de espaços em branco, conversão de vírgula para ponto, validação estrita de formato numérico (`^-?\\d+(\\.\\d+)?$`), conversão para `BigDecimal` e rejeição de valores negativos (`>= 0`).
+   - Inputs frontend com pré-tratamento em tempo real nos formulários de nova OS, edição de OS e modal de equipamento.
+   - Suíte de testes parametrizados cobrindo entradas válidas (`120,5`, `120.5`, `120 , 5`, ` 120.5 `, ` 120 , 50 `) e rejeição de inválidas (`abc`, `-10`, `12,3,4`, `..`, `1.2.3`).
+3. **FEATURE-002: Laudos Rápidos de Bancada em 1 Clique**:
+   - Modelos padronizados de testes de bancada exibidos durante a transição para o status `PRONTA` no modal de status da OS (`/ordens-servico/[id]`).
+   - Chips de preenchimento rápido segmentados para Máquinas de Solda (3 modelos) e Geradores de Energia (3 modelos).
+   - Fluxo com revisão humana obrigatória: o modelo preenche o campo de texto, permitindo edição e complementação antes da confirmação. Exigência de `testesRealizados != vazio` rigorosamente mantida no backend.
+4. **FEATURE-003: Filtro e Atalho "Prontas para Retirada"**:
+   - Botão de filtro rápido "Prontas para Retirada" na listagem de Ordens de Serviço (`/ordens-servico?status=PRONTA`), ativando instantaneamente o filtro `status=PRONTA`.
+   - Card de indicador no topo do Dashboard (`/dashboard`) com contagem em tempo real de ordens prontas e link direto para visualização filtrada.
+5. **FEATURE-001: Notificação de Retirada via WhatsApp (`wa.me`)**:
+   - Botão "Avisar no WhatsApp" em `/ordens-servico/[id]` disponível para ordens com status `PRONTA` e `CONCLUIDA`.
+   - Normalização automática do telefone do cliente para o formato internacional E.164 (`55...`), removendo máscaras e pontuações.
+   - Construção de link direto via protocolo web seguro `https://wa.me/55...` com texto pré-preenchido contendo nome do cliente, modelo da máquina, número da OS e valor total formatado.
+   - Totalmente isento de integrações de API paga, sem armazenamento em banco e com revisão manual pelo operador antes do envio.
+6. **FEATURE-004: Exportação de Relatórios em CSV**:
+   - Utilitário dedicado `csvHelper.ts` gerando arquivos CSV compatíveis com RFC 4180: delimitador `;`, quebras de linha `\r\n`, escape correto de aspas duplas (`""`) e UTF-8 com BOM (`\uFEFF`) para abertura nativa no Microsoft Excel em português e Bloco de Notas sem corrupção de caracteres.
+   - Disponível nos 6 relatórios do sistema: Ordens de Serviço, Situação do Estoque, Movimentações, Peças Mais Utilizadas, Clientes e Equipamentos.
+   - Regra estrita de exportação: exporta exatamente os registros visualizados de acordo com os filtros aplicados em tela.
+
+### Próximas Fases (Pós-V1.1)
+- Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado.
+
 
 

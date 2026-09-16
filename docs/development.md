@@ -110,8 +110,26 @@ oficina-gestao/
 
 ---
 
-## 6. Padrões de Qualidade e Boas Práticas
+## 6. Padrões de Qualidade e Boas Práticas (V1.1)
 
-- Sempre execute os testes (`.\mvnw.cmd clean test`) e valide o build antes de submeter alterações.
-- Nunca commite arquivos `.env`, credenciais ou arquivos gerados em diretórios de build (`target/`, `.next/`).
-- O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway.
+- **Testes Automatizados do Backend**:
+  ```bash
+  cd backend
+  .\mvnw.cmd clean test
+  ```
+  Executa a suíte completa de 174 testes unitários e de integração (0 failures, 0 errors, 0 skipped).
+- **Testes Automatizados do Frontend**:
+  ```bash
+  cd frontend
+  npm test
+  ```
+  Executa a suíte de 21 testes unitários dos módulos `whatsappHelper` e `csvHelper` utilizando o executor nativo do Node.js (`--experimental-strip-types`).
+- **Verificação de Lint e Build do Frontend**:
+  ```bash
+  npm run lint
+  npm run build
+  ```
+  Garante 0 erros e 0 warnings no ESLint e compilação sem falhas de todas as páginas e rotas dinâmicas no Next.js.
+- Nunca commite arquivos `.env`, credenciais ou artefatos gerados em diretórios de compilação (`target/`, `.next/`).
+- O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway (0 migrations necessárias na V1.1).
+
