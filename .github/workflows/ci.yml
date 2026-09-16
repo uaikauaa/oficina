@@ -11,6 +11,21 @@ jobs:
     name: Backend — Testes & Validação
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: oficinadb
+          POSTGRES_USER: oficina
+          POSTGRES_PASSWORD: oficinapassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v4
@@ -23,6 +38,11 @@ jobs:
           cache: maven
 
       - name: Executar Testes Automatizados do Backend
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/oficinadb
+          DB_USERNAME: oficina
+          DB_PASSWORD: oficinapassword
+          JWT_SECRET: default-secret-key-oficina-gestao-ci-test-environment-2026-secure
         run: |
           cd backend
           chmod +x mvnw
@@ -48,6 +68,11 @@ jobs:
           cd frontend
           npm ci
 
+      - name: Executar Testes Automatizados (Unitários)
+        run: |
+          cd frontend
+          npm test
+
       - name: Executar Linter (ESLint)
         run: |
           cd frontend
@@ -57,3 +82,4 @@ jobs:
         run: |
           cd frontend
           npm run build
+
