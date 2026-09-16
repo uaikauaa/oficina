@@ -106,16 +106,16 @@ Requisição HTTP (JSON / Cookies)
 - **Leituras**: Métodos de leitura utilizam `@Transactional(readOnly = true)` para otimizar conexões JDBC, evitar dirty-checking desnecessário e permitir réplicas de leitura.
 - **Escritas**: Métodos de criação, atualização ou exclusão utilizam `@Transactional` explícito, garantindo atomicidade estrita e rollback em falhas de execução.
 
-### 4.3. Estrutura Modular de Pacotes
-A aplicação foi reorganizada em pacotes modulares coesos:
-- `com.oficinagestao.config`: Configurações do framework (OpenAPI/Swagger, bootstrap).
-- `com.oficinagestao.security`: Filtros JWT, codificação BCrypt, CORS e SecurityFilterChain.
-- `com.oficinagestao.auth`: DTOs, controllers e serviços de autenticação, rotação e encerramento de sessão.
-- `com.oficinagestao.usuario`: Entidades (`Usuario`, `Role`, `RefreshToken`) e repositórios de usuários.
-- `com.oficinagestao.auditoria`: Entidade, repositório e serviço desacoplado de auditoria de eventos.
+### 4.3. Estrutura Simplificada de Camadas
+A aplicação adota uma organização arquitetural linear e direta em camadas tradicionais, favorecendo legibilidade e manutenção simples:
+- `com.oficinagestao.controller`: Endpoints REST e anotações do Spring Web / Swagger.
+- `com.oficinagestao.service`: Regras de negócio, demarcação transacional (`@Transactional`) e métodos diretos de conversão entidade/DTO (sem necessidade de mappers intermediários ou boilerplate redundante).
+- `com.oficinagestao.repository`: Interfaces Spring Data JPA tipadas com consultas derivadas e JPQL seguro.
+- `com.oficinagestao.entity`: Modelos persistentes mapeados contra as tabelas do PostgreSQL Neon via Flyway.
+- `com.oficinagestao.dto`: Records Java imutáveis para transferência de dados de entrada e saída.
 - `com.oficinagestao.exception`: Hierarquia de exceções de negócio e `GlobalExceptionHandler`.
-- `com.oficinagestao.common`: Contratos genéricos como `PageResponse<T>`, `SystemController` e endpoints utilitários.
-- **Pacotes de Domínio Reservados**: `cliente`, `maquina`, `produto`, `estoque`, `fornecedor`, `ordem`, `relatorio`.
+- `com.oficinagestao.security`: Filtros JWT, CORS, autenticação stateless e `SecurityConfig`.
+- `com.oficinagestao.config`: Configurações de bootstrap, CORS e documentação OpenAPI 3.
 
 ### 4.4. Tratamento Global de Exceções e Segurança de Informação
 O `GlobalExceptionHandler` intercepta todas as exceções e produz respostas padronizadas via `ApiErrorResponse`:

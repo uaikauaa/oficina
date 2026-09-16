@@ -18,6 +18,15 @@ Este documento descreve os pré-requisitos e os passos para configurar o ambient
 oficina-gestao/
 ├── frontend/             # Next.js (App Router, Tailwind)
 ├── backend/              # Spring Boot (Java 21, JPA, Flyway, Maven Wrapper)
+│   ├── src/main/java/com/oficinagestao/
+│   │   ├── config/       # Swagger, OpenAPI, bootstrap
+│   │   ├── controller/   # Endpoints REST (HTTP)
+│   │   ├── dto/          # Records de entrada e saída
+│   │   ├── entity/       # Entidades JPA
+│   │   ├── exception/    # Exceções e handler global
+│   │   ├── repository/   # Repositórios Spring Data
+│   │   ├── security/     # JWT e configurações de segurança
+│   │   └── service/      # Regras de negócio e transações
 ├── database/migrations/  # Espelho das migrations Flyway
 ├── docs/                 # Documentação técnica
 ├── scripts/              # Utilitários de desenvolvimento

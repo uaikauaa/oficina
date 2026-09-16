@@ -17,7 +17,7 @@ import {
   TipoMovimentacaoEstoque,
   MovimentacaoManualFormData,
 } from '@/lib/types';
-import { apiFetch, apiFetchJson } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 
 interface MovimentacaoEstoqueModalProps {
   isOpen: boolean;

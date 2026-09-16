@@ -1,9 +1,9 @@
 package com.oficinagestao.config;
 
-import com.oficinagestao.usuario.Role;
-import com.oficinagestao.usuario.Usuario;
-import com.oficinagestao.usuario.RoleRepository;
-import com.oficinagestao.usuario.UsuarioRepository;
+import com.oficinagestao.entity.Role;
+import com.oficinagestao.entity.Usuario;
+import com.oficinagestao.repository.RoleRepository;
+import com.oficinagestao.repository.UsuarioRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

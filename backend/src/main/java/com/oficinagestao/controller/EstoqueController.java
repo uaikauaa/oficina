@@ -1,0 +1,98 @@
+package com.oficinagestao.controller;
+import com.oficinagestao.repository.*;
+
+import com.oficinagestao.entity.*;
+import com.oficinagestao.dto.*;
+import com.oficinagestao.service.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.OffsetDateTime;
+
+@RestController
+@RequestMapping("/api/estoque")
+@Tag(name = "Estoque", description = "Controle fÃƒÂ­sico de estoque, saldos e histÃƒÂ³rico de movimentaÃƒÂ§ÃƒÂµes")
+@SecurityRequirement(name = "cookieAuth")
+@SecurityRequirement(name = "bearerAuth")
+public class EstoqueController {
+
+    private final EstoqueService estoqueService;
+    private final UsuarioRepository usuarioRepository;
+
+    public EstoqueController(EstoqueService estoqueService, UsuarioRepository usuarioRepository) {
+        this.estoqueService = estoqueService;
+        this.usuarioRepository = usuarioRepository;
+    }
+
+    @GetMapping("/resumo")
+    @Operation(summary = "Obter indicadores e resumo geral de estoque")
+    public ResponseEntity<EstoqueResumoDTO> obterResumo() {
+        return ResponseEntity.ok(estoqueService.obterResumoEstoque());
+    }
+
+    @PostMapping("/movimentar")
+    @Operation(summary = "Registrar movimentaÃƒÂ§ÃƒÂ£o manual de estoque (Entrada, SaÃƒÂ­da, Ajuste)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "MovimentaÃƒÂ§ÃƒÂ£o registrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou estoque insuficiente"),
+            @ApiResponse(responseCode = "404", description = "Produto nÃƒÂ£o encontrado")
+    })
+    public ResponseEntity<EstoqueMovimentacaoResponseDTO> movimentar(
+            @Valid @RequestBody MovimentacaoManualDTO dto,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Long usuarioId = extrairUsuarioId(authentication);
+        EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(dto, usuarioId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/movimentacoes")
+    @Operation(summary = "Consultar histÃƒÂ³rico de movimentaÃƒÂ§ÃƒÂµes de estoque com filtros e paginaÃƒÂ§ÃƒÂ£o")
+    public ResponseEntity<PageResponse<EstoqueMovimentacaoResponseDTO>> listarMovimentacoes(
+            @RequestParam(required = false) Long produtoId,
+            @RequestParam(required = false) TipoMovimentacaoEstoque tipo,
+            @RequestParam(required = false) OffsetDateTime dataInicio,
+            @RequestParam(required = false) OffsetDateTime dataFim,
+            @RequestParam(required = false) String numeroOs,
+            @PageableDefault(size = 20, sort = "dataMovimentacao", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<EstoqueMovimentacaoResponseDTO> page = estoqueService.listarMovimentacoes(
+                produtoId,
+                tipo,
+                dataInicio,
+                dataFim,
+                numeroOs,
+                pageable
+        );
+        return ResponseEntity.ok(PageResponse.from(page));
+    }
+
+    private Long extrairUsuarioId(Authentication authentication) {
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return usuarioRepository.findByEmail(authentication.getName())
+                .map(Usuario::getId)
+                .orElse(null);
+    }
+}

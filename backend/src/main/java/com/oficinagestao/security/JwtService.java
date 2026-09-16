@@ -1,7 +1,7 @@
 package com.oficinagestao.security;
 
-import com.oficinagestao.usuario.Role;
-import com.oficinagestao.usuario.Usuario;
+import com.oficinagestao.entity.Role;
+import com.oficinagestao.entity.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
