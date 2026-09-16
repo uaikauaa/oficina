@@ -719,4 +719,43 @@ class OrdemServicoServiceTest {
         );
         assertNotNull(ex.getMessage());
     }
+
+    @Test
+    @DisplayName("FEATURE-002: Deve rejeitar transição para PRONTA sem testes de bancada realizados")
+    void deveRejeitarTransicaoParaProntaSemTestes() {
+        OrdemServico os = new OrdemServico();
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+        os.setTestesRealizados(null);
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(90L)).thenReturn(Optional.of(os));
+
+        OrdemServicoStatusDTO dto = new OrdemServicoStatusDTO(StatusOrdemServico.PRONTA, null, null);
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                ordemServicoService.alterarStatus(90L, dto, 1L, "127.0.0.1")
+        );
+
+        assertTrue(ex.getMessage().contains("testes técnicos realizados na bancada"));
+    }
+
+    @Test
+    @DisplayName("FEATURE-002: Deve permitir transição para PRONTA com laudo de teste de bancada e persistir laudo")
+    void devePermitirTransicaoParaProntaComTestes() {
+        OrdemServico os = new OrdemServico();
+        os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
+        os.setTestesRealizados(null);
+
+        when(ordemServicoRepository.findByIdWithClienteAndMaquina(91L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String laudo = "Arco elétrico estável a 180A por 15 minutos.";
+        OrdemServicoStatusDTO dto = new OrdemServicoStatusDTO(StatusOrdemServico.PRONTA, laudo, "Liberado");
+
+        OrdemServicoResponseDTO response = ordemServicoService.alterarStatus(91L, dto, 1L, "127.0.0.1");
+
+        assertNotNull(response);
+        assertEquals(StatusOrdemServico.PRONTA, os.getStatus());
+        assertEquals(laudo, os.getTestesRealizados());
+        verify(ordemServicoRepository).save(os);
+    }
 }

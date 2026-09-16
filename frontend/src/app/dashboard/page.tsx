@@ -13,6 +13,7 @@ import {
   Clock,
   Wrench,
   Plus,
+  Zap,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import { CurrentUser } from '@/lib/types';
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [totalOs, setTotalOs] = useState<number | null>(null);
   const [totalOsAbertas, setTotalOsAbertas] = useState<number | null>(null);
   const [totalOsManutencao, setTotalOsManutencao] = useState<number | null>(null);
+  const [totalOsProntas, setTotalOsProntas] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,11 +40,12 @@ export default function DashboardPage() {
         setUser(userData);
 
         // Carrega contagens operacionais
-        const [cliRes, osTotRes, osAbertaRes, osManutRes] = await Promise.all([
+        const [cliRes, osTotRes, osAbertaRes, osManutRes, osProntaRes] = await Promise.all([
           apiFetch('/api/clientes?size=1'),
           apiFetch('/api/ordens-servico?size=1'),
           apiFetch('/api/ordens-servico?status=ABERTA&size=1'),
           apiFetch('/api/ordens-servico?status=EM_MANUTENCAO&size=1'),
+          apiFetch('/api/ordens-servico?status=PRONTA&size=1'),
         ]);
 
         if (cliRes.ok) {
@@ -60,6 +63,10 @@ export default function DashboardPage() {
         if (osManutRes.ok) {
           const d = await osManutRes.json();
           setTotalOsManutencao(d.totalElements ?? 0);
+        }
+        if (osProntaRes.ok) {
+          const d = await osProntaRes.json();
+          setTotalOsProntas(d.totalElements ?? 0);
         }
       } catch {
         router.push('/login');
@@ -121,7 +128,7 @@ export default function DashboardPage() {
                   Recepção de máquinas, diagnóstico de bancada, validação técnica sob carga e histórico completo por cliente e equipamento.
                 </p>
 
-                <div className="flex items-center gap-4 mt-3 text-xs">
+                <div className="flex flex-wrap items-center gap-4 mt-3 text-xs">
                   <span className="text-amber-400 font-semibold flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     <strong>{totalOsAbertas ?? 0}</strong> Abertas
@@ -130,6 +137,13 @@ export default function DashboardPage() {
                     <Wrench className="w-3.5 h-3.5" />
                     <strong>{totalOsManutencao ?? 0}</strong> Em Manutenção
                   </span>
+                  <Link
+                    href="/ordens-servico?status=PRONTA"
+                    className="text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 transition-colors underline-offset-4 hover:underline"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                    <strong>{totalOsProntas ?? 0}</strong> Prontas para Retirada
+                  </Link>
                   <span className="text-slate-400 font-medium">
                     Total: <strong className="text-white">{totalOs ?? 0}</strong> atendimentos
                   </span>
@@ -138,6 +152,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <Link
+                href="/ordens-servico?status=PRONTA"
+                className="px-4 py-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-semibold flex items-center gap-2 border border-emerald-500/30 transition-all cursor-pointer"
+              >
+                <Zap className="w-4 h-4" />
+                <span>Prontas para Retirada ({totalOsProntas ?? 0})</span>
+              </Link>
               <Link
                 href="/ordens-servico/nova"
                 className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   FileText,
   Search,
@@ -26,8 +26,10 @@ import {
 } from '@/lib/types';
 import { apiFetch, formatarMoeda, formatarDataHora } from '@/lib/api';
 
-export default function OrdensServicoPage() {
+function OrdensServicoContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status') || '';
 
   // Estados de Usuário e Autenticação
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
@@ -45,10 +47,17 @@ export default function OrdensServicoPage() {
   // Estados de Filtros
   const [termo, setTermo] = useState('');
   const [termoDebounced, setTermoDebounced] = useState('');
-  const [statusFiltro, setStatusFiltro] = useState<string>('');
+  const [statusFiltro, setStatusFiltro] = useState<string>(statusParam);
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
   const [periodoAtivo, setPeriodoAtivo] = useState<'30' | '90' | 'ano' | 'tudo' | 'custom'>('tudo');
+
+  const [prevStatusParam, setPrevStatusParam] = useState(statusParam);
+  if (statusParam !== prevStatusParam) {
+    setPrevStatusParam(statusParam);
+    setStatusFiltro(statusParam);
+    setPage(0);
+  }
 
   const definirPeriodo = (tipo: '30' | '90' | 'ano' | 'tudo') => {
     setPeriodoAtivo(tipo);
@@ -231,13 +240,31 @@ export default function OrdensServicoPage() {
             </p>
           </div>
 
-          <Link
-            href="/ordens-servico/nova"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Nova Ordem de Serviço</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setStatusFiltro('PRONTA');
+                setPage(0);
+              }}
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm border transition-all cursor-pointer ${
+                statusFiltro === 'PRONTA'
+                  ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20'
+                  : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+              }`}
+            >
+              <Zap className="w-4 h-4" />
+              <span>Prontas para Retirada ({metricas.prontas})</span>
+            </button>
+
+            <Link
+              href="/ordens-servico/nova"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nova Ordem de Serviço</span>
+            </Link>
+          </div>
         </div>
 
         {/* Cards de Métricas Operacionais */}
@@ -305,7 +332,7 @@ export default function OrdensServicoPage() {
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs text-emerald-400 font-medium">Prontas (Testadas)</span>
+              <span className="text-xs text-emerald-400 font-medium">Prontas para Retirada</span>
               <Zap className="w-4 h-4 text-emerald-400" />
             </div>
             <p className="text-xl sm:text-2xl font-black text-emerald-400 mt-1">{metricas.prontas}</p>
@@ -626,5 +653,19 @@ export default function OrdensServicoPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function OrdensServicoPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+          <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <OrdensServicoContent />
+    </Suspense>
   );
 }
