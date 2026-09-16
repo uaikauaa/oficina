@@ -23,9 +23,11 @@ import {
   Loader2,
   Download,
   Printer,
+  MessageCircle,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import OrdemServicoImpressao from '@/components/OrdemServicoImpressao';
+import { gerarLinkWhatsappRetirada } from '@/lib/whatsappHelper';
 import {
   CurrentUser,
   OrdemServico,
@@ -358,6 +360,25 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   };
 
+  // Notificação de Retirada via WhatsApp (FEATURE-001)
+  const handleAbrirWhatsApp = () => {
+    if (!os) return;
+    const res = gerarLinkWhatsappRetirada({
+      telefone: os.clienteTelefone,
+      clienteNome: os.clienteNome,
+      equipamentoModelo: `${os.maquinaMarca || ''} ${os.maquinaModelo || ''}`.trim(),
+      numeroOs: os.numeroOs,
+      valorTotal: os.valorTotal || 0,
+    });
+
+    if (!res.url) {
+      alert(res.erro || 'Telefone do cliente não informado ou inválido para WhatsApp.');
+      return;
+    }
+
+    window.open(res.url, '_blank', 'noopener,noreferrer');
+  };
+
   // Envio da Atualização Técnica e Financeira
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -536,6 +557,17 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                 <Printer className="w-3.5 h-3.5 text-sky-400" />
                 <span>Imprimir</span>
               </button>
+              {(os.status === 'PRONTA' || os.status === 'CONCLUIDA') && (
+                <button
+                  type="button"
+                  onClick={handleAbrirWhatsApp}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Avisar cliente via WhatsApp que o equipamento está pronto para retirada"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>Avisar no WhatsApp</span>
+                </button>
+              )}
               {!isTerminal && (
                 <button
                   type="button"
@@ -716,10 +748,23 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                   </p>
                 )}
                 {os.clienteTelefone && (
-                  <p>
-                    Contato:{' '}
-                    <strong className="text-slate-200">{formatarTelefone(os.clienteTelefone)}</strong>
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p>
+                      Contato:{' '}
+                      <strong className="text-slate-200">{formatarTelefone(os.clienteTelefone)}</strong>
+                    </p>
+                    {(os.status === 'PRONTA' || os.status === 'CONCLUIDA') && (
+                      <button
+                        type="button"
+                        onClick={handleAbrirWhatsApp}
+                        className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+                        title="Notificar cliente via WhatsApp"
+                      >
+                        <MessageCircle className="w-3 h-3" />
+                        <span>Avisar Retirada</span>
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
