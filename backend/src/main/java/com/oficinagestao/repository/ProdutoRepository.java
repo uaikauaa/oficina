@@ -12,10 +12,18 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+
+    @Query("SELECT p FROM Produto p WHERE " +
+           "p.ativo = true AND (" +
+           "  LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) " +
+           "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
+           "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', :termo, '%'))))")
+    List<Produto> buscarRapida(@Param("termo") String termo, Pageable pageable);
 
     boolean existsByCodigo(String codigo);
 

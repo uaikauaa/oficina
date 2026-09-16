@@ -23,6 +23,8 @@ import {
   Gauge,
   AlertTriangle,
   ArrowUpRight,
+  History,
+  DollarSign,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
@@ -30,6 +32,7 @@ import ConfirmModal from '@/components/ConfirmModal';
 import MaquinaModal from '@/components/MaquinaModal';
 import {
   Cliente,
+  ClienteResumo,
   CurrentUser,
   Maquina,
   OrdemServico,
@@ -69,6 +72,9 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
   // Estado de Ordens de Serviço do Cliente
   const [ordensCliente, setOrdensCliente] = useState<OrdemServico[]>([]);
   const [ordensLoading, setOrdensLoading] = useState(false);
+
+  // Resumo de KPIs do Cliente (Fase 7)
+  const [resumo, setResumo] = useState<ClienteResumo | null>(null);
 
   // Modais
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -174,15 +180,28 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
     }
   }, [clienteId]);
 
+  const fetchResumo = useCallback(async () => {
+    try {
+      const res = await apiFetch(`/api/clientes/${clienteId}/resumo`);
+      if (res.ok) {
+        const data: ClienteResumo = await res.json();
+        setResumo(data);
+      }
+    } catch {
+      // Ignora erro
+    }
+  }, [clienteId]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       if (clienteId) {
         fetchMaquinas();
         fetchOrdensCliente();
+        fetchResumo();
       }
     }, 0);
     return () => clearTimeout(timer);
-  }, [clienteId, fetchMaquinas, fetchOrdensCliente]);
+  }, [clienteId, fetchMaquinas, fetchOrdensCliente, fetchResumo]);
 
   const handleAlterarStatusMaquina = async (maquina: Maquina) => {
     const novoStatus = !maquina.ativo;
@@ -381,6 +400,72 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
               <div className="text-[11px] text-slate-500">
                 Atualizado em: {new Date(cliente.updatedAt).toLocaleDateString('pt-BR')}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* INDICADORES DO CLIENTE (5 CARDS DE RESUMO - FASE 7) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
+              <Wrench className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block">Equipamentos</span>
+              <span className="text-lg sm:text-xl font-black text-white">
+                {resumo?.quantidadeEquipamentos ?? maquinas.length}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block">Total de OS</span>
+              <span className="text-lg sm:text-xl font-black text-white">
+                {resumo?.quantidadeTotalOs ?? ordensCliente.length}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block">OS em Aberto</span>
+              <span className="text-lg sm:text-xl font-black text-orange-400">
+                {resumo?.quantidadeOsAbertas ?? 0}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block">Última Visita</span>
+              <span className="text-xs font-bold text-white">
+                {resumo?.ultimaVisitaData
+                  ? formatarDataHora(resumo.ultimaVisitaData)
+                  : 'Nenhuma'}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center gap-3 col-span-2 sm:col-span-1">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium block">Total Acumulado</span>
+              <span className="text-sm sm:text-base font-black text-emerald-400">
+                {formatarMoeda(resumo?.valorAcumulado ?? 0)}
+              </span>
+              <span className="text-[9px] text-slate-500 block leading-tight">Somente OS Concluídas</span>
             </div>
           </div>
         </div>
@@ -595,10 +680,11 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                     </Link>
                     <Link
                       href={`/maquinas/${maq.id}`}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-semibold flex items-center justify-center gap-1 border border-slate-700 transition-all cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[11px] font-semibold flex items-center justify-center gap-1 border border-amber-500/20 transition-all cursor-pointer"
+                      title="Ver Histórico Completo do Equipamento"
                     >
-                      <span>Histórico</span>
-                      <ArrowUpRight className="w-3 h-3" />
+                      <History className="w-3 h-3 text-amber-400" />
+                      <span>Ver Histórico</span>
                     </Link>
                     <button
                       onClick={() => { setEditingMaquina(maq); setIsMaquinaModalOpen(true); }}

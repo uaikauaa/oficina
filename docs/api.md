@@ -583,5 +583,55 @@ Remove uma peça da Ordem de Serviço com estorno automático:
 5. Recalcula `valorPecas` e `valorTotal` da Ordem de Serviço.
 - **Resposta Sucesso (204 No Content)**.
 
+---
+
+## 12. Endpoints da Fase 7 (Histórico Técnico e Busca Rápida)
+
+### 12.1. Busca Rápida Global
+
+#### `GET /api/busca/rapida`
+Executa busca global transversal e agregada em frações de segundo para balcão de atendimento:
+- **Query Params**: `termo` (obrigatório, mínimo 1 caractere).
+- **Escopo Pesquisado**:
+  - Clientes (nome, razão social, nome fantasia, CPF/CNPJ, telefone);
+  - Equipamentos (marca, modelo, número de série, nome do cliente vinculado);
+  - Ordens de Serviço (número da OS, cliente, equipamento, problema relatado);
+  - Peças / Produtos (código, nome, código de barras/SKU, marca).
+- **Limite**: Máximo 5 registros por categoria (total até 20 itens).
+- **Resposta Sucesso (200 OK)**: `BuscaRapidaDTO` contendo arrays tipados com `{ id, titulo, subtitulo, tag, url }`.
+
+### 12.2. Resumo e Histórico de Equipamentos
+
+#### `GET /api/maquinas/{id}/resumo`
+Retorna os 4 indicadores de desempenho e histórico da máquina:
+- **Resposta Sucesso (200 OK)**: `MaquinaResumoDTO`:
+  - `totalAtendimentos`: Quantidade total de OS registradas para a máquina;
+  - `ultimaManutencaoData`: Data e hora da última entrada;
+  - `ultimaOsNumero`: Número da última OS atendida;
+  - `ultimaOsProblema`: Defeito relatado no último atendimento;
+  - `ultimaOsStatus`: Status da última OS;
+  - `valorAcumulado`: Soma estrita de `valorTotal` apenas de Ordens com status `CONCLUIDA`.
+
+#### `GET /api/maquinas/{id}/historico`
+Retorna a lista completa cronológica de Ordens de Serviço da máquina, da mais recente para a mais antiga (`ORDER BY dataEntrada DESC`):
+- **Resposta Sucesso (200 OK)**: Lista de `OrdemServicoResponseDTO` isolada exclusivamente para a máquina solicitada.
+
+### 12.3. Resumo e Histórico do Cliente
+
+#### `GET /api/clientes/{id}/resumo`
+Retorna o resumo operacional do cliente:
+- **Resposta Sucesso (200 OK)**: `ClienteResumoDTO`:
+  - `quantidadeEquipamentos`: Total de equipamentos cadastrados pertencentes ao cliente;
+  - `quantidadeTotalOs`: Total de OS de todos os equipamentos do cliente;
+  - `quantidadeOsAbertas`: Total de OS em andamento (status != `CONCLUIDA` e != `CANCELADA`);
+  - `ultimaVisitaData`: Data da OS mais recente do cliente;
+  - `ultimaOsNumero`: Número da OS mais recente;
+  - `valorAcumulado`: Soma estrita de `valorTotal` de OS concluídas do cliente.
+
+#### `GET /api/clientes/{id}/historico`
+Retorna todas as Ordens de Serviço de todos os equipamentos do cliente ordenadas por data decrescente:
+- **Resposta Sucesso (200 OK)**: Lista de `OrdemServicoResponseDTO` isolada exclusivamente para o cliente solicitado.
+
+
 
 

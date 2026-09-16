@@ -23,20 +23,31 @@ public interface EstoqueMovimentacaoRepository extends JpaRepository<EstoqueMovi
             "AND (:tipo IS NULL OR m.tipoMovimentacao = :tipo) " +
             "AND (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao >= :dataInicio) " +
             "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao <= :dataFim) " +
-            "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%'))))",
+            "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%')))) " +
+            "AND (:termo IS NULL OR :termo = '' OR " +
+            "     LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+            "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', :termo, '%'))))",
             countQuery = "SELECT COUNT(m) FROM EstoqueMovimentacao m " +
+                    "LEFT JOIN m.produto p " +
+                    "LEFT JOIN m.usuario u " +
                     "LEFT JOIN m.ordemServico os " +
-                    "WHERE (:produtoId IS NULL OR m.produto.id = :produtoId) " +
+                    "WHERE (:produtoId IS NULL OR p.id = :produtoId) " +
                     "AND (:tipo IS NULL OR m.tipoMovimentacao = :tipo) " +
                     "AND (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao >= :dataInicio) " +
                     "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao <= :dataFim) " +
-                    "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%'))))")
+                    "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%')))) " +
+                    "AND (:termo IS NULL OR :termo = '' OR " +
+                    "     LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+                    "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+                    "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', :termo, '%'))))")
     Page<EstoqueMovimentacao> pesquisarHistorico(
             @Param("produtoId") Long produtoId,
             @Param("tipo") TipoMovimentacaoEstoque tipo,
             @Param("dataInicio") OffsetDateTime dataInicio,
             @Param("dataFim") OffsetDateTime dataFim,
             @Param("numeroOs") String numeroOs,
+            @Param("termo") String termo,
             Pageable pageable
     );
 

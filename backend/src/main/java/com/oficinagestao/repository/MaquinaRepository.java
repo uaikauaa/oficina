@@ -9,12 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
 
-    /** Conta quantos equipamentos (ativos ou nÃ£o) pertencem a um cliente. */
+    @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE " +
+           "LOWER(m.marca) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+           "LOWER(m.modelo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+           "LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%'))")
+    List<Maquina> buscarRapida(@Param("termo") String termo, Pageable pageable);
+
+    /** Conta quantos equipamentos (ativos ou não) pertencem a um cliente. */
     long countByClienteId(Long clienteId);
 
     /** Conta equipamentos ativos de um cliente (para exibiÃ§Ã£o no card do cliente). */

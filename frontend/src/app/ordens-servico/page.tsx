@@ -48,6 +48,31 @@ export default function OrdensServicoPage() {
   const [statusFiltro, setStatusFiltro] = useState<string>('');
   const [dataInicio, setDataInicio] = useState<string>('');
   const [dataFim, setDataFim] = useState<string>('');
+  const [periodoAtivo, setPeriodoAtivo] = useState<'30' | '90' | 'ano' | 'tudo' | 'custom'>('tudo');
+
+  const definirPeriodo = (tipo: '30' | '90' | 'ano' | 'tudo') => {
+    setPeriodoAtivo(tipo);
+    const hoje = new Date();
+    if (tipo === 'tudo') {
+      setDataInicio('');
+      setDataFim('');
+    } else if (tipo === '30') {
+      const d = new Date();
+      d.setDate(d.getDate() - 30);
+      setDataInicio(d.toISOString().split('T')[0]);
+      setDataFim(hoje.toISOString().split('T')[0]);
+    } else if (tipo === '90') {
+      const d = new Date();
+      d.setDate(d.getDate() - 90);
+      setDataInicio(d.toISOString().split('T')[0]);
+      setDataFim(hoje.toISOString().split('T')[0]);
+    } else if (tipo === 'ano') {
+      const d = new Date(hoje.getFullYear(), 0, 1);
+      setDataInicio(d.toISOString().split('T')[0]);
+      setDataFim(hoje.toISOString().split('T')[0]);
+    }
+    setPage(0);
+  };
 
   // Contadores rápidos
   const [metricas, setMetricas] = useState({
@@ -308,20 +333,20 @@ export default function OrdensServicoPage() {
         {/* Barra de Filtros e Pesquisa */}
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-            {/* Campo de Busca Livre */}
+            {/* Campo de Busca Livre (OS, Cliente, CPF/CNPJ, Equipamento, Nº Série) */}
             <div className="sm:col-span-6 relative">
               <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 value={termo}
                 onChange={(e) => setTermo(e.target.value)}
-                placeholder="Buscar por Nº da OS, cliente, equipamento ou nº de série..."
+                placeholder="Buscar por Nº da OS, cliente, CPF/CNPJ, equipamento ou nº de série..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 transition-all"
               />
             </div>
 
             {/* Filtro por Status */}
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-4">
               <select
                 value={statusFiltro}
                 onChange={(e) => {
@@ -340,7 +365,7 @@ export default function OrdensServicoPage() {
             </div>
 
             {/* Limpar Filtros */}
-            <div className="sm:col-span-3 flex items-center gap-2">
+            <div className="sm:col-span-2 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -348,12 +373,91 @@ export default function OrdensServicoPage() {
                   setStatusFiltro('');
                   setDataInicio('');
                   setDataFim('');
+                  setPeriodoAtivo('tudo');
                   setPage(0);
                 }}
                 className="w-full py-2.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 transition-all cursor-pointer"
               >
-                Limpar Filtros
+                Limpar
               </button>
+            </div>
+          </div>
+
+          {/* Atalhos Rápidos de Período */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-800/80 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-slate-400 font-medium">Período:</span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => definirPeriodo('tudo')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    periodoAtivo === 'tudo'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  type="button"
+                  onClick={() => definirPeriodo('30')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    periodoAtivo === '30'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  Últimos 30 dias
+                </button>
+                <button
+                  type="button"
+                  onClick={() => definirPeriodo('90')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    periodoAtivo === '90'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  Últimos 90 dias
+                </button>
+                <button
+                  type="button"
+                  onClick={() => definirPeriodo('ano')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    periodoAtivo === 'ano'
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-slate-200'
+                  }`}
+                >
+                  Este Ano
+                </button>
+              </div>
+            </div>
+
+            {/* Inputs de Data Personalizada */}
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dataInicio}
+                onChange={(e) => {
+                  setDataInicio(e.target.value);
+                  setPeriodoAtivo('custom');
+                  setPage(0);
+                }}
+                className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-amber-500/40"
+              />
+              <span className="text-slate-500">até</span>
+              <input
+                type="date"
+                value={dataFim}
+                onChange={(e) => {
+                  setDataFim(e.target.value);
+                  setPeriodoAtivo('custom');
+                  setPage(0);
+                }}
+                className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-amber-500/40"
+              />
             </div>
           </div>
         </div>

@@ -442,3 +442,44 @@ export interface OrdemServicoItemFormData {
   observacoes?: string;
 }
 
+// =========================================================================
+// Tipos da Fase 7: Histórico Técnico e Busca Rápida
+// =========================================================================
+
+export interface MaquinaResumo {
+  maquinaId: number;
+  totalAtendimentos: number;
+  ultimaManutencaoData?: string | null;
+  ultimaOsId?: number | null;
+  ultimaOsNumero?: string | null;
+  ultimaOsProblema?: string | null;
+  ultimaOsStatus?: StatusOrdemServico | null;
+  valorAcumulado: number;
+}
+
+export interface ClienteResumo {
+  clienteId: number;
+  quantidadeEquipamentos: number;
+  quantidadeTotalOs: number;
+  quantidadeOsAbertas: number;
+  ultimaVisitaData?: string | null;
+  ultimaOsNumero?: string | null;
+  valorAcumulado: number;
+}
+
+export interface ItemBuscaRapida {
+  id: number;
+  titulo: string;
+  subtitulo: string;
+  tag: string;
+  url: string;
+}
+
+export interface BuscaRapidaResultado {
+  clientes: ItemBuscaRapida[];
+  maquinas: ItemBuscaRapida[];
+  ordensServico: ItemBuscaRapida[];
+  produtos: ItemBuscaRapida[];
+  totalResultados: number;
+}
+

@@ -7,13 +7,17 @@ import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.ClienteRepository;
 import com.oficinagestao.repository.MaquinaRepository;
+import com.oficinagestao.repository.OrdemServicoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClienteService {
@@ -21,15 +25,50 @@ public class ClienteService {
     private final ClienteRepository clienteRepository;
     private final AuditoriaService auditoriaService;
     private final MaquinaRepository maquinaRepository;
+    private final OrdemServicoRepository ordemServicoRepository;
 
     public ClienteService(
             ClienteRepository clienteRepository,
             AuditoriaService auditoriaService,
-            MaquinaRepository maquinaRepository
+            MaquinaRepository maquinaRepository,
+            OrdemServicoRepository ordemServicoRepository
     ) {
         this.clienteRepository = clienteRepository;
         this.auditoriaService = auditoriaService;
         this.maquinaRepository = maquinaRepository;
+        this.ordemServicoRepository = ordemServicoRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public ClienteResumoDTO obterResumo(Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + clienteId));
+
+        long quantidadeEquipamentos = maquinaRepository.countByClienteId(clienteId);
+        long quantidadeTotalOs = ordemServicoRepository.countByClienteId(clienteId);
+        long quantidadeOsAbertas = ordemServicoRepository.countOsAbertasPorCliente(clienteId);
+        BigDecimal valorAcumulado = ordemServicoRepository.somarValorTotalConcluidasPorCliente(clienteId);
+
+        Optional<OrdemServico> ultimaOsOpt = ordemServicoRepository.findFirstByClienteIdOrderByDataEntradaDesc(clienteId);
+
+        OffsetDateTime ultimaVisitaData = null;
+        String ultimaOsNumero = null;
+
+        if (ultimaOsOpt.isPresent()) {
+            OrdemServico ultimaOs = ultimaOsOpt.get();
+            ultimaVisitaData = ultimaOs.getDataEntrada();
+            ultimaOsNumero = ultimaOs.getNumeroOs();
+        }
+
+        return new ClienteResumoDTO(
+                cliente.getId(),
+                quantidadeEquipamentos,
+                quantidadeTotalOs,
+                quantidadeOsAbertas,
+                ultimaVisitaData,
+                ultimaOsNumero,
+                valorAcumulado != null ? valorAcumulado : BigDecimal.ZERO
+        );
     }
 
     @Transactional(readOnly = true)

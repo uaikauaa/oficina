@@ -12,11 +12,18 @@ import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.ClienteRepository;
 import com.oficinagestao.repository.MaquinaRepository;
 import org.springframework.data.domain.Page;
+import com.oficinagestao.dto.MaquinaResumoDTO;
+import com.oficinagestao.dto.OrdemServicoResponseDTO;
+import com.oficinagestao.entity.OrdemServico;
+import com.oficinagestao.entity.StatusOrdemServico;
+import com.oficinagestao.repository.OrdemServicoRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Service
 public class MaquinaService {
@@ -24,15 +31,63 @@ public class MaquinaService {
     private final MaquinaRepository maquinaRepository;
     private final ClienteRepository clienteRepository;
     private final AuditoriaService auditoriaService;
+    private final OrdemServicoRepository ordemServicoRepository;
+    private final OrdemServicoService ordemServicoService;
 
     public MaquinaService(
             MaquinaRepository maquinaRepository,
             ClienteRepository clienteRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            OrdemServicoRepository ordemServicoRepository,
+            OrdemServicoService ordemServicoService
     ) {
         this.maquinaRepository = maquinaRepository;
         this.clienteRepository = clienteRepository;
         this.auditoriaService = auditoriaService;
+        this.ordemServicoRepository = ordemServicoRepository;
+        this.ordemServicoService = ordemServicoService;
+    }
+
+    @Transactional(readOnly = true)
+    public MaquinaResumoDTO obterResumo(Long maquinaId) {
+        Maquina maquina = maquinaRepository.findByIdWithCliente(maquinaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Equipamento não encontrado com ID: " + maquinaId));
+
+        long totalAtendimentos = ordemServicoRepository.countByMaquinaId(maquinaId);
+        BigDecimal valorAcumulado = ordemServicoRepository.somarValorTotalConcluidasPorMaquina(maquinaId);
+
+        Optional<OrdemServico> ultimaOsOpt = ordemServicoRepository.findFirstByMaquinaIdOrderByDataEntradaDesc(maquinaId);
+
+        OffsetDateTime ultimaManutencaoData = null;
+        Long ultimaOsId = null;
+        String ultimaOsNumero = null;
+        String ultimaOsProblema = null;
+        StatusOrdemServico ultimaOsStatus = null;
+
+        if (ultimaOsOpt.isPresent()) {
+            OrdemServico ultimaOs = ultimaOsOpt.get();
+            ultimaOsId = ultimaOs.getId();
+            ultimaOsNumero = ultimaOs.getNumeroOs();
+            ultimaOsProblema = ultimaOs.getProblemaRelatado();
+            ultimaOsStatus = ultimaOs.getStatus();
+            ultimaManutencaoData = ultimaOs.getDataConclusao() != null ? ultimaOs.getDataConclusao() : ultimaOs.getDataEntrada();
+        }
+
+        return new MaquinaResumoDTO(
+                maquina.getId(),
+                totalAtendimentos,
+                ultimaManutencaoData,
+                ultimaOsId,
+                ultimaOsNumero,
+                ultimaOsProblema,
+                ultimaOsStatus,
+                valorAcumulado != null ? valorAcumulado : BigDecimal.ZERO
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<OrdemServicoResponseDTO> obterHistorico(Long maquinaId, Pageable pageable) {
+        return ordemServicoService.listarPorMaquina(maquinaId, pageable);
     }
 
     @Transactional

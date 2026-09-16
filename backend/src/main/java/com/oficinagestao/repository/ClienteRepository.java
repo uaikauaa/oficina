@@ -9,12 +9,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
-    // VerificaÃ§Ãµes de duplicidade para criaÃ§Ã£o
+    @Query("SELECT c FROM Cliente c WHERE " +
+           "CAST(c.id AS string) = :termo OR " +
+           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+           "LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
+           "c.cpfCnpj LIKE CONCAT('%', :termo, '%') OR " +
+           "c.telefone LIKE CONCAT('%', :termo, '%') OR " +
+           "c.celular LIKE CONCAT('%', :termo, '%')")
+    List<Cliente> buscarRapida(@Param("termo") String termo, Pageable pageable);
+
+    // Verificações de duplicidade para criação
     boolean existsByCpfCnpj(String cpfCnpj);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Cliente c " +

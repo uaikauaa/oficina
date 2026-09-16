@@ -128,10 +128,12 @@ public class EstoqueService {
             OffsetDateTime dataInicio,
             OffsetDateTime dataFim,
             String numeroOs,
+            String termo,
             Pageable pageable
     ) {
         String numOs = (numeroOs != null && !numeroOs.isBlank()) ? numeroOs.trim() : null;
-        return estoqueMovimentacaoRepository.pesquisarHistorico(produtoId, tipo, dataInicio, dataFim, numOs, pageable)
+        String termoBusca = (termo != null && !termo.isBlank()) ? termo.trim() : null;
+        return estoqueMovimentacaoRepository.pesquisarHistorico(produtoId, tipo, dataInicio, dataFim, numOs, termoBusca, pageable)
                 .map(this::toResponseDTO);
     }
 

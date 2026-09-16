@@ -139,13 +139,14 @@ public class EstoqueController {
     }
 
     @GetMapping("/movimentacoes")
-    @Operation(summary = "Consultar histÃƒÂ³rico de movimentaÃƒÂ§ÃƒÂµes de estoque com filtros e paginaÃƒÂ§ÃƒÂ£o")
+    @Operation(summary = "Consultar histórico de movimentações de estoque com filtros e paginação")
     public ResponseEntity<PageResponse<EstoqueMovimentacaoResponseDTO>> listarMovimentacoes(
             @RequestParam(required = false) Long produtoId,
             @RequestParam(required = false) TipoMovimentacaoEstoque tipo,
             @RequestParam(required = false) OffsetDateTime dataInicio,
             @RequestParam(required = false) OffsetDateTime dataFim,
             @RequestParam(required = false) String numeroOs,
+            @RequestParam(required = false) String termo,
             @PageableDefault(size = 20, sort = "dataMovimentacao", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<EstoqueMovimentacaoResponseDTO> page = estoqueService.listarMovimentacoes(
@@ -154,6 +155,7 @@ public class EstoqueController {
                 dataInicio,
                 dataFim,
                 numeroOs,
+                termo,
                 pageable
         );
         return ResponseEntity.ok(PageResponse.from(page));

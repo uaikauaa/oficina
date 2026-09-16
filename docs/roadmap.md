@@ -96,16 +96,28 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Frontend com telas completas: `/produtos`, `/estoque`, `/estoque/movimentacoes`, e seção "Peças & Componentes Utilizados" em `/ordens-servico/[id]`.
 - 134 testes automatizados no backend cobrindo 100% dos fluxos e regras.
 
-### Fase 7 — Histórico e Consultas Rápidas (Próxima Fase)
-- Busca ágil por cliente, número de série do equipamento ou número da OS para atendimento em balcão.
-- Linha do tempo de manutenções anteriores por equipamento.
+### Fase 7 — Histórico Técnico e Consultas Rápidas (Concluída)
+- Central de busca rápida global (`Ctrl+K` / `Cmd+K` e botão no cabeçalho) pesquisando simultaneamente em Clientes, Equipamentos, Ordens de Serviço e Peças/Produtos com debounce de 250ms e navegação completa por teclado (setas + Enter + Esc).
+- Tela dedicada de consulta global de equipamentos técnicos (`/maquinas`) com filtros combinados por tipo (máquina de solda, gerador, outro), marca, modelo, número de série e cliente vinculado, com botão direto para histórico.
+- Tela de histórico técnico e timeline da máquina (`/maquinas/[id]`):
+  - 4 Cards de KPI no topo: Total de atendimentos, Data da última manutenção, Número da última OS e Valor total acumulado (restringido a OS com status `CONCLUIDA`);
+  - Linha do tempo visual linear ordenada cronologicamente (da mais recente para a mais antiga);
+  - Detalhamento de cada atendimento: problema relatado, diagnóstico técnico, solução aplicada, testes em bancada validados;
+  - Seção de peças utilizadas com expansão/recolhimento e exibição do preço unitário histórico congelado da OS;
+  - Estado vazio amigável quando o equipamento não possui atendimentos anteriores com botão direto de abertura de OS.
+- Visão rápida e resumo na ficha do cliente (`/clientes/[id]`):
+  - 5 Cards de KPI: Quantidade de equipamentos cadastrados, Quantidade total de OS, Quantidade de OS abertas/em andamento, Data da última visita e Valor total acumulado (somente OS concluídas);
+  - Ação direta "Ver Histórico" em cada card de equipamento do cliente, direcionando sem atrito para a timeline da máquina.
+- Consulta avançada e compacta de Ordens de Serviço (`/ordens-servico`) com busca combinada multivariável e atalhos rápidos de período ("Últimos 30 dias", "Últimos 90 dias", "Este Ano", "Todos").
+- Filtro por termo (peça código/nome e usuário responsável) nas movimentações de estoque (`/estoque/movimentacoes`).
+- Testes automatizados de regressão: isolamento estrito entre máquinas e entre clientes, cálculo financeiro exato e busca rápida global.
 
-### Fase 8 — Relatórios Gerenciais
-- Faturamento de serviços e peças, equipamentos mais atendidos, produtividade e consumo de peças em garantia.
+### Fase 8 — Relatórios e Impressão de OS (Próxima Fase)
+- Visualização e impressão de Ordens de Serviço em formato A4/termo de garantia.
+- Relatórios operacionais consolidados e exportações.
 
 ### Fase 9 — Auditoria e Segurança
 - Log detalhado de operações críticas (alterações em OS, movimentações de estoque, cancelamentos).
 
 ### Fase 10 — Melhorias Administrativas e Multi-usuário
 - Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.
-

@@ -9,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,9 +38,33 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
 
     long countByMaquinaId(Long maquinaId);
 
+    @Query("SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os " +
+           "WHERE os.maquina.id = :maquinaId AND os.status = com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA")
+    BigDecimal somarValorTotalConcluidasPorMaquina(@Param("maquinaId") Long maquinaId);
+
+    @Query("SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os " +
+           "WHERE os.cliente.id = :clienteId AND os.status = com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA")
+    BigDecimal somarValorTotalConcluidasPorCliente(@Param("clienteId") Long clienteId);
+
+    @Query("SELECT COUNT(os) FROM OrdemServico os " +
+           "WHERE os.cliente.id = :clienteId AND os.status NOT IN (com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA, com.oficinagestao.entity.StatusOrdemServico.CANCELADA)")
+    long countOsAbertasPorCliente(@Param("clienteId") Long clienteId);
+
+    Optional<OrdemServico> findFirstByMaquinaIdOrderByDataEntradaDesc(Long maquinaId);
+
+    Optional<OrdemServico> findFirstByClienteIdOrderByDataEntradaDesc(Long clienteId);
+
+    @Query("SELECT os FROM OrdemServico os " +
+           "JOIN FETCH os.cliente c " +
+           "JOIN FETCH os.maquina m " +
+           "WHERE LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :termo, '%')) " +
+           "   OR LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) " +
+           "   OR (m.numeroSerie IS NOT NULL AND LOWER(m.numeroSerie) LIKE LOWER(CONCAT('%', :termo, '%')))")
+    List<OrdemServico> buscarRapidaOs(@Param("termo") String termo, Pageable pageable);
+
     /**
-     * Pesquisa global com filtros por termo (nÃºmero OS, cliente, equipamento, nÃºmero de sÃ©rie),
-     * status e perÃ­odo de entrada.
+     * Pesquisa global com filtros por termo (número OS, cliente, equipamento, número de série),
+     * status e período de entrada.
      */
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +
@@ -63,7 +89,7 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     );
 
     /**
-     * Consulta paginada do histÃ³rico de Ordens de ServiÃ§o de um cliente especÃ­fico.
+     * Consulta paginada do histórico de Ordens de Serviço de um cliente específico.
      */
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +
@@ -77,7 +103,7 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     );
 
     /**
-     * Consulta paginada do histÃ³rico completo de manutenÃ§Ãµes de um equipamento especÃ­fico.
+     * Consulta paginada do histórico completo de manutenções de um equipamento específico.
      */
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +

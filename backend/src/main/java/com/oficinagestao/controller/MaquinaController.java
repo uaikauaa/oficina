@@ -91,11 +91,36 @@ public class MaquinaController {
     @Operation(summary = "Buscar equipamento por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Equipamento localizado"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Equipamento nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
     })
     public ResponseEntity<MaquinaResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(maquinaService.buscarPorId(id));
+    }
+
+    @GetMapping("/api/maquinas/{id}/resumo")
+    @Operation(summary = "Obter resumo e indicadores de manutenção do equipamento", description = "Retorna contadores de atendimentos, última manutenção e valor acumulado de OS concluídas.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resumo retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
+    })
+    public ResponseEntity<MaquinaResumoDTO> obterResumo(@PathVariable Long id) {
+        return ResponseEntity.ok(maquinaService.obterResumo(id));
+    }
+
+    @GetMapping("/api/maquinas/{id}/historico")
+    @Operation(summary = "Consultar histórico de Ordens de Serviço do equipamento", description = "Retorna lista paginada de manutenções com data, problema, diagnóstico, solução e valor total.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
+    })
+    public ResponseEntity<PageResponse<OrdemServicoResponseDTO>> obterHistorico(
+            @PathVariable Long id,
+            @PageableDefault(size = 20, sort = "dataEntrada", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(maquinaService.obterHistorico(id, pageable));
     }
 
     @PutMapping("/api/maquinas/{id}")

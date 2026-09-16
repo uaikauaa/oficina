@@ -37,10 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final OrdemServicoService ordemServicoService;
     private final UsuarioRepository usuarioRepository;
 
-    public ClienteController(ClienteService clienteService, UsuarioRepository usuarioRepository) {
+    public ClienteController(
+            ClienteService clienteService,
+            OrdemServicoService ordemServicoService,
+            UsuarioRepository usuarioRepository
+    ) {
         this.clienteService = clienteService;
+        this.ordemServicoService = ordemServicoService;
         this.usuarioRepository = usuarioRepository;
     }
 
@@ -99,6 +105,32 @@ public class ClienteController {
     public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
         ClienteResponseDTO response = clienteService.buscarPorId(id);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/resumo")
+    @Operation(summary = "Obter resumo e histórico consolidado do cliente", description = "Retorna contadores de equipamentos, ordens de serviço, status de OS abertas, última visita e valor acumulado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Resumo retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
+    })
+    public ResponseEntity<ClienteResumoDTO> obterResumo(@PathVariable Long id) {
+        return ResponseEntity.ok(clienteService.obterResumo(id));
+    }
+
+    @GetMapping("/{id}/historico")
+    @Operation(summary = "Consultar histórico de Ordens de Serviço do cliente", description = "Retorna lista paginada de todas as OS do cliente com detalhes e valores.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
+    })
+    public ResponseEntity<PageResponse<OrdemServicoResponseDTO>> obterHistorico(
+            @PathVariable Long id,
+            @RequestParam(name = "status", required = false) StatusOrdemServico status,
+            @PageableDefault(size = 20, sort = "dataEntrada", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(ordemServicoService.listarPorCliente(id, status, pageable));
     }
 
     @PutMapping("/{id}")
