@@ -21,6 +21,7 @@ import {
   Ban,
   AlertTriangle,
   Eye,
+  Download,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import {
@@ -40,7 +41,10 @@ import {
   Categoria,
   Fornecedor,
   PageResponse,
+  OrdemServico,
 } from '@/lib/types';
+import { gerarCsv, baixarArquivoCsv } from '@/lib/csvHelper';
+import type { ColunaCsv } from '@/lib/csvHelper';
 import {
   apiFetchJson,
   formatarMoeda,
@@ -296,6 +300,150 @@ export default function RelatoriosPage() {
     fetchEquipamentosRelatorio,
   ]);
 
+  // ----------------------------------------------------
+  // EXPORTAÇÃO CSV (FEATURE-004)
+  // ----------------------------------------------------
+  const handleExportarCsvOs = () => {
+    const dados = osRelatorio?.itens.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de Ordens de Serviço para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<OrdemServico>[] = [
+      { cabecalho: 'Número OS', acessar: (i) => i.numeroOs },
+      { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
+      { cabecalho: 'Documento', acessar: (i) => formatarDocumento(i.clienteCpfCnpj) },
+      { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.clienteTelefone) },
+      { cabecalho: 'Tipo Equipamento', acessar: (i) => i.maquinaTipoDescricao || '' },
+      { cabecalho: 'Marca', acessar: (i) => i.maquinaMarca || '' },
+      { cabecalho: 'Modelo', acessar: (i) => i.maquinaModelo || '' },
+      { cabecalho: 'Nº Série', acessar: (i) => i.maquinaNumeroSerie || '' },
+      { cabecalho: 'Status', acessar: (i) => i.statusDescricao },
+      { cabecalho: 'Data Entrada', acessar: (i) => formatarDataHora(i.dataEntrada) },
+      { cabecalho: 'Data Conclusão', acessar: (i) => i.dataConclusao ? formatarDataHora(i.dataConclusao) : '' },
+      { cabecalho: 'Valor Peças (R$)', acessar: (i) => (i.valorPecas ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Valor Mão de Obra (R$)', acessar: (i) => (i.valorMaoObra ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Desconto (R$)', acessar: (i) => (i.valorDesconto ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Valor Total (R$)', acessar: (i) => (i.valorTotal ?? 0).toFixed(2).replace('.', ',') },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-ordens-servico-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvEstoque = () => {
+    const dados = estoqueRelatorio?.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de estoque para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<RelatorioEstoqueItem>[] = [
+      { cabecalho: 'ID', acessar: (i) => i.produtoId },
+      { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
+      { cabecalho: 'Produto / Peça', acessar: (i) => i.nome },
+      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+      { cabecalho: 'Categoria', acessar: (i) => i.categoriaNome || '' },
+      { cabecalho: 'Fornecedor', acessar: (i) => i.fornecedorNome || '' },
+      { cabecalho: 'Estoque Atual', acessar: (i) => (i.estoqueAtual ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Estoque Mínimo', acessar: (i) => (i.estoqueMinimo ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Situação Estoque', acessar: (i) => i.statusEstoque },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-estoque-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvMovimentacoes = () => {
+    const dados = movRelatorio?.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de movimentações para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<EstoqueMovimentacao>[] = [
+      { cabecalho: 'ID', acessar: (i) => i.id },
+      { cabecalho: 'Data/Hora', acessar: (i) => formatarDataHora(i.dataMovimentacao) },
+      { cabecalho: 'Tipo', acessar: (i) => i.tipoDescricao || TIPO_MOVIMENTACAO_ESTOQUE_LABELS[i.tipoMovimentacao] || i.tipoMovimentacao },
+      { cabecalho: 'Código Peça', acessar: (i) => i.produtoCodigo || '' },
+      { cabecalho: 'Peça / Produto', acessar: (i) => i.produtoNome },
+      { cabecalho: 'Quantidade', acessar: (i) => (i.quantidade ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Saldo Anterior', acessar: (i) => (i.quantidadeAnterior ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Novo Saldo', acessar: (i) => (i.quantidadePosterior ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'OS Vinculada', acessar: (i) => i.ordemServicoNumero || '' },
+      { cabecalho: 'Motivo / Justificativa', acessar: (i) => i.motivo || '' },
+      { cabecalho: 'Usuário', acessar: (i) => i.usuarioNome || '' },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-movimentacoes-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvPecas = () => {
+    const dados = pecasRelatorio?.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de peças para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<PecaMaisUtilizada>[] = [
+      { cabecalho: 'ID', acessar: (i) => i.produtoId },
+      { cabecalho: 'Código', acessar: (i) => i.codigo || '' },
+      { cabecalho: 'Peça', acessar: (i) => i.nome },
+      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+      { cabecalho: 'Total Utilizado em OS', acessar: (i) => (i.quantidadeTotalUtilizada ?? 0).toFixed(2).replace('.', ',') },
+      { cabecalho: 'Qtd de OS Atendidas', acessar: (i) => i.quantidadeOs ?? 0 },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-pecas-mais-utilizadas-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvClientes = () => {
+    const dados = clientesRelatorio?.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de clientes para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<RelatorioClienteItem>[] = [
+      { cabecalho: 'ID', acessar: (i) => i.clienteId },
+      { cabecalho: 'Nome / Razão Social', acessar: (i) => i.nomeRazaoSocial },
+      { cabecalho: 'CPF / CNPJ', acessar: (i) => formatarDocumento(i.cpfCnpj) },
+      { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.telefone) },
+      { cabecalho: 'Qtd Equipamentos', acessar: (i) => i.quantidadeEquipamentos ?? 0 },
+      { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
+      { cabecalho: 'Última Visita', acessar: (i) => i.ultimaVisita ? formatarDataHora(i.ultimaVisita) : '' },
+      { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-clientes-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvEquipamentos = () => {
+    const dados = equipamentosRelatorio?.content || [];
+    if (dados.length === 0) {
+      alert('Não há dados de equipamentos para exportar com os filtros atuais.');
+      return;
+    }
+    const colunas: ColunaCsv<RelatorioMaquinaItem>[] = [
+      { cabecalho: 'ID', acessar: (i) => i.maquinaId },
+      { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
+      { cabecalho: 'Tipo', acessar: (i) => TIPO_EQUIPAMENTO_LABELS[i.tipo] || i.tipo },
+      { cabecalho: 'Marca', acessar: (i) => i.marca || '' },
+      { cabecalho: 'Modelo', acessar: (i) => i.modelo || '' },
+      { cabecalho: 'Nº Série', acessar: (i) => i.numeroSerie || '' },
+      { cabecalho: 'Qtd Ordens de Serviço', acessar: (i) => i.quantidadeOs ?? 0 },
+      { cabecalho: 'Última Manutenção', acessar: (i) => i.ultimaManutencao ? formatarDataHora(i.ultimaManutencao) : '' },
+      { cabecalho: 'Valor Acumulado (R$)', acessar: (i) => (i.valorAcumulado ?? 0).toFixed(2).replace('.', ',') },
+    ];
+    const csv = gerarCsv(colunas, dados);
+    baixarArquivoCsv(csv, `relatorio-equipamentos-${new Date().toISOString().split('T')[0]}`);
+  };
+
+  const handleExportarCsvAtivo = () => {
+    switch (activeTab) {
+      case 'ordens-servico': handleExportarCsvOs(); break;
+      case 'estoque': handleExportarCsvEstoque(); break;
+      case 'movimentacoes': handleExportarCsvMovimentacoes(); break;
+      case 'pecas-mais-utilizadas': handleExportarCsvPecas(); break;
+      case 'clientes': handleExportarCsvClientes(); break;
+      case 'equipamentos': handleExportarCsvEquipamentos(); break;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
       <Header user={currentUser} />
@@ -314,24 +462,37 @@ export default function RelatoriosPage() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              switch (activeTab) {
-                case 'ordens-servico': fetchOsRelatorio(); break;
-                case 'estoque': fetchEstoqueRelatorio(); break;
-                case 'movimentacoes': fetchMovimentacoesRelatorio(); break;
-                case 'pecas-mais-utilizadas': fetchPecasRelatorio(); break;
-                case 'clientes': fetchClientesRelatorio(); break;
-                case 'equipamentos': fetchEquipamentosRelatorio(); break;
-              }
-            }}
-            disabled={isLoading}
-            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 self-start sm:self-auto"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-400' : ''}`} />
-            <span>Atualizar Dados</span>
-          </button>
+          <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            <button
+              type="button"
+              onClick={handleExportarCsvAtivo}
+              disabled={isLoading}
+              className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+              title="Exportar dados filtrados da aba atual em formato CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Exportar CSV</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                switch (activeTab) {
+                  case 'ordens-servico': fetchOsRelatorio(); break;
+                  case 'estoque': fetchEstoqueRelatorio(); break;
+                  case 'movimentacoes': fetchMovimentacoesRelatorio(); break;
+                  case 'pecas-mais-utilizadas': fetchPecasRelatorio(); break;
+                  case 'clientes': fetchClientesRelatorio(); break;
+                  case 'equipamentos': fetchEquipamentosRelatorio(); break;
+                }
+              }}
+              disabled={isLoading}
+              className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/30 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-amber-400' : ''}`} />
+              <span>Atualizar Dados</span>
+            </button>
+          </div>
         </div>
 
         {/* Mensagem de Erro Global */}
@@ -487,6 +648,16 @@ export default function RelatoriosPage() {
                   Limpar Filtros
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={handleExportarCsvOs}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ml-auto"
+                title="Exportar dados de Ordens de Serviço filtradas para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Cards de Resumo */}
@@ -706,6 +877,16 @@ export default function RelatoriosPage() {
                   <span>Apenas Zerados</span>
                 </label>
               </div>
+
+              <button
+                type="button"
+                onClick={handleExportarCsvEstoque}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ml-auto"
+                title="Exportar dados de Estoque filtrados para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Tabela de Estoque */}
@@ -876,6 +1057,16 @@ export default function RelatoriosPage() {
                   Limpar
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={handleExportarCsvMovimentacoes}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all ml-auto"
+                title="Exportar dados de Movimentações para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Tabela de Movimentações */}
@@ -1006,6 +1197,16 @@ export default function RelatoriosPage() {
                   <p className="text-xs text-slate-400">Identifique os componentes de maior giro para reposição preventiva de estoque.</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleExportarCsvPecas}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                title="Exportar ranking de peças para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Tabela Ranking */}
@@ -1125,6 +1326,16 @@ export default function RelatoriosPage() {
                   <p className="text-xs text-slate-400">Volume de máquinas, total de atendimentos e receita gerada por cliente.</p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleExportarCsvClientes}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                title="Exportar dados de Clientes para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Tabela de Clientes */}
@@ -1233,6 +1444,16 @@ export default function RelatoriosPage() {
                   </p>
                 </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleExportarCsvEquipamentos}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                title="Exportar dados de Equipamentos para CSV"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Exportar CSV</span>
+              </button>
             </div>
 
             {/* Tabela de Equipamentos */}
