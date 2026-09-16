@@ -67,4 +67,14 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
             @Param("ativo") Boolean ativo,
             Pageable pageable
     );
+
+    @Query("SELECT new com.oficinagestao.dto.RelatorioClienteItemDTO(" +
+           "c.id, c.nomeRazaoSocial, c.cpfCnpj, COALESCE(c.telefone, c.celular), " +
+           "(SELECT COUNT(m) FROM Maquina m WHERE m.cliente.id = c.id AND m.ativo = true), " +
+           "(SELECT COUNT(os) FROM OrdemServico os WHERE os.cliente.id = c.id), " +
+           "(SELECT MAX(os.dataEntrada) FROM OrdemServico os WHERE os.cliente.id = c.id), " +
+           "(SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os WHERE os.cliente.id = c.id AND os.status = com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA)) " +
+           "FROM Cliente c WHERE c.ativo = true " +
+           "ORDER BY c.nomeRazaoSocial ASC")
+    Page<com.oficinagestao.dto.RelatorioClienteItemDTO> relatorioClientes(Pageable pageable);
 }

@@ -115,6 +115,25 @@ public class OrdemServicoController {
         return ResponseEntity.ok(ordemServicoService.buscarPorId(id));
     }
 
+    @GetMapping(value = "/api/ordens-servico/{id}/pdf", produces = "application/pdf")
+    @Operation(summary = "Gerar PDF oficial da Ordem de Serviço",
+            description = "Gera o documento PDF vetorial A4 formatado para impressão ou entrega ao cliente com preços históricos congelados.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "PDF gerado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
+    })
+    public ResponseEntity<byte[]> gerarPdf(@PathVariable Long id) {
+        byte[] pdfBytes = ordemServicoService.gerarPdf(id);
+        OrdemServicoResponseDTO os = ordemServicoService.buscarPorId(id);
+        String filename = "OS-" + (os.numeroOs() != null ? os.numeroOs() : id) + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "application/pdf")
+                .body(pdfBytes);
+    }
+
     @PutMapping("/api/ordens-servico/{id}")
     @Operation(summary = "Atualizar Ordem de ServiÃƒÂ§o", description = "Atualiza dados tÃƒÂ©cnicos (diagnÃƒÂ³stico, soluÃƒÂ§ÃƒÂ£o, testes) e valores financeiros.")
     @ApiResponses({

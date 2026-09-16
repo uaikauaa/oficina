@@ -173,4 +173,11 @@ O ciclo de vida da OS reflete com fidelidade as etapas práticas da oficina espe
 - Bloqueio estrito de estoque negativo: uma peça não pode ser consumida se o saldo disponível for insuficiente.
 - O preço unitário da peça na OS é gravado no momento da inclusão em `ordem_servico_itens`, protegendo o valor orçado/faturado contra variações cadastrais futuras no preço de custo ou venda.
 
+### 5.4. Documentação Impressa, PDF e Módulo de Relatórios (Fase 8)
+- **Geração Vetorial A4**: Geração de documentos em PDF realizada no backend com a biblioteca OpenPDF (compatível com Java 21 LTS), garantindo precisão milimétrica, fidelidade tipográfica e independência de renderizadores do navegador do cliente.
+- **Congelamento Histórico Rigoroso**: Tanto a impressão em tela quanto o PDF e relatórios utilizam os valores unitários históricos gravados em `ordem_servico_itens.valor_unitario`, prevenindo distorções orçamentárias e financeiras.
+- **Integridade de Faturamento**: Em todos os relatórios agregados e indicadores de faturamento acumulado (por período, cliente ou equipamento), apenas Ordens de Serviço com status `CONCLUIDA` são somadas para a receita efetivada. Ordens `CANCELADA` preservam integralmente seu histórico e detalhamento técnico, com destaque visual em vermelho sem acúmulo financeiro.
+- **Relatórios Gerenciais Agregados**: Executados diretamente via queries otimizadas no banco de dados (`GROUP BY`, `SUM`, `COUNT`) paginadas com `Pageable`, reduzindo sobrecarga de memória e viabilizando alto desempenho.
+
+
 

@@ -632,6 +632,79 @@ Retorna o resumo operacional do cliente:
 Retorna todas as Ordens de Serviço de todos os equipamentos do cliente ordenadas por data decrescente:
 - **Resposta Sucesso (200 OK)**: Lista de `OrdemServicoResponseDTO` isolada exclusivamente para o cliente solicitado.
 
+---
+
+## 13. Endpoints da Fase 8 (Impressão, PDF de OS e Relatórios)
+
+### 13.1. Geração de PDF Oficial da Ordem de Serviço
+
+#### `GET /api/ordens-servico/{id}/pdf`
+Gera o documento vetorial A4 para impressão e entrega ao cliente:
+- **Content-Type**: `application/pdf`
+- **Headers**: `Content-Disposition: inline; filename=OS-{numeroOs}.pdf`
+- **Conteúdo**:
+  - Cabeçalho institucional da oficina especializada (Soldas & Geradores);
+  - Identificação completa da OS (Número, Data de Entrada, Data de Conclusão, Horímetro);
+  - Dados do Cliente (Nome, CPF/CNPJ formatado, Telefone formatado);
+  - Dados do Equipamento (Tipo, Marca, Modelo, Número de Série);
+  - Informações Técnicas (Problema Relatado, Diagnóstico Técnico, Solução Aplicada, Testes de Bancada);
+  - Tabela de Peças e Componentes com 6 colunas (Item, Código, Descrição, Qtd, Preço Histórico Congelado, Subtotal);
+  - Totalizadores Financeiros (Mão de Obra, Peças, Desconto, Valor Total Líquido);
+  - Badge visual de Status (destaque em vermelho para Ordens Canceladas sem apagar histórico);
+  - Termos de garantia (90 dias legais) e campos de assinatura formal (Cliente e Responsável Técnico).
+
+---
+
+### 13.2. Módulo de Relatórios Operacionais e Gerenciais
+
+#### `GET /api/relatorios/ordens-servico`
+Relatório analítico e sintético de ordens de serviço por período:
+- **Query Params**:
+  - `dataInicio` (OffsetDateTime, opcional): Início do período.
+  - `dataFim` (OffsetDateTime, opcional): Fim do período.
+  - `status` (StatusOrdemServico, opcional): Filtrar por status específico.
+  - `page`, `size`: Paginação padrão.
+- **Resposta Sucesso (200 OK)**: `RelatorioOsResponseDTO`:
+  - `resumo`: `{ totalOs, concluidas, abertas, canceladas, valorTotalConcluidas }` (faturamento soma estritamente `CONCLUIDA`);
+  - `itens`: `Page<OrdemServicoResponseDTO>` paginado.
+
+#### `GET /api/relatorios/estoque`
+Relatório de situação e controle de reposição do inventário:
+- **Query Params**:
+  - `categoriaId` (Long, opcional): Filtrar por categoria.
+  - `fornecedorId` (Long, opcional): Filtrar por fornecedor.
+  - `estoqueBaixo` (Boolean, opcional): Apenas produtos com saldo atual <= estoque mínimo.
+  - `zerado` (Boolean, opcional): Apenas produtos com saldo atual <= 0.
+  - `page`, `size`: Paginação padrão.
+- **Resposta Sucesso (200 OK)**: `Page<RelatorioEstoqueItemDTO>` com status de estoque calculado (`NORMAL`, `BAIXO`, `ZERADO`).
+
+#### `GET /api/relatorios/movimentacoes`
+Histórico detalhado e auditoria de movimentações de estoque:
+- **Query Params**:
+  - `dataInicio` (OffsetDateTime, opcional);
+  - `dataFim` (OffsetDateTime, opcional);
+  - `produtoId` (Long, opcional);
+  - `tipo` (TipoMovimentacaoEstoque, opcional);
+  - `numeroOs` (String, opcional);
+  - `page`, `size`: Paginação padrão.
+- **Resposta Sucesso (200 OK)**: `Page<EstoqueMovimentacaoResponseDTO>`.
+
+#### `GET /api/relatorios/pecas-mais-utilizadas`
+Ranking decrescente de peças e componentes mais aplicados em ordens de serviço:
+- **Query Params**: `page`, `size` (padrão size=20).
+- **Resposta Sucesso (200 OK)**: `Page<PecaMaisUtilizadaDTO>` contendo `{ produtoId, codigo, nome, marca, quantidadeTotalUtilizada, quantidadeOs }`.
+
+#### `GET /api/relatorios/clientes`
+Relatório consolidado de carteira de clientes com histórico e faturamento acumulado:
+- **Query Params**: `page`, `size` (padrão size=20).
+- **Resposta Sucesso (200 OK)**: `Page<RelatorioClienteItemDTO>` contendo `{ clienteId, nomeRazaoSocial, cpfCnpj, telefone, quantidadeEquipamentos, quantidadeOs, ultimaVisita, valorAcumulado }` (faturamento estritamente de ordens `CONCLUIDA`).
+
+#### `GET /api/relatorios/equipamentos`
+Relatório consolidado de equipamentos atendidos na oficina:
+- **Query Params**: `page`, `size` (padrão size=20).
+- **Resposta Sucesso (200 OK)**: `Page<RelatorioMaquinaItemDTO>` contendo `{ maquinaId, clienteNome, tipo, marca, modelo, numeroSerie, quantidadeOs, ultimaManutencao, valorAcumulado }`.
+
+
 
 
 

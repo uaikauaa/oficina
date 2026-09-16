@@ -53,6 +53,9 @@ class OrdemServicoServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private PdfService pdfService;
+
     @InjectMocks
     private OrdemServicoService ordemServicoService;
 

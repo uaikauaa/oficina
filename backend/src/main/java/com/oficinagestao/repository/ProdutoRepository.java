@@ -84,4 +84,28 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     @Query("SELECT COALESCE(SUM(p.estoqueAtual * p.precoCusto), 0) FROM Produto p WHERE p.ativo = true")
     BigDecimal somarValorTotalEstoque();
+
+    @Query(value = "SELECT p FROM Produto p " +
+            "LEFT JOIN FETCH p.categoria c " +
+            "LEFT JOIN FETCH p.fornecedor f WHERE " +
+            "p.ativo = true " +
+            "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
+            "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +
+            "AND (:estoqueBaixo IS NULL OR (:estoqueBaixo = true AND p.estoqueAtual <= p.estoqueMinimo)) " +
+            "AND (:zerado IS NULL OR (:zerado = true AND p.estoqueAtual <= 0))",
+            countQuery = "SELECT COUNT(p) FROM Produto p " +
+                    "LEFT JOIN p.categoria c " +
+                    "LEFT JOIN p.fornecedor f WHERE " +
+                    "p.ativo = true " +
+                    "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
+                    "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +
+                    "AND (:estoqueBaixo IS NULL OR (:estoqueBaixo = true AND p.estoqueAtual <= p.estoqueMinimo)) " +
+                    "AND (:zerado IS NULL OR (:zerado = true AND p.estoqueAtual <= 0))")
+    Page<Produto> relatorioEstoque(
+            @Param("categoriaId") Long categoriaId,
+            @Param("fornecedorId") Long fornecedorId,
+            @Param("estoqueBaixo") Boolean estoqueBaixo,
+            @Param("zerado") Boolean zerado,
+            Pageable pageable
+    );
 }

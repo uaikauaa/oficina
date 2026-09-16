@@ -113,4 +113,32 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
             @Param("maquinaId") Long maquinaId,
             Pageable pageable
     );
+
+    @Query("SELECT COUNT(os) FROM OrdemServico os " +
+           "WHERE (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada >= :dataInicio) " +
+           "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada <= :dataFim) " +
+           "AND (:status IS NULL OR os.status = :status)")
+    long contarPorPeriodoEStatus(
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("status") StatusOrdemServico status
+    );
+
+    @Query("SELECT COUNT(os) FROM OrdemServico os " +
+           "WHERE (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada >= :dataInicio) " +
+           "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada <= :dataFim) " +
+           "AND os.status NOT IN (com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA, com.oficinagestao.entity.StatusOrdemServico.CANCELADA)")
+    long contarAbertasPorPeriodo(
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim
+    );
+
+    @Query("SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os " +
+           "WHERE (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada >= :dataInicio) " +
+           "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada <= :dataFim) " +
+           "AND os.status = com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA")
+    BigDecimal somarValorConcluidasPorPeriodo(
+            @Param("dataInicio") OffsetDateTime dataInicio,
+            @Param("dataFim") OffsetDateTime dataFim
+    );
 }

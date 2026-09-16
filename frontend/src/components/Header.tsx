@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Wrench, Users, LayoutDashboard, LogOut, FileText, Package, Boxes, Search } from 'lucide-react';
+import { Wrench, Users, LayoutDashboard, LogOut, FileText, Package, Boxes, Search, BarChart3 } from 'lucide-react';
 import { CurrentUser } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 import BuscaRapidaModal from '@/components/BuscaRapidaModal';
@@ -33,6 +33,7 @@ export default function Header({ user }: HeaderProps) {
   const isOsActive = pathname.startsWith('/ordens-servico');
   const isProdutosActive = pathname.startsWith('/produtos');
   const isEstoqueActive = pathname.startsWith('/estoque');
+  const isRelatoriosActive = pathname.startsWith('/relatorios');
 
   const [isBuscaOpen, setIsBuscaOpen] = useState(false);
 
@@ -137,6 +138,18 @@ export default function Header({ user }: HeaderProps) {
                 <Boxes className="w-4 h-4" />
                 <span>Estoque</span>
               </Link>
+
+              <Link
+                href="/relatorios"
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                  isRelatoriosActive
+                    ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Relatórios</span>
+              </Link>
             </nav>
           </div>
 
@@ -179,10 +192,10 @@ export default function Header({ user }: HeaderProps) {
         </div>
 
         {/* Navegação Mobile Inferior */}
-        <div className="flex md:hidden items-center gap-2 mt-3 pt-3 border-t border-slate-800/80">
+        <div className="flex md:hidden items-center gap-2 mt-3 pt-3 border-t border-slate-800/80 overflow-x-auto">
           <Link
             href="/dashboard"
-            className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
               isDashboardActive
                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                 : 'text-slate-400 bg-slate-900/80 border border-slate-800'
@@ -193,7 +206,7 @@ export default function Header({ user }: HeaderProps) {
           </Link>
           <Link
             href="/clientes"
-            className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-2 ${
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
               isClientesActive
                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                 : 'text-slate-400 bg-slate-900/80 border border-slate-800'
@@ -204,7 +217,7 @@ export default function Header({ user }: HeaderProps) {
           </Link>
           <Link
             href="/ordens-servico"
-            className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
               isOsActive
                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                 : 'text-slate-400 bg-slate-900/80 border border-slate-800'
@@ -215,7 +228,7 @@ export default function Header({ user }: HeaderProps) {
           </Link>
           <Link
             href="/produtos"
-            className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
               isProdutosActive
                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                 : 'text-slate-400 bg-slate-900/80 border border-slate-800'
@@ -226,7 +239,7 @@ export default function Header({ user }: HeaderProps) {
           </Link>
           <Link
             href="/estoque"
-            className={`flex-1 py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 ${
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
               isEstoqueActive
                 ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
                 : 'text-slate-400 bg-slate-900/80 border border-slate-800'
@@ -234,6 +247,17 @@ export default function Header({ user }: HeaderProps) {
           >
             <Boxes className="w-3.5 h-3.5" />
             <span>Estoque</span>
+          </Link>
+          <Link
+            href="/relatorios"
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
+              isRelatoriosActive
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'text-slate-400 bg-slate-900/80 border border-slate-800'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span>Relatórios</span>
           </Link>
         </div>
       </header>

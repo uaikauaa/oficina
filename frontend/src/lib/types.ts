@@ -483,3 +483,64 @@ export interface BuscaRapidaResultado {
   totalResultados: number;
 }
 
+// =========================================================================
+// Tipos da Fase 8: Relatórios e PDF de Ordem de Serviço
+// =========================================================================
+
+export interface RelatorioOsResumo {
+  totalOs: number;
+  concluidas: number;
+  abertas: number;
+  canceladas: number;
+  valorTotalConcluidas: number;
+}
+
+export interface RelatorioOsResponse {
+  resumo: RelatorioOsResumo;
+  itens: PageResponse<OrdemServico>;
+}
+
+export interface RelatorioEstoqueItem {
+  produtoId: number;
+  codigo: string;
+  nome: string;
+  marca?: string | null;
+  categoriaNome?: string | null;
+  fornecedorNome?: string | null;
+  estoqueAtual: number;
+  estoqueMinimo: number;
+  statusEstoque: 'NORMAL' | 'BAIXO' | 'ZERADO';
+}
+
+export interface PecaMaisUtilizada {
+  produtoId: number;
+  codigo: string;
+  nome: string;
+  marca?: string | null;
+  quantidadeTotalUtilizada: number;
+  quantidadeOs: number;
+}
+
+export interface RelatorioClienteItem {
+  clienteId: number;
+  nomeRazaoSocial: string;
+  cpfCnpj?: string | null;
+  telefone?: string | null;
+  quantidadeEquipamentos: number;
+  quantidadeOs: number;
+  ultimaVisita?: string | null;
+  valorAcumulado: number;
+}
+
+export interface RelatorioMaquinaItem {
+  maquinaId: number;
+  clienteNome: string;
+  tipo: TipoEquipamento;
+  marca?: string | null;
+  modelo?: string | null;
+  numeroSerie?: string | null;
+  quantidadeOs: number;
+  ultimaManutencao?: string | null;
+  valorAcumulado: number;
+}
+

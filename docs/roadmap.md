@@ -112,12 +112,23 @@ O desenvolvimento segue um planejamento faseado rigoroso, evitando a introduçã
 - Filtro por termo (peça código/nome e usuário responsável) nas movimentações de estoque (`/estoque/movimentacoes`).
 - Testes automatizados de regressão: isolamento estrito entre máquinas e entre clientes, cálculo financeiro exato e busca rápida global.
 
-### Fase 8 — Relatórios e Impressão de OS (Próxima Fase)
-- Visualização e impressão de Ordens de Serviço em formato A4/termo de garantia.
-- Relatórios operacionais consolidados e exportações.
+### Fase 8 — Relatórios e Impressão de OS (Concluída)
+- Geração vetorial nativa em PDF A4 via OpenPDF (`GET /api/ordens-servico/{id}/pdf`) com cabeçalho oficial, dados do cliente/equipamento, defeito/diagnóstico/solução, testes de bancada, tabela com 6 colunas de peças (preços históricos congelados), totais, badge de status (vermelho em canceladas mantendo o histórico), garantia e assinaturas.
+- Layout de impressão moderno no frontend (`window.print()` / `@media print`) via componente `OrdemServicoImpressao.tsx`, com estilos monocromáticos de alta fidelidade para entrega ao cliente no balcão.
+- Ações de "Gerar PDF" e "Imprimir" integradas na página de detalhes da OS (`/ordens-servico/[id]`) disponíveis em todos os estados da Ordem de Serviço.
+- Novo módulo completo de relatórios operacionais e gerenciais (`/relatorios`) com 6 abas dinâmicas:
+  1. **Ordens de Serviço por Período**: Indicadores de Total, Concluídas, Abertas, Canceladas, Faturamento Total de Concluídas, filtros por data e status, e tabela paginada;
+  2. **Situação do Estoque**: Controle de reposição por categoria e fornecedor, filtros de estoque baixo/zerado, e badges visuais (Normal, Baixo, Zerado);
+  3. **Movimentações de Estoque**: Auditoria completa de entradas, saídas, ajustes e devoluções com paginação e filtros combinados;
+  4. **Peças Mais Utilizadas**: Ranking analítico dos componentes de maior consumo em ordens de serviço para planejamento preventivo de compras;
+  5. **Clientes**: Consolidado da carteira com contagem de equipamentos, total de OS, última visita e receita acumulada;
+  6. **Equipamentos**: Relatório consolidado por máquina com histórico de manutenções e faturamento acumulado.
+- 151 testes automatizados no backend aprovados com 100% de sucesso.
+- Frontend com 0 erros de lint e build de produção Next.js 16.3.5 / Turbopack concluído com êxito.
 
-### Fase 9 — Auditoria e Segurança
+### Fase 9 — Auditoria e Segurança (Próxima Fase)
 - Log detalhado de operações críticas (alterações em OS, movimentações de estoque, cancelamentos).
 
 ### Fase 10 — Melhorias Administrativas e Multi-usuário
 - Expansão de perfis (gerente, técnico/mecânico, atendente) mantendo o RBAC estruturado na V1.
+

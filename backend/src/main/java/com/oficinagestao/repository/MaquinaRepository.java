@@ -69,4 +69,13 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
             @Param("ativo") Boolean ativo,
             Pageable pageable
     );
+
+    @Query("SELECT new com.oficinagestao.dto.RelatorioMaquinaItemDTO(" +
+           "m.id, c.nomeRazaoSocial, m.tipoEquipamento, m.marca, m.modelo, m.numeroSerie, " +
+           "(SELECT COUNT(os) FROM OrdemServico os WHERE os.maquina.id = m.id), " +
+           "(SELECT MAX(os.dataEntrada) FROM OrdemServico os WHERE os.maquina.id = m.id), " +
+           "(SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os WHERE os.maquina.id = m.id AND os.status = com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA)) " +
+           "FROM Maquina m JOIN m.cliente c WHERE m.ativo = true " +
+           "ORDER BY m.id DESC")
+    Page<com.oficinagestao.dto.RelatorioMaquinaItemDTO> relatorioEquipamentos(Pageable pageable);
 }

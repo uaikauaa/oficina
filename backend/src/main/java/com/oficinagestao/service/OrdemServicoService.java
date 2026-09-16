@@ -39,6 +39,7 @@ public class OrdemServicoService {
     private final ProdutoRepository produtoRepository;
     private final EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PdfService pdfService;
 
     public OrdemServicoService(
             OrdemServicoRepository ordemServicoRepository,
@@ -48,7 +49,8 @@ public class OrdemServicoService {
             OrdemServicoItemRepository ordemServicoItemRepository,
             ProdutoRepository produtoRepository,
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            PdfService pdfService
     ) {
         this.ordemServicoRepository = ordemServicoRepository;
         this.clienteRepository = clienteRepository;
@@ -58,6 +60,7 @@ public class OrdemServicoService {
         this.produtoRepository = produtoRepository;
         this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.pdfService = pdfService;
     }
 
     @Transactional
@@ -111,6 +114,17 @@ public class OrdemServicoService {
         OrdemServico os = ordemServicoRepository.findByIdWithClienteAndMaquina(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com ID: " + id));
         return toResponseDTO(os);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] gerarPdf(Long id) {
+        OrdemServico os = ordemServicoRepository.findByIdWithClienteAndMaquina(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com ID: " + id));
+        if (os.getCliente() != null && os.getCliente().getEnderecos() != null) {
+            os.getCliente().getEnderecos().size(); // força inicialização da coleção
+        }
+        List<OrdemServicoItem> itens = ordemServicoItemRepository.findByOrdemServicoIdComProduto(id);
+        return pdfService.gerarOrdemServicoPdf(os, itens);
     }
 
     @Transactional(readOnly = true)

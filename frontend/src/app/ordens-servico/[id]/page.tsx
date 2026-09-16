@@ -21,8 +21,11 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Download,
+  Printer,
 } from 'lucide-react';
 import Header from '@/components/Header';
+import OrdemServicoImpressao from '@/components/OrdemServicoImpressao';
 import {
   CurrentUser,
   OrdemServico,
@@ -83,6 +86,32 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     valorDesconto: 0,
   });
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  // Download do PDF A4
+  const handleGerarPdf = async () => {
+    if (!os) return;
+    setIsDownloadingPdf(true);
+    try {
+      const res = await apiFetch(`/api/ordens-servico/${os.id}/pdf`);
+      if (!res.ok) {
+        throw new Error('Falha ao gerar arquivo PDF da Ordem de Serviço.');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `OS-${os.numeroOs || os.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Erro ao baixar PDF');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   // Carrega Usuário da Sessão
   useEffect(() => {
@@ -412,9 +441,11 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
+      <div className="print:hidden">
+        <Header user={currentUser} />
+      </div>
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6 print:hidden">
         {/* Navegação e Alertas */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <Link
@@ -481,8 +512,31 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
             </div>
 
             {/* Ações Técnicas no Topo */}
-            {!isTerminal && (
-              <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleGerarPdf}
+                disabled={isDownloadingPdf}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                title="Baixar Ordem de Serviço em PDF A4"
+              >
+                {isDownloadingPdf ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
+                ) : (
+                  <Download className="w-3.5 h-3.5 text-amber-400" />
+                )}
+                <span>Gerar PDF</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Imprimir layout da Ordem de Serviço"
+              >
+                <Printer className="w-3.5 h-3.5 text-sky-400" />
+                <span>Imprimir</span>
+              </button>
+              {!isTerminal && (
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(true)}
@@ -491,8 +545,8 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                   <Edit2 className="w-3.5 h-3.5 text-amber-400" />
                   <span>Editar Técnico / Valores</span>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Barra de Ciclo de Vida e Transições de Status */}
@@ -1392,6 +1446,9 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
           </div>
         </div>
       )}
+
+      {/* Componente Exclusivo de Impressão (A4) */}
+      <OrdemServicoImpressao os={os} itens={itens} />
     </div>
   );
 }
