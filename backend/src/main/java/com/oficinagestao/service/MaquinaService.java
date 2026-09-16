@@ -246,8 +246,12 @@ public class MaquinaService {
         if (value == null || value.isBlank()) {
             return null;
         }
+        String sanitized = value.replaceAll("\\s+", "").replace(",", ".");
+        if (!sanitized.matches("^-?\\d+(\\.\\d+)?$")) {
+            throw new BusinessException("Valor de horímetro inválido: " + value);
+        }
         try {
-            BigDecimal val = new BigDecimal(value.replace(",", ".").trim());
+            BigDecimal val = new BigDecimal(sanitized);
             if (val.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BusinessException("O horímetro não pode ser negativo.");
             }

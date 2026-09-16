@@ -373,7 +373,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
         solucaoAplicada: editForm.solucaoAplicada?.trim() || undefined,
         testesRealizados: editForm.testesRealizados?.trim() || undefined,
         observacoes: editForm.observacoes?.trim() || undefined,
-        horimetroAtual: editForm.horimetroAtual?.trim() || undefined,
+        horimetroAtual: editForm.horimetroAtual ? editForm.horimetroAtual.replace(/\s+/g, '').replace(',', '.') : undefined,
         valorMaoObra: Number(editForm.valorMaoObra) || 0,
         valorPecas: Number(editForm.valorPecas) || 0,
         valorDesconto: Number(editForm.valorDesconto) || 0,

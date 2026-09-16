@@ -129,9 +129,9 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
   let currentIndexTracker = 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-12 pb-6 px-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-hidden">
       <div
-        className="w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+        className="w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra de Busca Superior */}
@@ -162,7 +162,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
         </div>
 
         {/* Corpo dos Resultados */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
           {!termo.trim() && (
             <div className="py-8 text-center text-slate-500 text-xs space-y-2">
               <Sparkles className="w-8 h-8 text-amber-500/40 mx-auto" />
@@ -345,7 +345,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
         </div>
 
         {/* Rodapé com Dicas de Atalho */}
-        <div className="px-4 py-2.5 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between text-[11px] text-slate-500">
+        <div className="shrink-0 px-4 py-2.5 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between text-[11px] text-slate-500">
           <div className="flex items-center gap-3">
             <span>
               <kbd className="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700 text-[10px] mr-1">↑</kbd>

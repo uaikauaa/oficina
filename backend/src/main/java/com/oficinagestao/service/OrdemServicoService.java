@@ -394,8 +394,12 @@ public class OrdemServicoService {
         if (value == null || value.isBlank()) {
             return null;
         }
+        String sanitized = value.replaceAll("\\s+", "").replace(",", ".");
+        if (!sanitized.matches("^-?\\d+(\\.\\d+)?$")) {
+            throw new BusinessException("Valor numérico inválido informado para o horímetro: " + value);
+        }
         try {
-            BigDecimal val = new BigDecimal(value.trim().replace(",", "."));
+            BigDecimal val = new BigDecimal(sanitized);
             if (val.compareTo(BigDecimal.ZERO) < 0) {
                 throw new BusinessException("O horímetro não pode ser negativo.");
             }

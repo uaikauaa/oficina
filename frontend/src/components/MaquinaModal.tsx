@@ -142,7 +142,7 @@ export default function MaquinaModal({
       modelo: formData.modelo?.trim(),
       anoFabricacao: formData.anoFabricacao ? Number(formData.anoFabricacao) : null,
       numeroSerie: formData.numeroSerie?.trim() || null,
-      horimetro: formData.horimetro?.trim() || null,
+      horimetro: formData.horimetro ? formData.horimetro.replace(/\s+/g, '').replace(',', '.') : null,
       potencia: formData.potencia?.trim() || null,
       tensao: formData.tensao?.trim() || null,
       observacoes: formData.observacoes?.trim() || null,

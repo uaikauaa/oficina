@@ -11,6 +11,8 @@ import com.oficinagestao.repository.MaquinaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -124,5 +126,24 @@ class MaquinaServiceTest {
 
         assertNotNull(response);
         assertEquals(0, BigDecimal.valueOf(125.5).compareTo(response.horimetro()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"120,5", "120.5", "120 , 5", " 120.5 ", " 120 , 50 "})
+    @DisplayName("BUG-002: Deve aceitar formatos válidos de horímetro com vírgula e espaços intercalados em Máquinas")
+    void deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String entrada) {
+        BigDecimal resultado = MaquinaService.parseBigDecimal(entrada);
+        assertNotNull(resultado);
+        assertTrue(resultado.compareTo(BigDecimal.ZERO) >= 0);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"abc", "-10", "12,3,4", "..", "1.2.3"})
+    @DisplayName("BUG-002: Deve rejeitar estritamente formatos inválidos de horímetro em Máquinas")
+    void deveRejeitarHorimetroInvalidoEmMaquinas(String entrada) {
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                MaquinaService.parseBigDecimal(entrada)
+        );
+        assertNotNull(ex.getMessage());
     }
 }

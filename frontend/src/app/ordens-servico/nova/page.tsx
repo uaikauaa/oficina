@@ -212,7 +212,7 @@ function NovaOrdemServicoContent() {
         problemaRelatado: formData.problemaRelatado.trim(),
         dataEntrada: formData.dataEntrada ? new Date(formData.dataEntrada).toISOString() : undefined,
         observacoes: formData.observacoes.trim() || undefined,
-        horimetroAtual: formData.horimetroAtual.trim() || undefined,
+        horimetroAtual: formData.horimetroAtual ? formData.horimetroAtual.replace(/\s+/g, '').replace(',', '.') : undefined,
         numeroOs: formData.numeroOs.trim() || undefined,
       };
 
