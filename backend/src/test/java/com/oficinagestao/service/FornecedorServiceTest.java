@@ -125,7 +125,7 @@ class FornecedorServiceTest {
 
         assertNotNull(response);
         assertFalse(response.ativo());
-        verify(auditoriaService).registrarComRequest(eq(10L), eq("Fornecedor"), eq("1"), eq("INATIVAR"), any());
+        verify(auditoriaService).registrarComRequest(eq(10L), eq("Fornecedor"), eq("1"), eq("UPDATE"), any());
     }
 
     @Test

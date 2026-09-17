@@ -114,7 +114,7 @@ class CategoriaServiceTest {
 
         assertNotNull(response);
         assertFalse(response.ativo());
-        verify(auditoriaService).registrarComRequest(eq(1L), eq("Categoria"), eq("1"), eq("INATIVAR"), any());
+        verify(auditoriaService).registrarComRequest(eq(1L), eq("Categoria"), eq("1"), eq("UPDATE"), any());
     }
 
     @Test

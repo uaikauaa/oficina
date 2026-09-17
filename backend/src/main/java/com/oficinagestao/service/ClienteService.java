@@ -132,7 +132,7 @@ public class ClienteService {
                     usuarioId,
                     "Cliente",
                     String.valueOf(atualizado.getId()),
-                    ativo ? "ATIVACAO" : "INATIVACAO",
+                    "UPDATE",
                     ipOrigem
             );
         }

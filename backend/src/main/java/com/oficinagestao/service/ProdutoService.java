@@ -171,7 +171,7 @@ public class ProdutoService {
                 usuarioId,
                 "Produto",
                 salvo.getId().toString(),
-                ativo ? "ATIVAR" : "INATIVAR",
+                "UPDATE",
                 request
         );
 

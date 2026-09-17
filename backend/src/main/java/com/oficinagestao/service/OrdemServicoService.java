@@ -284,7 +284,7 @@ public class OrdemServicoService {
                     usuarioId,
                     "OrdemServico",
                     String.valueOf(salva.getId()),
-                    "STATUS_" + novoStatus.name(),
+                    "UPDATE",
                     ipOrigem
             );
         }

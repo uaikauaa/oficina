@@ -109,7 +109,7 @@ public class CategoriaService {
                 usuarioId,
                 "Categoria",
                 salva.getId().toString(),
-                ativo ? "ATIVAR" : "INATIVAR",
+                "UPDATE",
                 request
         );
 

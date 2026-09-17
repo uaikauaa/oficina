@@ -243,7 +243,7 @@ class ProdutoServiceTest {
 
         assertNotNull(response);
         assertFalse(response.ativo());
-        verify(auditoriaService).registrarComRequest(eq(1L), eq("Produto"), eq("10"), eq("INATIVAR"), any());
+        verify(auditoriaService).registrarComRequest(eq(1L), eq("Produto"), eq("10"), eq("UPDATE"), any());
     }
 
     @Test

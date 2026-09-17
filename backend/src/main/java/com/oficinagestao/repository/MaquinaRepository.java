@@ -16,10 +16,10 @@ import java.util.Optional;
 public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
 
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE " +
-           "LOWER(m.marca) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "LOWER(m.modelo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%'))")
+           "LOWER(m.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "LOWER(m.modelo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))")
     List<Maquina> buscarRapida(@Param("termo") String termo, Pageable pageable);
 
     /** Conta quantos equipamentos (ativos ou não) pertencem a um cliente. */
@@ -39,10 +39,10 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE c.id = :clienteId " +
            "AND (:ativo IS NULL OR m.ativo = :ativo) " +
            "AND (:tipoEquipamento IS NULL OR m.tipoEquipamento = :tipoEquipamento) " +
-           "AND (:termo IS NULL OR :termo = '' OR " +
-           "     LOWER(m.marca) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "     LOWER(m.modelo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "     LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', :termo, '%')))")
+           "AND (CAST(:termo AS string) IS NULL OR CAST(:termo AS string) = '' OR " +
+           "     LOWER(m.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "     LOWER(m.modelo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "     LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))")
     Page<Maquina> pesquisarPorCliente(
             @Param("clienteId") Long clienteId,
             @Param("termo") String termo,
@@ -58,11 +58,11 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE " +
            "(:ativo IS NULL OR m.ativo = :ativo) " +
            "AND (:tipoEquipamento IS NULL OR m.tipoEquipamento = :tipoEquipamento) " +
-           "AND (:termo IS NULL OR :termo = '' OR " +
-           "     LOWER(m.marca) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "     LOWER(m.modelo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "     LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "     LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')))")
+           "AND (CAST(:termo AS string) IS NULL OR CAST(:termo AS string) = '' OR " +
+           "     LOWER(m.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "     LOWER(m.modelo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "     LOWER(COALESCE(m.numeroSerie, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "     LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))")
     Page<Maquina> pesquisarGlobal(
             @Param("termo") String termo,
             @Param("tipoEquipamento") TipoEquipamento tipoEquipamento,

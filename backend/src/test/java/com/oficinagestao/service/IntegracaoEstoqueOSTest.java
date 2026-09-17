@@ -203,6 +203,6 @@ class IntegracaoEstoqueOSTest {
         assertTrue(temDevolucao, "Passo 13: Movimentação do tipo DEVOLUCAO de 3 unidades deve ter sido persistida com saldos anterior=7 e posterior=10");
 
         // 14. Verificar histórico de movimentações auditadas
-        verify(auditoriaService, atLeastOnce()).registrar(eq(1L), eq("OrdemServico"), eq("500"), eq("STATUS_CANCELADA"), any());
+        verify(auditoriaService, atLeastOnce()).registrar(eq(1L), eq("OrdemServico"), eq("500"), eq("UPDATE"), any());
     }
 }

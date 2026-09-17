@@ -183,7 +183,7 @@ public class MaquinaService {
                     usuarioId,
                     "Maquina",
                     String.valueOf(atualizada.getId()),
-                    ativo ? "ATIVACAO" : "INATIVACAO",
+                    "UPDATE",
                     ipOrigem
             );
         }

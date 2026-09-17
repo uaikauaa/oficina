@@ -104,7 +104,7 @@ public class FornecedorService {
                 usuarioId,
                 "Fornecedor",
                 salvo.getId().toString(),
-                ativo ? "ATIVAR" : "INATIVAR",
+                "UPDATE",
                 request
         );
 

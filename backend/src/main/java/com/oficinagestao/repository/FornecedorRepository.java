@@ -23,9 +23,9 @@ public interface FornecedorRepository extends JpaRepository<Fornecedor, Long> {
     Page<Fornecedor> findByAtivoTrue(Pageable pageable);
 
     @Query("SELECT f FROM Fornecedor f WHERE " +
-            "(:termo IS NULL OR LOWER(f.razaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR LOWER(f.nomeFantasia) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "OR f.cnpj LIKE CONCAT('%', :termo, '%')) " +
+            "(CAST(:termo AS string) IS NULL OR LOWER(f.razaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+            "OR LOWER(f.nomeFantasia) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+            "OR f.cnpj LIKE CONCAT('%', CAST(:termo AS string), '%')) " +
             "AND (:ativo IS NULL OR f.ativo = :ativo)")
     Page<Fornecedor> pesquisarGlobal(
             @Param("termo") String termo,

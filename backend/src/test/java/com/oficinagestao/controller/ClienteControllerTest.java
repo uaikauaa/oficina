@@ -105,7 +105,7 @@ class ClienteControllerTest {
                 TipoPessoa.JURIDICA,
                 "Metalúrgica Aço Forte LTDA",
                 "Aço Forte Geradores",
-                "12345678000195",
+                "99887766000155",
                 "0621234560089",
                 "3133987654",
                 "31988887777",
@@ -122,7 +122,7 @@ class ClienteControllerTest {
                 .andExpect(jsonPath("$.tipoPessoa").value("JURIDICA"))
                 .andExpect(jsonPath("$.nomeRazaoSocial").value("Metalúrgica Aço Forte LTDA"))
                 .andExpect(jsonPath("$.nomeFantasia").value("Aço Forte Geradores"))
-                .andExpect(jsonPath("$.cpfCnpj").value("12345678000195"))
+                .andExpect(jsonPath("$.cpfCnpj").value("99887766000155"))
                 .andExpect(jsonPath("$.ativo").value(true))
                 .andExpect(jsonPath("$.enderecos", hasSize(1)));
     }

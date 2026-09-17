@@ -23,8 +23,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
     List<Categoria> findByAtivoTrueOrderByNomeAsc();
 
     @Query("SELECT c FROM Categoria c WHERE " +
-            "(:termo IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "  OR (c.descricao IS NOT NULL AND LOWER(c.descricao) LIKE LOWER(CONCAT('%', :termo, '%')))) " +
+            "(CAST(:termo AS string) IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+            "  OR (c.descricao IS NOT NULL AND LOWER(c.descricao) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))) " +
             "AND (:ativo IS NULL OR c.ativo = :ativo)")
     Page<Categoria> pesquisar(
             @Param("termo") String termo,

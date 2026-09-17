@@ -23,11 +23,11 @@ public interface EstoqueMovimentacaoRepository extends JpaRepository<EstoqueMovi
             "AND (:tipo IS NULL OR m.tipoMovimentacao = :tipo) " +
             "AND (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao >= :dataInicio) " +
             "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao <= :dataFim) " +
-            "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%')))) " +
-            "AND (:termo IS NULL OR :termo = '' OR " +
-            "     LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-            "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-            "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', :termo, '%'))))",
+            "AND (CAST(:numeroOs AS string) IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', CAST(:numeroOs AS string), '%')))) " +
+            "AND (CAST(:termo AS string) IS NULL OR CAST(:termo AS string) = '' OR " +
+            "     LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+            "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+            "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))))",
             countQuery = "SELECT COUNT(m) FROM EstoqueMovimentacao m " +
                     "LEFT JOIN m.produto p " +
                     "LEFT JOIN m.usuario u " +
@@ -36,11 +36,11 @@ public interface EstoqueMovimentacaoRepository extends JpaRepository<EstoqueMovi
                     "AND (:tipo IS NULL OR m.tipoMovimentacao = :tipo) " +
                     "AND (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao >= :dataInicio) " +
                     "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR m.dataMovimentacao <= :dataFim) " +
-                    "AND (:numeroOs IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :numeroOs, '%')))) " +
-                    "AND (:termo IS NULL OR :termo = '' OR " +
-                    "     LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-                    "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-                    "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', :termo, '%'))))")
+                    "AND (CAST(:numeroOs AS string) IS NULL OR (os IS NOT NULL AND LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', CAST(:numeroOs AS string), '%')))) " +
+                    "AND (CAST(:termo AS string) IS NULL OR CAST(:termo AS string) = '' OR " +
+                    "     LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+                    "     LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+                    "     (u IS NOT NULL AND LOWER(u.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))))")
     Page<EstoqueMovimentacao> pesquisarHistorico(
             @Param("produtoId") Long produtoId,
             @Param("tipo") TipoMovimentacaoEstoque tipo,

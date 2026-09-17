@@ -57,9 +57,9 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +
            "JOIN FETCH os.maquina m " +
-           "WHERE LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-           "   OR LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-           "   OR (m.numeroSerie IS NOT NULL AND LOWER(m.numeroSerie) LIKE LOWER(CONCAT('%', :termo, '%')))")
+           "WHERE LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+           "   OR LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+           "   OR (m.numeroSerie IS NOT NULL AND LOWER(m.numeroSerie) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))")
     List<OrdemServico> buscarRapidaOs(@Param("termo") String termo, Pageable pageable);
 
     /**
@@ -69,13 +69,13 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +
            "JOIN FETCH os.maquina m " +
-           "WHERE (:termo IS NULL OR (" +
-           "   LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "   LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "   (c.cpfCnpj IS NOT NULL AND c.cpfCnpj LIKE CONCAT('%', :termo, '%')) OR " +
-           "   LOWER(m.marca) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "   LOWER(m.modelo) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "   (m.numeroSerie IS NOT NULL AND LOWER(m.numeroSerie) LIKE LOWER(CONCAT('%', :termo, '%'))) " +
+           "WHERE (CAST(:termo AS string) IS NULL OR (" +
+           "   LOWER(os.numeroOs) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "   LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "   (c.cpfCnpj IS NOT NULL AND c.cpfCnpj LIKE CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "   LOWER(m.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "   LOWER(m.modelo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "   (m.numeroSerie IS NOT NULL AND LOWER(m.numeroSerie) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))) " +
            ")) " +
            "AND (:status IS NULL OR os.status = :status) " +
            "AND (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada >= :dataInicio) " +

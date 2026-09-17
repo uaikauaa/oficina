@@ -20,9 +20,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     @Query("SELECT p FROM Produto p WHERE " +
            "p.ativo = true AND (" +
-           "  LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-           "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-           "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', :termo, '%'))))")
+           "  LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+           "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+           "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))))")
     List<Produto> buscarRapida(@Param("termo") String termo, Pageable pageable);
 
     boolean existsByCodigo(String codigo);
@@ -43,10 +43,10 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Query(value = "SELECT p FROM Produto p " +
             "LEFT JOIN FETCH p.categoria c " +
             "LEFT JOIN FETCH p.fornecedor f WHERE " +
-            "(:termo IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-            "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', :termo, '%'))) " +
-            "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', :termo, '%'))) " +
+            "(CAST(:termo AS string) IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+            "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+            "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))) " +
+            "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', CAST(:termo AS string), '%'))) " +
             "AND (:tipo IS NULL OR p.tipo = :tipo) " +
             "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
             "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +
@@ -56,10 +56,10 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             countQuery = "SELECT COUNT(p) FROM Produto p " +
                     "LEFT JOIN p.categoria c " +
                     "LEFT JOIN p.fornecedor f WHERE " +
-                    "(:termo IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-                    "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :termo, '%')) " +
-                    "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', :termo, '%'))) " +
-                    "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', :termo, '%'))) " +
+                    "(CAST(:termo AS string) IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+                    "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
+                    "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))) " +
+                    "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', CAST(:termo AS string), '%'))) " +
                     "AND (:tipo IS NULL OR p.tipo = :tipo) " +
                     "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
                     "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +

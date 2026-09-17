@@ -16,12 +16,12 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     @Query("SELECT c FROM Cliente c WHERE " +
-           "CAST(c.id AS string) = :termo OR " +
-           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           "c.cpfCnpj LIKE CONCAT('%', :termo, '%') OR " +
-           "c.telefone LIKE CONCAT('%', :termo, '%') OR " +
-           "c.celular LIKE CONCAT('%', :termo, '%')")
+           "CAST(c.id AS string) = CAST(:termo AS string) OR " +
+           "LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           "c.cpfCnpj LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           "c.telefone LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           "c.celular LIKE CONCAT('%', CAST(:termo AS string), '%')")
     List<Cliente> buscarRapida(@Param("termo") String termo, Pageable pageable);
 
     // Verificações de duplicidade para criação
@@ -34,7 +34,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     boolean existsByNomeRazaoSocialIgnoreCase(String nomeRazaoSocial);
 
-    // VerificaÃ§Ãµes de duplicidade para atualizaÃ§Ã£o (excluindo o prÃ³prio ID)
+    // Verificações de duplicidade para atualização (excluindo o próprio ID)
     boolean existsByCpfCnpjAndIdNot(String cpfCnpj, Long id);
 
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Cliente c " +
@@ -45,22 +45,22 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     boolean existsByNomeRazaoSocialIgnoreCaseAndIdNot(String nomeRazaoSocial, Long id);
 
-    // Busca detalhada com JOIN FETCH dos endereÃ§os (evita N+1 na visualizaÃ§Ã£o/ediÃ§Ã£o)
+    // Busca detalhada com JOIN FETCH dos endereços (evita N+1 na visualização/edição)
     @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.enderecos WHERE c.id = :id")
     Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
 
-    // Pesquisa paginada com mÃºltiplos critÃ©rios
+    // Pesquisa paginada com múltiplos critérios
     @Query(value = "SELECT c FROM Cliente c WHERE " +
            "(:ativo IS NULL OR c.ativo = :ativo) AND " +
            "(:tipoPessoa IS NULL OR c.tipoPessoa = :tipoPessoa) AND " +
-           "(:termo IS NULL OR :termo = '' OR " +
-           " CAST(c.id AS string) = :termo OR " +
-           " LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           " LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           " LOWER(COALESCE(c.email, '')) LIKE LOWER(CONCAT('%', :termo, '%')) OR " +
-           " c.cpfCnpj LIKE CONCAT('%', :termo, '%') OR " +
-           " c.telefone LIKE CONCAT('%', :termo, '%') OR " +
-           " c.celular LIKE CONCAT('%', :termo, '%'))")
+           "(CAST(:termo AS string) IS NULL OR CAST(:termo AS string) = '' OR " +
+           " CAST(c.id AS string) = CAST(:termo AS string) OR " +
+           " LOWER(c.nomeRazaoSocial) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           " LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           " LOWER(COALESCE(c.email, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
+           " c.cpfCnpj LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           " c.telefone LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           " c.celular LIKE CONCAT('%', CAST(:termo AS string), '%'))")
     Page<Cliente> pesquisar(
             @Param("termo") String termo,
             @Param("tipoPessoa") TipoPessoa tipoPessoa,

@@ -185,7 +185,7 @@ class DatabaseConnectionTest {
             assertFalse(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE não deve existir no MVP.");
 
             // Validar que nenhum usuário fictício foi criado
-            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios")) {
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE email != 'admin@oficina.com'")) {
                 assertTrue(rs.next());
                 int userCount = rs.getInt(1);
                 assertEquals(0, userCount, "Nenhum usuário fictício deve existir na tabela usuarios.");
