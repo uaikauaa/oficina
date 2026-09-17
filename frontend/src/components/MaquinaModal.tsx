@@ -12,14 +12,16 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Search,
+  User,
 } from 'lucide-react';
-import { Maquina, MaquinaFormData, TipoEquipamento } from '@/lib/types';
-import { apiFetch } from '@/lib/api';
+import { Cliente, Maquina, MaquinaFormData, TipoEquipamento } from '@/lib/types';
+import { apiFetch, formatarDocumento, formatarTelefone } from '@/lib/api';
 
-interface MaquinaModalProps {
+export interface MaquinaModalProps {
   isOpen: boolean;
-  clienteId: number;
-  clienteNome: string;
+  clienteId?: number;
+  clienteNome?: string;
   maquina?: Maquina | null; // Se fornecido, modo edição
   onClose: () => void;
   onSuccess: (maquina: Maquina) => void;
@@ -47,7 +49,7 @@ export default function MaquinaModal({
   const isEditing = !!maquina;
 
   const [formData, setFormData] = useState<Partial<MaquinaFormData>>({
-    clienteId,
+    clienteId: clienteId,
     tipoEquipamento: 'MAQUINA_SOLDA',
     marca: '',
     modelo: '',
@@ -59,11 +61,19 @@ export default function MaquinaModal({
     observacoes: '',
   });
 
+  // Estado da seleção de cliente (para quando clienteId não é fornecido)
+  const [selectedCliente, setSelectedCliente] = useState<{ id: number; nome: string } | null>(
+    clienteId ? { id: clienteId, nome: clienteNome || '' } : null
+  );
+  const [termoCliente, setTermoCliente] = useState('');
+  const [clientesEncontrados, setClientesEncontrados] = useState<Cliente[]>([]);
+  const [isBuscandoClientes, setIsBuscandoClientes] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  // Popula o form ao abrir em modo edição
+  // Popula o form ao abrir
   useEffect(() => {
     const timer = setTimeout(() => {
       if (isOpen) {
@@ -80,7 +90,8 @@ export default function MaquinaModal({
             tensao: maquina.tensao ?? '',
             observacoes: maquina.observacoes ?? '',
           });
-        } else {
+          setSelectedCliente({ id: maquina.clienteId, nome: maquina.clienteNome || '' });
+        } else if (clienteId) {
           setFormData({
             clienteId,
             tipoEquipamento: 'MAQUINA_SOLDA',
@@ -93,13 +104,57 @@ export default function MaquinaModal({
             tensao: '',
             observacoes: '',
           });
+          setSelectedCliente({ id: clienteId, nome: clienteNome || '' });
+        } else {
+          setFormData({
+            clienteId: undefined,
+            tipoEquipamento: 'MAQUINA_SOLDA',
+            marca: '',
+            modelo: '',
+            anoFabricacao: '',
+            numeroSerie: '',
+            horimetro: '',
+            potencia: '',
+            tensao: '',
+            observacoes: '',
+          });
+          setSelectedCliente(null);
         }
+        setTermoCliente('');
+        setClientesEncontrados([]);
         setErrorMessage(null);
         setFieldErrors({});
       }
     }, 0);
     return () => clearTimeout(timer);
-  }, [isOpen, maquina, clienteId]);
+  }, [isOpen, maquina, clienteId, clienteNome]);
+
+  // Busca de clientes com debounce
+  useEffect(() => {
+    if (selectedCliente || !termoCliente.trim() || termoCliente.trim().length < 2) {
+      const resetTimer = setTimeout(() => {
+        setClientesEncontrados([]);
+      }, 0);
+      return () => clearTimeout(resetTimer);
+    }
+
+    const timer = setTimeout(async () => {
+      setIsBuscandoClientes(true);
+      try {
+        const res = await apiFetch(`/api/clientes?termo=${encodeURIComponent(termoCliente.trim())}&size=6`);
+        if (res.ok) {
+          const data = await res.json();
+          setClientesEncontrados(data.content || []);
+        }
+      } catch {
+        // Silencioso
+      } finally {
+        setIsBuscandoClientes(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [termoCliente, selectedCliente]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -113,6 +168,9 @@ export default function MaquinaModal({
 
   const validate = (): boolean => {
     const erros: Record<string, string> = {};
+    if (!formData.clienteId) {
+      erros.clienteId = 'Por favor, selecione o cliente proprietário do equipamento.';
+    }
     if (!formData.tipoEquipamento) erros.tipoEquipamento = 'Tipo de equipamento é obrigatório.';
     if (!formData.marca?.trim()) erros.marca = 'Marca é obrigatória.';
     if (!formData.modelo?.trim()) erros.modelo = 'Modelo é obrigatório.';
@@ -164,7 +222,6 @@ export default function MaquinaModal({
 
       if (!res.ok) {
         const err = await res.json();
-        // Verifica se há erros de validação por campo
         if (err.errors && typeof err.errors === 'object') {
           setFieldErrors(err.errors);
         } else {
@@ -205,7 +262,13 @@ export default function MaquinaModal({
                 {isEditing ? 'Editar Equipamento' : 'Novo Equipamento'}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Cliente: <span className="text-slate-200 font-medium">{clienteNome}</span>
+                {selectedCliente ? (
+                  <>
+                    Cliente: <span className="text-slate-200 font-medium">{selectedCliente.nome}</span>
+                  </>
+                ) : (
+                  'Selecione o cliente e informe os dados técnicos'
+                )}
               </p>
             </div>
           </div>
@@ -227,6 +290,94 @@ export default function MaquinaModal({
                 <span>{errorMessage}</span>
               </div>
             )}
+
+            {/* SELEÇÃO DO CLIENTE (quando não for edição e não veio clienteId pré-definido) */}
+            <div>
+              <label className={LABEL_CLASS}>
+                <User className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                Cliente Proprietário <span className="text-red-400">*</span>
+              </label>
+
+              {selectedCliente ? (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">{selectedCliente.nome}</span>
+                      <span className="text-[11px] text-slate-500 block">ID: #{selectedCliente.id}</span>
+                    </div>
+                  </div>
+                  {!clienteId && !isEditing && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedCliente(null);
+                        setFormData((prev) => ({ ...prev, clienteId: undefined }));
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer"
+                    >
+                      Trocar Cliente
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Pesquisar cliente por nome, CPF/CNPJ ou telefone..."
+                      value={termoCliente}
+                      onChange={(e) => setTermoCliente(e.target.value)}
+                      className={`${INPUT_CLASS} pl-9 ${fieldErrors.clienteId ? 'border-red-500/60' : ''}`}
+                    />
+                    {isBuscandoClientes && (
+                      <Loader2 className="w-4 h-4 text-amber-400 absolute right-3 top-1/2 -translate-y-1/2 animate-spin" />
+                    )}
+                  </div>
+
+                  {clientesEncontrados.length > 0 && (
+                    <div className="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/60 shadow-lg max-h-48 overflow-y-auto">
+                      {clientesEncontrados.map((c) => (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedCliente({ id: c.id, nome: c.nomeRazaoSocial });
+                            setFormData((prev) => ({ ...prev, clienteId: c.id }));
+                            setTermoCliente('');
+                            setClientesEncontrados([]);
+                            if (fieldErrors.clienteId) {
+                              setFieldErrors((prev) => ({ ...prev, clienteId: '' }));
+                            }
+                          }}
+                          className="p-2.5 hover:bg-slate-800/50 cursor-pointer transition-colors flex items-center justify-between text-xs"
+                        >
+                          <div>
+                            <span className="font-bold text-white block">{c.nomeRazaoSocial}</span>
+                            <span className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                              {c.cpfCnpj && <span>{formatarDocumento(c.cpfCnpj)}</span>}
+                              {(c.celular || c.telefone) && <span>• {formatarTelefone(c.celular || c.telefone)}</span>}
+                            </span>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-semibold border border-slate-700">
+                            {c.tipoPessoa === 'JURIDICA' ? 'PJ' : 'PF'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {termoCliente.trim().length >= 2 && !isBuscandoClientes && clientesEncontrados.length === 0 && (
+                    <p className="text-xs text-slate-500 italic p-1">Nenhum cliente localizado para &quot;{termoCliente}&quot;</p>
+                  )}
+                </div>
+              )}
+              {fieldErrors.clienteId && (
+                <p className="mt-1 text-xs text-red-400">{fieldErrors.clienteId}</p>
+              )}
+            </div>
 
             {/* Tipo de Equipamento */}
             <div>
@@ -282,7 +433,7 @@ export default function MaquinaModal({
                   name="modelo"
                   value={formData.modelo ?? ''}
                   onChange={handleChange}
-                  placeholder="Ex: LHN 280, Lider 400-N"
+                  placeholder="Ex: LHN 280i, TG8000"
                   className={`${INPUT_CLASS} ${fieldErrors.modelo ? 'border-red-500/60' : ''}`}
                   maxLength={100}
                 />
@@ -319,7 +470,7 @@ export default function MaquinaModal({
                   name="anoFabricacao"
                   value={formData.anoFabricacao ?? ''}
                   onChange={handleChange}
-                  placeholder="Ex: 2019"
+                  placeholder="Ex: 2022"
                   min={1900}
                   max={2100}
                   className={`${INPUT_CLASS} ${fieldErrors.anoFabricacao ? 'border-red-500/60' : ''}`}
@@ -342,7 +493,7 @@ export default function MaquinaModal({
                   name="potencia"
                   value={formData.potencia ?? ''}
                   onChange={handleChange}
-                  placeholder="Ex: 160A, 5kVA"
+                  placeholder="Ex: 250A, 8kVA"
                   className={INPUT_CLASS}
                   maxLength={50}
                 />
@@ -357,7 +508,7 @@ export default function MaquinaModal({
                   name="tensao"
                   value={formData.tensao ?? ''}
                   onChange={handleChange}
-                  placeholder="Ex: 110V/220V"
+                  placeholder="Ex: 220V/380V"
                   className={INPUT_CLASS}
                   maxLength={50}
                 />
@@ -372,7 +523,7 @@ export default function MaquinaModal({
                   name="horimetro"
                   value={formData.horimetro ?? ''}
                   onChange={handleChange}
-                  placeholder="Ex: 1200.5"
+                  placeholder="Ex: 120.5"
                   className={INPUT_CLASS}
                 />
               </div>
@@ -386,7 +537,7 @@ export default function MaquinaModal({
                 value={formData.observacoes ?? ''}
                 onChange={handleChange}
                 rows={3}
-                placeholder="Detalhes técnicos, histórico de problemas, configurações especiais..."
+                placeholder="Detalhes técnicos, cabos e tochas inclusos, histórico de reparos..."
                 className={`${INPUT_CLASS} resize-none leading-relaxed`}
               />
             </div>
