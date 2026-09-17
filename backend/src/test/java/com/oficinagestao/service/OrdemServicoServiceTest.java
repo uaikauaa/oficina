@@ -865,4 +865,31 @@ class OrdemServicoServiceTest {
         assertEquals(3L, contadores.aguardandoAprovacao());
         assertEquals(8L, contadores.emManutencao());
     }
+
+    @Test
+    @DisplayName("UX-003: Deve obter contadores consolidados de status para tela de Ordens de Serviço com sucesso")
+    void deveObterContadoresStatusCorretamente() {
+        when(ordemServicoRepository.count()).thenReturn(42L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.ABERTA)).thenReturn(8L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_DIAGNOSTICO)).thenReturn(2L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_APROVACAO)).thenReturn(5L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_MANUTENCAO)).thenReturn(6L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_PECA)).thenReturn(3L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.PRONTA)).thenReturn(4L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.CONCLUIDA)).thenReturn(12L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.CANCELADA)).thenReturn(2L);
+
+        OrdemServicoContadoresStatusDTO status = ordemServicoService.obterContadoresStatus();
+
+        assertNotNull(status);
+        assertEquals(42L, status.total());
+        assertEquals(8L, status.aberta());
+        assertEquals(2L, status.emDiagnostico());
+        assertEquals(5L, status.aguardandoAprovacao());
+        assertEquals(6L, status.emManutencao());
+        assertEquals(3L, status.aguardandoPeca());
+        assertEquals(4L, status.pronta());
+        assertEquals(12L, status.concluida());
+        assertEquals(2L, status.cancelada());
+    }
 }

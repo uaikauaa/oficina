@@ -557,4 +557,16 @@ export interface EstoqueResumo {
   valorTotalEstoque: number;
 }
 
+export interface OrdemServicoContadoresStatus {
+  total: number;
+  aberta: number;
+  emDiagnostico: number;
+  aguardandoAprovacao: number;
+  emManutencao: number;
+  aguardandoPeca: number;
+  pronta: number;
+  concluida: number;
+  cancelada: number;
+}
+
 

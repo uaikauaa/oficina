@@ -1,6 +1,7 @@
 package com.oficinagestao.service;
 
 import com.oficinagestao.dto.OrdemServicoContadoresDashboardDTO;
+import com.oficinagestao.dto.OrdemServicoContadoresStatusDTO;
 import com.oficinagestao.dto.OrdemServicoCreateDTO;
 import com.oficinagestao.dto.OrdemServicoResponseDTO;
 import com.oficinagestao.dto.OrdemServicoStatusDTO;
@@ -471,5 +472,30 @@ public class OrdemServicoService {
         long aguardandoAprovacao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_APROVACAO);
         long emManutencao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_MANUTENCAO);
         return new OrdemServicoContadoresDashboardDTO(prontas, aguardandoAprovacao, emManutencao);
+    }
+
+    @Transactional(readOnly = true)
+    public OrdemServicoContadoresStatusDTO obterContadoresStatus() {
+        long total = ordemServicoRepository.count();
+        long aberta = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.ABERTA);
+        long emDiagnostico = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_DIAGNOSTICO);
+        long aguardandoAprovacao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_APROVACAO);
+        long emManutencao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_MANUTENCAO);
+        long aguardandoPeca = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_PECA);
+        long pronta = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.PRONTA);
+        long concluida = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.CONCLUIDA);
+        long cancelada = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.CANCELADA);
+
+        return new OrdemServicoContadoresStatusDTO(
+                total,
+                aberta,
+                emDiagnostico,
+                aguardandoAprovacao,
+                emManutencao,
+                aguardandoPeca,
+                pronta,
+                concluida,
+                cancelada
+        );
     }
 }

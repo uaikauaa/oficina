@@ -110,6 +110,12 @@ public class OrdemServicoController {
         return ResponseEntity.ok(ordemServicoService.obterContadoresDashboard());
     }
 
+    @GetMapping("/api/ordens-servico/contadores-status")
+    @Operation(summary = "Obter contadores consolidados de Ordens de Serviço por status para a tela operacional")
+    public ResponseEntity<OrdemServicoContadoresStatusDTO> obterContadoresStatus() {
+        return ResponseEntity.ok(ordemServicoService.obterContadoresStatus());
+    }
+
     @GetMapping("/api/ordens-servico/{id}")
     @Operation(summary = "Buscar Ordem de ServiÃƒÂ§o por ID", description = "Retorna os detalhes completos da OS, cliente, equipamento e financeiro.")
     @ApiResponses({
