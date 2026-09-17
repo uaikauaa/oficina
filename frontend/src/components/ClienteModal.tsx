@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -61,6 +61,7 @@ interface ClienteModalProps {
   onSuccess?: (clienteSalvo: Cliente) => void;
   incluirEquipamento?: boolean;
   onSuccessComEquipamento?: (clienteSalvo: Cliente, maquinaSalva: Maquina) => void;
+  nomePreDefinido?: string;
 }
 
 const TIPO_EQUIPAMENTO_OPTIONS: { value: TipoEquipamento; label: string; icon: string; desc: string }[] = [
@@ -81,6 +82,7 @@ export default function ClienteModal({
   onSuccess,
   incluirEquipamento = false,
   onSuccessComEquipamento,
+  nomePreDefinido,
 }: ClienteModalProps) {
   const [etapa, setEtapa] = useState<1 | 2>(1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -153,6 +155,49 @@ export default function ClienteModal({
     name: 'tipoPessoa',
     defaultValue: cliente?.tipoPessoa || 'FISICA',
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isOpen) {
+        setEtapa(1);
+        setErrorMessage(null);
+        setMaquinaFieldErrors({});
+        reset({
+          tipoPessoa: cliente?.tipoPessoa || 'FISICA',
+          nomeRazaoSocial: cliente?.nomeRazaoSocial || nomePreDefinido || '',
+          nomeFantasia: cliente?.nomeFantasia || '',
+          cpfCnpj: cliente?.cpfCnpj || '',
+          rgIe: cliente?.rgIe || '',
+          telefone: cliente?.telefone || '',
+          celular: cliente?.celular || '',
+          email: cliente?.email || '',
+          observacoes: cliente?.observacoes || '',
+          ativo: cliente?.ativo !== undefined ? cliente.ativo : true,
+          endereco: {
+            cep: enderecoPadrao?.cep || '',
+            logradouro: enderecoPadrao?.logradouro || '',
+            numero: enderecoPadrao?.numero || '',
+            complemento: enderecoPadrao?.complemento || '',
+            bairro: enderecoPadrao?.bairro || '',
+            cidade: enderecoPadrao?.cidade || '',
+            estado: enderecoPadrao?.estado || '',
+          },
+        });
+        setMaquinaData({
+          tipoEquipamento: 'MAQUINA_SOLDA',
+          marca: '',
+          modelo: '',
+          numeroSerie: '',
+          anoFabricacao: '',
+          potencia: '',
+          tensao: '',
+          horimetro: '',
+          observacoes: '',
+        });
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [isOpen, cliente, nomePreDefinido, reset, enderecoPadrao]);
 
   if (!isOpen) return null;
 
@@ -378,7 +423,7 @@ export default function ClienteModal({
         if (e.target === e.currentTarget) handleCloseModal();
       }}
     >
-      <div className="relative w-full max-w-3xl my-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-3xl my-4 sm:my-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Cabeçalho do Modal */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60 shrink-0">
           <div className="flex items-center gap-3">
@@ -401,7 +446,7 @@ export default function ClienteModal({
               <div className="flex items-center gap-2">
                 <h2 className="text-base sm:text-lg font-bold text-white">
                   {incluirEquipamento
-                    ? 'Novo Cliente & Equipamento'
+                    ? 'Nova Ordem de Serviço — Cadastro'
                     : isEditing
                     ? 'Editar Cliente'
                     : 'Novo Cliente'}
@@ -445,7 +490,7 @@ export default function ClienteModal({
               <div className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
                 1
               </div>
-              <span>Dados do Cliente</span>
+              <span>Dados do cliente</span>
             </button>
 
             <span className="text-slate-600 text-xs">→</span>
@@ -462,16 +507,29 @@ export default function ClienteModal({
               <div className="w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-black flex items-center justify-center">
                 2
               </div>
-              <span>Equipamento da Oficina</span>
+              <span>Dados do equipamento</span>
             </button>
           </div>
         )}
 
         {/* Mensagem de Erro Geral */}
         {errorMessage && (
-          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2 shrink-0">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{errorMessage}</span>
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            {(errorMessage.includes('Já existe') ||
+              errorMessage.includes('duplicad') ||
+              errorMessage.includes('CPF/CNPJ')) && (
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-[11px] transition-colors self-start sm:self-auto cursor-pointer"
+              >
+                Voltar para pesquisar cliente existente
+              </button>
+            )}
           </div>
         )}
 
@@ -735,7 +793,7 @@ export default function ClienteModal({
                   onClick={handleAvancarParaEquipamento}
                   className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
                 >
-                  <span>Avançar para Equipamento</span>
+                  <span>Avançar para dados do equipamento</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -1036,7 +1094,7 @@ export default function ClienteModal({
                   ) : (
                     <>
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Concluir Cadastro e Vincular à OS</span>
+                      <span>Continuar para Ordem de Serviço</span>
                     </>
                   )}
                 </button>

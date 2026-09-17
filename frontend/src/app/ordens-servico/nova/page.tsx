@@ -347,7 +347,7 @@ function NovaOrdemServicoContent() {
                     className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer py-1 px-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all self-start sm:self-auto"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>Cadastrar Novo Cliente & Equipamento</span>
+                    <span>Cadastrar novo cliente</span>
                   </button>
                 </div>
 
@@ -398,14 +398,14 @@ function NovaOrdemServicoContent() {
 
                 {termoCliente.trim().length >= 2 && !buscandoClientes && clientesEncontrados.length === 0 && (
                   <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
-                    <p>Nenhum cliente localizado com o termo digitado.</p>
+                    <p>Cliente não encontrado com o termo digitado.</p>
                     <button
                       type="button"
                       onClick={() => setIsNovoClienteModalOpen(true)}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all cursor-pointer shadow-md"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      <span>Cadastrar Novo Cliente & Equipamento</span>
+                      <span>Cadastrar novo cliente</span>
                     </button>
                   </div>
                 )}
@@ -654,13 +654,14 @@ function NovaOrdemServicoContent() {
       <ClienteModal
         isOpen={isNovoClienteModalOpen}
         incluirEquipamento={true}
+        nomePreDefinido={termoCliente.trim()}
         onClose={() => setIsNovoClienteModalOpen(false)}
         onSuccessComEquipamento={(novoCliente, novaMaquina) => {
           setClienteSelecionado(novoCliente);
           setMaquinasCliente([novaMaquina]);
           setMaquinaSelecionadaId(novaMaquina.id.toString());
           setToastSucesso(
-            `Cliente "${novoCliente.nomeRazaoSocial}" e equipamento "${novaMaquina.marca} ${novaMaquina.modelo}" cadastrados com sucesso!`
+            `Cliente "${novoCliente.nomeRazaoSocial}" e equipamento "${novaMaquina.marca} ${novaMaquina.modelo}" vinculados à Ordem de Serviço!`
           );
         }}
       />
