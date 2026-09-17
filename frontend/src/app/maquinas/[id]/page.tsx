@@ -28,6 +28,7 @@ import {
   MaquinaResumo,
   OrdemServico,
   OrdemServicoItem,
+  PageResponse,
   STATUS_ORDEM_SERVICO_BADGES,
   TIPO_EQUIPAMENTO_LABELS,
 } from '@/lib/types';
@@ -103,10 +104,10 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
       }
 
       // 3. Carrega histórico cronológico de Ordens de Serviço (mais recente no topo)
-      const resOs = await apiFetch(`/api/maquinas/${maquinaId}/historico`);
+      const resOs = await apiFetch(`/api/maquinas/${maquinaId}/historico?size=50`);
       if (resOs.ok) {
-        const dataOs: OrdemServico[] = await resOs.json();
-        setOrdens(dataOs || []);
+        const dataOs: PageResponse<OrdemServico> = await resOs.json();
+        setOrdens(dataOs.content ?? []);
       }
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Erro ao consultar equipamento.');
