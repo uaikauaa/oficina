@@ -94,6 +94,17 @@ public class ClienteController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/contadores-status")
+    @Operation(summary = "Obter contadores operacionais de clientes", description = "Retorna contadores de Total, PF, PJ, Ativos e Inativos para alimentar as pills do frontend.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contadores retornados com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado")
+    })
+    public ResponseEntity<ClienteContadoresStatusDTO> obterContadoresStatus() {
+        return ResponseEntity.ok(clienteService.obterContadoresStatus());
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Buscar cliente por ID", description = "Retorna os detalhes completos do cliente e seus endereÃƒÂ§os.")
     @ApiResponses({

@@ -569,4 +569,12 @@ export interface OrdemServicoContadoresStatus {
   cancelada: number;
 }
 
+export interface ClienteContadoresStatus {
+  total: number;
+  pessoaFisica: number;
+  pessoaJuridica: number;
+  ativos: number;
+  inativos: number;
+}
+
 

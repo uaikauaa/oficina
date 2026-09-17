@@ -2,6 +2,8 @@ package com.oficinagestao.repository;
 
 import com.oficinagestao.entity.*;
 
+import com.oficinagestao.dto.ClienteContadoresStatusDTO;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,7 +51,7 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.enderecos WHERE c.id = :id")
     Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
 
-    // Pesquisa paginada com múltiplos critérios
+    // Pesquisa paginada com múltiplos critérios e suporte a dígitos de CPF/CNPJ/Telefone
     @Query(value = "SELECT c FROM Cliente c WHERE " +
            "(:ativo IS NULL OR c.ativo = :ativo) AND " +
            "(:tipoPessoa IS NULL OR c.tipoPessoa = :tipoPessoa) AND " +
@@ -59,14 +61,27 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
            " LOWER(COALESCE(c.nomeFantasia, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
            " LOWER(COALESCE(c.email, '')) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) OR " +
            " c.cpfCnpj LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           " (CAST(:termoDigitos AS string) IS NOT NULL AND CAST(:termoDigitos AS string) != '' AND c.cpfCnpj LIKE CONCAT('%', CAST(:termoDigitos AS string), '%')) OR " +
            " c.telefone LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
-           " c.celular LIKE CONCAT('%', CAST(:termo AS string), '%'))")
+           " (CAST(:termoDigitos AS string) IS NOT NULL AND CAST(:termoDigitos AS string) != '' AND c.telefone LIKE CONCAT('%', CAST(:termoDigitos AS string), '%')) OR " +
+           " c.celular LIKE CONCAT('%', CAST(:termo AS string), '%') OR " +
+           " (CAST(:termoDigitos AS string) IS NOT NULL AND CAST(:termoDigitos AS string) != '' AND c.celular LIKE CONCAT('%', CAST(:termoDigitos AS string), '%')))")
     Page<Cliente> pesquisar(
             @Param("termo") String termo,
+            @Param("termoDigitos") String termoDigitos,
             @Param("tipoPessoa") TipoPessoa tipoPessoa,
             @Param("ativo") Boolean ativo,
             Pageable pageable
     );
+
+    @Query("SELECT new com.oficinagestao.dto.ClienteContadoresStatusDTO(" +
+           "COUNT(c), " +
+           "COALESCE(SUM(CASE WHEN c.tipoPessoa = com.oficinagestao.entity.TipoPessoa.FISICA THEN 1L ELSE 0L END), 0L), " +
+           "COALESCE(SUM(CASE WHEN c.tipoPessoa = com.oficinagestao.entity.TipoPessoa.JURIDICA THEN 1L ELSE 0L END), 0L), " +
+           "COALESCE(SUM(CASE WHEN c.ativo = true THEN 1L ELSE 0L END), 0L), " +
+           "COALESCE(SUM(CASE WHEN c.ativo = false THEN 1L ELSE 0L END), 0L)) " +
+           "FROM Cliente c")
+    ClienteContadoresStatusDTO obterContadoresStatus();
 
     @Query("SELECT new com.oficinagestao.dto.RelatorioClienteItemDTO(" +
            "c.id, c.nomeRazaoSocial, c.cpfCnpj, COALESCE(c.telefone, c.celular), " +

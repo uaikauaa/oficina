@@ -72,9 +72,15 @@ public class ClienteService {
     }
 
     @Transactional(readOnly = true)
+    public ClienteContadoresStatusDTO obterContadoresStatus() {
+        return clienteRepository.obterContadoresStatus();
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<ClienteResponseDTO> listar(String termo, TipoPessoa tipoPessoa, Boolean ativo, Pageable pageable) {
         String termoNormalizado = (termo != null && !termo.isBlank()) ? termo.trim() : null;
-        Page<Cliente> page = clienteRepository.pesquisar(termoNormalizado, tipoPessoa, ativo, pageable);
+        String termoDigitos = apenasDigitos(termoNormalizado);
+        Page<Cliente> page = clienteRepository.pesquisar(termoNormalizado, termoDigitos, tipoPessoa, ativo, pageable);
         return PageResponse.from(page.map(cliente ->
                 toResponseDTO(cliente, maquinaRepository.countByClienteId(cliente.getId()))));
     }
