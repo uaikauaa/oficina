@@ -90,6 +90,28 @@ class RelatorioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve gerar relatório de Ordens de Serviço sem calcular resumo quando incluirResumo for falso (UX008-08)")
+    void deveGerarRelatorioOsSemCalcularResumoQuandoSolicitado() {
+        OffsetDateTime inicio = OffsetDateTime.now().minusDays(30);
+        OffsetDateTime fim = OffsetDateTime.now();
+
+        OrdemServico os = new OrdemServico();
+        os.setId(1L);
+        Page<OrdemServico> pageOs = new PageImpl<>(List.of(os), pageable, 1);
+        when(ordemServicoRepository.pesquisarGlobal(isNull(), isNull(), eq(inicio), eq(fim), eq(pageable))).thenReturn(pageOs);
+
+        RelatorioOsResponseDTO resultado = relatorioService.obterRelatorioOsPorPeriodo(inicio, fim, null, false, pageable);
+
+        assertNotNull(resultado);
+        assertNull(resultado.resumo(), "Resumo deve ser nulo quando incluirResumo for falso");
+        assertEquals(1, resultado.itens().getTotalElements());
+        // Garante que nenhuma das 5 queries agregadas foi chamada
+        verify(ordemServicoRepository, never()).contarPorPeriodoEStatus(any(), any(), any());
+        verify(ordemServicoRepository, never()).contarAbertasPorPeriodo(any(), any());
+        verify(ordemServicoRepository, never()).somarValorConcluidasPorPeriodo(any(), any());
+    }
+
+    @Test
     @DisplayName("Deve classificar status do estoque corretamente (ZERADO, BAIXO, NORMAL)")
     void deveClassificarStatusEstoqueCorretamente() {
         Categoria cat = new Categoria();

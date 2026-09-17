@@ -44,9 +44,11 @@ public class RelatorioController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime dataFim,
             @Parameter(description = "Filtrar por status específico")
             @RequestParam(required = false) StatusOrdemServico status,
+            @Parameter(description = "Indica se deve calcular os contadores agregados de resumo (padrão: true)")
+            @RequestParam(required = false, defaultValue = "true") Boolean incluirResumo,
             @PageableDefault(size = 20, sort = "dataEntrada", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        RelatorioOsResponseDTO response = relatorioService.obterRelatorioOsPorPeriodo(dataInicio, dataFim, status, pageable);
+        RelatorioOsResponseDTO response = relatorioService.obterRelatorioOsPorPeriodo(dataInicio, dataFim, status, Boolean.TRUE.equals(incluirResumo), pageable);
         return ResponseEntity.ok(response);
     }
 

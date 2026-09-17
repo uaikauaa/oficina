@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import type { OrdemServico, OrdemServicoItem, Produto, StatusOrdemServico } from './types.ts';
-import { formatarMoeda, formatarDocumento, formatarTelefone } from './api.ts';
+import type { OrdemServico, OrdemServicoItem, Produto } from './types.ts';
+import { formatarDocumento, formatarTelefone } from './api.ts';
 import {
   gerarLinkWhatsappOrcamento,
   gerarLinkWhatsappRetirada,
@@ -49,12 +49,14 @@ describe('UX-007: Cockpit de Bancada Técnica para Ordem de Serviço (/ordens-se
       produtoId: 88,
       produtoCodigo: 'DIO-50A-1200V',
       produtoNome: 'Diodo Rápido 50A 1200V Ponte H',
+      tipoItem: 'PECA',
+      tipoItemDescricao: 'Peça',
       quantidade: 2,
       valorUnitario: 110.0,
       valorDesconto: 0,
       valorTotal: 220.0,
       observacoes: 'Substituição no canal de potência',
-      criadoEm: '2026-09-17T10:00:00',
+      createdAt: '2026-09-17T10:00:00',
     },
   ];
 
@@ -227,11 +229,12 @@ describe('UX-007: Cockpit de Bancada Técnica para Ordem de Serviço (/ordens-se
         estoqueAtual: 4,
         estoqueMinimo: 2,
         estoqueMaximo: 20,
-        estoqueDisponivel: 4,
         localizacao: 'Gaveta E-02',
         ativo: true,
         categoriaNome: 'Semicondutores',
         fornecedorNome: 'Eletrônica Brasil',
+        estoqueBaixo: false,
+        semEstoque: false,
         createdAt: '2026-01-01T00:00:00',
         updatedAt: '2026-01-01T00:00:00',
       };

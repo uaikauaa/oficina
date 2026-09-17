@@ -61,19 +61,32 @@ public class RelatorioService {
             StatusOrdemServico status,
             Pageable pageable
     ) {
-        long totalOs = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, null);
-        long concluidas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CONCLUIDA);
-        long abertas = ordemServicoRepository.contarAbertasPorPeriodo(dataInicio, dataFim);
-        long canceladas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CANCELADA);
-        BigDecimal valorTotalConcluidas = ordemServicoRepository.somarValorConcluidasPorPeriodo(dataInicio, dataFim);
+        return obterRelatorioOsPorPeriodo(dataInicio, dataFim, status, true, pageable);
+    }
 
-        RelatorioOsResumoDTO resumo = new RelatorioOsResumoDTO(
-                totalOs,
-                concluidas,
-                abertas,
-                canceladas,
-                valorTotalConcluidas
-        );
+    public RelatorioOsResponseDTO obterRelatorioOsPorPeriodo(
+            OffsetDateTime dataInicio,
+            OffsetDateTime dataFim,
+            StatusOrdemServico status,
+            boolean incluirResumo,
+            Pageable pageable
+    ) {
+        RelatorioOsResumoDTO resumo = null;
+        if (incluirResumo) {
+            long totalOs = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, null);
+            long concluidas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CONCLUIDA);
+            long abertas = ordemServicoRepository.contarAbertasPorPeriodo(dataInicio, dataFim);
+            long canceladas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CANCELADA);
+            BigDecimal valorTotalConcluidas = ordemServicoRepository.somarValorConcluidasPorPeriodo(dataInicio, dataFim);
+
+            resumo = new RelatorioOsResumoDTO(
+                    totalOs,
+                    concluidas,
+                    abertas,
+                    canceladas,
+                    valorTotalConcluidas
+            );
+        }
 
         Page<OrdemServicoResponseDTO> itens = ordemServicoRepository
                 .pesquisarGlobal(null, status, dataInicio, dataFim, pageable)
