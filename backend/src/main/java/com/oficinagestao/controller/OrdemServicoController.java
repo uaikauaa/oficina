@@ -104,6 +104,12 @@ public class OrdemServicoController {
         return ResponseEntity.ok(ordemServicoService.listar(termo, status, dataInicio, dataFim, pageable));
     }
 
+    @GetMapping("/api/ordens-servico/contadores-dashboard")
+    @Operation(summary = "Obter contadores de Ordens de Serviço para o painel de atenção da Dashboard")
+    public ResponseEntity<OrdemServicoContadoresDashboardDTO> obterContadoresDashboard() {
+        return ResponseEntity.ok(ordemServicoService.obterContadoresDashboard());
+    }
+
     @GetMapping("/api/ordens-servico/{id}")
     @Operation(summary = "Buscar Ordem de ServiÃƒÂ§o por ID", description = "Retorna os detalhes completos da OS, cliente, equipamento e financeiro.")
     @ApiResponses({

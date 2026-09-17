@@ -544,3 +544,17 @@ export interface RelatorioMaquinaItem {
   valorAcumulado: number;
 }
 
+export interface OrdemServicoContadoresDashboard {
+  prontas: number;
+  aguardandoAprovacao: number;
+  emManutencao: number;
+}
+
+export interface EstoqueResumo {
+  totalProdutos: number;
+  itensSemEstoque: number;
+  itensEstoqueBaixo: number;
+  valorTotalEstoque: number;
+}
+
+

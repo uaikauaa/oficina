@@ -850,4 +850,19 @@ class OrdemServicoServiceTest {
         assertEquals(laudo, os.getTestesRealizados());
         verify(ordemServicoRepository).save(os);
     }
+
+    @Test
+    @DisplayName("UX-002: Deve obter contadores operacionais da Dashboard com sucesso")
+    void deveObterContadoresDashboardCorretamente() {
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.PRONTA)).thenReturn(5L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_APROVACAO)).thenReturn(3L);
+        when(ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_MANUTENCAO)).thenReturn(8L);
+
+        OrdemServicoContadoresDashboardDTO contadores = ordemServicoService.obterContadoresDashboard();
+
+        assertNotNull(contadores);
+        assertEquals(5L, contadores.prontas());
+        assertEquals(3L, contadores.aguardandoAprovacao());
+        assertEquals(8L, contadores.emManutencao());
+    }
 }

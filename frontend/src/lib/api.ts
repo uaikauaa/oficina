@@ -105,3 +105,19 @@ export function formatarDataHora(dataStr?: string | null): string {
     return dataStr;
   }
 }
+
+export function formatarData(dataStr?: string | null): string {
+  if (!dataStr) return '-';
+  try {
+    const data = new Date(dataStr);
+    if (isNaN(data.getTime())) return dataStr;
+    return data.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  } catch {
+    return dataStr;
+  }
+}
+

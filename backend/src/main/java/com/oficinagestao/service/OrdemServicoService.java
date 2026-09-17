@@ -1,5 +1,6 @@
 package com.oficinagestao.service;
 
+import com.oficinagestao.dto.OrdemServicoContadoresDashboardDTO;
 import com.oficinagestao.dto.OrdemServicoCreateDTO;
 import com.oficinagestao.dto.OrdemServicoResponseDTO;
 import com.oficinagestao.dto.OrdemServicoStatusDTO;
@@ -462,5 +463,13 @@ public class OrdemServicoService {
         }
 
         return numeroGerado;
+    }
+
+    @Transactional(readOnly = true)
+    public OrdemServicoContadoresDashboardDTO obterContadoresDashboard() {
+        long prontas = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.PRONTA);
+        long aguardandoAprovacao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.AGUARDANDO_APROVACAO);
+        long emManutencao = ordemServicoRepository.contarPorPeriodoEStatus(null, null, StatusOrdemServico.EM_MANUTENCAO);
+        return new OrdemServicoContadoresDashboardDTO(prontas, aguardandoAprovacao, emManutencao);
     }
 }
