@@ -87,6 +87,32 @@ public class GlobalExceptionHandler {
                 .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST", "Corpo da requisição ausente ou malformado.", request.getRequestURI()));
     }
 
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        String paramName = ex.getName();
+        Object value = ex.getValue();
+        String expectedType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "tipo compatível";
+        String message = String.format("Parâmetro '%s' com valor inválido: '%s'. Esperava-se um valor do tipo %s.",
+                paramName, value, expectedType);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST", message, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        log.warn("Argumento inválido na rota {}: {}", request.getRequestURI(), ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiErrorResponse.of(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST", ex.getMessage() != null ? ex.getMessage() : "Argumento inválido.", request.getRequestURI()));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<ApiErrorResponse.ValidationErrorDetail> details = ex.getBindingResult().getFieldErrors().stream()

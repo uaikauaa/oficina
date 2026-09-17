@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Boxes,
   Package,
@@ -14,13 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
+  X,
+  RotateCcw,
 } from 'lucide-react';
 import Header from '@/components/Header';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
 import { CurrentUser, Produto, EstoqueResumo, Categoria, Fornecedor } from '@/lib/types';
-import { apiFetchJson, formatarMoeda } from '@/lib/api';
+import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
 
 export default function EstoquePage() {
+  const router = useRouter();
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [resumo, setResumo] = useState<EstoqueResumo | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -30,7 +34,8 @@ export default function EstoquePage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filtros
-  const [termo, setTermo] = useState('');
+  const [termoInput, setTermoInput] = useState('');
+  const [termoDebounced, setTermoDebounced] = useState('');
   const [categoriaId, setCategoriaId] = useState<string>('');
   const [fornecedorId, setFornecedorId] = useState<string>('');
   const [filtroNivel, setFiltroNivel] = useState<'TODOS' | 'CRITICO' | 'ZERADO'>('TODOS');
@@ -46,12 +51,17 @@ export default function EstoquePage() {
 
   const carregarUsuario = useCallback(async () => {
     try {
-      const u = await apiFetchJson<CurrentUser>('/api/auth/me');
+      const res = await apiFetch('/api/auth/me');
+      if (!res.ok) {
+        router.push('/login');
+        return;
+      }
+      const u = await res.json();
       setUser(u);
     } catch {
-      // Ignora erro
+      router.push('/login');
     }
-  }, []);
+  }, [router]);
 
   const carregarResumo = useCallback(async () => {
     try {
@@ -90,6 +100,15 @@ export default function EstoquePage() {
     return () => clearTimeout(timer);
   }, [carregarUsuario, carregarResumo, carregarCategorias, carregarFornecedores]);
 
+  // Debounce de 400ms para a busca
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTermoDebounced(termoInput.trim());
+      setPage(0);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [termoInput]);
+
   const carregarProdutos = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -99,7 +118,7 @@ export default function EstoquePage() {
         size: '15',
         ativo: 'true',
       });
-      if (termo.trim()) params.append('termo', termo.trim());
+      if (termoDebounced) params.append('termo', termoDebounced);
       if (categoriaId) params.append('categoriaId', categoriaId);
       if (fornecedorId) params.append('fornecedorId', fornecedorId);
       if (filtroNivel === 'CRITICO' || filtroNivel === 'ZERADO') {
@@ -112,14 +131,7 @@ export default function EstoquePage() {
         totalElements: number;
       }>(`/api/produtos?${params.toString()}`);
 
-      let list = res.content || [];
-      if (filtroNivel === 'ZERADO') {
-        list = list.filter((p) => p.estoqueAtual === 0);
-      } else if (filtroNivel === 'CRITICO') {
-        list = list.filter((p) => p.estoqueAtual > 0 && p.estoqueAtual <= p.estoqueMinimo);
-      }
-
-      setProdutos(list);
+      setProdutos(res.content || []);
       setTotalPages(res.totalPages || 0);
       setTotalElements(res.totalElements || 0);
     } catch (err: unknown) {
@@ -128,7 +140,7 @@ export default function EstoquePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, termo, categoriaId, fornecedorId, filtroNivel]);
+  }, [page, termoDebounced, categoriaId, fornecedorId, filtroNivel]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -258,15 +270,22 @@ export default function EstoquePage() {
             <div className="relative">
               <input
                 type="text"
-                value={termo}
-                onChange={(e) => {
-                  setTermo(e.target.value);
-                  setPage(0);
-                }}
+                value={termoInput}
+                onChange={(e) => setTermoInput(e.target.value)}
                 placeholder="Buscar por código, nome ou marca..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
               />
               <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+              {termoInput && (
+                <button
+                  type="button"
+                  onClick={() => setTermoInput('')}
+                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                  title="Limpar busca"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             {/* Filtro por Categoria */}
@@ -319,10 +338,32 @@ export default function EstoquePage() {
               >
                 <option value="TODOS">Todos os saldos</option>
                 <option value="CRITICO">Apenas estoque crítico (&le; mín)</option>
-                <option value="ZERADO">Apenas estoque zerado (= 0)</option>
               </select>
             </div>
           </div>
+
+          {(termoDebounced || categoriaId || fornecedorId || filtroNivel !== 'TODOS') && (
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+              <span className="text-slate-400">
+                Filtros ativos: <strong className="text-amber-400">{totalElements}</strong> registros encontrados
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setTermoInput('');
+                  setTermoDebounced('');
+                  setCategoriaId('');
+                  setFornecedorId('');
+                  setFiltroNivel('TODOS');
+                  setPage(0);
+                }}
+                className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-400 text-xs transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Limpar Filtros</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Mensagem de Erro */}

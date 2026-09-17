@@ -54,6 +54,16 @@ class GlobalExceptionHandlerTest {
             public void throwDataIntegrity() {
                 throw new org.springframework.dao.DataIntegrityViolationException("violacao de chave única de teste");
             }
+
+            @GetMapping("/illegal-argument")
+            public void throwIllegalArgument() {
+                throw new IllegalArgumentException("Valor do parâmetro inválido de teste.");
+            }
+
+            @GetMapping("/enum-param")
+            public String testEnumParam(@org.springframework.web.bind.annotation.RequestParam com.oficinagestao.entity.TipoProduto tipo) {
+                return tipo.name();
+            }
         }
     }
 
@@ -139,5 +149,39 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("CONFLICT"))
                 .andExpect(jsonPath("$.message").value("Conflito de integridade de dados ou registro duplicado."));
+    }
+
+    @Test
+    @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST para MethodArgumentTypeMismatchException (enum inválido em query param)")
+    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    void shouldReturn400OnTypeMismatchEnum() throws Exception {
+        mockMvc.perform(get("/api/test-exceptions/enum-param").param("tipo", "INVALIDO"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Parâmetro 'tipo' com valor inválido: 'INVALIDO'")))
+                .andExpect(jsonPath("$.path").value("/api/test-exceptions/enum-param"));
+    }
+
+    @Test
+    @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST para IllegalArgumentException")
+    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    void shouldReturn400OnIllegalArgument() throws Exception {
+        mockMvc.perform(get("/api/test-exceptions/illegal-argument"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Valor do parâmetro inválido de teste."));
+    }
+
+    @Test
+    @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST em endpoint real /api/produtos com enum inválido")
+    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    void shouldReturn400OnProdutosEndpointWithInvalidEnum() throws Exception {
+        mockMvc.perform(get("/api/produtos").param("tipo", "TIPO_INEXISTENTE"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Parâmetro 'tipo' com valor inválido: 'TIPO_INEXISTENTE'")));
     }
 }
