@@ -158,10 +158,14 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
     }
   };
 
+  // Feedback visual de ação de status
+  const [statusFeedback, setStatusFeedback] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
+
   // Alterna status ativo/inativo
   const handleToggleStatus = async () => {
     if (!maquina) return;
     setIsChangingStatus(true);
+    setStatusFeedback(null);
     try {
       const res = await apiFetch(`/api/maquinas/${maquina.id}/status`, {
         method: 'PATCH',
@@ -171,12 +175,27 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
         const atualizada: Maquina = await res.json();
         setMaquina(atualizada);
         setIsStatusModalOpen(false);
+        setStatusFeedback({
+          tipo: 'sucesso',
+          mensagem: `Equipamento ${atualizada.ativo ? 'reativado' : 'inativado'} com sucesso!`,
+        });
+        setTimeout(() => setStatusFeedback(null), 4000);
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(err.message || 'Erro ao alterar status do equipamento.');
+        setIsStatusModalOpen(false);
+        setStatusFeedback({
+          tipo: 'erro',
+          mensagem: err.message || 'Erro ao alterar status do equipamento.',
+        });
+        setTimeout(() => setStatusFeedback(null), 5000);
       }
     } catch {
-      alert('Falha na comunicação com o servidor.');
+      setIsStatusModalOpen(false);
+      setStatusFeedback({
+        tipo: 'erro',
+        mensagem: 'Falha na comunicação com o servidor.',
+      });
+      setTimeout(() => setStatusFeedback(null), 5000);
     } finally {
       setIsChangingStatus(false);
     }
@@ -237,6 +256,33 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
             </Link>
           </div>
         </div>
+
+        {/* Feedback de Ação Contextual (Substitui window.alert) */}
+        {statusFeedback && (
+          <div
+            className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 shadow-md animate-in fade-in transition-all ${
+              statusFeedback.tipo === 'sucesso'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                : 'bg-red-500/10 border-red-500/30 text-red-300'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              {statusFeedback.tipo === 'sucesso' ? (
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+              )}
+              <span>{statusFeedback.mensagem}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStatusFeedback(null)}
+              className="text-slate-400 hover:text-white text-xs font-semibold px-2 py-0.5 cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* Alerta de Equipamento Inativo se aplicável */}
         {!maquina.ativo && (

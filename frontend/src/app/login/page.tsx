@@ -7,6 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Lock, Mail, Eye, EyeOff, Wrench, AlertCircle, ArrowRight } from 'lucide-react';
 
+import { sanitizarRedirect } from '@/lib/api';
+
 const loginSchema = z.object({
   email: z.string().min(1, 'O email é obrigatório').email('Formato de email inválido'),
   senha: z.string().min(1, 'A senha é obrigatória'),
@@ -17,7 +19,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  const redirectUrl = sanitizarRedirect(searchParams.get('redirect'));
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -81,18 +81,18 @@ export function calcularIntervaloPreset(
 
     case '7dias': {
       // 7 dias corridos: hoje menos 6 dias
-      const d7 = new Date(Date.UTC(ano, mes, dia - 6));
+      const d7 = new Date(Date.UTC(ano, mes, dia - 6, 12, 0, 0));
       return {
-        dataInicio: d7.toISOString().split('T')[0],
+        dataInicio: formatarDataLocalYmd(d7),
         dataFim: hojeYmd,
       };
     }
 
     case '30dias': {
       // 30 dias corridos: hoje menos 29 dias
-      const d30 = new Date(Date.UTC(ano, mes, dia - 29));
+      const d30 = new Date(Date.UTC(ano, mes, dia - 29, 12, 0, 0));
       return {
-        dataInicio: d30.toISOString().split('T')[0],
+        dataInicio: formatarDataLocalYmd(d30),
         dataFim: hojeYmd,
       };
     }
@@ -137,3 +137,55 @@ export function identificarPresetAtivo(
 
   return 'customizado';
 }
+
+/**
+ * Obtém a data e hora atual formatada para input type="datetime-local" (YYYY-MM-DDTHH:mm)
+ * estritamente no fuso horário oficial America/Sao_Paulo (ISSUE-02).
+ */
+export function obterAgoraLocalDatetimeInput(data: Date = new Date()): string {
+  const partes = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: FUSO_HORARIO_OFICIAL,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(data);
+
+  const ano = partes.find((p) => p.type === 'year')?.value || '2026';
+  const mes = partes.find((p) => p.type === 'month')?.value || '01';
+  const dia = partes.find((p) => p.type === 'day')?.value || '01';
+  let hora = partes.find((p) => p.type === 'hour')?.value || '00';
+  if (hora === '24') hora = '00';
+  const minuto = partes.find((p) => p.type === 'minute')?.value || '00';
+
+  return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+}
+
+/**
+ * Converte o valor do input datetime-local para string ISO com offset oficial de São Paulo (-03:00).
+ * Exemplo: '2026-09-17T21:30' -> '2026-09-17T21:30:00-03:00'
+ */
+export function converterDatetimeLocalParaIsoComOffset(datetimeLocal?: string | null): string | undefined {
+  if (!datetimeLocal || !datetimeLocal.trim()) return undefined;
+  const trimmed = datetimeLocal.trim();
+
+  // Se já contém offset ou sufixo
+  if (trimmed.includes('-03:00') || trimmed.endsWith('Z')) {
+    return trimmed;
+  }
+
+  // Formato YYYY-MM-DDTHH:mm (16 caracteres)
+  if (trimmed.length === 16) {
+    return `${trimmed}:00${OFFSET_PADRAO_SP}`;
+  }
+
+  // Formato YYYY-MM-DDTHH:mm:ss (19 caracteres)
+  if (trimmed.length === 19) {
+    return `${trimmed}${OFFSET_PADRAO_SP}`;
+  }
+
+  return `${trimmed}${OFFSET_PADRAO_SP}`;
+}
+

@@ -63,6 +63,9 @@ export default function EstoquePage() {
     }
   }, [router]);
 
+  const [carregandoCategorias, setCarregandoCategorias] = useState(false);
+  const [carregandoFornecedores, setCarregandoFornecedores] = useState(false);
+
   const carregarResumo = useCallback(async () => {
     try {
       const r = await apiFetchJson<EstoqueResumo>('/api/estoque/resumo');
@@ -73,32 +76,38 @@ export default function EstoquePage() {
   }, []);
 
   const carregarCategorias = useCallback(async () => {
+    if (categorias.length > 0 || carregandoCategorias) return;
+    setCarregandoCategorias(true);
     try {
       const data = await apiFetchJson<Categoria[]>('/api/categorias/ativas');
       setCategorias(data || []);
     } catch {
       // Ignora erro
+    } finally {
+      setCarregandoCategorias(false);
     }
-  }, []);
+  }, [categorias.length, carregandoCategorias]);
 
   const carregarFornecedores = useCallback(async () => {
+    if (fornecedores.length > 0 || carregandoFornecedores) return;
+    setCarregandoFornecedores(true);
     try {
       const data = await apiFetchJson<{ content: Fornecedor[] }>('/api/fornecedores?size=100');
       setFornecedores(data.content || []);
     } catch {
       // Ignora erro
+    } finally {
+      setCarregandoFornecedores(false);
     }
-  }, []);
+  }, [fornecedores.length, carregandoFornecedores]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       carregarUsuario();
       carregarResumo();
-      carregarCategorias();
-      carregarFornecedores();
     }, 0);
     return () => clearTimeout(timer);
-  }, [carregarUsuario, carregarResumo, carregarCategorias, carregarFornecedores]);
+  }, [carregarUsuario, carregarResumo]);
 
   // Debounce de 400ms para a busca
   useEffect(() => {
@@ -292,13 +301,15 @@ export default function EstoquePage() {
             <div>
               <select
                 value={categoriaId}
+                onFocus={carregarCategorias}
+                onPointerDown={carregarCategorias}
                 onChange={(e) => {
                   setCategoriaId(e.target.value);
                   setPage(0);
                 }}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
               >
-                <option value="">Todas as categorias</option>
+                <option value="">{carregandoCategorias ? 'Carregando categorias...' : 'Todas as categorias'}</option>
                 {categorias.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.nome}
@@ -311,13 +322,15 @@ export default function EstoquePage() {
             <div>
               <select
                 value={fornecedorId}
+                onFocus={carregarFornecedores}
+                onPointerDown={carregarFornecedores}
                 onChange={(e) => {
                   setFornecedorId(e.target.value);
                   setPage(0);
                 }}
                 className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
               >
-                <option value="">Todos os fornecedores</option>
+                <option value="">{carregandoFornecedores ? 'Carregando fornecedores...' : 'Todos os fornecedores'}</option>
                 {fornecedores.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.razaoSocial || f.nomeFantasia}

@@ -1,5 +1,37 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
+// Mutex / Promise compartilhada para evitar disparos concorrentes de refresh token (ISSUE-01)
+let activeRefreshPromise: Promise<boolean> | null = null;
+
+export async function executeSilentRefresh(): Promise<boolean> {
+  if (!activeRefreshPromise) {
+    activeRefreshPromise = (async () => {
+      try {
+        const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
+        return refreshRes.ok;
+      } catch {
+        return false;
+      } finally {
+        activeRefreshPromise = null;
+      }
+    })();
+  }
+  return activeRefreshPromise;
+}
+
+export function sanitizarRedirect(url: string | null): string {
+  if (!url) return '/dashboard';
+  const trimmed = url.trim();
+  // Deve ser caminho relativo interno iniciando com '/', não pode ser protocol-relative ('//') e não pode conter esquema ('://')
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.includes('://')) {
+    return trimmed;
+  }
+  return '/dashboard';
+}
+
 export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const url = `${API_URL}${endpoint}`;
   const config: RequestInit = {
@@ -13,20 +45,12 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
 
   let response = await fetch(url, config);
 
-  // Se o access_token expirou (401), tenta renovar silenciosamente com refresh_token
+  // Se o access_token expirou (401), aguarda ou executa renovação silenciosa com refresh_token compartilhado
   if (response.status === 401 && !endpoint.startsWith('/api/auth/')) {
-    try {
-      const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (refreshRes.ok) {
-        // Repete a requisição original com os novos cookies definidos no navegador
-        response = await fetch(url, config);
-      }
-    } catch {
-      // Ignora erro de refresh e retorna o 401 original
+    const refreshSuccess = await executeSilentRefresh();
+    if (refreshSuccess) {
+      // Repete a requisição original com os novos cookies definidos no navegador
+      response = await fetch(url, config);
     }
   }
 

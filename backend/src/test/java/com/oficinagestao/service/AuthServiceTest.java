@@ -264,4 +264,15 @@ class AuthServiceTest {
         assertEquals("admin@oficina.com", response.email());
         assertTrue(response.roles().contains("ROLE_ADMIN"));
     }
+
+    @Test
+    @DisplayName("ISSUE-08: Deve expurgar refresh tokens expirados ou revogados com sucesso")
+    void shouldPurgeExpiredOrRevokedRefreshTokens() {
+        when(refreshTokenRepository.deleteExpiredOrRevoked(any(OffsetDateTime.class))).thenReturn(42);
+
+        int deletados = authService.purgarTokensExpiradosOuRevogados();
+
+        assertEquals(42, deletados);
+        verify(refreshTokenRepository, times(1)).deleteExpiredOrRevoked(any(OffsetDateTime.class));
+    }
 }

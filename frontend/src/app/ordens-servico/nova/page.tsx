@@ -24,6 +24,10 @@ import {
   TIPO_EQUIPAMENTO_LABELS,
 } from '@/lib/types';
 import { apiFetch, formatarDocumento, formatarTelefone } from '@/lib/api';
+import {
+  obterAgoraLocalDatetimeInput,
+  converterDatetimeLocalParaIsoComOffset,
+} from '@/lib/relatorioDateHelper';
 
 function NovaOrdemServicoContent() {
   const router = useRouter();
@@ -60,7 +64,7 @@ function NovaOrdemServicoContent() {
     observacoes: string;
   }>({
     numeroOs: '',
-    dataEntrada: new Date().toISOString().slice(0, 16), // YYYY-MM-DDTHH:mm
+    dataEntrada: obterAgoraLocalDatetimeInput(), // YYYY-MM-DDTHH:mm no fuso de São Paulo
     problemaRelatado: '',
     horimetroAtual: '',
     observacoes: '',
@@ -217,7 +221,7 @@ function NovaOrdemServicoContent() {
         clienteId: clienteSelecionado.id,
         maquinaId: Number(maquinaSelecionadaId),
         problemaRelatado: formData.problemaRelatado.trim(),
-        dataEntrada: formData.dataEntrada ? new Date(formData.dataEntrada).toISOString() : undefined,
+        dataEntrada: converterDatetimeLocalParaIsoComOffset(formData.dataEntrada),
         observacoes: formData.observacoes.trim() || undefined,
         horimetroAtual: formData.horimetroAtual ? formData.horimetroAtual.replace(/\s+/g, '').replace(',', '.') : undefined,
         numeroOs: formData.numeroOs.trim() || undefined,

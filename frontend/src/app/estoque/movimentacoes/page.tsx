@@ -25,6 +25,7 @@ import {
   TIPO_MOVIMENTACAO_ESTOQUE_BADGES,
 } from '@/lib/types';
 import { apiFetchJson, formatarDataHora } from '@/lib/api';
+import { formatarDataInicioParaApi, formatarDataFimParaApi } from '@/lib/relatorioDateHelper';
 
 export default function MovimentacoesEstoquePage() {
   const [user, setUser] = useState<CurrentUser | null>(null);
@@ -71,8 +72,8 @@ export default function MovimentacoesEstoquePage() {
       if (termo.trim()) params.append('termo', termo.trim());
       if (tipo) params.append('tipo', tipo);
       if (numeroOs.trim()) params.append('numeroOs', numeroOs.trim());
-      if (dataInicio) params.append('dataInicio', `${dataInicio}T00:00:00Z`);
-      if (dataFim) params.append('dataFim', `${dataFim}T23:59:59Z`);
+      if (dataInicio) params.append('dataInicio', formatarDataInicioParaApi(dataInicio));
+      if (dataFim) params.append('dataFim', formatarDataFimParaApi(dataFim));
 
       const res = await apiFetchJson<{
         content: EstoqueMovimentacao[];

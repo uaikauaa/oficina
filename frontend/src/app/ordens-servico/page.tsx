@@ -27,6 +27,7 @@ import {
   OrdemServicoContadoresStatus,
 } from '@/lib/types';
 import { apiFetch, formatarMoeda, formatarData } from '@/lib/api';
+import { formatarDataInicioParaApi, formatarDataFimParaApi, formatarDataLocalYmd } from '@/lib/relatorioDateHelper';
 
 function OrdensServicoContent() {
   const router = useRouter();
@@ -137,12 +138,10 @@ function OrdensServicoContent() {
           params.append('status', statusFiltro);
         }
         if (dataInicio) {
-          params.append('dataInicio', new Date(dataInicio).toISOString());
+          params.append('dataInicio', formatarDataInicioParaApi(dataInicio));
         }
         if (dataFim) {
-          const dtFim = new Date(dataFim);
-          dtFim.setHours(23, 59, 59, 999);
-          params.append('dataFim', dtFim.toISOString());
+          params.append('dataFim', formatarDataFimParaApi(dataFim));
         }
 
         const res = await apiFetch(`/api/ordens-servico?${params.toString()}`);
@@ -178,27 +177,32 @@ function OrdensServicoContent() {
     };
   }, [page, size, termoDebounced, statusFiltro, dataInicio, dataFim, isLoadingUser, refreshTrigger]);
 
-  // Função para definir período rápido de datas
+  // Função para definir período rápido de datas estritamente no fuso America/Sao_Paulo (ISSUE-05)
   const definirPeriodo = (tipo: '30' | '90' | 'ano' | 'tudo') => {
     setPeriodoAtivo(tipo);
-    const hoje = new Date();
     if (tipo === 'tudo') {
       setDataInicio('');
       setDataFim('');
-    } else if (tipo === '30') {
-      const d = new Date();
-      d.setDate(d.getDate() - 30);
-      setDataInicio(d.toISOString().split('T')[0]);
-      setDataFim(hoje.toISOString().split('T')[0]);
-    } else if (tipo === '90') {
-      const d = new Date();
-      d.setDate(d.getDate() - 90);
-      setDataInicio(d.toISOString().split('T')[0]);
-      setDataFim(hoje.toISOString().split('T')[0]);
-    } else if (tipo === 'ano') {
-      const d = new Date(hoje.getFullYear(), 0, 1);
-      setDataInicio(d.toISOString().split('T')[0]);
-      setDataFim(hoje.toISOString().split('T')[0]);
+    } else {
+      const hoje = new Date();
+      const hojeYmd = formatarDataLocalYmd(hoje);
+      const [anoStr, mesStr, diaStr] = hojeYmd.split('-');
+      const ano = parseInt(anoStr, 10);
+      const mes = parseInt(mesStr, 10) - 1;
+      const dia = parseInt(diaStr, 10);
+
+      if (tipo === '30') {
+        const d = new Date(Date.UTC(ano, mes, dia - 30, 12, 0, 0));
+        setDataInicio(formatarDataLocalYmd(d));
+        setDataFim(hojeYmd);
+      } else if (tipo === '90') {
+        const d = new Date(Date.UTC(ano, mes, dia - 90, 12, 0, 0));
+        setDataInicio(formatarDataLocalYmd(d));
+        setDataFim(hojeYmd);
+      } else if (tipo === 'ano') {
+        setDataInicio(`${anoStr}-01-01`);
+        setDataFim(hojeYmd);
+      }
     }
     setPage(0);
   };

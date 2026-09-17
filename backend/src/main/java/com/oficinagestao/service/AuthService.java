@@ -212,6 +212,14 @@ public class AuthService {
         }
     }
 
+    @Transactional
+    public int purgarTokensExpiradosOuRevogados() {
+        OffsetDateTime limite = OffsetDateTime.now().minusDays(7);
+        int deletados = refreshTokenRepository.deleteExpiredOrRevoked(limite);
+        log.info("Purga de refresh tokens concluída: {} tokens removidos.", deletados);
+        return deletados;
+    }
+
     private String extrairIp(HttpServletRequest request) {
         if (request == null) {
             return "127.0.0.1";
