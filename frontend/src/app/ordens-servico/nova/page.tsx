@@ -14,6 +14,8 @@ import {
   Plus,
 } from 'lucide-react';
 import Header from '@/components/Header';
+import ClienteModal from '@/components/ClienteModal';
+import MaquinaModal from '@/components/MaquinaModal';
 import {
   Cliente,
   CurrentUser,
@@ -43,6 +45,11 @@ function NovaOrdemServicoContent() {
   const [maquinasCliente, setMaquinasCliente] = useState<Maquina[]>([]);
   const [carregandoMaquinas, setCarregandoMaquinas] = useState(false);
   const [maquinaSelecionadaId, setMaquinaSelecionadaId] = useState<string>('');
+
+  // Modais de Criação Rápida
+  const [isNovoClienteModalOpen, setIsNovoClienteModalOpen] = useState(false);
+  const [isNovaMaquinaModalOpen, setIsNovaMaquinaModalOpen] = useState(false);
+  const [toastSucesso, setToastSucesso] = useState<string | null>(null);
 
   // Formulário de Abertura
   const [formData, setFormData] = useState<{
@@ -274,6 +281,22 @@ function NovaOrdemServicoContent() {
           </div>
         </div>
 
+        {/* Notificação de Sucesso */}
+        {toastSucesso && (
+          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <span className="font-semibold">{toastSucesso}</span>
+            </div>
+            <button
+              onClick={() => setToastSucesso(null)}
+              className="text-emerald-400 hover:text-emerald-200 font-bold ml-4 cursor-pointer text-base"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Mensagem de Erro Geral */}
         {errorMessage && (
           <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs sm:text-sm flex items-start gap-3">
@@ -314,9 +337,20 @@ function NovaOrdemServicoContent() {
 
             {!clienteSelecionado ? (
               <div className="space-y-3">
-                <label className="block text-xs font-semibold text-slate-300">
-                  Pesquise o cliente por Nome, Razão Social, CPF ou CNPJ:
-                </label>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Pesquise o cliente por Nome, Razão Social, CPF ou CNPJ:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsNovoClienteModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer py-1 px-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all self-start sm:self-auto"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Cadastrar Novo Cliente & Equipamento</span>
+                  </button>
+                </div>
+
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
                   <input
@@ -363,11 +397,16 @@ function NovaOrdemServicoContent() {
                 )}
 
                 {termoCliente.trim().length >= 2 && !buscandoClientes && clientesEncontrados.length === 0 && (
-                  <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400">
-                    Nenhum cliente localizado com o termo digitado.{' '}
-                    <Link href="/clientes" className="text-amber-400 underline font-semibold">
-                      Cadastrar novo cliente
-                    </Link>
+                  <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
+                    <p>Nenhum cliente localizado com o termo digitado.</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsNovoClienteModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all cursor-pointer shadow-md"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Cadastrar Novo Cliente & Equipamento</span>
+                    </button>
                   </div>
                 )}
               </div>
@@ -411,13 +450,14 @@ function NovaOrdemServicoContent() {
                   </div>
                   <h2 className="text-base font-bold text-white">Equipamento da Oficina</h2>
                 </div>
-                <Link
-                  href={`/clientes/${clienteSelecionado.id}`}
+                <button
+                  type="button"
+                  onClick={() => setIsNovaMaquinaModalOpen(true)}
                   className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Cadastrar Máquina para este Cliente</span>
-                </Link>
+                </button>
               </div>
 
               {carregandoMaquinas ? (
@@ -434,13 +474,14 @@ function NovaOrdemServicoContent() {
                   <p className="text-xs text-slate-400 max-w-md mx-auto">
                     Para abrir uma Ordem de Serviço, o equipamento técnico deve estar cadastrado na ficha do cliente.
                   </p>
-                  <Link
-                    href={`/clientes/${clienteSelecionado.id}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all mt-2"
+                  <button
+                    type="button"
+                    onClick={() => setIsNovaMaquinaModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all mt-2 cursor-pointer shadow-md"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Cadastrar Equipamento Agora</span>
-                  </Link>
+                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -608,6 +649,42 @@ function NovaOrdemServicoContent() {
           )}
         </form>
       </main>
+
+      {/* Modal de Cadastro Integrado: Cliente + Equipamento */}
+      <ClienteModal
+        isOpen={isNovoClienteModalOpen}
+        incluirEquipamento={true}
+        onClose={() => setIsNovoClienteModalOpen(false)}
+        onSuccessComEquipamento={(novoCliente, novaMaquina) => {
+          setClienteSelecionado(novoCliente);
+          setMaquinasCliente([novaMaquina]);
+          setMaquinaSelecionadaId(novaMaquina.id.toString());
+          setToastSucesso(
+            `Cliente "${novoCliente.nomeRazaoSocial}" e equipamento "${novaMaquina.marca} ${novaMaquina.modelo}" cadastrados com sucesso!`
+          );
+        }}
+      />
+
+      {/* Modal de Cadastro de Máquina para Cliente Já Existente */}
+      {clienteSelecionado && (
+        <MaquinaModal
+          isOpen={isNovaMaquinaModalOpen}
+          clienteId={clienteSelecionado.id}
+          clienteNome={clienteSelecionado.nomeRazaoSocial}
+          onClose={() => setIsNovaMaquinaModalOpen(false)}
+          onSuccess={(novaMaquina) => {
+            setMaquinasCliente((prev) => [
+              novaMaquina,
+              ...prev.filter((m) => m.id !== novaMaquina.id),
+            ]);
+            setMaquinaSelecionadaId(novaMaquina.id.toString());
+            setIsNovaMaquinaModalOpen(false);
+            setToastSucesso(
+              `Equipamento "${novaMaquina.marca} ${novaMaquina.modelo}" cadastrado com sucesso!`
+            );
+          }}
+        />
+      )}
     </div>
   );
 }
