@@ -89,3 +89,50 @@ export function gerarLinkWhatsappRetirada(params: WhatsAppRetiradaParams): Whats
     mensagem,
   };
 }
+
+/**
+ * Parâmetros para geração de link de aprovação de orçamento
+ */
+export interface WhatsAppOrcamentoParams {
+  telefone?: string | null;
+  clienteNome: string;
+  equipamentoModelo: string;
+  numeroOs: string;
+  valorPecas: number;
+  valorMaoObra: number;
+  valorTotal: number;
+}
+
+/**
+ * Constrói a mensagem e o link seguro wa.me para envio de orçamento para aprovação.
+ */
+export function gerarLinkWhatsappOrcamento(params: WhatsAppOrcamentoParams): WhatsAppResult {
+  const { telefone, clienteNome, equipamentoModelo, numeroOs, valorPecas, valorMaoObra, valorTotal } = params;
+
+  const nomeLimpo = (clienteNome || 'Cliente').trim();
+  const modeloLimpo = (equipamentoModelo || 'Equipamento').trim();
+  const osLimpa = (numeroOs || '').trim();
+  const pecasFormatado = formatarMoedaWhatsapp(valorPecas ?? 0);
+  const maoObraFormatado = formatarMoedaWhatsapp(valorMaoObra ?? 0);
+  const totalFormatado = formatarMoedaWhatsapp(valorTotal ?? 0);
+
+  const mensagem = `Olá, ${nomeLimpo}.\n\nSegue o orçamento para a OS ${osLimpa} referente à máquina ${modeloLimpo}:\n- Peças: ${pecasFormatado}\n- Mão de Obra: ${maoObraFormatado}\n- Total: ${totalFormatado}\n\nFavor nos confirmar a aprovação para iniciarmos o serviço.`;
+
+  const telefoneNormalizado = sanitizarTelefoneWhatsapp(telefone);
+
+  if (!telefoneNormalizado) {
+    return {
+      url: null,
+      mensagem,
+      erro: 'Telefone inválido ou não informado.',
+    };
+  }
+
+  const encodedText = encodeURIComponent(mensagem);
+  const url = `https://wa.me/${telefoneNormalizado}?text=${encodedText}`;
+
+  return {
+    url,
+    mensagem,
+  };
+}
