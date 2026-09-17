@@ -32,15 +32,18 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ObjectMapper objectMapper;
     private final String allowedOrigins;
+    private final boolean swaggerEnabled;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             ObjectMapper objectMapper,
-            @Value("${cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}") String allowedOrigins
+            @Value("${cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}") String allowedOrigins,
+            @Value("${springdoc.swagger-ui.enabled:true}") boolean swaggerEnabled
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.objectMapper = objectMapper;
         this.allowedOrigins = allowedOrigins;
+        this.swaggerEnabled = swaggerEnabled;
     }
 
     @Bean
@@ -65,19 +68,23 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        // Endpoint de health check público
-                        .requestMatchers("/api/health").permitAll()
-                        // Documentação Swagger / OpenAPI pública
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        // Endpoints de autenticação abertos
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
-                        // Qualquer outro endpoint da API exige autenticação com ROLE_ADMIN
-                        .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    // Endpoint de health check público (avaliando conectividade com PostgreSQL)
+                    auth.requestMatchers("/api/health").permitAll();
+
+                    // Documentação Swagger / OpenAPI permitida publicamente apenas se habilitada na configuração (PROD001-09)
+                    if (swaggerEnabled) {
+                        auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll();
+                    }
+
+                    // Endpoints de autenticação abertos
+                    auth.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
+                            // Qualquer outro endpoint da API exige autenticação com ROLE_ADMIN
+                            .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")
+                            .anyRequest().authenticated();
+                })
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

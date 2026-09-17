@@ -1,25 +1,33 @@
 # Procedimentos de Backup e Recuperação de Desastres — Oficina Gestão
 
-Este documento estabelece as rotinas operacionais oficiais para realização de **backup**, **verificação de integridade** e **restauração de dados (restore)** do banco de dados PostgreSQL Neon da aplicação **Oficina Gestão**.
+Este documento estabelece as rotinas operacionais oficiais para realização de **backup**, **backup off-site**, **verificação de integridade** e **restauração de dados (restore)** do banco de dados PostgreSQL Neon da aplicação **Oficina Gestão**.
 
 ---
 
-## 1. Estratégia de Proteção de Dados
+## 1. Estratégia de Proteção de Dados e Backup Off-Site (PROD001-05)
 
-A arquitetura adota três camadas complementares de salvaguarda de dados:
+A arquitetura adota quatro camadas complementares de salvaguarda de dados:
 
 1. **Snapshots de Liberação (Neon Serverless)**:
-   - Snapshot criado na homologação da Release 1.0.0:
-     - **ID**: `snap-spring-thunder-acvzytef`
-     - **Nome**: `snapshot-pre-release-1-0-0`
-     - **Projeto**: `summer-frost-22688608`
-     - **Branch de Origem**: `br-wispy-truth-acn1bsbe` (`production`)
-     - Permite restauração instantânea do banco para o estado virgem e homologado da Release 1.0.0 a qualquer instante.
+   - Snapshot criado na homologação da Release 1.0.0 e marcos de liberação:
+     - Permite restauração instantânea do banco para o estado virgem e homologado a qualquer instante.
 2. **Nível de Plataforma (Neon Point-in-Time Recovery - PITR)**:
    - O Neon grava o log contínuo de transações (*Write-Ahead Logging* / WAL).
    - Permite restauração a qualquer segundo dos últimos 7 a 30 dias.
    - Criação instantânea de branches de recuperação sem downtime na produção.
-3. **Nível Lógico Operacional (`pg_dump`)**:
+3. **Backup Off-Site Criptografado (Nuvem Externa)**:
+   - **Frequência**: Diária às 02:00 da madrugada (horário de menor tráfego da oficina) + Pré-deploy de novas versões.
+   - **Destino**: Bucket externo isolado (ex: Cloudflare R2, AWS S3 ou Google Cloud Storage) em região geograficamente distinta do Neon.
+   - **Retenção**:
+     - Diários: 14 dias
+     - Semanais (domingos): 8 semanas (2 meses)
+     - Mensais (1º dia do mês): 12 meses (1 ano)
+   - **Criptografia**: AES-256 (GPG com chave assimétrica ou SSE no bucket com KMS gerenciado).
+   - **Controle de Acesso**: Menor privilégio via IAM. O agente de backup possui permissão apenas de gravação (`PutObject`), sem permissão de deleção direta.
+   - **Nomenclatura Padrão**: `oficina_prod_YYYYMMDD_HHMMSS.dump.gz`
+   - **Responsável**: Administrador de TI / Responsável Técnico.
+   - **Teste Periódico de Restore**: Simulado trimestralmente em base temporária de homologação.
+4. **Nível Lógico Operacional (`pg_dump`)**:
    - Geração periódica de despejo SQL completo (`.sql` ou `.dump`), independente de nuvem ou fornecedor.
    - Permite portabilidade ou migração para instâncias PostgreSQL locais ou gerenciadas.
 

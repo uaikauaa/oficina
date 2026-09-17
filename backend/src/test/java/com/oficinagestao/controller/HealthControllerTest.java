@@ -19,10 +19,11 @@ class HealthControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("GET /api/health deve ser público e retornar status UP")
+    @DisplayName("PROD001-06: GET /api/health deve ser público e retornar status UP e database UP quando conectado")
     void shouldReturnStatusUp() throws Exception {
         mockMvc.perform(get("/api/health"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("UP"));
+                .andExpect(jsonPath("$.status").value("UP"))
+                .andExpect(jsonPath("$.database").value("UP"));
     }
 }
