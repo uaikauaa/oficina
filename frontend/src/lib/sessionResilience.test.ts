@@ -211,4 +211,97 @@ describe('UX-009: Estabilização e Resiliência — Testes Automatizados', () =
       assert.equal(sanitizarRedirect(null), '/dashboard');
     });
   });
+
+  // =========================================================================
+  // 4. HOMOLOGAÇÃO MANUAL / E2E DOS HORÁRIOS NOTURNOS E FRONTEIRAS TEMPORAIS
+  // =========================================================================
+  describe('ISSUE-02: Homologação de Horários Noturnos e Virada de Dia/Mês', () => {
+    const horariosNoturnos = [
+      { input: '2026-09-17T21:00', esperado: '2026-09-17T21:00:00-03:00', label: '21:00' },
+      { input: '2026-09-17T22:00', esperado: '2026-09-17T22:00:00-03:00', label: '22:00' },
+      { input: '2026-09-17T23:00', esperado: '2026-09-17T23:00:00-03:00', label: '23:00' },
+      { input: '2026-09-17T23:30', esperado: '2026-09-17T23:30:00-03:00', label: '23:30' },
+      { input: '2026-09-18T00:00', esperado: '2026-09-18T00:00:00-03:00', label: '00:00' },
+      { input: '2026-09-18T00:30', esperado: '2026-09-18T00:30:00-03:00', label: '00:30' },
+    ];
+
+    for (const { input, esperado, label } of horariosNoturnos) {
+      it(`16. Horário ${label}: hora digitada = hora enviada (${esperado}) sem deslocamento UTC indevido`, () => {
+        const resultadoIso = converterDatetimeLocalParaIsoComOffset(input);
+        assert.equal(resultadoIso, esperado);
+        assert.ok(!resultadoIso?.endsWith('Z'), 'Não deve conter sufixo Z');
+        assert.ok(resultadoIso?.includes('-03:00'), 'Deve conter offset -03:00');
+      });
+    }
+
+    it('17. Virada de Dia: 23:59 de 31/03 e 00:01 de 01/04 mantêm seus respectivos dias civis', () => {
+      const fimDia = converterDatetimeLocalParaIsoComOffset('2026-03-31T23:59');
+      const inicioDia = converterDatetimeLocalParaIsoComOffset('2026-04-01T00:01');
+
+      assert.equal(fimDia, '2026-03-31T23:59:00-03:00');
+      assert.equal(inicioDia, '2026-04-01T00:01:00-03:00');
+    });
+
+    it('18. Virada de Mês / Ano Bissexto: 28/02 e 01/03 mantêm integridade temporal', () => {
+      const fimFev = converterDatetimeLocalParaIsoComOffset('2026-02-28T23:45');
+      const inicioMar = converterDatetimeLocalParaIsoComOffset('2026-03-01T00:15');
+
+      assert.equal(fimFev, '2026-02-28T23:45:00-03:00');
+      assert.equal(inicioMar, '2026-03-01T00:15:00-03:00');
+    });
+  });
+
+  // =========================================================================
+  // 5. HOMOLOGAÇÃO DE REFRESH COM SIMULAÇÃO DE ABAS PARALELAS E DIVERSOS STATUS
+  // =========================================================================
+  describe('ISSUE-01: Homologação E2E de Casos de Borda do Refresh', () => {
+    it('19. Refresh Válido: duas abas abertas simultâneas renovam e ambas recebem true com 1 chamada HTTP', async () => {
+      let chamadas = 0;
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/refresh')) {
+          chamadas++;
+          await new Promise((resolve) => setTimeout(resolve, 25));
+          return new Response(JSON.stringify({ accessToken: 'novo.jwt' }), { status: 200 });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      // Simulação: aba 1 e aba 2 disparam refresh ao mesmo tempo
+      const aba1 = executeSilentRefresh();
+      const aba2 = executeSilentRefresh();
+
+      const [res1, res2] = await Promise.all([aba1, aba2]);
+
+      assert.equal(res1, true);
+      assert.equal(res2, true);
+      assert.equal(chamadas, 1, 'Deve executar apenas 1 requisição física unificada');
+    });
+
+    it('20. Refresh Expirado (401): deve retornar false e não entrar em loop infinito', async () => {
+      let chamadas = 0;
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/refresh')) {
+          chamadas++;
+          return new Response(JSON.stringify({ message: 'Refresh token expirado.' }), { status: 401 });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const resultado = await executeSilentRefresh();
+      assert.equal(resultado, false);
+      assert.equal(chamadas, 1);
+    });
+
+    it('21. Refresh Inválido (400 Bad Request): deve retornar false de forma resiliente', async () => {
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/refresh')) {
+          return new Response(JSON.stringify({ message: 'Refresh token revogado.' }), { status: 400 });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const resultado = await executeSilentRefresh();
+      assert.equal(resultado, false);
+    });
+  });
 });
