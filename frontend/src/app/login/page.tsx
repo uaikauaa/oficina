@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Lock, Mail, Eye, EyeOff, Wrench, AlertCircle, ArrowRight } from 'lucide-react';
 
-import { sanitizarRedirect } from '@/lib/api';
+import { sanitizarRedirect, API_URL, extrairMensagemErroLogin } from '@/lib/api';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'O email é obrigatório').email('Formato de email inválido'),
@@ -41,10 +41,8 @@ function LoginForm() {
     setIsLoading(true);
     setErrorMessage(null);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-
     try {
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -54,14 +52,8 @@ function LoginForm() {
       });
 
       if (!response.ok) {
-        if (response.status === 401 || response.status === 400) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || 'Credenciais inválidas. Verifique seu email e senha.');
-        } else if (response.status === 403) {
-          throw new Error('Conta desativada. Entre em contato com o suporte.');
-        } else {
-          throw new Error('Falha de conexão com o servidor. Tente novamente mais tarde.');
-        }
+        const errorMsg = await extrairMensagemErroLogin(response);
+        throw new Error(errorMsg);
       }
 
       // Sucesso na autenticação

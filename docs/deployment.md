@@ -59,7 +59,7 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 | `CORS_ALLOWED_ORIGINS` | Origem autorizada do frontend em produção | `https://app.oficinagestao.com.br` |
 | `INITIAL_ADMIN_EMAIL` | E-mail do usuário administrativo da proprietária | `oficina.soldas@oficinagestao.com.br` |
 | `INITIAL_ADMIN_PASSWORD` | Senha forte inicial (mínimo 8 caracteres) | `[SENHA_INICIAL_ADMIN]` |
-| `INITIAL_ADMIN_NOME` | Nome completo da dona da oficina | `Proprietária Oficina` |
+| `INITIAL_ADMIN_NAME` | Nome completo da dona da oficina | `Proprietária Oficina` |
 
 ### 3.2. Frontend (Next.js)
 

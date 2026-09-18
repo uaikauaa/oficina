@@ -117,7 +117,7 @@ O mecanismo automatizado e seguro de bootstrap (`AdminAccountBootstrap.java`) fo
 - **Injeção de Segredos**: As credenciais não residem em código e devem ser passadas via variáveis de ambiente no container de produção:
   - `INITIAL_ADMIN_EMAIL`: E-mail oficial da dona da oficina.
   - `INITIAL_ADMIN_PASSWORD`: Senha forte inicial (criptografada via BCrypt com custo 12).
-  - `INITIAL_ADMIN_NOME`: Nome da proprietária.
+  - `INITIAL_ADMIN_NAME`: Nome da proprietária.
 - **Perfil Atribuído**: `ADMIN` (acesso total às Ordens de Serviço, Clientes, Equipamentos, Estoque, Preços e Relatórios Financeiros).
 
 ---

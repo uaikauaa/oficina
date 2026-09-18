@@ -1,4 +1,48 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+// AUDIT-001: Suporte à arquitetura de mesma origem (Next.js rewrites: /api/* -> Spring Boot).
+// Se NEXT_PUBLIC_API_URL estiver definido, usa seu valor;
+// Se em produção (NODE_ENV === 'production') e não definido, usa '' para chamadas relativas à mesma origem;
+// Em ambiente de desenvolvimento local, o fallback é 'http://localhost:8080'.
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL !== undefined
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.NODE_ENV === 'production'
+      ? ''
+      : 'http://localhost:8080';
+
+/**
+ * AUDIT-002: Extrai mensagem amigável e segura de erro de login com base no status HTTP e corpo da resposta.
+ * Preserva:
+ * - 401 -> Credenciais inválidas (e-mail ou senha incorretos)
+ * - 400 -> Dados de login inválidos
+ * - 429 -> Bloqueio temporário por tentativas excessivas (lockout)
+ * - 403 -> Conta desativada
+ * - Outros -> Erro genérico de conexão com o servidor
+ */
+export async function extrairMensagemErroLogin(response: Response): Promise<string> {
+  if (response.status === 429) {
+    const errorData = await response.json().catch(() => ({}));
+    return (
+      errorData?.message ||
+      'Conta temporariamente bloqueada por excesso de tentativas. Tente novamente mais tarde.'
+    );
+  }
+
+  if (response.status === 401) {
+    const errorData = await response.json().catch(() => ({}));
+    return errorData?.message || 'E-mail ou senha incorretos.';
+  }
+
+  if (response.status === 400) {
+    const errorData = await response.json().catch(() => ({}));
+    return errorData?.message || 'Dados de login inválidos.';
+  }
+
+  if (response.status === 403) {
+    return 'Conta desativada. Entre em contato com o suporte.';
+  }
+
+  return 'Falha de conexão com o servidor. Tente novamente mais tarde.';
+}
 
 // Mutex / Promise compartilhada para evitar disparos concorrentes de refresh token (ISSUE-01)
 let activeRefreshPromise: Promise<boolean> | null = null;
