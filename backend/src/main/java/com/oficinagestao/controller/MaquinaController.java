@@ -58,12 +58,12 @@ public class MaquinaController {
     // =========================================================================
 
     @PostMapping("/api/maquinas")
-    @Operation(summary = "Cadastrar equipamento", description = "Cadastra uma mÃƒÂ¡quina de solda ou gerador vinculado a um cliente existente.")
+    @Operation(summary = "Cadastrar equipamento", description = "Cadastra uma máquina de solda ou gerador vinculado a um cliente existente.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Equipamento cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public ResponseEntity<MaquinaResponseDTO> criar(
             @Valid @RequestBody MaquinaCreateDTO dto,
@@ -80,10 +80,10 @@ public class MaquinaController {
     @Operation(summary = "Listar equipamentos (global)", description = "Lista paginada de todos os equipamentos com filtros opcionais.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado")
+            @ApiResponse(responseCode = "401", description = "Não autenticado")
     })
     public ResponseEntity<PageResponse<MaquinaResponseDTO>> listar(
-            @Parameter(description = "Termo de busca (marca, modelo, nÃƒÂºmero de sÃƒÂ©rie, nome do cliente)")
+            @Parameter(description = "Termo de busca (marca, modelo, número de série, nome do cliente)")
             @RequestParam(name = "termo", required = false) String termo,
 
             @Parameter(description = "Filtro por tipo de equipamento")
@@ -135,12 +135,12 @@ public class MaquinaController {
     }
 
     @PutMapping("/api/maquinas/{id}")
-    @Operation(summary = "Atualizar equipamento", description = "Atualiza dados tÃƒÂ©cnicos do equipamento. O cliente vinculado nÃƒÂ£o pode ser alterado.")
+    @Operation(summary = "Atualizar equipamento", description = "Atualiza dados técnicos do equipamento. O cliente vinculado não pode ser alterado.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Equipamento atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Equipamento nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
     })
     public ResponseEntity<MaquinaResponseDTO> atualizar(
             @PathVariable Long id,
@@ -157,9 +157,9 @@ public class MaquinaController {
     @Operation(summary = "Ativar ou inativar equipamento")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status alterado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "ParÃƒÂ¢metro invÃƒÂ¡lido"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Equipamento nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "400", description = "Parâmetro inválido"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
     })
     public ResponseEntity<MaquinaResponseDTO> alterarStatus(
             @PathVariable Long id,
@@ -179,17 +179,17 @@ public class MaquinaController {
     @GetMapping("/api/clientes/{clienteId}/maquinas")
     @Operation(
             summary = "Listar equipamentos de um cliente",
-            description = "Retorna a lista paginada de equipamentos vinculados a um cliente especÃƒÂ­fico."
+            description = "Retorna a lista paginada de equipamentos vinculados a um cliente específico."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public ResponseEntity<PageResponse<MaquinaResponseDTO>> listarPorCliente(
             @PathVariable Long clienteId,
 
-            @Parameter(description = "Termo de busca (marca, modelo, nÃƒÂºmero de sÃƒÂ©rie)")
+            @Parameter(description = "Termo de busca (marca, modelo, número de série)")
             @RequestParam(name = "termo", required = false) String termo,
 
             @Parameter(description = "Filtro por tipo de equipamento")

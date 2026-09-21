@@ -2,10 +2,10 @@ package com.oficinagestao.entity;
 
 public enum TipoMovimentacaoEstoque {
     ENTRADA("Entrada"),
-    SAIDA("SaÃ­da"),
+    SAIDA("Saída"),
     AJUSTE_POSITIVO("Ajuste Positivo"),
     AJUSTE_NEGATIVO("Ajuste Negativo"),
-    DEVOLUCAO("DevoluÃ§Ã£o / Estorno");
+    DEVOLUCAO("Devolução / Estorno");
 
     private final String descricao;
 

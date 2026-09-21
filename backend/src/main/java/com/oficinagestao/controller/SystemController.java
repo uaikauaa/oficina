@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 
 @RestController
 @RequestMapping("/api/system")
-@Tag(name = "Sistema", description = "Endpoints de diagnÃƒÂ³stico e integridade da infraestrutura")
+@Tag(name = "Sistema", description = "Endpoints de diagnóstico e integridade da infraestrutura")
 public class SystemController {
 
     private final String environment;
@@ -29,13 +29,13 @@ public class SystemController {
     @GetMapping("/status")
     @Operation(
             summary = "Status da infraestrutura e SecurityContext",
-            description = "Endpoint autenticado para validaÃƒÂ§ÃƒÂ£o do SecurityContext e da infraestrutura da API. Exige papel ROLE_ADMIN.",
+            description = "Endpoint autenticado para validação do SecurityContext e da infraestrutura da API. Exige papel ROLE_ADMIN.",
             security = { @SecurityRequirement(name = "cookieAuth"), @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Infraestrutura operacional e autenticaÃƒÂ§ÃƒÂ£o confirmada"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado Ã¢â‚¬â€ papel ROLE_ADMIN necessÃƒÂ¡rio")
+            @ApiResponse(responseCode = "200", description = "Infraestrutura operacional e autenticação confirmada"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — papel ROLE_ADMIN necessário")
     })
     public ResponseEntity<SystemStatusResponse> status(Authentication authentication) {
         String username = authentication != null ? authentication.getName() : "desconhecido";

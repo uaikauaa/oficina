@@ -25,7 +25,7 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
     /** Conta quantos equipamentos (ativos ou não) pertencem a um cliente. */
     long countByClienteId(Long clienteId);
 
-    /** Conta equipamentos ativos de um cliente (para exibiÃ§Ã£o no card do cliente). */
+    /** Conta equipamentos ativos de um cliente (para exibição no card do cliente). */
     long countByClienteIdAndAtivo(Long clienteId, Boolean ativo);
 
     /** Busca equipamento por ID com JOIN FETCH do cliente (evita N+1). */
@@ -33,7 +33,7 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
     Optional<Maquina> findByIdWithCliente(@Param("id") Long id);
 
     /**
-     * Pesquisa paginada de equipamentos de um cliente especÃ­fico.
+     * Pesquisa paginada de equipamentos de um cliente específico.
      * Filtros opcionais: tipo e status ativo.
      */
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE c.id = :clienteId " +
@@ -53,7 +53,7 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
 
     /**
      * Pesquisa paginada global de equipamentos (todos os clientes).
-     * Filtros opcionais: tipo, ativo, e termo (marca, modelo, nÃºmero de sÃ©rie, nome do cliente).
+     * Filtros opcionais: tipo, ativo, e termo (marca, modelo, número de série, nome do cliente).
      */
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente c WHERE " +
            "(:ativo IS NULL OR m.ativo = :ativo) " +

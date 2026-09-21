@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record ProdutoCompatibilidadeDTO(
-        @NotNull(message = "O ID da mÃ¡quina/equipamento Ã© obrigatÃ³rio.")
+        @NotNull(message = "O ID da máquina/equipamento é obrigatório.")
         Long maquinaId,
 
-        @Size(max = 255, message = "A observaÃ§Ã£o de compatibilidade deve ter no mÃ¡ximo 255 caracteres.")
+        @Size(max = 255, message = "A observação de compatibilidade deve ter no máximo 255 caracteres.")
         String observacaoCompatibilidade
 ) {
 }

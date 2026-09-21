@@ -1,19 +1,19 @@
 package com.oficinagestao.entity;
 
 /**
- * Status do ciclo de vida da Ordem de ServiÃ§o tÃ©cnica
- * para mÃ¡quinas de solda e geradores de energia.
+ * Status do ciclo de vida da Ordem de Serviço técnica
+ * para máquinas de solda e geradores de energia.
  * <p>
  * Segue estritamente os status definidos na migration V5.
  */
 public enum StatusOrdemServico {
     ABERTA("Aberta"),
-    EM_DIAGNOSTICO("Em DiagnÃ³stico"),
-    AGUARDANDO_APROVACAO("Aguardando AprovaÃ§Ã£o"),
-    EM_MANUTENCAO("Em ManutenÃ§Ã£o"),
-    AGUARDANDO_PECA("Aguardando PeÃ§a"),
+    EM_DIAGNOSTICO("Em Diagnóstico"),
+    AGUARDANDO_APROVACAO("Aguardando Aprovação"),
+    EM_MANUTENCAO("Em Manutenção"),
+    AGUARDANDO_PECA("Aguardando Peça"),
     PRONTA("Pronta"),
-    CONCLUIDA("ConcluÃ­da"),
+    CONCLUIDA("Concluída"),
     CANCELADA("Cancelada");
 
     private final String descricao;
@@ -27,27 +27,27 @@ public enum StatusOrdemServico {
     }
 
     /**
-     * Indica se o status Ã© final/terminal.
-     * Ordens concluÃ­das ou canceladas nÃ£o podem sofrer novas alteraÃ§Ãµes de status.
+     * Indica se o status é final/terminal.
+     * Ordens concluídas ou canceladas não podem sofrer novas alterações de status.
      */
     public boolean isTerminal() {
         return this == CONCLUIDA || this == CANCELADA;
     }
 
     /**
-     * Valida se a transiÃ§Ã£o a partir do status atual para o novo status Ã© permitida.
+     * Valida se a transição a partir do status atual para o novo status é permitida.
      */
     public boolean podeTransicionarPara(StatusOrdemServico novoStatus) {
         if (this == novoStatus) {
             return true;
         }
 
-        // Status terminal nÃ£o pode mudar para nenhum outro
+        // Status terminal não pode mudar para nenhum outro
         if (this.isTerminal()) {
             return false;
         }
 
-        // Cancelamento Ã© permitido a partir de qualquer status nÃ£o terminal
+        // Cancelamento é permitido a partir de qualquer status não terminal
         if (novoStatus == CANCELADA) {
             return true;
         }

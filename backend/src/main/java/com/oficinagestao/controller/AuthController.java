@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "AutenticaÃƒÂ§ÃƒÂ£o", description = "Endpoints de login, renovaÃƒÂ§ÃƒÂ£o e encerramento de sessÃƒÂ£o")
+@Tag(name = "Autenticação", description = "Endpoints de login, renovação e encerramento de sessão")
 public class AuthController {
 
     private final AuthService authService;
@@ -33,11 +33,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login administrativo", description = "Autentica a usuÃƒÂ¡ria via e-mail e senha. Define cookies HttpOnly e retorna dados do usuÃƒÂ¡rio sem expor JWT no corpo.")
+    @Operation(summary = "Login administrativo", description = "Autentica a usuária via e-mail e senha. Define cookies HttpOnly e retorna dados do usuário sem expor JWT no corpo.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "ValidaÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida nos campos informados"),
-            @ApiResponse(responseCode = "401", description = "Credenciais invÃƒÂ¡lidas")
+            @ApiResponse(responseCode = "400", description = "Validação inválida nos campos informados"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
     })
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request,
@@ -68,9 +68,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "RenovaÃƒÂ§ÃƒÂ£o silenciosa de sessÃƒÂ£o", description = "Rotaciona refresh token e access token utilizando o cookie HttpOnly refresh_token.")
+    @Operation(summary = "Renovação silenciosa de sessão", description = "Rotaciona refresh token e access token utilizando o cookie HttpOnly refresh_token.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "SessÃƒÂ£o renovada com novos cookies"),
+            @ApiResponse(responseCode = "200", description = "Sessão renovada com novos cookies"),
             @ApiResponse(responseCode = "401", description = "Refresh token ausente, expirado ou revogado")
     })
     public ResponseEntity<LoginResponse> refresh(
@@ -103,13 +103,13 @@ public class AuthController {
 
     @GetMapping("/me")
     @Operation(
-            summary = "Dados da usuÃƒÂ¡ria autenticada",
-            description = "Retorna os dados cadastrais e permissÃƒÂµes da usuÃƒÂ¡ria na sessÃƒÂ£o ativa.",
+            summary = "Dados da usuária autenticada",
+            description = "Retorna os dados cadastrais e permissões da usuária na sessão ativa.",
             security = { @SecurityRequirement(name = "cookieAuth"), @SecurityRequirement(name = "bearerAuth") }
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "UsuÃƒÂ¡ria autenticada localizada"),
-            @ApiResponse(responseCode = "401", description = "SessÃƒÂ£o invÃƒÂ¡lida ou expirada")
+            @ApiResponse(responseCode = "200", description = "Usuária autenticada localizada"),
+            @ApiResponse(responseCode = "401", description = "Sessão inválida ou expirada")
     })
     public ResponseEntity<CurrentUserResponse> me(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
@@ -120,8 +120,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Encerramento de sessÃƒÂ£o", description = "Revoga o refresh token no banco de dados e expira ambos os cookies.")
-    @ApiResponse(responseCode = "200", description = "SessÃƒÂ£o encerrada com sucesso")
+    @Operation(summary = "Encerramento de sessão", description = "Revoga o refresh token no banco de dados e expira ambos os cookies.")
+    @ApiResponse(responseCode = "200", description = "Sessão encerrada com sucesso")
     public ResponseEntity<Void> logout(
             Authentication authentication,
             @CookieValue(name = "refresh_token", required = false) String refreshToken,

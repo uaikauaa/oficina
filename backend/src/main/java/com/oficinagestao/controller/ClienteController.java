@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/clientes")
-@Tag(name = "Clientes", description = "Gerenciamento cadastral de clientes (Pessoa FÃƒÂ­sica e Pessoa JurÃƒÂ­dica)")
+@Tag(name = "Clientes", description = "Gerenciamento cadastral de clientes (Pessoa Física e Pessoa Jurídica)")
 @SecurityRequirement(name = "cookieAuth")
 @SecurityRequirement(name = "bearerAuth")
 public class ClienteController {
@@ -63,13 +63,13 @@ public class ClienteController {
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar novo cliente", description = "Cadastra cliente Pessoa FÃƒÂ­sica ou JurÃƒÂ­dica com prevenÃƒÂ§ÃƒÂ£o contra duplicidade.")
+    @Operation(summary = "Cadastrar novo cliente", description = "Cadastra cliente Pessoa Física ou Jurídica com prevenção contra duplicidade.")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Cliente cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "409", description = "Conflito: CPF, CNPJ, telefone ou razÃƒÂ£o social jÃƒÂ¡ existente")
+            @ApiResponse(responseCode = "409", description = "Conflito: CPF, CNPJ, telefone ou razão social já existente")
     })
     public ResponseEntity<ClienteResponseDTO> criar(
             @Valid @RequestBody ClienteCreateDTO dto,
@@ -83,14 +83,14 @@ public class ClienteController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar clientes paginados", description = "Pesquisa e pagina clientes por termo (nome, razÃƒÂ£o, documento, telefone, ID) e filtros opcionais.")
+    @Operation(summary = "Listar clientes paginados", description = "Pesquisa e pagina clientes por termo (nome, razão, documento, telefone, ID) e filtros opcionais.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista paginada de clientes"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado")
     })
     public ResponseEntity<PageResponse<ClienteResponseDTO>> listar(
-            @Parameter(description = "Termo de busca (Nome, RazÃƒÂ£o Social, Fantasia, CPF, CNPJ, Telefone ou ID)")
+            @Parameter(description = "Termo de busca (Nome, Razão Social, Fantasia, CPF, CNPJ, Telefone ou ID)")
             @RequestParam(name = "termo", required = false) String termo,
 
             @Parameter(description = "Filtro por tipo de pessoa (FISICA ou JURIDICA)")
@@ -118,12 +118,12 @@ public class ClienteController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar cliente por ID", description = "Retorna os detalhes completos do cliente e seus endereÃƒÂ§os.")
+    @Operation(summary = "Buscar cliente por ID", description = "Retorna os detalhes completos do cliente e seus endereços.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cliente localizado com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public ResponseEntity<ClienteResponseDTO> buscarPorId(@PathVariable Long id) {
         ClienteResponseDTO response = clienteService.buscarPorId(id);
@@ -157,13 +157,13 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar cliente", description = "Atualiza dados cadastrais e endereÃƒÂ§o de um cliente existente.")
+    @Operation(summary = "Atualizar cliente", description = "Atualiza dados cadastrais e endereço de um cliente existente.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de entrada invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
             @ApiResponse(responseCode = "409", description = "Conflito de duplicidade com outro cliente cadastrado")
     })
     public ResponseEntity<ClienteResponseDTO> atualizar(
@@ -179,13 +179,13 @@ public class ClienteController {
     }
 
     @PatchMapping("/{id}/status")
-    @Operation(summary = "Ativar ou inativar cliente", description = "Altera o status ativo do cliente de forma rÃƒÂ¡pida.")
+    @Operation(summary = "Ativar ou inativar cliente", description = "Altera o status ativo do cliente de forma rápida.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status alterado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "ParÃƒÂ¢metro invÃƒÂ¡lido"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
+            @ApiResponse(responseCode = "400", description = "Parâmetro inválido"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
             @ApiResponse(responseCode = "403", description = "Acesso negado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public ResponseEntity<ClienteResponseDTO> alterarStatus(
             @PathVariable Long id,

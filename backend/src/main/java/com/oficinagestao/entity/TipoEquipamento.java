@@ -1,8 +1,8 @@
 package com.oficinagestao.entity;
 
 /**
- * Tipos de equipamentos tÃ©cnicos atendidos pela oficina.
- * DomÃ­nio oficial: mÃ¡quinas de solda e geradores de energia.
+ * Tipos de equipamentos técnicos atendidos pela oficina.
+ * Domínio oficial: máquinas de solda e geradores de energia.
  */
 public enum TipoEquipamento {
     MAQUINA_SOLDA,
@@ -11,7 +11,7 @@ public enum TipoEquipamento {
 
     public String getDescricao() {
         return switch (this) {
-            case MAQUINA_SOLDA -> "MÃ¡quina de Solda";
+            case MAQUINA_SOLDA -> "Máquina de Solda";
             case GERADOR_ENERGIA -> "Gerador de Energia";
             case OUTRO_EQUIPAMENTO -> "Outro Equipamento";
         };

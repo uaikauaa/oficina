@@ -20,12 +20,12 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
- * Equipamento tÃ©cnico pertencente a um cliente.
- * Representa mÃ¡quinas de solda (MIG, TIG, Eletrodo, Inversoras)
+ * Equipamento técnico pertencente a um cliente.
+ * Representa máquinas de solda (MIG, TIG, Eletrodo, Inversoras)
  * e geradores de energia (diesel, gasolina) atendidos pela oficina.
  * <p>
- * Um equipamento pertence a um Ãºnico cliente e deve ser reutilizado
- * em mÃºltiplas Ordens de ServiÃ§o â€” nunca recriado a cada atendimento.
+ * Um equipamento pertence a um único cliente e deve ser reutilizado
+ * em múltiplas Ordens de Serviço — nunca recriado a cada atendimento.
  */
 @Entity
 @Table(name = "maquinas")
@@ -55,19 +55,19 @@ public class Maquina {
     @Column(name = "numero_serie", length = 100)
     private String numeroSerie;
 
-    /** Horas de uso (para geradores e equipamentos com horÃ­metro). */
+    /** Horas de uso (para geradores e equipamentos com horímetro). */
     @Column(name = "horimetro", precision = 12, scale = 2)
     private BigDecimal horimetro;
 
-    /** PotÃªncia do equipamento (ex: "160A", "5kVA"). */
+    /** Potência do equipamento (ex: "160A", "5kVA"). */
     @Column(name = "potencia", length = 50)
     private String potencia;
 
-    /** TensÃ£o de trabalho (ex: "110V/220V", "380V"). */
+    /** Tensão de trabalho (ex: "110V/220V", "380V"). */
     @Column(name = "tensao", length = 50)
     private String tensao;
 
-    /** EspecificaÃ§Ãµes tÃ©cnicas adicionais em formato JSON livre (persiste como JSONB). */
+    /** Especificações técnicas adicionais em formato JSON livre (persiste como JSONB). */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "especificacoes_tecnicas", columnDefinition = "jsonb")
     private String especificacoesTecnicas;

@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando um item (peÃ§a ou serviÃ§o) aplicado a uma Ordem de ServiÃ§o.
- * Armazena o preÃ§o unitÃ¡rio congelado no momento da inclusÃ£o na OS para preservar o histÃ³rico financeiro.
+ * Entidade JPA representando um item (peça ou serviço) aplicado a uma Ordem de Serviço.
+ * Armazena o preço unitário congelado no momento da inclusão na OS para preservar o histórico financeiro.
  */
 @Entity
 @Table(name = "ordem_servico_itens")
@@ -44,7 +44,7 @@ public class OrdemServicoItem {
     private BigDecimal quantidade;
 
     /**
-     * PreÃ§o unitÃ¡rio congelado no momento do vÃ­nculo Ã  Ordem de ServiÃ§o.
+     * Preço unitário congelado no momento do vínculo à Ordem de Serviço.
      * NUNCA deve ser alterado retroativamente quando o cadastro do produto for reajustado.
      */
     @Column(name = "valor_unitario", nullable = false, precision = 12, scale = 2)

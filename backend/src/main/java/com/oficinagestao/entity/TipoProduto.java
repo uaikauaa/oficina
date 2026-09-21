@@ -2,9 +2,9 @@ package com.oficinagestao.entity;
 
 public enum TipoProduto {
     PRODUTO("Produto"),
-    PECA("PeÃ§a / Componente"),
-    SERVICO("ServiÃ§o"),
-    CONSUMIVEL("ConsumÃ­vel");
+    PECA("Peça / Componente"),
+    SERVICO("Serviço"),
+    CONSUMIVEL("Consumível");
 
     private final String descricao;
 

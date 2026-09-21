@@ -18,12 +18,12 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando uma Ordem de ServiÃ§o (OS) na oficina tÃ©cnica.
+ * Entidade JPA representando uma Ordem de Serviço (OS) na oficina técnica.
  * <p>
  * Regra Fundamental:
  * Toda OS pertence obrigatoriamente a um Cliente e a um Equipamento daquele cliente.
- * O equipamento deve continuar existindo independentemente da OS e poderÃ¡
- * acumular mÃºltiplas OS ao longo do tempo (histÃ³rico de manutenÃ§Ã£o).
+ * O equipamento deve continuar existindo independentemente da OS e poderá
+ * acumular múltiplas OS ao longo do tempo (histórico de manutenção).
  */
 @Entity
 @Table(name = "ordens_servico")
@@ -56,47 +56,47 @@ public class OrdemServico {
     @Column(name = "data_abertura", nullable = false)
     private OffsetDateTime dataEntrada;
 
-    /** PrevisÃ£o estimada de conclusÃ£o dos serviÃ§os. */
+    /** Previsão estimada de conclusão dos serviços. */
     @Column(name = "previsao_conclusao")
     private OffsetDateTime previsaoConclusao;
 
-    /** Data efetiva de conclusÃ£o/retirada do equipamento. */
+    /** Data efetiva de conclusão/retirada do equipamento. */
     @Column(name = "data_conclusao")
     private OffsetDateTime dataConclusao;
 
-    /** DescriÃ§Ã£o do problema relatado pelo cliente na recepÃ§Ã£o. */
+    /** Descrição do problema relatado pelo cliente na recepção. */
     @Column(name = "defeito_reclamado", nullable = false, columnDefinition = "TEXT")
     private String problemaRelatado;
 
-    /** DiagnÃ³stico tÃ©cnico elaborado pelo mecÃ¢nico/tÃ©cnico na bancada. */
+    /** Diagnóstico técnico elaborado pelo mecânico/técnico na bancada. */
     @Column(name = "diagnostico_tecnico", columnDefinition = "TEXT")
     private String diagnostico;
 
-    /** SoluÃ§Ã£o tÃ©cnica aplicada (reparos, rebobinamento, trocas, etc.). */
+    /** Solução técnica aplicada (reparos, rebobinamento, trocas, etc.). */
     @Column(name = "solucao_aplicada", columnDefinition = "TEXT")
     private String solucaoAplicada;
 
     /**
-     * Registro de testes tÃ©cnicos realizados na bancada
-     * (ex: teste de carga, arco sob carga, ciclo de trabalho, aferiÃ§Ã£o de tensÃ£o/AVR).
-     * MandatÃ³rio antes de marcar a OS como PRONTA.
+     * Registro de testes técnicos realizados na bancada
+     * (ex: teste de carga, arco sob carga, ciclo de trabalho, aferição de tensão/AVR).
+     * Mandatório antes de marcar a OS como PRONTA.
      */
     @Column(name = "testes_realizados", columnDefinition = "TEXT")
     private String testesRealizados;
 
-    /** ObservaÃ§Ãµes gerais de atendimento ou recepÃ§Ã£o. */
+    /** Observações gerais de atendimento ou recepção. */
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    /** HorÃ­metro do equipamento no momento da entrada na oficina. */
+    /** Horímetro do equipamento no momento da entrada na oficina. */
     @Column(name = "horimetro_atual", precision = 12, scale = 2)
     private BigDecimal horimetroAtual;
 
-    /** Valor dos serviÃ§os / mÃ£o de obra tÃ©cnica. */
+    /** Valor dos serviços / mão de obra técnica. */
     @Column(name = "valor_servicos", nullable = false, precision = 12, scale = 2)
     private BigDecimal valorMaoObra = BigDecimal.ZERO;
 
-    /** Valor das peÃ§as e insumos aplicados. */
+    /** Valor das peças e insumos aplicados. */
     @Column(name = "valor_pecas", nullable = false, precision = 12, scale = 2)
     private BigDecimal valorPecas = BigDecimal.ZERO;
 
@@ -104,7 +104,7 @@ public class OrdemServico {
     @Column(name = "valor_desconto", nullable = false, precision = 12, scale = 2)
     private BigDecimal valorDesconto = BigDecimal.ZERO;
 
-    /** Valor total calculado da Ordem de ServiÃ§o. */
+    /** Valor total calculado da Ordem de Serviço. */
     @Column(name = "valor_total", nullable = false, precision = 12, scale = 2)
     private BigDecimal valorTotal = BigDecimal.ZERO;
 

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/fornecedores")
-@Tag(name = "Fornecedores", description = "GestÃƒÂ£o de fornecedores de peÃƒÂ§as e insumos para equipamentos tÃƒÂ©cnicos")
+@Tag(name = "Fornecedores", description = "Gestão de fornecedores de peças e insumos para equipamentos técnicos")
 @SecurityRequirement(name = "cookieAuth")
 @SecurityRequirement(name = "bearerAuth")
 public class FornecedorController {
@@ -49,7 +49,7 @@ public class FornecedorController {
     @Operation(summary = "Cadastrar novo fornecedor")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Fornecedor cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou CNPJ jÃƒÂ¡ cadastrado")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou CNPJ já cadastrado")
     })
     public ResponseEntity<FornecedorResponseDTO> cadastrar(
             @Valid @RequestBody FornecedorCreateDTO dto,
@@ -62,7 +62,7 @@ public class FornecedorController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar fornecedores com filtros e paginaÃƒÂ§ÃƒÂ£o")
+    @Operation(summary = "Listar fornecedores com filtros e paginação")
     public ResponseEntity<PageResponse<FornecedorResponseDTO>> listar(
             @RequestParam(required = false) String termo,
             @RequestParam(required = false) Boolean ativo,
@@ -76,7 +76,7 @@ public class FornecedorController {
     @Operation(summary = "Buscar fornecedor por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Fornecedor localizado"),
-            @ApiResponse(responseCode = "404", description = "Fornecedor nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Fornecedor não encontrado")
     })
     public ResponseEntity<FornecedorResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(fornecedorService.buscarPorId(id));
@@ -86,8 +86,8 @@ public class FornecedorController {
     @Operation(summary = "Atualizar dados do fornecedor")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Fornecedor atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou conflito de CNPJ"),
-            @ApiResponse(responseCode = "404", description = "Fornecedor nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou conflito de CNPJ"),
+            @ApiResponse(responseCode = "404", description = "Fornecedor não encontrado")
     })
     public ResponseEntity<FornecedorResponseDTO> atualizar(
             @PathVariable Long id,
@@ -103,7 +103,7 @@ public class FornecedorController {
     @Operation(summary = "Ativar ou inativar fornecedor")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status alterado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Fornecedor nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Fornecedor não encontrado")
     })
     public ResponseEntity<FornecedorResponseDTO> alterarStatus(
             @PathVariable Long id,

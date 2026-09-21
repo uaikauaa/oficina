@@ -7,17 +7,17 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 
 public record OrdemServicoItemCreateDTO(
-        @NotNull(message = "O ID da peÃ§a/produto Ã© obrigatÃ³rio.")
+        @NotNull(message = "O ID da peça/produto é obrigatório.")
         Long produtoId,
 
-        @NotNull(message = "A quantidade Ã© obrigatÃ³ria.")
+        @NotNull(message = "A quantidade é obrigatória.")
         @DecimalMin(value = "0.001", message = "A quantidade deve ser maior que zero.")
         BigDecimal quantidade,
 
-        @DecimalMin(value = "0.00", message = "O desconto nÃ£o pode ser negativo.")
+        @DecimalMin(value = "0.00", message = "O desconto não pode ser negativo.")
         BigDecimal valorDesconto,
 
-        @Size(max = 255, message = "As observaÃ§Ãµes devem ter no mÃ¡ximo 255 caracteres.")
+        @Size(max = 255, message = "As observações devem ter no máximo 255 caracteres.")
         String observacoes
 ) {
 }

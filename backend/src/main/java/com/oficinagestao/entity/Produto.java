@@ -18,8 +18,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando peÃ§as, componentes eletrÃ´nicos e produtos utilizados
- * na manutenÃ§Ã£o de mÃ¡quinas de solda e geradores de energia.
+ * Entidade JPA representando peças, componentes eletrônicos e produtos utilizados
+ * na manutenção de máquinas de solda e geradores de energia.
  */
 @Entity
 @Table(name = "produtos")

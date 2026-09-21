@@ -17,8 +17,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando cada movimentaÃ§Ã£o fÃ­sica de peÃ§as e produtos no estoque.
- * Registra entradas, saÃ­das (por uso em OS ou avulsas), ajustes e devoluÃ§Ãµes com auditoria de saldo.
+ * Entidade JPA representando cada movimentação física de peças e produtos no estoque.
+ * Registra entradas, saídas (por uso em OS ou avulsas), ajustes e devoluções com auditoria de saldo.
  */
 @Entity
 @Table(name = "estoque_movimentacoes")

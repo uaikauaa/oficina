@@ -15,7 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando a compatibilidade entre uma peÃ§a/componente e um equipamento tÃ©cnico.
+ * Entidade JPA representando a compatibilidade entre uma peça/componente e um equipamento técnico.
  */
 @Entity
 @Table(name = "produto_maquina", uniqueConstraints = {

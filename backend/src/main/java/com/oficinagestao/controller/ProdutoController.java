@@ -34,7 +34,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/produtos")
-@Tag(name = "Produtos e PeÃƒÂ§as", description = "CatÃƒÂ¡logo de peÃƒÂ§as, componentes tÃƒÂ©cnicos e insumos para mÃƒÂ¡quinas de solda e geradores")
+@Tag(name = "Produtos e Peças", description = "Catálogo de peças, componentes técnicos e insumos para máquinas de solda e geradores")
 @SecurityRequirement(name = "cookieAuth")
 @SecurityRequirement(name = "bearerAuth")
 public class ProdutoController {
@@ -48,11 +48,11 @@ public class ProdutoController {
     }
 
     @PostMapping
-    @Operation(summary = "Cadastrar nova peÃƒÂ§a ou componente tÃƒÂ©cnico")
+    @Operation(summary = "Cadastrar nova peça ou componente técnico")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Produto/peÃƒÂ§a cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "409", description = "CÃƒÂ³digo de produto jÃƒÂ¡ cadastrado")
+            @ApiResponse(responseCode = "201", description = "Produto/peça cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "409", description = "Código de produto já cadastrado")
     })
     public ResponseEntity<ProdutoResponseDTO> cadastrar(
             @Valid @RequestBody ProdutoCreateDTO dto,
@@ -80,22 +80,22 @@ public class ProdutoController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Buscar produto ou peÃƒÂ§a por ID")
+    @Operation(summary = "Buscar produto ou peça por ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto localizado"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
     public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(produtoService.buscarPorId(id));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Atualizar dados do produto ou peÃƒÂ§a")
+    @Operation(summary = "Atualizar dados do produto ou peça")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Produto atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃƒÂ£o encontrado"),
-            @ApiResponse(responseCode = "409", description = "CÃƒÂ³digo jÃƒÂ¡ utilizado por outro produto")
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Código já utilizado por outro produto")
     })
     public ResponseEntity<ProdutoResponseDTO> atualizar(
             @PathVariable Long id,
@@ -108,10 +108,10 @@ public class ProdutoController {
     }
 
     @PatchMapping("/{id}/status")
-    @Operation(summary = "Ativar ou inativar produto/peÃƒÂ§a")
+    @Operation(summary = "Ativar ou inativar produto/peça")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status alterado com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Produto nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
     })
     public ResponseEntity<ProdutoResponseDTO> alterarStatus(
             @PathVariable Long id,
@@ -124,7 +124,7 @@ public class ProdutoController {
     }
 
     // =========================================================================
-    // Compatibilidade PeÃƒÂ§a Ã¢â€ â€ MÃƒÂ¡quina
+    // Compatibilidade Peça ↔ Máquina
     // =========================================================================
 
     @GetMapping(value = {"/{id}/compatibilidades", "/{id}/maquinas"})
@@ -152,10 +152,10 @@ public class ProdutoController {
     }
 
     @DeleteMapping(value = {"/{id}/compatibilidades/{maquinaId}", "/{id}/maquinas/{maquinaId}"})
-    @Operation(summary = "Remover vÃƒÂ­nculo de compatibilidade entre peÃƒÂ§a e equipamento")
+    @Operation(summary = "Remover vínculo de compatibilidade entre peça e equipamento")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Compatibilidade removida com sucesso"),
-            @ApiResponse(responseCode = "404", description = "VÃƒÂ­nculo nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Vínculo não encontrado")
     })
     public ResponseEntity<Void> removerCompatibilidade(
             @PathVariable Long id,

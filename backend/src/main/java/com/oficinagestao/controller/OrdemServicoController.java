@@ -34,7 +34,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
-@Tag(name = "Ordens de ServiÃƒÂ§o", description = "Fluxo central de atendimento tÃƒÂ©cnico para mÃƒÂ¡quinas de solda e geradores de energia")
+@Tag(name = "Ordens de Serviço", description = "Fluxo central de atendimento técnico para máquinas de solda e geradores de energia")
 @SecurityRequirement(name = "cookieAuth")
 @SecurityRequirement(name = "bearerAuth")
 public class OrdemServicoController {
@@ -70,13 +70,13 @@ public class OrdemServicoController {
     // =========================================================================
 
     @PostMapping("/api/ordens-servico")
-    @Operation(summary = "Abrir nova Ordem de ServiÃƒÂ§o", description = "Abre uma OS com status ABERTA vinculando um cliente e um equipamento do prÃƒÂ³prio cliente.")
+    @Operation(summary = "Abrir nova Ordem de Serviço", description = "Abre uma OS com status ABERTA vinculando um cliente e um equipamento do próprio cliente.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Ordem de ServiÃƒÂ§o criada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou equipamento nÃƒÂ£o pertence ao cliente"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Cliente ou equipamento nÃƒÂ£o encontrado"),
-            @ApiResponse(responseCode = "409", description = "NÃƒÂºmero de OS jÃƒÂ¡ existente")
+            @ApiResponse(responseCode = "201", description = "Ordem de Serviço criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou equipamento não pertence ao cliente"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente ou equipamento não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Número de OS já existente")
     })
     public ResponseEntity<OrdemServicoResponseDTO> criar(
             @Valid @RequestBody OrdemServicoCreateDTO dto,
@@ -90,13 +90,13 @@ public class OrdemServicoController {
     }
 
     @GetMapping("/api/ordens-servico")
-    @Operation(summary = "Listar Ordens de ServiÃƒÂ§o", description = "Retorna lista paginada de OS com filtros por termo, status e perÃƒÂ­odo.")
+    @Operation(summary = "Listar Ordens de Serviço", description = "Retorna lista paginada de OS com filtros por termo, status e período.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado")
+            @ApiResponse(responseCode = "401", description = "Não autenticado")
     })
     public ResponseEntity<PageResponse<OrdemServicoResponseDTO>> listar(
-            @Parameter(description = "Busca por nÃƒÂºmero OS, cliente, equipamento ou nÃƒÂºmero de sÃƒÂ©rie")
+            @Parameter(description = "Busca por número OS, cliente, equipamento ou número de série")
             @RequestParam(name = "termo", required = false) String termo,
 
             @Parameter(description = "Filtro por status")
@@ -129,11 +129,11 @@ public class OrdemServicoController {
     }
 
     @GetMapping("/api/ordens-servico/{id}")
-    @Operation(summary = "Buscar Ordem de ServiÃƒÂ§o por ID", description = "Retorna os detalhes completos da OS, cliente, equipamento e financeiro.")
+    @Operation(summary = "Buscar Ordem de Serviço por ID", description = "Retorna os detalhes completos da OS, cliente, equipamento e financeiro.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ordem de ServiÃƒÂ§o encontrada"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Ordem de ServiÃƒÂ§o nÃƒÂ£o encontrada")
+            @ApiResponse(responseCode = "200", description = "Ordem de Serviço encontrada"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
     })
     public ResponseEntity<OrdemServicoResponseDTO> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(ordemServicoService.buscarPorId(id));
@@ -159,12 +159,12 @@ public class OrdemServicoController {
     }
 
     @PutMapping("/api/ordens-servico/{id}")
-    @Operation(summary = "Atualizar Ordem de ServiÃƒÂ§o", description = "Atualiza dados tÃƒÂ©cnicos (diagnÃƒÂ³stico, soluÃƒÂ§ÃƒÂ£o, testes) e valores financeiros.")
+    @Operation(summary = "Atualizar Ordem de Serviço", description = "Atualiza dados técnicos (diagnóstico, solução, testes) e valores financeiros.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Ordem de ServiÃƒÂ§o atualizada com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados invÃƒÂ¡lidos ou OS concluÃƒÂ­da/cancelada"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Ordem de ServiÃƒÂ§o nÃƒÂ£o encontrada")
+            @ApiResponse(responseCode = "200", description = "Ordem de Serviço atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos ou OS concluída/cancelada"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
     })
     public ResponseEntity<OrdemServicoResponseDTO> atualizar(
             @PathVariable Long id,
@@ -178,12 +178,12 @@ public class OrdemServicoController {
     }
 
     @PatchMapping("/api/ordens-servico/{id}/status")
-    @Operation(summary = "Alterar status da Ordem de ServiÃƒÂ§o", description = "AvanÃƒÂ§a o ciclo de vida da OS, validando testes obrigatÃƒÂ³rios para PRONTA e conclusÃƒÂ£o automÃƒÂ¡tica.")
+    @Operation(summary = "Alterar status da Ordem de Serviço", description = "Avança o ciclo de vida da OS, validando testes obrigatórios para PRONTA e conclusão automática.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "TransiÃƒÂ§ÃƒÂ£o invÃƒÂ¡lida ou ausÃƒÂªncia de testes de bancada"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Ordem de ServiÃƒÂ§o nÃƒÂ£o encontrada")
+            @ApiResponse(responseCode = "400", description = "Transição inválida ou ausência de testes de bancada"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
     })
     public ResponseEntity<OrdemServicoResponseDTO> alterarStatus(
             @PathVariable Long id,
@@ -197,15 +197,15 @@ public class OrdemServicoController {
     }
 
     // =========================================================================
-    // Endpoints aninhados: HistÃƒÂ³rico por Cliente e por MÃƒÂ¡quina
+    // Endpoints aninhados: Histórico por Cliente e por Máquina
     // =========================================================================
 
     @GetMapping("/api/clientes/{clienteId}/ordens-servico")
-    @Operation(summary = "Listar Ordens de ServiÃƒÂ§o do cliente", description = "Retorna o histÃƒÂ³rico de todas as OS abertas para um determinado cliente.")
+    @Operation(summary = "Listar Ordens de Serviço do cliente", description = "Retorna o histórico de todas as OS abertas para um determinado cliente.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "HistÃƒÂ³rico retornado com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Cliente nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "200", description = "Histórico retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Cliente não encontrado")
     })
     public ResponseEntity<PageResponse<OrdemServicoResponseDTO>> listarPorCliente(
             @PathVariable Long clienteId,
@@ -217,11 +217,11 @@ public class OrdemServicoController {
     }
 
     @GetMapping("/api/maquinas/{maquinaId}/ordens-servico")
-    @Operation(summary = "Listar histÃƒÂ³rico de Ordens de ServiÃƒÂ§o do equipamento", description = "Permite responder: 'Quantas vezes essa mÃƒÂ¡quina jÃƒÂ¡ veio para a oficina e o que foi feito nela?'.")
+    @Operation(summary = "Listar histórico de Ordens de Serviço do equipamento", description = "Permite responder: 'Quantas vezes essa máquina já veio para a oficina e o que foi feito nela?'.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "HistÃƒÂ³rico do equipamento retornado com sucesso"),
-            @ApiResponse(responseCode = "401", description = "NÃƒÂ£o autenticado"),
-            @ApiResponse(responseCode = "404", description = "Equipamento nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "200", description = "Histórico do equipamento retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "404", description = "Equipamento não encontrado")
     })
     public ResponseEntity<PageResponse<OrdemServicoResponseDTO>> listarPorMaquina(
             @PathVariable Long maquinaId,
@@ -232,25 +232,25 @@ public class OrdemServicoController {
     }
 
     // =========================================================================
-    // Endpoints de PeÃƒÂ§as Utilizadas na Ordem de ServiÃƒÂ§o
+    // Endpoints de Peças Utilizadas na Ordem de Serviço
     // =========================================================================
 
     @GetMapping("/api/ordens-servico/{id}/itens")
-    @Operation(summary = "Listar peÃƒÂ§as e serviÃƒÂ§os utilizados na Ordem de ServiÃƒÂ§o")
+    @Operation(summary = "Listar peças e serviços utilizados na Ordem de Serviço")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de itens retornada com sucesso"),
-            @ApiResponse(responseCode = "404", description = "Ordem de ServiÃƒÂ§o nÃƒÂ£o encontrada")
+            @ApiResponse(responseCode = "404", description = "Ordem de Serviço não encontrada")
     })
     public ResponseEntity<List<OrdemServicoItemResponseDTO>> listarItens(@PathVariable Long id) {
         return ResponseEntity.ok(ordemServicoItemService.listarItens(id));
     }
 
     @PostMapping("/api/ordens-servico/{id}/itens")
-    @Operation(summary = "Adicionar peÃƒÂ§a ÃƒÂ  Ordem de ServiÃƒÂ§o", description = "Realiza baixa atÃƒÂ´mica no estoque com congelamento de preÃƒÂ§o histÃƒÂ³rico e recalculo da OS.")
+    @Operation(summary = "Adicionar peça à Ordem de Serviço", description = "Realiza baixa atômica no estoque com congelamento de preço histórico e recalculo da OS.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "PeÃƒÂ§a adicionada ÃƒÂ  OS com sucesso"),
+            @ApiResponse(responseCode = "201", description = "Peça adicionada à OS com sucesso"),
             @ApiResponse(responseCode = "400", description = "Estoque insuficiente ou OS em status terminal"),
-            @ApiResponse(responseCode = "404", description = "OS ou produto nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "OS ou produto não encontrado")
     })
     public ResponseEntity<OrdemServicoItemResponseDTO> adicionarPeca(
             @PathVariable Long id,
@@ -264,11 +264,11 @@ public class OrdemServicoController {
     }
 
     @DeleteMapping("/api/ordens-servico/{id}/itens/{itemId}")
-    @Operation(summary = "Remover peÃƒÂ§a da Ordem de ServiÃƒÂ§o", description = "Remove o item da OS e estorna a quantidade para o estoque.")
+    @Operation(summary = "Remover peça da Ordem de Serviço", description = "Remove o item da OS e estorna a quantidade para o estoque.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Item removido e estoque estornado"),
             @ApiResponse(responseCode = "400", description = "OS em status terminal"),
-            @ApiResponse(responseCode = "404", description = "Item ou OS nÃƒÂ£o encontrado")
+            @ApiResponse(responseCode = "404", description = "Item ou OS não encontrado")
     })
     public ResponseEntity<Void> removerItem(
             @PathVariable Long id,

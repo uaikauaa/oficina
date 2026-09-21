@@ -10,30 +10,30 @@ import jakarta.validation.constraints.Size;
 
 public record MaquinaUpdateDTO(
 
-        @NotNull(message = "O tipo de equipamento Ã© obrigatÃ³rio")
+        @NotNull(message = "O tipo de equipamento é obrigatório")
         TipoEquipamento tipoEquipamento,
 
-        @NotBlank(message = "A marca Ã© obrigatÃ³ria")
-        @Size(max = 100, message = "Marca deve ter no mÃ¡ximo 100 caracteres")
+        @NotBlank(message = "A marca é obrigatória")
+        @Size(max = 100, message = "Marca deve ter no máximo 100 caracteres")
         String marca,
 
-        @NotBlank(message = "O modelo Ã© obrigatÃ³rio")
-        @Size(max = 100, message = "Modelo deve ter no mÃ¡ximo 100 caracteres")
+        @NotBlank(message = "O modelo é obrigatório")
+        @Size(max = 100, message = "Modelo deve ter no máximo 100 caracteres")
         String modelo,
 
-        @Min(value = 1900, message = "Ano de fabricaÃ§Ã£o invÃ¡lido")
-        @Max(value = 2100, message = "Ano de fabricaÃ§Ã£o invÃ¡lido")
+        @Min(value = 1900, message = "Ano de fabricação inválido")
+        @Max(value = 2100, message = "Ano de fabricação inválido")
         Integer anoFabricacao,
 
-        @Size(max = 100, message = "NÃºmero de sÃ©rie deve ter no mÃ¡ximo 100 caracteres")
+        @Size(max = 100, message = "Número de série deve ter no máximo 100 caracteres")
         String numeroSerie,
 
         String horimetro,
 
-        @Size(max = 50, message = "PotÃªncia deve ter no mÃ¡ximo 50 caracteres")
+        @Size(max = 50, message = "Potência deve ter no máximo 50 caracteres")
         String potencia,
 
-        @Size(max = 50, message = "TensÃ£o deve ter no mÃ¡ximo 50 caracteres")
+        @Size(max = 50, message = "Tensão deve ter no máximo 50 caracteres")
         String tensao,
 
         String observacoes

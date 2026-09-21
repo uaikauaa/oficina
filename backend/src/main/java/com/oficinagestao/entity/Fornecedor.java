@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 /**
- * Entidade JPA representando um fornecedor de peÃ§as e insumos para mÃ¡quinas de solda e geradores.
+ * Entidade JPA representando um fornecedor de peças e insumos para máquinas de solda e geradores.
  */
 @Entity
 @Table(name = "fornecedores")

@@ -30,7 +30,7 @@ import java.time.OffsetDateTime;
 
 @RestController
 @RequestMapping("/api/estoque")
-@Tag(name = "Estoque", description = "Controle fÃƒÂ­sico de estoque, saldos e histÃƒÂ³rico de movimentaÃƒÂ§ÃƒÂµes")
+@Tag(name = "Estoque", description = "Controle físico de estoque, saldos e histórico de movimentações")
 @SecurityRequirement(name = "cookieAuth")
 @SecurityRequirement(name = "bearerAuth")
 public class EstoqueController {

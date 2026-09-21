@@ -1,8 +1,8 @@
 package com.oficinagestao.entity;
 
 public enum TipoItemOrdemServico {
-    PECA("PeÃ§a"),
-    SERVICO("ServiÃ§o");
+    PECA("Peça"),
+    SERVICO("Serviço");
 
     private final String descricao;
 
