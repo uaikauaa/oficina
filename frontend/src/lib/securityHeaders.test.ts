@@ -7,43 +7,56 @@ import {
 
 describe('SEC-002: Security Headers & CSP (PSQ-SaaS-001)', () => {
   describe('buildContentSecurityPolicy', () => {
-    it('deve conter default-src restrito a self', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("default-src 'self'"));
+    it('deve conter default-src restrito a self em prod e dev', () => {
+      assert.ok(buildContentSecurityPolicy(true).includes("default-src 'self'"));
+      assert.ok(buildContentSecurityPolicy(false).includes("default-src 'self'"));
     });
 
-    it('deve permitir script-src self e unsafe-inline para hidratação Next.js', () => {
-      const csp = buildContentSecurityPolicy();
+    it('PRODUÇÃO: deve permitir script-src self e unsafe-inline SEM unsafe-eval', () => {
+      const csp = buildContentSecurityPolicy(true);
       assert.ok(csp.includes("script-src 'self' 'unsafe-inline'"));
+      assert.strictEqual(csp.includes("'unsafe-eval'"), false, 'Produção NUNCA deve conter unsafe-eval');
+    });
+
+    it('DESENVOLVIMENTO: deve permitir unsafe-eval em script-src para Turbopack e HMR', () => {
+      const csp = buildContentSecurityPolicy(false);
+      assert.ok(csp.includes("script-src 'self' 'unsafe-inline' 'unsafe-eval'"));
+      assert.ok(csp.includes("'unsafe-eval'"));
+    });
+
+    it('PRODUÇÃO: deve restringir connect-src estritamente a self', () => {
+      const csp = buildContentSecurityPolicy(true);
+      assert.ok(csp.includes("connect-src 'self'"));
+      assert.strictEqual(csp.includes("ws:"), false, 'Produção não deve expor ws: aberto');
+    });
+
+    it('DESENVOLVIMENTO: deve permitir ws: e http: em connect-src para HMR local', () => {
+      const csp = buildContentSecurityPolicy(false);
+      assert.ok(csp.includes("connect-src 'self' ws: http:"));
     });
 
     it('deve permitir style-src self e unsafe-inline para Tailwind CSS', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("style-src 'self' 'unsafe-inline'"));
+      assert.ok(buildContentSecurityPolicy(true).includes("style-src 'self' 'unsafe-inline'"));
+      assert.ok(buildContentSecurityPolicy(false).includes("style-src 'self' 'unsafe-inline'"));
     });
 
     it('deve permitir img-src self, data: e blob:', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("img-src 'self' data: blob:"));
+      assert.ok(buildContentSecurityPolicy(true).includes("img-src 'self' data: blob:"));
+      assert.ok(buildContentSecurityPolicy(false).includes("img-src 'self' data: blob:"));
     });
 
     it('deve restringir font-src a self', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("font-src 'self'"));
-    });
-
-    it('deve restringir connect-src a self', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("connect-src 'self'"));
+      assert.ok(buildContentSecurityPolicy(true).includes("font-src 'self'"));
+      assert.ok(buildContentSecurityPolicy(false).includes("font-src 'self'"));
     });
 
     it('deve restringir frame-ancestors a none (anti-clickjacking CSP nível 2/3)', () => {
-      const csp = buildContentSecurityPolicy();
-      assert.ok(csp.includes("frame-ancestors 'none'"));
+      assert.ok(buildContentSecurityPolicy(true).includes("frame-ancestors 'none'"));
+      assert.ok(buildContentSecurityPolicy(false).includes("frame-ancestors 'none'"));
     });
 
     it('deve restringir base-uri e form-action a self', () => {
-      const csp = buildContentSecurityPolicy();
+      const csp = buildContentSecurityPolicy(true);
       assert.ok(csp.includes("base-uri 'self'"));
       assert.ok(csp.includes("form-action 'self'"));
     });
@@ -82,11 +95,16 @@ describe('SEC-002: Security Headers & CSP (PSQ-SaaS-001)', () => {
       assert.ok(header.value.includes('usb=()'));
     });
 
-    it('deve incluir Content-Security-Policy', () => {
-      const headers = getSecurityHeaders(false);
-      const header = headers.find((h) => h.key === 'Content-Security-Policy');
-      assert.ok(header, 'Content-Security-Policy deve existir');
-      assert.strictEqual(header.value, buildContentSecurityPolicy());
+    it('deve incluir Content-Security-Policy correspondente em dev e prod', () => {
+      const headersDev = getSecurityHeaders(false);
+      const headerDev = headersDev.find((h) => h.key === 'Content-Security-Policy');
+      assert.ok(headerDev, 'Content-Security-Policy deve existir em dev');
+      assert.strictEqual(headerDev.value, buildContentSecurityPolicy(false));
+
+      const headersProd = getSecurityHeaders(true);
+      const headerProd = headersProd.find((h) => h.key === 'Content-Security-Policy');
+      assert.ok(headerProd, 'Content-Security-Policy deve existir em prod');
+      assert.strictEqual(headerProd.value, buildContentSecurityPolicy(true));
     });
 
     it('NÃO deve incluir HSTS em ambiente não-produção para permitir testes locais', () => {

@@ -88,7 +88,10 @@ function OrdensServicoContent() {
 
   // Carrega Contadores Iniciais
   useEffect(() => {
-    carregarContadoresStatus();
+    const timer = setTimeout(() => {
+      carregarContadoresStatus();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarContadoresStatus]);
 
   // Busca as Ordens de Serviço

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Lock, Mail, Eye, EyeOff, Wrench, AlertCircle, ArrowRight } from 'lucide-react';
 
-import { sanitizarRedirect, API_URL, extrairMensagemErroLogin } from '@/lib/api';
+import { sanitizarRedirect, apiFetch, extrairMensagemErroLogin } from '@/lib/api';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'O email é obrigatório').email('Formato de email inválido'),
@@ -42,12 +42,8 @@ function LoginForm() {
     setErrorMessage(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Importante: inclui e recebe cookies HttpOnly
         body: JSON.stringify(data),
       });
 

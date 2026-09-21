@@ -1,13 +1,10 @@
 // AUDIT-001: Suporte à arquitetura de mesma origem (Next.js rewrites: /api/* -> Spring Boot).
-// Se NEXT_PUBLIC_API_URL estiver definido, usa seu valor;
-// Se em produção (NODE_ENV === 'production') e não definido, usa '' para chamadas relativas à mesma origem;
-// Em ambiente de desenvolvimento local, o fallback é 'http://localhost:8080'.
+// No navegador (client-side), as requisições utilizam caminho relativo ('') para mesma origem via rewrite do Next.js.
+// No servidor (SSR/testes), utiliza INTERNAL_BACKEND_URL ou NEXT_PUBLIC_API_URL se definidos.
 export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL !== undefined
-    ? process.env.NEXT_PUBLIC_API_URL
-    : process.env.NODE_ENV === 'production'
-      ? ''
-      : 'http://localhost:8080';
+  typeof window !== 'undefined'
+    ? ''
+    : (process.env.INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '');
 
 /**
  * AUDIT-002: Extrai mensagem amigável e segura de erro de login com base no status HTTP e corpo da resposta.

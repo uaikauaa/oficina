@@ -12,14 +12,24 @@ export interface SecurityHeader {
  * Constrói a Content Security Policy (CSP) sob medida para Next.js App Router (auto-contido).
  * Não há fontes ou scripts externos (fontes Geist são locais via next/font; ícones Lucide são SVG inline).
  */
-export function buildContentSecurityPolicy(): string {
+export function buildContentSecurityPolicy(
+  isProd: boolean = process.env.NODE_ENV === 'production'
+): string {
+  const scriptSrc = isProd
+    ? "script-src 'self' 'unsafe-inline'"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+
+  const connectSrc = isProd
+    ? "connect-src 'self'"
+    : "connect-src 'self' ws: http:";
+
   const directives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    scriptSrc,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    "connect-src 'self'",
+    connectSrc,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -54,7 +64,7 @@ export function getSecurityHeaders(
     },
     {
       key: 'Content-Security-Policy',
-      value: buildContentSecurityPolicy(),
+      value: buildContentSecurityPolicy(isProd),
     },
   ];
 

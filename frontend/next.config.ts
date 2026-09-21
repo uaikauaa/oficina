@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/:path*',
-        headers: getSecurityHeaders(),
+        headers: getSecurityHeaders(process.env.NODE_ENV === 'production'),
       },
     ];
   },

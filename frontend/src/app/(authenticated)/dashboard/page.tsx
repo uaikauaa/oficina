@@ -133,9 +133,12 @@ export default function DashboardPage() {
 
   // Carga dos indicadores operacionais
   useEffect(() => {
-    carregarContadoresOs();
-    carregarEstoque();
-    carregarOrdensRecentes();
+    const timer = setTimeout(() => {
+      carregarContadoresOs();
+      carregarEstoque();
+      carregarOrdensRecentes();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [carregarContadoresOs, carregarEstoque, carregarOrdensRecentes]);
 
   return (
