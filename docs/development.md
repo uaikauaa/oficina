@@ -27,7 +27,6 @@ oficina-gestao/
 │   │   ├── repository/   # Repositórios Spring Data
 │   │   ├── security/     # JWT e configurações de segurança
 │   │   └── service/      # Regras de negócio e transações
-├── database/migrations/  # Espelho das migrations Flyway
 ├── docs/                 # Documentação técnica
 ├── scripts/              # Utilitários de desenvolvimento
 ├── .env.example          # Modelo de variáveis de ambiente

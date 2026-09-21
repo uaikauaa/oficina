@@ -34,9 +34,8 @@ A conexão com o Neon é configurada estritamente via variáveis de ambiente ou 
    V<Versão>__<descricao_em_snake_case>.sql
    Exemplo: V1__create_initial_schema.sql
    ```
-4. Os arquivos de migration residem no backend em:
+4. Os arquivos de migration residem exclusivamente no backend em:
    - `backend/src/main/resources/db/migration/`
-   - E são espelhados para referência em `database/migrations/`.
 
 ---
 
