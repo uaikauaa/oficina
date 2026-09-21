@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { fetchTodosRegistrosRelatorio } from './csvExportHelper.ts';
-import type { PageResponse } from './csvExportHelper.ts';
+import type { PageResponse } from './types.ts';
 import { gerarCsv } from './csvHelper.ts';
 import type { ColunaCsv } from './csvHelper.ts';
 

@@ -1,15 +1,6 @@
-/**
- * Interface simplificada da resposta paginada da API.
- */
-export interface PageResponse<T> {
-  content: T[];
-  totalPages?: number;
-  totalElements?: number;
-  page?: number;
-  size?: number;
-  first?: boolean;
-  last?: boolean;
-}
+import type { PageResponse } from './types.ts';
+
+export type { PageResponse };
 
 /**
  * Interface para a função executora de cada página de busca.
