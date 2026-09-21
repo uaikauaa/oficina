@@ -38,7 +38,9 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final LoginAttemptService loginAttemptService;
     private final long refreshExpirationMs;
+    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public AuthService(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
@@ -46,7 +48,8 @@ public class AuthService {
             AuditoriaService auditoriaService,
             RefreshTokenRepository refreshTokenRepository,
             LoginAttemptService loginAttemptService,
-            @Value("${security.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs
+            @Value("${security.jwt.refresh-expiration-ms:604800000}") long refreshExpirationMs,
+            com.oficinagestao.security.IpAddressResolver ipAddressResolver
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
@@ -55,6 +58,19 @@ public class AuthService {
         this.refreshTokenRepository = refreshTokenRepository;
         this.loginAttemptService = loginAttemptService;
         this.refreshExpirationMs = refreshExpirationMs;
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+    }
+
+    public AuthService(
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            AuditoriaService auditoriaService,
+            RefreshTokenRepository refreshTokenRepository,
+            LoginAttemptService loginAttemptService,
+            long refreshExpirationMs
+    ) {
+        this(usuarioRepository, passwordEncoder, jwtService, auditoriaService, refreshTokenRepository, loginAttemptService, refreshExpirationMs, new com.oficinagestao.security.IpAddressResolver());
     }
 
     @Transactional
@@ -221,13 +237,6 @@ public class AuthService {
     }
 
     private String extrairIp(HttpServletRequest request) {
-        if (request == null) {
-            return "127.0.0.1";
-        }
-        String xForwarded = request.getHeader("X-Forwarded-For");
-        if (xForwarded != null && !xForwarded.isBlank()) {
-            return xForwarded.split(",")[0].trim();
-        }
-        return request.getRemoteAddr() != null ? request.getRemoteAddr() : "127.0.0.1";
+        return ipAddressResolver.extrairIp(request);
     }
 }

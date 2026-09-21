@@ -59,6 +59,7 @@ backend/logs/
 *.iws
 *.ipr
 .vscode/
+.cursor/
 *.sublime-project
 *.sublime-workspace
 .project

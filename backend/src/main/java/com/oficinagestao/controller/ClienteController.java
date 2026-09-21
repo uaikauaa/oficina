@@ -39,15 +39,27 @@ public class ClienteController {
     private final ClienteService clienteService;
     private final OrdemServicoService ordemServicoService;
     private final UsuarioRepository usuarioRepository;
+    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ClienteController(
+            ClienteService clienteService,
+            OrdemServicoService ordemServicoService,
+            UsuarioRepository usuarioRepository,
+            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+    ) {
+        this.clienteService = clienteService;
+        this.ordemServicoService = ordemServicoService;
+        this.usuarioRepository = usuarioRepository;
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+    }
 
     public ClienteController(
             ClienteService clienteService,
             OrdemServicoService ordemServicoService,
             UsuarioRepository usuarioRepository
     ) {
-        this.clienteService = clienteService;
-        this.ordemServicoService = ordemServicoService;
-        this.usuarioRepository = usuarioRepository;
+        this(clienteService, ordemServicoService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
     }
 
     @PostMapping
@@ -65,7 +77,7 @@ public class ClienteController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -161,7 +173,7 @@ public class ClienteController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.atualizar(id, dto, usuarioId, ip);
         return ResponseEntity.ok(response);
     }
@@ -182,7 +194,7 @@ public class ClienteController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.alterarStatus(id, dto.ativo(), usuarioId, ip);
         return ResponseEntity.ok(response);
     }

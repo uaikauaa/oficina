@@ -26,10 +26,30 @@ export default function ConfirmModal({
   onCancel,
   isLoading = false,
 }: ConfirmModalProps) {
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isLoading) {
+        onCancel();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, isLoading, onCancel]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    >
       <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         <div className="p-6">
           <div className="flex items-start gap-4">
@@ -44,7 +64,7 @@ export default function ConfirmModal({
             </div>
 
             <div className="flex-1">
-              <h3 className="text-base font-bold text-white leading-tight">{title}</h3>
+              <h3 id="confirm-modal-title" className="text-base font-bold text-white leading-tight">{title}</h3>
               <p className="text-xs text-slate-400 mt-2 leading-relaxed">{message}</p>
             </div>
 

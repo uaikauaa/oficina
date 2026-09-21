@@ -42,15 +42,27 @@ public class OrdemServicoController {
     private final OrdemServicoService ordemServicoService;
     private final OrdemServicoItemService ordemServicoItemService;
     private final UsuarioRepository usuarioRepository;
+    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public OrdemServicoController(
+            OrdemServicoService ordemServicoService,
+            OrdemServicoItemService ordemServicoItemService,
+            UsuarioRepository usuarioRepository,
+            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+    ) {
+        this.ordemServicoService = ordemServicoService;
+        this.ordemServicoItemService = ordemServicoItemService;
+        this.usuarioRepository = usuarioRepository;
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+    }
 
     public OrdemServicoController(
             OrdemServicoService ordemServicoService,
             OrdemServicoItemService ordemServicoItemService,
             UsuarioRepository usuarioRepository
     ) {
-        this.ordemServicoService = ordemServicoService;
-        this.ordemServicoItemService = ordemServicoItemService;
-        this.usuarioRepository = usuarioRepository;
+        this(ordemServicoService, ordemServicoItemService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
     }
 
     // =========================================================================
@@ -72,7 +84,7 @@ public class OrdemServicoController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         OrdemServicoResponseDTO response = ordemServicoService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -161,7 +173,7 @@ public class OrdemServicoController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(ordemServicoService.atualizar(id, dto, usuarioId, ip));
     }
 
@@ -180,7 +192,7 @@ public class OrdemServicoController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(ordemServicoService.alterarStatus(id, dto, usuarioId, ip));
     }
 

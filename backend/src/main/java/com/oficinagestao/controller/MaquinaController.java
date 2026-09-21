@@ -36,10 +36,21 @@ public class MaquinaController {
 
     private final MaquinaService maquinaService;
     private final UsuarioRepository usuarioRepository;
+    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
 
-    public MaquinaController(MaquinaService maquinaService, UsuarioRepository usuarioRepository) {
+    @org.springframework.beans.factory.annotation.Autowired
+    public MaquinaController(
+            MaquinaService maquinaService,
+            UsuarioRepository usuarioRepository,
+            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+    ) {
         this.maquinaService = maquinaService;
         this.usuarioRepository = usuarioRepository;
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+    }
+
+    public MaquinaController(MaquinaService maquinaService, UsuarioRepository usuarioRepository) {
+        this(maquinaService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
     }
 
     // =========================================================================
@@ -60,7 +71,7 @@ public class MaquinaController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         MaquinaResponseDTO response = maquinaService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -138,7 +149,7 @@ public class MaquinaController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(maquinaService.atualizar(id, dto, usuarioId, ip));
     }
 
@@ -157,7 +168,7 @@ public class MaquinaController {
             HttpServletRequest request
     ) {
         Long usuarioId = extrairUsuarioId(authentication);
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(maquinaService.alterarStatus(id, dto.ativo(), usuarioId, ip));
     }
 

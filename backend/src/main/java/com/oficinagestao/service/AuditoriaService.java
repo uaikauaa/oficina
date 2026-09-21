@@ -10,9 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuditoriaService {
 
     private final AuditoriaRepository auditoriaRepository;
+    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AuditoriaService(AuditoriaRepository auditoriaRepository, com.oficinagestao.security.IpAddressResolver ipAddressResolver) {
+        this.auditoriaRepository = auditoriaRepository;
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+    }
 
     public AuditoriaService(AuditoriaRepository auditoriaRepository) {
-        this.auditoriaRepository = auditoriaRepository;
+        this(auditoriaRepository, new com.oficinagestao.security.IpAddressResolver());
     }
 
     @Transactional
@@ -29,7 +36,7 @@ public class AuditoriaService {
 
     @Transactional
     public void registrarComRequest(Long usuarioId, String entidade, String entidadeId, String acao, HttpServletRequest request) {
-        String ip = request != null ? request.getRemoteAddr() : "127.0.0.1";
+        String ip = ipAddressResolver.extrairIp(request);
         registrar(usuarioId, entidade, entidadeId, acao, ip);
     }
 }
