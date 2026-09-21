@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
+import { getSecurityHeaders } from "./src/lib/securityHeaders.ts";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: getSecurityHeaders(),
+      },
+    ];
+  },
   async rewrites() {
     // AUDIT-001: Mesma origem no Next.js (Vercel).
     // Encaminha requisições /api/* para o container backend Spring Boot.

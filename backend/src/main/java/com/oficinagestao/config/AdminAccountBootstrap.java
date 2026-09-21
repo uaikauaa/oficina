@@ -56,6 +56,14 @@ public class AdminAccountBootstrap implements ApplicationRunner {
             return;
         }
 
+        // FASE 4.2: Validação obrigatória da política de senha para impedir credenciais fracas no bootstrap
+        try {
+            com.oficinagestao.security.PasswordPolicyValidator.validar(adminPassword);
+        } catch (com.oficinagestao.exception.BusinessException e) {
+            log.error("Inicialização: A senha fornecida em INITIAL_ADMIN_PASSWORD não atende à política de segurança: {}", e.getMessage());
+            throw new IllegalStateException("Falha de segurança na inicialização da conta administrativa: senha fraca. " + e.getMessage(), e);
+        }
+
         Role roleAdmin = roleRepository.findByNome("ROLE_ADMIN")
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_ADMIN", "Administrador com acesso irrestrito ao sistema")));
 

@@ -1,5 +1,6 @@
 package com.oficinagestao.service;
 
+import com.oficinagestao.dto.AlterarSenhaRequest;
 import com.oficinagestao.dto.CurrentUserResponse;
 import com.oficinagestao.dto.LoginRequest;
 import com.oficinagestao.dto.LoginResult;
@@ -8,8 +9,10 @@ import com.oficinagestao.entity.Role;
 import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.repository.RefreshTokenRepository;
 import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.security.JwtService;
 import com.oficinagestao.security.LoginAttemptService;
+import com.oficinagestao.security.PasswordPolicyValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,6 +229,49 @@ public class AuthService {
                 auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "LOGOUT", httpRequest);
             });
         }
+    }
+
+    @Transactional
+    public void alterarSenha(String email, AlterarSenhaRequest request, HttpServletRequest httpRequest) {
+        if (email == null || email.isBlank()) {
+            throw new BadCredentialsException("Usuário não autenticado.");
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado."));
+
+        if (!Boolean.TRUE.equals(usuario.getAtivo())) {
+            throw new DisabledException("Conta de usuário inativa.");
+        }
+
+        // 1. Validar senha atual usando BCrypt
+        if (!passwordEncoder.matches(request.senhaAtual(), usuario.getSenha())) {
+            throw new BusinessException("Senha atual incorreta.");
+        }
+
+        // 2. Confirmar novaSenha == confirmacaoNovaSenha
+        if (!request.novaSenha().equals(request.confirmacaoNovaSenha())) {
+            throw new BusinessException("A confirmação da nova senha não confere.");
+        }
+
+        // 3. Impedir que a nova senha seja igual à senha atual
+        if (passwordEncoder.matches(request.novaSenha(), usuario.getSenha())) {
+            throw new BusinessException("A nova senha não pode ser igual à senha atual.");
+        }
+
+        // 4. Validar nova senha com a política centralizada de segurança
+        PasswordPolicyValidator.validar(request.novaSenha());
+
+        // 5. Gerar novo hash BCrypt e salvar no banco
+        usuario.setSenha(passwordEncoder.encode(request.novaSenha()));
+        usuarioRepository.save(usuario);
+
+        // 6. Invalidar/revogar todos os refresh tokens existentes do usuário
+        refreshTokenRepository.revokeAllByUsuarioId(usuario.getId());
+
+        // 7. Log de auditoria da alteração de credencial
+        auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "PASSWORD_CHANGE", httpRequest);
+        log.info("Senha alterada com sucesso para o usuário ID: [{}]", usuario.getId());
     }
 
     @Transactional

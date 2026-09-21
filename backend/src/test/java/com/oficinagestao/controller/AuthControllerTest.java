@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -157,5 +158,47 @@ class AuthControllerTest {
                 .andExpect(cookie().maxAge("refresh_token", 0));
 
         verify(authService).logout(isNull(), eq("active-refresh-token"), any());
+    }
+
+    @Test
+    @DisplayName("PUT /api/auth/alterar-senha sem autenticação deve retornar 401")
+    void shouldReturn401WhenNotAuthenticatedOnAlterarSenha() throws Exception {
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenha@1234", "NovaSenha@1234");
+
+        mockMvc.perform(put("/api/auth/alterar-senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("PUT /api/auth/alterar-senha autenticado com dados válidos deve retornar 200 e mensagem de sucesso")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void shouldReturn200OnSuccessfulAlterarSenha() throws Exception {
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenha@1234", "NovaSenha@1234");
+
+        mockMvc.perform(put("/api/auth/alterar-senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Senha alterada com sucesso."));
+
+        verify(authService).alterarSenha(eq("admin@oficina.com"), any(AlterarSenhaRequest.class), any());
+    }
+
+    @Test
+    @DisplayName("PUT /api/auth/alterar-senha com senha atual incorreta deve retornar 400")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void shouldReturn400WhenCurrentPasswordIsIncorrect() throws Exception {
+        org.mockito.Mockito.doThrow(new com.oficinagestao.exception.BusinessException("Senha atual incorreta."))
+                .when(authService).alterarSenha(eq("admin@oficina.com"), any(AlterarSenhaRequest.class), any());
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaErrada@123", "NovaSenha@1234", "NovaSenha@1234");
+
+        mockMvc.perform(put("/api/auth/alterar-senha")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Senha atual incorreta."));
     }
 }

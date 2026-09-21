@@ -39,11 +39,11 @@ class AdminAccountBootstrapTest {
     void shouldProvisionAdminAccountWhenNoUsersExist() {
         ReflectionTestUtils.setField(bootstrap, "adminName", "Proprietária");
         ReflectionTestUtils.setField(bootstrap, "adminEmail", "admin@oficina.com");
-        ReflectionTestUtils.setField(bootstrap, "adminPassword", "SenhaSegura123");
+        ReflectionTestUtils.setField(bootstrap, "adminPassword", "SenhaSegura@123");
 
         when(usuarioRepository.count()).thenReturn(0L);
         when(roleRepository.findByNome("ROLE_ADMIN")).thenReturn(Optional.of(new Role("ROLE_ADMIN", "Admin")));
-        when(passwordEncoder.encode("SenhaSegura123")).thenReturn("senha_hash_bcrypt");
+        when(passwordEncoder.encode("SenhaSegura@123")).thenReturn("senha_hash_bcrypt");
 
         bootstrap.run(new DefaultApplicationArguments(new String[]{}));
 
@@ -69,6 +69,38 @@ class AdminAccountBootstrapTest {
         when(usuarioRepository.count()).thenReturn(0L);
 
         bootstrap.run(new DefaultApplicationArguments(new String[]{}));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalStateException e abortar bootstrap se a senha inicial for fraca")
+    void shouldThrowExceptionWhenInitialPasswordIsWeak() {
+        ReflectionTestUtils.setField(bootstrap, "adminName", "Proprietária");
+        ReflectionTestUtils.setField(bootstrap, "adminEmail", "admin@oficina.com");
+        ReflectionTestUtils.setField(bootstrap, "adminPassword", "admin123");
+
+        when(usuarioRepository.count()).thenReturn(0L);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () ->
+                bootstrap.run(new DefaultApplicationArguments(new String[]{}))
+        );
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalStateException se a senha inicial tiver menos de 12 caracteres")
+    void shouldThrowExceptionWhenInitialPasswordIsTooShort() {
+        ReflectionTestUtils.setField(bootstrap, "adminName", "Proprietária");
+        ReflectionTestUtils.setField(bootstrap, "adminEmail", "admin@oficina.com");
+        ReflectionTestUtils.setField(bootstrap, "adminPassword", "Curta@123");
+
+        when(usuarioRepository.count()).thenReturn(0L);
+
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () ->
+                bootstrap.run(new DefaultApplicationArguments(new String[]{}))
+        );
 
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }

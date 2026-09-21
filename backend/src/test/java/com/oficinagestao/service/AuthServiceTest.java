@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import com.oficinagestao.exception.BusinessException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -274,5 +275,120 @@ class AuthServiceTest {
 
         assertEquals(42, deletados);
         verify(refreshTokenRepository, times(1)).deleteExpiredOrRevoked(any(OffsetDateTime.class));
+    }
+
+    @Test
+    @DisplayName("Deve alterar a senha com sucesso, salvar hash BCrypt e revogar refresh tokens ativos")
+    void shouldChangePasswordSuccessfully() {
+        Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
+        when(passwordEncoder.matches("NovaSenhaSegura#2026", "hash_antigo")).thenReturn(false);
+        when(passwordEncoder.encode("NovaSenhaSegura#2026")).thenReturn("hash_novo_bcrypt");
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenhaSegura#2026", "NovaSenhaSegura#2026");
+
+        authService.alterarSenha("admin@oficina.com", request, httpRequest);
+
+        assertEquals("hash_novo_bcrypt", usuario.getSenha());
+        verify(usuarioRepository, times(1)).save(usuario);
+        verify(refreshTokenRepository, times(1)).revokeAllByUsuarioId(1L);
+        verify(auditoriaService, times(1)).registrarComRequest(eq(1L), eq("Usuario"), eq("1"), eq("PASSWORD_CHANGE"), eq(httpRequest));
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar alteração quando a senha atual informada estiver incorreta")
+    void shouldRejectPasswordChangeWhenCurrentPasswordIsIncorrect() {
+        Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("SenhaErrada@123", "hash_antigo")).thenReturn(false);
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaErrada@123", "NovaSenhaSegura#2026", "NovaSenhaSegura#2026");
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                authService.alterarSenha("admin@oficina.com", request, httpRequest)
+        );
+
+        assertEquals("Senha atual incorreta.", ex.getMessage());
+        verify(usuarioRepository, never()).save(any());
+        verify(refreshTokenRepository, never()).revokeAllByUsuarioId(any());
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar alteração quando a confirmação da nova senha divergir")
+    void shouldRejectPasswordChangeWhenConfirmationDoesNotMatch() {
+        Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenhaSegura#2026", "ConfirmacaoDiferente#2026");
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                authService.alterarSenha("admin@oficina.com", request, httpRequest)
+        );
+
+        assertEquals("A confirmação da nova senha não confere.", ex.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar alteração quando a nova senha for idêntica à senha atual")
+    void shouldRejectPasswordChangeWhenNewPasswordIsSameAsCurrent() {
+        Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "SenhaAtual@123", "SenhaAtual@123");
+
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                authService.alterarSenha("admin@oficina.com", request, httpRequest)
+        );
+
+        assertEquals("A nova senha não pode ser igual à senha atual.", ex.getMessage());
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar alteração quando a nova senha violar a política de complexidade")
+    void shouldRejectPasswordChangeWhenNewPasswordViolatesPolicy() {
+        Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
+        when(passwordEncoder.matches("admin123", "hash_antigo")).thenReturn(false);
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "admin123", "admin123");
+
+        assertThrows(BusinessException.class, () ->
+                authService.alterarSenha("admin@oficina.com", request, httpRequest)
+        );
+
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar alteração se a conta de usuário estiver inativa")
+    void shouldRejectPasswordChangeWhenUserIsInactive() {
+        Usuario usuario = new Usuario("Proprietária", "inativo@oficina.com", "hash_antigo", false);
+        usuario.setId(1L);
+
+        when(usuarioRepository.findByEmail("inativo@oficina.com")).thenReturn(Optional.of(usuario));
+
+        AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenhaSegura#2026", "NovaSenhaSegura#2026");
+
+        assertThrows(DisabledException.class, () ->
+                authService.alterarSenha("inativo@oficina.com", request, httpRequest)
+        );
+
+        verify(usuarioRepository, never()).save(any());
     }
 }

@@ -151,4 +151,27 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie.toString())
                 .build();
     }
+
+    @PutMapping("/alterar-senha")
+    @Operation(
+            summary = "Alteração de senha da usuária autenticada",
+            description = "Valida a senha atual via BCrypt, aplica a política de complexidade para a nova senha, atualiza o hash e revoga os refresh tokens ativos.",
+            security = { @SecurityRequirement(name = "cookieAuth"), @SecurityRequirement(name = "bearerAuth") }
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos, confirmação divergente ou senha atual incorreta"),
+            @ApiResponse(responseCode = "401", description = "Sessão inválida ou expirada")
+    })
+    public ResponseEntity<MensagemResponse> alterarSenha(
+            @Valid @RequestBody AlterarSenhaRequest request,
+            Authentication authentication,
+            HttpServletRequest httpRequest
+    ) {
+        if (authentication == null || authentication.getName() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        authService.alterarSenha(authentication.getName(), request, httpRequest);
+        return ResponseEntity.ok(new MensagemResponse("Senha alterada com sucesso."));
+    }
 }
