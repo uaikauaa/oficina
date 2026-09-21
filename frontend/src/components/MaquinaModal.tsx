@@ -241,10 +241,28 @@ export default function MaquinaModal({
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isLoading) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, isLoading, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="maquina-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -258,7 +276,7 @@ export default function MaquinaModal({
               <Wrench className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">
+              <h2 id="maquina-modal-title" className="text-sm font-bold text-white">
                 {isEditing ? 'Editar Equipamento' : 'Novo Equipamento'}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
@@ -275,6 +293,7 @@ export default function MaquinaModal({
           <button
             onClick={onClose}
             className="h-8 w-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer"
+            aria-label="Fechar modal"
           >
             <X className="w-4 h-4" />
           </button>

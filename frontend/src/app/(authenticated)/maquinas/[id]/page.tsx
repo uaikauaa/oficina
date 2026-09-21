@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Wrench,
@@ -24,11 +23,9 @@ import {
   Power,
   Table as TableIcon,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import MaquinaModal from '@/components/MaquinaModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import {
-  CurrentUser,
   Maquina,
   MaquinaResumo,
   OrdemServico,
@@ -46,9 +43,7 @@ interface PageProps {
 export default function MaquinaDetalhesPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const maquinaId = resolvedParams.id;
-  const router = useRouter();
 
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [maquina, setMaquina] = useState<Maquina | null>(null);
   const [resumo, setResumo] = useState<MaquinaResumo | null>(null);
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
@@ -68,29 +63,6 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
   const [loadingItensOs, setLoadingItensOs] = useState<Record<number, boolean>>({});
   const [osExpandidas, setOsExpandidas] = useState<Record<number, boolean>>({});
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   // Carrega dados da Máquina, Resumo (KPIs) e Histórico Completo com PARALELIZAÇÃO (Promise.all)
   const carregarDados = useCallback(async () => {
@@ -203,38 +175,33 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center">
-        <div className="flex items-center gap-3">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-400">
           <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
           <span>Carregando dados do equipamento...</span>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (!maquina || errorMessage) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-        <Header user={currentUser} />
-        <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center gap-4 text-center">
-          <AlertCircle className="w-12 h-12 text-red-400" />
-          <h2 className="text-xl font-bold text-white">Equipamento não localizado</h2>
-          <p className="text-sm text-slate-400">{errorMessage}</p>
-          <Link
-            href="/maquinas"
-            className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition-colors"
-          >
-            Voltar para Equipamentos
-          </Link>
-        </main>
-      </div>
+      <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center gap-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-400" />
+        <h2 className="text-xl font-bold text-white">Equipamento não localizado</h2>
+        <p className="text-sm text-slate-400">{errorMessage}</p>
+        <Link
+          href="/maquinas"
+          className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition-colors"
+        >
+          Voltar para Equipamentos
+        </Link>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
+    <>
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* Navegação de Retorno */}
         <div className="flex items-center justify-between">
@@ -860,6 +827,6 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
           onCancel={() => setIsStatusModalOpen(false)}
         />
       )}
-    </div>
+    </>
   );
 }

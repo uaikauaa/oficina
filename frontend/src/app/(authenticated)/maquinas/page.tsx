@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Wrench,
   Search,
@@ -14,10 +13,8 @@ import {
   Eye,
   AlertCircle,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import MaquinaModal from '@/components/MaquinaModal';
 import {
-  CurrentUser,
   Maquina,
   PageResponse,
   TipoEquipamento,
@@ -26,9 +23,6 @@ import {
 import { apiFetch } from '@/lib/api';
 
 export default function MaquinasPage() {
-  const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-
   // Estados da listagem
   const [maquinas, setMaquinas] = useState<Maquina[]>([]);
   const [page, setPage] = useState(0);
@@ -46,29 +40,6 @@ export default function MaquinasPage() {
   // Modal de Cadastro
   const [isNovoModalOpen, setIsNovoModalOpen] = useState(false);
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   // Carrega Equipamentos
   const carregarMaquinas = useCallback(async () => {
@@ -115,9 +86,7 @@ export default function MaquinasPage() {
   }, [carregarMaquinas]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
+    <>
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* Cabeçalho */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -495,6 +464,6 @@ export default function MaquinasPage() {
           carregarMaquinas();
         }}
       />
-    </div>
+    </>
   );
 }

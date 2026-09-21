@@ -199,6 +199,27 @@ export default function ClienteModal({
     return () => clearTimeout(timer);
   }, [isOpen, cliente, nomePreDefinido, reset, enderecoPadrao]);
 
+  const handleCloseModal = React.useCallback(() => {
+    setErrorMessage(null);
+    setEtapa(1);
+    onClose();
+  }, [onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !isSubmitting) {
+        handleCloseModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, isSubmitting, handleCloseModal]);
+
   if (!isOpen) return null;
 
   const validarEndereco = (values: ClienteFormValues): boolean => {
@@ -410,14 +431,13 @@ export default function ClienteModal({
     }
   };
 
-  const handleCloseModal = () => {
-    setErrorMessage(null);
-    setEtapa(1);
-    onClose();
-  };
+
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cliente-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleCloseModal();
@@ -444,7 +464,7 @@ export default function ClienteModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-bold text-white">
+                <h2 id="cliente-modal-title" className="text-base sm:text-lg font-bold text-white">
                   {incluirEquipamento
                     ? 'Nova Ordem de Serviço — Cadastro'
                     : isEditing
@@ -470,6 +490,7 @@ export default function ClienteModal({
           <button
             onClick={handleCloseModal}
             className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            aria-label="Fechar modal"
           >
             <X className="w-5 h-5" />
           </button>

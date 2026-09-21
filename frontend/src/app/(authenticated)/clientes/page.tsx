@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useTransition, useCallback, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   Search,
   Plus,
@@ -22,13 +22,11 @@ import {
   Edit2,
   RefreshCw,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import {
   Cliente,
   ClienteContadoresStatus,
-  CurrentUser,
   PageResponse,
   TipoPessoa,
 } from '@/lib/types';
@@ -37,11 +35,8 @@ import { apiFetch, formatarDocumento, formatarTelefone } from '@/lib/api';
 type FiltroPill = 'TODAS' | 'FISICA' | 'JURIDICA' | 'ATIVOS' | 'INATIVOS';
 
 function ClientesContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
-
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   // Estados da Listagem
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -90,29 +85,6 @@ function ClientesContent() {
     };
   }, [buscaInput]);
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   // Carrega Contadores de Status das Pills (1 única requisição consolidada)
   const carregarContadores = useCallback(async () => {
@@ -291,9 +263,7 @@ function ClientesContent() {
   const registroFinal = Math.min((page + 1) * pageSize, totalElements);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
+    <>
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4">
         {/* ========================================================================= */}
         {/* CABEÇALHO COMPACTO OPERACIONAL                                            */}
@@ -728,11 +698,12 @@ function ClientesContent() {
                               }}
                               className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-blue-500/20 hover:text-blue-400 text-slate-400 transition-colors cursor-pointer border border-transparent hover:border-blue-500/30"
                               title="Editar dados cadastrais"
+                              aria-label={`Editar dados cadastrais de ${cli.nomeRazaoSocial}`}
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Inativar / Ativar */}
+                            {/* Alterar Status (Ativar / Inativar) */}
                             <button
                               onClick={() => setClienteParaAlterarStatus(cli)}
                               className={`p-1.5 rounded-lg transition-colors cursor-pointer border border-transparent ${
@@ -741,6 +712,7 @@ function ClientesContent() {
                                   : 'bg-slate-800/80 hover:bg-emerald-500/20 hover:text-emerald-400 text-slate-400 hover:border-emerald-500/30'
                               }`}
                               title={cli.ativo ? 'Inativar cliente' : 'Reativar cliente'}
+                              aria-label={cli.ativo ? `Inativar cliente ${cli.nomeRazaoSocial}` : `Reativar cliente ${cli.nomeRazaoSocial}`}
                             >
                               <Power className="w-3.5 h-3.5" />
                             </button>
@@ -830,7 +802,7 @@ function ClientesContent() {
         onConfirm={confirmarAlteracaoStatus}
         onCancel={() => setClienteParaAlterarStatus(null)}
       />
-    </div>
+    </>
   );
 }
 
@@ -838,12 +810,9 @@ export default function ClientesPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-          <Header user={null} />
-          <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center">
-            <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          </main>
-        </div>
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        </main>
       }
     >
       <ClientesContent />

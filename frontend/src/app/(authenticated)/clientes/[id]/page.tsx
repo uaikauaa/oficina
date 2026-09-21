@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Building2,
@@ -26,14 +25,12 @@ import {
   History,
   DollarSign,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
 import ConfirmModal from '@/components/ConfirmModal';
 import MaquinaModal from '@/components/MaquinaModal';
 import {
   Cliente,
   ClienteResumo,
-  CurrentUser,
   Maquina,
   OrdemServico,
   STATUS_ORDEM_SERVICO_BADGES,
@@ -55,9 +52,7 @@ interface PageProps {
 export default function ClienteDetalhesPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const clienteId = resolvedParams.id;
-  const router = useRouter();
 
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -85,29 +80,6 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
   const [isMaquinaModalOpen, setIsMaquinaModalOpen] = useState(false);
   const [editingMaquina, setEditingMaquina] = useState<Maquina | null>(null);
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   // Carrega Dados do Cliente de forma assíncrona segura
   useEffect(() => {
@@ -257,48 +229,40 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-        <Header user={currentUser} />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-3 text-slate-400">
-            <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            <span>Carregando dados do cliente...</span>
-          </div>
-        </main>
-      </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-400">
+          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <span>Carregando dados do cliente...</span>
+        </div>
+      </main>
     );
   }
 
   if (errorMessage || !cliente) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-        <Header user={currentUser} />
-        <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center text-center">
-          <div className="h-14 w-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4">
-            <ShieldAlert className="w-7 h-7" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">{errorMessage || 'Cliente não localizado'}</h2>
-          <p className="text-xs text-slate-400 max-w-md mb-6">
-            O registro solicitado pode ter sido removido ou o identificador informado está incorreto.
-          </p>
-          <Link
-            href="/clientes"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Voltar para Lista de Clientes</span>
-          </Link>
-        </main>
-      </div>
+      <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center text-center">
+        <div className="h-14 w-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 mb-4">
+          <ShieldAlert className="w-7 h-7" />
+        </div>
+        <h2 className="text-xl font-bold text-white mb-2">{errorMessage || 'Cliente não localizado'}</h2>
+        <p className="text-xs text-slate-400 max-w-md mb-6">
+          O registro solicitado pode ter sido removido ou o identificador informado está incorreto.
+        </p>
+        <Link
+          href="/clientes"
+          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar para Lista de Clientes</span>
+        </Link>
+      </main>
     );
   }
 
   const enderecoPrincipal = cliente.enderecos?.[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
+    <>
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* Navegação Superior */}
         <div className="flex items-center justify-between">
@@ -869,6 +833,6 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
         onConfirm={handleAlterarStatus}
         onCancel={() => setIsConfirmModalOpen(false)}
       />
-    </div>
+    </>
   );
 }

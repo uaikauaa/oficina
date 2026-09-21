@@ -103,6 +103,21 @@ export default function MovimentacaoEstoqueModal({
     return () => clearTimeout(timer);
   }, [produto, isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !loading) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, loading, onClose]);
+
   if (!isOpen || !produto) return null;
 
   const handleTipoChange = (tipo: TipoMovimentacaoEstoque) => {
@@ -175,8 +190,15 @@ export default function MovimentacaoEstoqueModal({
     }
   };
 
+
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="movimentacao-estoque-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+    >
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
@@ -185,7 +207,7 @@ export default function MovimentacaoEstoqueModal({
               <Boxes className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Movimentação Manual de Estoque</h2>
+              <h2 id="movimentacao-estoque-title" className="text-base font-bold text-white">Movimentação Manual de Estoque</h2>
               <p className="text-xs text-slate-400">
                 <span className="text-amber-400 font-semibold">{produto.codigo}</span> - {produto.nome}
               </p>
@@ -194,6 +216,7 @@ export default function MovimentacaoEstoqueModal({
           <button
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Fechar modal"
           >
             <X className="w-5 h-5" />
           </button>

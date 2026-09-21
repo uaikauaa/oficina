@@ -13,12 +13,10 @@ import {
   CheckCircle2,
   Plus,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import ClienteModal from '@/components/ClienteModal';
 import MaquinaModal from '@/components/MaquinaModal';
 import {
   Cliente,
-  CurrentUser,
   Maquina,
   OrdemServicoFormData,
   TIPO_EQUIPAMENTO_LABELS,
@@ -35,9 +33,6 @@ function NovaOrdemServicoContent() {
 
   const preClienteId = searchParams.get('clienteId');
   const preMaquinaId = searchParams.get('maquinaId');
-
-  // Usuário da Sessão
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   // Estados do Cliente
   const [termoCliente, setTermoCliente] = useState('');
@@ -73,29 +68,7 @@ function NovaOrdemServicoContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
+
 
   // Se veio clienteId na URL, busca e pré-seleciona
   useEffect(() => {
@@ -247,9 +220,7 @@ function NovaOrdemServicoContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
+    <>
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* Navegação de Retorno */}
         <div className="flex items-center justify-between">
@@ -690,7 +661,7 @@ function NovaOrdemServicoContent() {
           }}
         />
       )}
-    </div>
+    </>
   );
 }
 
@@ -698,9 +669,9 @@ export default function NovaOrdemServicoPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center text-slate-400">
           <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        </main>
       }
     >
       <NovaOrdemServicoContent />

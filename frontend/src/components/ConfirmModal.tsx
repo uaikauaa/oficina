@@ -69,8 +69,10 @@ export default function ConfirmModal({
             </div>
 
             <button
+              type="button"
               onClick={onCancel}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              aria-label="Fechar modal"
             >
               <X className="w-4 h-4" />
             </button>

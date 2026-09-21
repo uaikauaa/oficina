@@ -161,6 +161,7 @@ export default function Header({ user }: HeaderProps) {
               onClick={() => setIsBuscaOpen(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-500/40 text-slate-400 hover:text-slate-200 text-xs transition-all cursor-pointer shadow-sm"
               title="Busca Rápida Global (Ctrl+K)"
+              aria-label="Abrir busca rápida"
             >
               <Search className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Busca rápida...</span>
@@ -184,6 +185,7 @@ export default function Header({ user }: HeaderProps) {
               onClick={handleLogout}
               className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-red-500/10 hover:text-red-400 text-slate-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700 hover:border-red-500/30 transition-all cursor-pointer"
               title="Encerrar Sessão"
+              aria-label="Encerrar Sessão"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sair</span>
@@ -214,6 +216,17 @@ export default function Header({ user }: HeaderProps) {
           >
             <Users className="w-3.5 h-3.5" />
             <span>Clientes</span>
+          </Link>
+          <Link
+            href="/maquinas"
+            className={`flex-1 min-w-[70px] py-1.5 text-center rounded-lg text-xs font-semibold flex items-center justify-center gap-1 ${
+              isMaquinasActive
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'text-slate-400 bg-slate-900/80 border border-slate-800'
+            }`}
+          >
+            <Wrench className="w-3.5 h-3.5" />
+            <span>Equip.</span>
           </Link>
           <Link
             href="/ordens-servico"

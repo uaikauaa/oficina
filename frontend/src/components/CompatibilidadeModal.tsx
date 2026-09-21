@@ -122,6 +122,21 @@ export default function CompatibilidadeModal({
     }
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !adding) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, adding, onClose]);
+
   if (!isOpen || !produto) return null;
 
   // Filtrar máquinas para o select
@@ -136,7 +151,12 @@ export default function CompatibilidadeModal({
     );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="compatibilidade-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+    >
       <div className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
@@ -145,7 +165,7 @@ export default function CompatibilidadeModal({
               <Wrench className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Compatibilidade Técnica de Equipamentos</h2>
+              <h2 id="compatibilidade-modal-title" className="text-base font-bold text-white">Compatibilidade Técnica de Equipamentos</h2>
               <p className="text-xs text-slate-400">
                 Peça: <span className="text-amber-400 font-semibold">{produto.codigo}</span> - {produto.nome}
               </p>
@@ -154,6 +174,7 @@ export default function CompatibilidadeModal({
           <button
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Fechar modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -309,6 +330,7 @@ export default function CompatibilidadeModal({
                       onClick={() => handleRemover(c.maquinaId)}
                       className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
                       title="Remover vínculo"
+                      aria-label="Remover vínculo"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

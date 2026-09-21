@@ -16,9 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import {
-  CurrentUser,
   EstoqueMovimentacao,
   TipoMovimentacaoEstoque,
   TIPO_MOVIMENTACAO_ESTOQUE_LABELS,
@@ -28,7 +26,6 @@ import { apiFetchJson, formatarDataHora } from '@/lib/api';
 import { formatarDataInicioParaApi, formatarDataFimParaApi } from '@/lib/relatorioDateHelper';
 
 export default function MovimentacoesEstoquePage() {
-  const [user, setUser] = useState<CurrentUser | null>(null);
   const [movimentacoes, setMovimentacoes] = useState<EstoqueMovimentacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,21 +42,7 @@ export default function MovimentacoesEstoquePage() {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  const carregarUsuario = useCallback(async () => {
-    try {
-      const u = await apiFetchJson<CurrentUser>('/api/auth/me');
-      setUser(u);
-    } catch {
-      // Ignora erro
-    }
-  }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      carregarUsuario();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [carregarUsuario]);
 
   const carregarMovimentacoes = useCallback(async () => {
     setLoading(true);
@@ -116,10 +99,8 @@ export default function MovimentacoesEstoquePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <Header user={user} />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 font-sans">
+      <main className="space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -406,6 +387,7 @@ export default function MovimentacoesEstoquePage() {
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
                   className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  aria-label="Página anterior"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -413,6 +395,7 @@ export default function MovimentacoesEstoquePage() {
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page >= totalPages - 1}
                   className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  aria-label="Próxima página"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

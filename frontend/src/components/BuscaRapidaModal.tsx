@@ -129,7 +129,13 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
   let currentIndexTracker = 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-12 pb-6 px-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-hidden">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Busca Rápida"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-6 sm:pt-12 pb-6 px-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150 overflow-hidden"
+      onClick={onClose}
+    >
       <div
         className="w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
         onClick={(e) => e.stopPropagation()}
@@ -149,9 +155,11 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
             <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mr-2" />
           ) : termo ? (
             <button
+              type="button"
               onClick={() => setTermo('')}
-              className="p-1 text-slate-400 hover:text-white mr-2"
+              className="p-1 text-slate-400 hover:text-white mr-2 cursor-pointer"
               title="Limpar"
+              aria-label="Limpar busca"
             >
               <X className="w-4 h-4" />
             </button>
@@ -195,11 +203,13 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                       const itemIdx = currentIndexTracker++;
                       const isSelected = itemIdx === selectedIndex;
                       return (
-                        <div
+                        <button
                           key={`cli-${cli.id}`}
+                          type="button"
                           onClick={() => handleNavegarPara(cli.url)}
                           onMouseEnter={() => setSelectedIndex(itemIdx)}
-                          className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
+                          onFocus={() => setSelectedIndex(itemIdx)}
+                          className={`w-full text-left flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-amber-500/15 border border-amber-500/30 text-white'
                               : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
@@ -215,7 +225,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{cli.subtitulo}</p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -234,11 +244,13 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                       const itemIdx = currentIndexTracker++;
                       const isSelected = itemIdx === selectedIndex;
                       return (
-                        <div
+                        <button
                           key={`maq-${maq.id}`}
+                          type="button"
                           onClick={() => handleNavegarPara(maq.url)}
                           onMouseEnter={() => setSelectedIndex(itemIdx)}
-                          className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
+                          onFocus={() => setSelectedIndex(itemIdx)}
+                          className={`w-full text-left flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-amber-500/15 border border-amber-500/30 text-white'
                               : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
@@ -254,7 +266,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{maq.subtitulo}</p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -273,11 +285,13 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                       const itemIdx = currentIndexTracker++;
                       const isSelected = itemIdx === selectedIndex;
                       return (
-                        <div
+                        <button
                           key={`os-${os.id}`}
+                          type="button"
                           onClick={() => handleNavegarPara(os.url)}
                           onMouseEnter={() => setSelectedIndex(itemIdx)}
-                          className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
+                          onFocus={() => setSelectedIndex(itemIdx)}
+                          className={`w-full text-left flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-amber-500/15 border border-amber-500/30 text-white'
                               : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
@@ -295,7 +309,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                             <p className="text-[11px] text-slate-400 truncate mt-1">{os.subtitulo}</p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -314,11 +328,13 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                       const itemIdx = currentIndexTracker++;
                       const isSelected = itemIdx === selectedIndex;
                       return (
-                        <div
+                        <button
                           key={`prod-${prod.id}`}
+                          type="button"
                           onClick={() => handleNavegarPara(prod.url)}
                           onMouseEnter={() => setSelectedIndex(itemIdx)}
-                          className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
+                          onFocus={() => setSelectedIndex(itemIdx)}
+                          className={`w-full text-left flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-amber-500/15 border border-amber-500/30 text-white'
                               : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
@@ -334,7 +350,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
                             <p className="text-[11px] text-slate-400 truncate mt-0.5">{prod.subtitulo}</p>
                           </div>
                           <ArrowRight className="w-4 h-4 text-slate-500 shrink-0" />
-                        </div>
+                        </button>
                       );
                     })}
                   </div>

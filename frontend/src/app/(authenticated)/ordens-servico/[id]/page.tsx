@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, use, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Sparkles,
@@ -32,14 +31,13 @@ import {
   ChevronRight,
   Info,
 } from 'lucide-react';
-import Header from '@/components/Header';
+import ConfirmModal from '@/components/ConfirmModal';
 import OrdemServicoImpressao from '@/components/OrdemServicoImpressao';
 import {
   gerarLinkWhatsappRetirada,
   gerarLinkWhatsappOrcamento,
 } from '@/lib/whatsappHelper';
 import {
-  CurrentUser,
   OrdemServico,
   OrdemServicoStatusData,
   OrdemServicoUpdateData,
@@ -74,10 +72,6 @@ interface ToastState {
 export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const osId = resolvedParams.id;
-  const router = useRouter();
-
-  // Usuário da Sessão
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
 
   // Estados principais da OS
   const [os, setOs] = useState<OrdemServico | null>(null);
@@ -151,29 +145,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   }, [toast]);
 
-  // Carrega Usuário da Sessão
-  useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
 
   // Carrega Dados da OS
   const fetchOs = useCallback(async () => {
@@ -551,31 +522,29 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-400 flex items-center justify-center">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center text-slate-400">
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
           <span>Carregando Cockpit da Ordem de Serviço...</span>
         </div>
-      </div>
+      </main>
     );
   }
 
   if (!os || errorMessage) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-        <Header user={currentUser} />
-        <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center gap-4 text-center">
-          <AlertCircle className="w-12 h-12 text-red-400" />
-          <h2 className="text-xl font-bold text-white">Não foi possível carregar a OS</h2>
-          <p className="text-sm text-slate-400 max-w-md">{errorMessage || 'Registro não localizado no sistema.'}</p>
-          <Link
-            href="/ordens-servico"
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
-          >
-            Retornar para a Lista
-          </Link>
-        </main>
-      </div>
+      <main className="flex-1 max-w-4xl w-full mx-auto p-6 flex flex-col items-center justify-center gap-4 text-center">
+        <AlertCircle className="w-12 h-12 text-red-400" />
+        <h2 className="text-xl font-bold text-white">Não foi possível carregar a OS</h2>
+        <p className="text-sm text-slate-400 max-w-md">{errorMessage || 'Registro não localizado no sistema.'}</p>
+        <Link
+          href="/ordens-servico"
+          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Voltar para Lista de Ordens de Serviço</span>
+        </Link>
+      </main>
     );
   }
 
@@ -590,10 +559,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   const isTestesValidosParaPronta = testesLength >= 15;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <div className="print:hidden">
-        <Header user={currentUser} />
-      </div>
+    <>
 
       {/* TOAST FLUTUANTE DE FEEDBACK (Sem alert() nativo) */}
       {toast && (
@@ -1452,6 +1418,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                                     onClick={() => setItemParaRemover(item)}
                                     className="p-1 text-slate-500 hover:text-rose-400 rounded hover:bg-rose-500/10 transition-colors cursor-pointer"
                                     title={`Remover ${item.produtoNome} da OS`}
+                                    aria-label={`Remover ${item.produtoNome} da OS`}
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -1893,70 +1860,22 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* MODAL VISUAL DE CONFIRMAÇÃO DE REMOÇÃO DE PEÇA (Sem window.confirm) */}
-      {/* ========================================================================= */}
-      {itemParaRemover && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-400" />
-                <span>Confirmar Remoção de Peça</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setItemParaRemover(null)}
-                className="text-slate-400 hover:text-white text-xs font-semibold cursor-pointer p-1"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-3">
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Deseja remover a peça <strong className="text-white">{itemParaRemover.produtoNome}</strong> ({itemParaRemover.produtoCodigo}) desta Ordem de Serviço?
-              </p>
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 space-y-1">
-                <p className="font-semibold text-rose-200">Consequência da Ação:</p>
-                <p>
-                  A quantidade de <strong>{itemParaRemover.quantidade} unidades</strong> será estornada imediatamente ao estoque da oficina e o valor total da OS será recalculado.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2.5 p-4 bg-slate-950/60 border-t border-slate-800">
-              <button
-                type="button"
-                disabled={isDeletingItem}
-                onClick={() => setItemParaRemover(null)}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 transition-all cursor-pointer disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                id="btn-confirmar-remocao-peca"
-                disabled={isDeletingItem}
-                onClick={handleConfirmarRemocaoItem}
-                className="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-rose-600/20"
-              >
-                {isDeletingItem ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Removendo...</span>
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Remover Peça</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de Confirmação de Remoção de Peça (Padronizado via ConfirmModal) */}
+      <ConfirmModal
+        isOpen={!!itemParaRemover}
+        title="Confirmar Remoção de Peça"
+        message={
+          itemParaRemover
+            ? `Deseja remover a peça "${itemParaRemover.produtoNome}" (${itemParaRemover.produtoCodigo}) desta Ordem de Serviço? A quantidade de ${itemParaRemover.quantidade} unidades será estornada imediatamente ao estoque da oficina e o valor total da OS será recalculado.`
+            : ''
+        }
+        confirmText="Remover Peça"
+        cancelText="Cancelar"
+        isDestructive={true}
+        isLoading={isDeletingItem}
+        onConfirm={handleConfirmarRemocaoItem}
+        onCancel={() => setItemParaRemover(null)}
+      />
 
       {/* ========================================================================= */}
       {/* MODAL DE TRANSIÇÃO DE STATUS */}
@@ -2074,6 +1993,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
       {/* Componente Exclusivo de Impressão (A4) */}
       <OrdemServicoImpressao os={os} itens={itens} />
-    </div>
+    </>
   );
 }

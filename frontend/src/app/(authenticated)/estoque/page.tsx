@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Boxes,
   Package,
@@ -18,14 +17,11 @@ import {
   X,
   RotateCcw,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
-import { CurrentUser, Produto, EstoqueResumo, Categoria, Fornecedor } from '@/lib/types';
-import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
+import { Produto, EstoqueResumo, Categoria, Fornecedor } from '@/lib/types';
+import { apiFetchJson, formatarMoeda } from '@/lib/api';
 
 export default function EstoquePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<CurrentUser | null>(null);
   const [resumo, setResumo] = useState<EstoqueResumo | null>(null);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -48,20 +44,6 @@ export default function EstoquePage() {
   // Modal de Movimentação
   const [modalMovimentacaoOpen, setModalMovimentacaoOpen] = useState(false);
   const [produtoSelecionado, setProdutoSelecionado] = useState<Produto | null>(null);
-
-  const carregarUsuario = useCallback(async () => {
-    try {
-      const res = await apiFetch('/api/auth/me');
-      if (!res.ok) {
-        router.push('/login');
-        return;
-      }
-      const u = await res.json();
-      setUser(u);
-    } catch {
-      router.push('/login');
-    }
-  }, [router]);
 
   const [carregandoCategorias, setCarregandoCategorias] = useState(false);
   const [carregandoFornecedores, setCarregandoFornecedores] = useState(false);
@@ -103,11 +85,10 @@ export default function EstoquePage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      carregarUsuario();
       carregarResumo();
     }, 0);
     return () => clearTimeout(timer);
-  }, [carregarUsuario, carregarResumo]);
+  }, [carregarResumo]);
 
   // Debounce de 400ms para a busca
   useEffect(() => {
@@ -164,10 +145,8 @@ export default function EstoquePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <Header user={user} />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 font-sans">
+      <main className="space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -565,6 +544,7 @@ export default function EstoquePage() {
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
                   className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  aria-label="Página anterior"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -575,6 +555,7 @@ export default function EstoquePage() {
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page >= totalPages - 1}
                   className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  aria-label="Próxima página"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

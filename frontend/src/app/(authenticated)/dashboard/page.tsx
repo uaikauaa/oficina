@@ -18,9 +18,8 @@ import {
   RefreshCw,
   Eye,
 } from 'lucide-react';
-import Header from '@/components/Header';
+import { useAuth } from '@/app/(authenticated)/layout';
 import {
-  CurrentUser,
   OrdemServico,
   OrdemServicoContadoresDashboard,
   EstoqueResumo,
@@ -39,10 +38,7 @@ function obterSaudacao(): string {
 
 export default function DashboardPage() {
   const router = useRouter();
-
-  // Usuário autenticado
-  const [user, setUser] = useState<CurrentUser | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const { user } = useAuth();
 
   // Data formatada por extenso
   const dataHojeFormatada = useMemo(() => {
@@ -135,57 +131,15 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Carga inicial unificada
+  // Carga dos indicadores operacionais
   useEffect(() => {
-    let ignore = false;
-    async function inicializar() {
-      try {
-        const userRes = await apiFetch('/api/auth/me');
-        if (!userRes.ok) {
-          router.push('/login');
-          return;
-        }
-        const userData = await userRes.json();
-        if (!ignore) {
-          setUser(userData);
-          setIsAuthLoading(false);
-        }
-      } catch {
-        router.push('/login');
-        return;
-      }
-
-      if (!ignore) {
-        carregarContadoresOs();
-        carregarEstoque();
-        carregarOrdensRecentes();
-      }
-    }
-
-    inicializar();
-
-    return () => {
-      ignore = true;
-    };
-  }, [router, carregarContadoresOs, carregarEstoque, carregarOrdensRecentes]);
-
-  if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium">Carregando painel operacional...</span>
-        </div>
-      </div>
-    );
-  }
+    carregarContadoresOs();
+    carregarEstoque();
+    carregarOrdensRecentes();
+  }, [carregarContadoresOs, carregarEstoque, carregarOrdensRecentes]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={user} />
-
-      {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         {/* ========================================================================= */}
         {/* 1. TOPO OPERACIONAL COMPACTO & AÇÃO HEROICA */}
         {/* ========================================================================= */}
@@ -616,6 +570,5 @@ export default function DashboardPage() {
           )}
         </section>
       </main>
-    </div>
   );
 }

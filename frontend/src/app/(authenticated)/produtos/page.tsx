@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Package,
   Plus,
@@ -23,12 +22,11 @@ import {
   MapPin,
   Tag,
 } from 'lucide-react';
-import Header from '@/components/Header';
+import ConfirmModal from '@/components/ConfirmModal';
 import ProdutoModal from '@/components/ProdutoModal';
 import CompatibilidadeModal from '@/components/CompatibilidadeModal';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
 import {
-  CurrentUser,
   Produto,
   Fornecedor,
   Categoria,
@@ -38,11 +36,6 @@ import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
 type PillTipo = 'TODAS' | 'PECA' | 'CONSUMIVEL' | 'PRODUTO' | 'CRITICO';
 
 export default function ProdutosPage() {
-  const router = useRouter();
-
-  // Sessão do Usuário
-  const [user, setUser] = useState<CurrentUser | null>(null);
-
   // Lista de Produtos e Paginação
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,33 +73,7 @@ export default function ProdutosPage() {
   const [statusToast, setStatusToast] = useState<{ tipo: 'sucesso' | 'erro'; mensagem: string } | null>(null);
 
   // =========================================================================
-  // 1. CARREGAMENTO DO USUÁRIO & PROTEÇÃO DE ROTA (Fase 12)
-  // =========================================================================
-  useEffect(() => {
-    let ignore = false;
-    async function checkAuth() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const u: CurrentUser = await res.json();
-        if (!ignore) {
-          setUser(u);
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    checkAuth();
-    return () => {
-      ignore = true;
-    };
-  }, [router]);
-
-  // =========================================================================
-  // 2. BUSCA COM DEBOUNCE REAL DE 400ms (Fase 4)
+  // 1. BUSCA COM DEBOUNCE REAL DE 400ms (Fase 4)
   // =========================================================================
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -321,10 +288,8 @@ export default function ProdutosPage() {
   }, [termoDebounced, pillAtiva, somenteAtivos, categoriaId, fornecedorId, categorias, fornecedores]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      <Header user={user} />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-4">
+    <div className="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-4 font-sans">
+      <main className="space-y-4">
         {/* =================================================================== */}
         {/* TOPO: CABEÇALHO COMPACTO & CTA PRINCIPAL (Fases 3 e 13) */}
         {/* =================================================================== */}
@@ -846,6 +811,7 @@ export default function ProdutosPage() {
                               onClick={() => handleAbrirCompatibilidades(p)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors cursor-pointer"
                               title="Compatibilidade Técnica (produto_maquina)"
+                              aria-label="Compatibilidade técnica"
                             >
                               <Wrench className="w-3.5 h-3.5" />
                             </button>
@@ -856,6 +822,7 @@ export default function ProdutosPage() {
                               onClick={() => handleEditarProduto(p)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
                               title="Editar Peça"
+                              aria-label="Editar peça"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
@@ -870,6 +837,7 @@ export default function ProdutosPage() {
                                   : 'text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10'
                               }`}
                               title={p.ativo ? 'Inativar peça' : 'Ativar peça'}
+                              aria-label={p.ativo ? 'Inativar peça' : 'Ativar peça'}
                             >
                               <Power className="w-3.5 h-3.5" />
                             </button>
@@ -898,6 +866,7 @@ export default function ProdutosPage() {
                   disabled={page === 0}
                   className="p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   title="Página anterior"
+                  aria-label="Página anterior"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -910,6 +879,7 @@ export default function ProdutosPage() {
                   disabled={page >= totalPages - 1}
                   className="p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   title="Próxima página"
+                  aria-label="Próxima página"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -920,69 +890,23 @@ export default function ProdutosPage() {
       </main>
 
       {/* =================================================================== */}
-      {/* MODAL DE CONFIRMAÇÃO VISUAL DE STATUS (Fase 10 — Sem window.confirm) */}
+      {/* MODAL DE CONFIRMAÇÃO VISUAL DE STATUS (ConfirmModal) */}
       {/* =================================================================== */}
-      {produtoParaAlternarStatus && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 space-y-4">
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2.5 rounded-xl border ${
-                  produtoParaAlternarStatus.ativo
-                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                }`}
-              >
-                <Power className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold text-white">
-                  {produtoParaAlternarStatus.ativo ? 'Inativar Peça / Produto' : 'Reativar Peça / Produto'}
-                </h3>
-                <p className="text-xs text-slate-400 font-mono">
-                  {produtoParaAlternarStatus.codigo}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-slate-300">
-              Deseja realmente {produtoParaAlternarStatus.ativo ? 'inativar' : 'reativar'} a peça{' '}
-              <strong className="text-white font-semibold">
-                &quot;{produtoParaAlternarStatus.nome}&quot;
-              </strong>
-              ?
-              {produtoParaAlternarStatus.ativo &&
-                ' Ela deixará de aparecer nas buscas padrão de novas Ordens de Serviço.'}
-            </p>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setProdutoParaAlternarStatus(null)}
-                disabled={isSubmittingStatus}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmarStatus}
-                disabled={isSubmittingStatus}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  produtoParaAlternarStatus.ativo
-                    ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/20'
-                    : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20'
-                }`}
-              >
-                {isSubmittingStatus && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                <span>
-                  {produtoParaAlternarStatus.ativo ? 'Confirmar Inativação' : 'Confirmar Ativação'}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={!!produtoParaAlternarStatus}
+        title={produtoParaAlternarStatus?.ativo ? 'Inativar Peça / Produto' : 'Reativar Peça / Produto'}
+        message={
+          produtoParaAlternarStatus
+            ? `Deseja realmente ${produtoParaAlternarStatus.ativo ? 'inativar' : 'reativar'} a peça "${produtoParaAlternarStatus.nome}" (${produtoParaAlternarStatus.codigo})?${produtoParaAlternarStatus.ativo ? ' Ela deixará de aparecer nas buscas padrão de novas Ordens de Serviço.' : ''}`
+            : ''
+        }
+        confirmText={produtoParaAlternarStatus?.ativo ? 'Confirmar Inativação' : 'Confirmar Ativação'}
+        cancelText="Cancelar"
+        isDestructive={!!produtoParaAlternarStatus?.ativo}
+        isLoading={isSubmittingStatus}
+        onConfirm={handleConfirmarStatus}
+        onCancel={() => setProdutoParaAlternarStatus(null)}
+      />
 
       {/* Modal de Cadastro / Edição de Produto */}
       <ProdutoModal

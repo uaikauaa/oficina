@@ -17,9 +17,7 @@ import {
   RefreshCw,
   Calendar,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import {
-  CurrentUser,
   OrdemServico,
   PageResponse,
   STATUS_ORDEM_SERVICO_BADGES,
@@ -33,10 +31,6 @@ function OrdensServicoContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const statusParam = searchParams.get('status') || '';
-
-  // Estados de Usuário e Autenticação
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
-  const [isLoadingUser, setIsLoadingUser] = useState(true);
 
   // Estados de Dados e Paginação
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
@@ -92,37 +86,15 @@ function OrdensServicoContent() {
     }
   }, []);
 
-  // Carrega Usuário da Sessão e Contadores Iniciais
+  // Carrega Contadores Iniciais
   useEffect(() => {
-    let ignore = false;
-    async function loadUser() {
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) {
-          router.push('/login');
-          return;
-        }
-        const data = await res.json();
-        if (!ignore) {
-          setCurrentUser(data);
-          setIsLoadingUser(false);
-          carregarContadoresStatus();
-        }
-      } catch {
-        router.push('/login');
-      }
-    }
-    loadUser();
-    return () => {
-      ignore = true;
-    };
-  }, [router, carregarContadoresStatus]);
+    carregarContadoresStatus();
+  }, [carregarContadoresStatus]);
 
   // Busca as Ordens de Serviço
   useEffect(() => {
     let ignore = false;
     async function carregarOrdens() {
-      if (isLoadingUser) return;
       setIsLoading(true);
       setErrorMessage(null);
       try {
@@ -175,7 +147,7 @@ function OrdensServicoContent() {
       ignore = true;
       clearTimeout(timer);
     };
-  }, [page, size, termoDebounced, statusFiltro, dataInicio, dataFim, isLoadingUser, refreshTrigger]);
+  }, [page, size, termoDebounced, statusFiltro, dataInicio, dataFim, refreshTrigger]);
 
   // Função para definir período rápido de datas estritamente no fuso America/Sao_Paulo (ISSUE-05)
   const definirPeriodo = (tipo: '30' | '90' | 'ano' | 'tudo') => {
@@ -246,10 +218,7 @@ function OrdensServicoContent() {
   const temFiltrosAtivos = termo.trim() !== '' || statusFiltro !== '' || dataInicio !== '' || dataFim !== '';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4">
+    <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-4">
         {/* ========================================================================= */}
         {/* 1. CABEÇALHO COMPACTO & AÇÃO HEROICA */}
         {/* ========================================================================= */}
@@ -703,7 +672,6 @@ function OrdensServicoContent() {
           )}
         </div>
       </main>
-    </div>
   );
 }
 
@@ -711,9 +679,9 @@ export default function OrdensServicoPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center text-slate-400">
           <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        </main>
       }
     >
       <OrdensServicoContent />

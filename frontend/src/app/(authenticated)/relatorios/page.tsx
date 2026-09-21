@@ -25,9 +25,7 @@ import {
   Check,
   Info,
 } from 'lucide-react';
-import Header from '@/components/Header';
 import {
-  CurrentUser,
   StatusOrdemServico,
   STATUS_ORDEM_SERVICO_BADGES,
   STATUS_ORDEM_SERVICO_LABELS,
@@ -78,7 +76,6 @@ interface ToastNotificacao {
 }
 
 export default function RelatoriosPage() {
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [activeTab, setActiveTab] = useState<RelatorioTab>('ordens-servico');
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -159,18 +156,7 @@ export default function RelatoriosPage() {
     setToast({ id: Date.now(), tipo, mensagem });
   }, []);
 
-  // Carrega Usuário no mount
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const u = await apiFetchJson<CurrentUser>('/api/auth/me');
-        setCurrentUser(u);
-      } catch {
-        // Ignora erro
-      }
-    }
-    loadUser();
-  }, []);
+
 
   // Lazy Loading de Categorias e Fornecedores (UX008-03 - apenas ao abrir aba 'estoque')
   useEffect(() => {
@@ -711,8 +697,7 @@ export default function RelatoriosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Header user={currentUser} />
+    <div className="text-slate-100 flex flex-col">
 
       {/* Toast Notification (UX008-01 - feedback visual não-bloqueante) */}
       {toast && (
