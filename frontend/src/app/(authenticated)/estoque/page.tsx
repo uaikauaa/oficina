@@ -371,14 +371,14 @@ export default function EstoquePage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
-                  <th className="py-3.5 px-4">Peça / Componente</th>
-                  <th className="py-3.5 px-4">Categoria</th>
-                  <th className="py-3.5 px-4">Localização</th>
-                  <th className="py-3.5 px-4 text-center">Nível Físico</th>
-                  <th className="py-3.5 px-4 text-center">Saldo Atual</th>
-                  <th className="py-3.5 px-4 text-center">Estoque Mínimo</th>
-                  <th className="py-3.5 px-4 text-right">Valor em Estoque</th>
-                  <th className="py-3.5 px-4 text-right">Ação</th>
+                  <th className="py-2.5 px-2.5 sm:px-3">Peça / Componente</th>
+                  <th className="py-2.5 px-2 sm:px-2.5">Categoria</th>
+                  <th className="py-2.5 px-2 sm:px-2.5">Localização</th>
+                  <th className="py-2.5 px-2 sm:px-2.5 text-center">Nível Físico</th>
+                  <th className="py-2.5 px-2 sm:px-2.5 text-center">Saldo Atual</th>
+                  <th className="py-2.5 px-2 sm:px-2.5 text-center">Estoque Mínimo</th>
+                  <th className="py-2.5 px-2 sm:px-2.5 text-right">Valor em Estoque</th>
+                  <th className="py-2.5 px-2.5 sm:px-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
@@ -415,31 +415,31 @@ export default function EstoquePage() {
                         className="hover:bg-slate-800/40 transition-colors group"
                       >
                         {/* Peça & Marca */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px]">
+                        <td className="py-2.5 px-2.5 sm:px-3">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px] shrink-0">
                               {p.codigo}
                             </span>
-                            <span className="font-bold text-white group-hover:text-amber-300 transition-colors">
+                            <span className="font-bold text-white group-hover:text-amber-300 transition-colors break-words">
                               {p.nome}
                             </span>
                             {p.marca && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-amber-400 border border-amber-500/20">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-amber-400 border border-amber-500/20 shrink-0">
                                 {p.marca}
                               </span>
                             )}
                           </div>
                           {p.fornecedorNome && (
-                            <span className="block text-[10px] text-slate-500 mt-0.5">
+                            <span className="block text-[10px] text-slate-500 mt-0.5 truncate max-w-[200px] sm:max-w-xs" title={`Fornecedor: ${p.fornecedorNome}`}>
                               Fornecedor: {p.fornecedorNome}
                             </span>
                           )}
                         </td>
 
                         {/* Categoria */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        <td className="py-2.5 px-2 sm:px-2.5">
                           {p.categoriaNome ? (
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 break-words max-w-[110px] sm:max-w-[130px] leading-tight">
                               {p.categoriaNome}
                             </span>
                           ) : (
@@ -448,10 +448,10 @@ export default function EstoquePage() {
                         </td>
 
                         {/* Localização */}
-                        <td className="py-3.5 px-4 text-slate-300">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-slate-300">
                           {p.localizacao ? (
-                            <span className="inline-flex items-center gap-1 text-[11px]">
-                              <MapPin className="w-3 h-3 text-slate-500" />
+                            <span className="inline-flex items-center gap-1 text-[11px] break-words max-w-[90px]">
+                              <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
                               <span>{p.localizacao}</span>
                             </span>
                           ) : (
@@ -460,9 +460,9 @@ export default function EstoquePage() {
                         </td>
 
                         {/* Barra de Nível Físico */}
-                        <td className="py-3.5 px-4 text-center">
-                          <div className="w-32 mx-auto space-y-1">
-                            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-center">
+                          <div className="w-14 sm:w-16 md:w-20 mx-auto space-y-0.5">
+                            <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
                               <div
                                 className={`h-full transition-all rounded-full ${
                                   isZerado
@@ -474,16 +474,16 @@ export default function EstoquePage() {
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-[10px] text-slate-500 block leading-tight">
                               {isZerado ? 'Esgotado' : isCritico ? 'Crítico' : 'Normal'}
                             </span>
                           </div>
                         </td>
 
                         {/* Saldo Atual */}
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-center whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold border ${
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${
                               isZerado
                                 ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
                                 : isCritico
@@ -499,13 +499,13 @@ export default function EstoquePage() {
                         </td>
 
                         {/* Estoque Mínimo */}
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap text-slate-400 font-semibold">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-center whitespace-nowrap text-slate-400 font-semibold text-[11px]">
                           {p.estoqueMinimo} {p.unidadeMedida}
                         </td>
 
                         {/* Valor Investido */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                          <span className="font-bold text-white">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-right whitespace-nowrap">
+                          <span className="font-bold text-white text-[11px] sm:text-xs">
                             {formatarMoeda(valorInvestido)}
                           </span>
                           <span className="block text-[10px] text-slate-500">
@@ -513,15 +513,15 @@ export default function EstoquePage() {
                           </span>
                         </td>
 
-                        {/* Ação */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        {/* Ações */}
+                        <td className="py-2.5 px-2.5 sm:px-3 text-right whitespace-nowrap">
                           <button
                             onClick={() => handleAbrirMovimentacao(p)}
-                            className="px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                             title="Ajustar saldo, registrar compra ou descarte"
                           >
-                            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
-                            <span>Movimentar</span>
+                            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="hidden xl:inline">Movimentar</span>
                           </button>
                         </td>
                       </tr>

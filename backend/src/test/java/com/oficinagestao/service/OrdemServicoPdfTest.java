@@ -4,6 +4,10 @@ import com.oficinagestao.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -12,17 +16,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class OrdemServicoPdfTest {
 
+    @Mock
+    private ConfiguracaoOficinaService configuracaoOficinaService;
+
+    @InjectMocks
     private PdfService pdfService;
+
     private Cliente cliente;
     private Maquina maquina;
     private OrdemServico os;
 
     @BeforeEach
     void setUp() {
-        pdfService = new PdfService();
+        // Stub: retorna ConfiguracaoOficina com dados reais da Bruno Soldas
+        ConfiguracaoOficina configStub = new ConfiguracaoOficina();
+        configStub.setNomeFantasia("Bruno Soldas");
+        configStub.setNomeEmpresarial("45.076.507 BRUNO SOARES RODRIGUES");
+        configStub.setCnpj("45.076.507/0001-67");
+        configStub.setTelefone("(14) 9886-7223");
+        configStub.setEmail("INDUTECSERVICE@HOTMAIL.COM");
+        configStub.setLogradouro("Avenida Jacinto Ferreira de Sá - de 1272/1273 ao fim");
+        configStub.setNumero("1538");
+        configStub.setBairro("Vila Sandano");
+        configStub.setCep("19.914-080");
+        configStub.setMunicipio("Ourinhos");
+        configStub.setUf("SP");
+        when(configuracaoOficinaService.obterEntidade()).thenReturn(configStub);
 
         cliente = new Cliente();
         cliente.setId(1L);

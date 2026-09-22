@@ -60,6 +60,9 @@ class ReleaseSmokeTest {
     private UsuarioRepository usuarioRepository;
 
     @Mock
+    private ConfiguracaoOficinaService configuracaoOficinaService;
+
+    @Mock
     private AuditoriaService auditoriaService;
 
     @InjectMocks
@@ -189,7 +192,17 @@ class ReleaseSmokeTest {
         assertNotNull(os.getDataConclusao(), "Data de conclusão deve ser preenchida ao concluir");
 
         // 8. Gerar PDF da OS e verificar integridade
+        ConfiguracaoOficina configStub = new ConfiguracaoOficina();
+        configStub.setNomeFantasia("Bruno Soldas");
+        configStub.setCnpj("45.076.507/0001-67");
+        configStub.setTelefone("(14) 9886-7223");
+        configStub.setEmail("INDUTECSERVICE@HOTMAIL.COM");
+        configStub.setMunicipio("Ourinhos");
+        configStub.setUf("SP");
+        when(configuracaoOficinaService.obterEntidade()).thenReturn(configStub);
+
         PdfService pdfService = new PdfService();
+        org.springframework.test.util.ReflectionTestUtils.setField(pdfService, "configuracaoOficinaService", configuracaoOficinaService);
         byte[] pdfBytes = pdfService.gerarOrdemServicoPdf(os, itensOs);
         assertNotNull(pdfBytes);
         assertTrue(pdfBytes.length > 500, "O PDF gerado deve conter cabeçalho, dados e rodapé válidos");

@@ -1,6 +1,7 @@
 import React from 'react';
 import { OrdemServico, OrdemServicoItem } from '@/lib/types';
 import { formatarMoeda, formatarDataHora } from '@/lib/api';
+import { OFICINA } from '@/lib/oficina';
 
 interface OrdemServicoImpressaoProps {
   os: OrdemServico;
@@ -16,7 +17,7 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
       <div className="flex items-start justify-between border-b-2 border-slate-800 pb-3 mb-4">
         <div>
           <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">
-            Oficina Gestão
+            {OFICINA.nomeFantasia}
           </h1>
           <p className="text-xs font-bold text-slate-700 uppercase">
             Assistência Técnica Especializada
@@ -25,7 +26,10 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
             Máquinas de Solda • Geradores de Energia • Manutenção Técnica
           </p>
           <p className="text-[10px] text-slate-500 mt-0.5">
-            Telefone: (31) 3333-4444 | contato@oficinagestao.com.br
+            CNPJ: {OFICINA.cnpj} | {OFICINA.municipio}/{OFICINA.uf}
+          </p>
+          <p className="text-[10px] text-slate-500">
+            Tel: {OFICINA.telefone} | {OFICINA.email}
           </p>
         </div>
 
@@ -245,9 +249,9 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
           </div>
           <div>
             <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
-              {os.tecnicoNome || 'Oficina Gestão'}
+              {os.tecnicoNome || OFICINA.nomeFantasia}
             </div>
-            <span className="text-[9px] text-slate-500">Técnico Responsável / Oficina</span>
+            <span className="text-[9px] text-slate-500">Técnico Responsável / {OFICINA.nomeFantasia}</span>
           </div>
         </div>
       </div>

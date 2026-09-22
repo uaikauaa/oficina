@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Wrench, Users, LayoutDashboard, LogOut, FileText, Package, Boxes, Search, BarChart3, Menu, X } from 'lucide-react';
+import { Wrench, Users, LayoutDashboard, LogOut, FileText, Package, Boxes, Search, BarChart3, Menu, X, Settings } from 'lucide-react';
 import { CurrentUser } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 import BuscaRapidaModal from '@/components/BuscaRapidaModal';
@@ -34,6 +34,7 @@ export default function Header({ user }: HeaderProps) {
   const isProdutosActive = pathname.startsWith('/produtos');
   const isEstoqueActive = pathname.startsWith('/estoque');
   const isRelatoriosActive = pathname.startsWith('/relatorios');
+  const isConfiguracaoActive = pathname.startsWith('/configuracoes');
 
   const [isBuscaOpen, setIsBuscaOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -116,6 +117,10 @@ export default function Header({ user }: HeaderProps) {
               <Link href="/relatorios" className={navLinkClass(isRelatoriosActive)}>
                 <BarChart3 className="w-3.5 h-3.5 shrink-0" />
                 <span>Relatórios</span>
+              </Link>
+              <Link href="/configuracoes" className={navLinkClass(isConfiguracaoActive)}>
+                <Settings className="w-3.5 h-3.5 shrink-0" />
+                <span>Configurações</span>
               </Link>
             </nav>
 
@@ -256,6 +261,17 @@ export default function Header({ user }: HeaderProps) {
                 >
                   <BarChart3 className="w-4 h-4 shrink-0" />
                   <span>Relatórios</span>
+                </Link>
+                <Link
+                  href="/configuracoes"
+                  className={`py-2.5 px-3 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all ${
+                    isConfiguracaoActive
+                      ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                      : 'text-slate-300 bg-slate-800/60 border border-slate-700/60 hover:bg-slate-700/60'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 shrink-0" />
+                  <span>Configurações</span>
                 </Link>
               </nav>
 

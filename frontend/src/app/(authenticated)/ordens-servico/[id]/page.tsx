@@ -34,8 +34,7 @@ import {
 import ConfirmModal from '@/components/ConfirmModal';
 import OrdemServicoImpressao from '@/components/OrdemServicoImpressao';
 import {
-  gerarLinkWhatsappRetirada,
-  gerarLinkWhatsappOrcamento,
+  gerarLinkWhatsappOS,
 } from '@/lib/whatsappHelper';
 import {
   OrdemServico,
@@ -281,31 +280,18 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   const handleAbrirWhatsApp = () => {
     if (!os) return;
 
-    if (os.status === 'AGUARDANDO_APROVACAO') {
-      const res = gerarLinkWhatsappOrcamento({
-        telefone: os.clienteTelefone,
-        clienteNome: os.clienteNome,
-        equipamentoModelo: `${os.maquinaMarca || ''} ${os.maquinaModelo || ''}`.trim(),
-        numeroOs: os.numeroOs,
-        valorPecas: os.valorPecas || 0,
-        valorMaoObra: os.valorMaoObra || 0,
-        valorTotal: os.valorTotal || 0,
-      });
-
-      if (!res.url) {
-        showToast('error', res.erro || 'Telefone do cliente inválido ou não informado para WhatsApp.');
-        return;
-      }
-      window.open(res.url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Caso padrão (Retirada em PRONTA / CONCLUIDA ou contato geral)
-    const res = gerarLinkWhatsappRetirada({
+    const res = gerarLinkWhatsappOS({
       telefone: os.clienteTelefone,
       clienteNome: os.clienteNome,
-      equipamentoModelo: `${os.maquinaMarca || ''} ${os.maquinaModelo || ''}`.trim(),
+      equipamentoModelo: `${os.maquinaMarca || ''} ${os.maquinaModelo || ''}`.trim() || os.maquinaTipoDescricao || undefined,
+      equipamentoNumeroSerie: os.maquinaNumeroSerie || undefined,
       numeroOs: os.numeroOs,
+      status: os.status,
+      problemaRelatado: os.problemaRelatado,
+      diagnostico: os.diagnostico || undefined,
+      valorPecas: os.valorPecas || 0,
+      valorMaoObra: os.valorMaoObra || 0,
+      valorDesconto: os.valorDesconto || 0,
       valorTotal: os.valorTotal || 0,
     });
 
@@ -778,13 +764,35 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                         ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-md shadow-purple-600/20'
                         : os.status === 'PRONTA' || os.status === 'CONCLUIDA'
                         ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20'
+                        : os.status === 'EM_DIAGNOSTICO'
+                        ? 'bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-600/20'
+                        : os.status === 'EM_MANUTENCAO'
+                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20'
+                        : os.status === 'AGUARDANDO_PECA'
+                        ? 'bg-amber-600 hover:bg-amber-500 text-slate-950 shadow-md shadow-amber-600/20'
+                        : os.status === 'ABERTA'
+                        ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20'
+                        : os.status === 'CANCELADA'
+                        ? 'bg-rose-700 hover:bg-rose-600 text-white shadow-md shadow-rose-700/20'
                         : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
                     }`}
                     title={
                       os.status === 'AGUARDANDO_APROVACAO'
                         ? 'Enviar orçamento via WhatsApp para aprovação'
-                        : os.status === 'PRONTA' || os.status === 'CONCLUIDA'
+                        : os.status === 'PRONTA'
                         ? 'Notificar cliente de retirada via WhatsApp'
+                        : os.status === 'CONCLUIDA'
+                        ? 'Enviar aviso de conclusão via WhatsApp'
+                        : os.status === 'EM_DIAGNOSTICO'
+                        ? 'Informar cliente sobre diagnóstico em andamento'
+                        : os.status === 'EM_MANUTENCAO'
+                        ? 'Informar cliente sobre andamento da manutenção'
+                        : os.status === 'AGUARDANDO_PECA'
+                        ? 'Informar cliente sobre espera de peça'
+                        : os.status === 'ABERTA'
+                        ? 'Confirmar recebimento do equipamento via WhatsApp'
+                        : os.status === 'CANCELADA'
+                        ? 'Informar cancelamento da Ordem de Serviço via WhatsApp'
                         : 'Contatar cliente via WhatsApp'
                     }
                   >
@@ -792,8 +800,20 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     <span>
                       {os.status === 'AGUARDANDO_APROVACAO'
                         ? 'Enviar Orçamento WhatsApp'
-                        : os.status === 'PRONTA' || os.status === 'CONCLUIDA'
+                        : os.status === 'PRONTA'
                         ? 'Avisar Retirada no WhatsApp'
+                        : os.status === 'CONCLUIDA'
+                        ? 'Avisar Conclusão no WhatsApp'
+                        : os.status === 'EM_DIAGNOSTICO'
+                        ? 'Avisar Diagnóstico no WhatsApp'
+                        : os.status === 'EM_MANUTENCAO'
+                        ? 'Avisar Manutenção no WhatsApp'
+                        : os.status === 'AGUARDANDO_PECA'
+                        ? 'Avisar Espera de Peça'
+                        : os.status === 'ABERTA'
+                        ? 'Confirmar Entrada no WhatsApp'
+                        : os.status === 'CANCELADA'
+                        ? 'Avisar Cancelamento'
                         : 'Contatar via WhatsApp'}
                     </span>
                   </button>

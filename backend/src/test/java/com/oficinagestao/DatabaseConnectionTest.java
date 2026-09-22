@@ -47,26 +47,25 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V10 foram aplicadas e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V11 foram aplicadas e as tabelas essenciais existem")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("10", current.getVersion().getVersion(), "A versão atual da migration deve ser 10.");
-        assertEquals("add composite foreign key os maquina cliente", current.getDescription());
+        assertEquals("11", current.getVersion().getVersion(), "A versão atual da migration deve ser 11.");
+        assertEquals("create configuracao oficina", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 15 tabelas no banco de dados (14 anteriores +
-        // refresh_tokens)
+        // Validar existência das 16 tabelas no banco de dados (15 anteriores + configuracao_oficina)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens");
+                "refresh_tokens", "configuracao_oficina");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {

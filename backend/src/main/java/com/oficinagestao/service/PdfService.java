@@ -12,11 +12,13 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.oficinagestao.entity.Cliente;
+import com.oficinagestao.entity.ConfiguracaoOficina;
 import com.oficinagestao.entity.Endereco;
 import com.oficinagestao.entity.Maquina;
 import com.oficinagestao.entity.OrdemServico;
 import com.oficinagestao.entity.OrdemServicoItem;
 import com.oficinagestao.entity.StatusOrdemServico;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -36,6 +38,9 @@ import java.util.Locale;
  */
 @Service
 public class PdfService {
+
+    @Autowired
+    private ConfiguracaoOficinaService configuracaoOficinaService;
 
     private static final Locale LOCALE_PT_BR = Locale.forLanguageTag("pt-BR");
     private static final DateTimeFormatter DATA_HORA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", LOCALE_PT_BR);
@@ -58,6 +63,7 @@ public class PdfService {
     private static final Font FONT_FOOTER = FontFactory.getFont(FontFactory.HELVETICA, 7, COLOR_TEXT_MUTED);
 
     public byte[] gerarOrdemServicoPdf(OrdemServico os, List<OrdemServicoItem> itens) {
+        ConfiguracaoOficina config = configuracaoOficinaService.obterEntidade();
         Document document = new Document(PageSize.A4, 24, 24, 24, 24);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -66,7 +72,7 @@ public class PdfService {
             document.open();
 
             // 1. Cabeçalho Oficial da Oficina e Dados da OS
-            adicionarCabecalho(document, os);
+            adicionarCabecalho(document, os, config);
 
             // 2. Dados do Cliente
             adicionarDadosCliente(document, os.getCliente());
@@ -84,7 +90,7 @@ public class PdfService {
             adicionarResumoFinanceiro(document, os);
 
             // 7. Termos de Garantia e Linhas de Assinatura
-            adicionarTermosEAssinaturas(document, os);
+            adicionarTermosEAssinaturas(document, os, config);
 
             document.close();
             return out.toByteArray();
@@ -93,19 +99,35 @@ public class PdfService {
         }
     }
 
-    private void adicionarCabecalho(Document document, OrdemServico os) throws DocumentException {
+    private void adicionarCabecalho(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
         PdfPTable table = new PdfPTable(2);
         table.setWidthPercentage(100);
         table.setWidths(new float[]{60, 40});
         table.setSpacingAfter(10);
 
-        // Coluna Esquerda: Dados da Empresa
+        // Coluna Esquerda: Dados da Empresa (Nome fantasia comercial da oficina)
+        String nomeFantasia = (config.getNomeFantasia() != null && !config.getNomeFantasia().isBlank())
+                ? config.getNomeFantasia().toUpperCase() : "OFICINA GESTÃO";
+        String cnpjLinha = (config.getCnpj() != null && !config.getCnpj().isBlank())
+                ? "CNPJ: " + config.getCnpj() + " | " : "";
+        String contatoLinha = montarLinhaContato(config);
+
         PdfPCell cellEmpresa = new PdfPCell();
         cellEmpresa.setBorder(PdfPCell.NO_BORDER);
-        cellEmpresa.addElement(new Paragraph("OFICINA GESTÃO", FONT_TITLE));
+        cellEmpresa.addElement(new Paragraph(nomeFantasia, FONT_TITLE));
         cellEmpresa.addElement(new Paragraph("ASSISTÊNCIA TÉCNICA ESPECIALIZADA", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, COLOR_PRIMARY)));
         cellEmpresa.addElement(new Paragraph("Máquinas de Solda • Geradores de Energia • Manutenção Industrial", FONT_SUBTITLE));
-        cellEmpresa.addElement(new Paragraph("Telefone: (31) 3333-4444 | contato@oficinagestao.com.br", FONT_SUBTITLE));
+        if (!cnpjLinha.isBlank()) {
+            cellEmpresa.addElement(new Paragraph(cnpjLinha.strip(), FONT_SUBTITLE));
+        }
+        cellEmpresa.addElement(new Paragraph(contatoLinha, FONT_SUBTITLE));
+        if (config.getLogradouro() != null && !config.getLogradouro().isBlank()) {
+            String endLinha = config.getLogradouro() +
+                    (config.getNumero() != null ? ", " + config.getNumero() : "") +
+                    (config.getMunicipio() != null ? " — " + config.getMunicipio() : "") +
+                    (config.getUf() != null ? "/" + config.getUf() : "");
+            cellEmpresa.addElement(new Paragraph(endLinha, FONT_SUBTITLE));
+        }
         table.addCell(cellEmpresa);
 
         // Coluna Direita: Box de Identificação da OS
@@ -285,7 +307,7 @@ public class PdfService {
         document.add(table);
     }
 
-    private void adicionarTermosEAssinaturas(Document document, OrdemServico os) throws DocumentException {
+    private void adicionarTermosEAssinaturas(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
         // Termos Legais e Condições de Garantia
         Paragraph pTermos = new Paragraph(
                 "Condições de garantia conforme política da oficina sobre os serviços executados e componentes substituídos, respeitadas as condições " +
@@ -310,18 +332,21 @@ public class PdfService {
         cCliente.setHorizontalAlignment(Element.ALIGN_CENTER);
         tableAssinaturas.addCell(cCliente);
 
+        String nomeOficina = (config.getNomeFantasia() != null && !config.getNomeFantasia().isBlank())
+                ? config.getNomeFantasia() : "Oficina Gestão";
+
         PdfPCell cTecnico = new PdfPCell();
         cTecnico.setBorder(PdfPCell.NO_BORDER);
         cTecnico.addElement(new Paragraph("________________________________________________", FONT_VALUE));
-        cTecnico.addElement(new Paragraph("Técnico Responsável / Oficina Gestão", FONT_VALUE_BOLD));
-        String tecNome = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : "Oficina Gestão";
+        cTecnico.addElement(new Paragraph("Técnico Responsável / " + nomeOficina, FONT_VALUE_BOLD));
+        String tecNome = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : nomeOficina;
         cTecnico.addElement(new Paragraph(tecNome, FONT_SUBTITLE));
         cTecnico.setHorizontalAlignment(Element.ALIGN_CENTER);
         tableAssinaturas.addCell(cTecnico);
 
         document.add(tableAssinaturas);
 
-        // Rodapé com data/hora de emissão
+        // Rodapé com data/hora de emissão — "Sistema Oficina Gestão" refere-se ao software
         Paragraph pEmissao = new Paragraph("Documento gerado em " + OffsetDateTime.now().format(DATA_HORA_FORMATTER) + " • Sistema Oficina Gestão v1.0", FONT_FOOTER);
         pEmissao.setAlignment(Element.ALIGN_RIGHT);
         document.add(pEmissao);
@@ -480,6 +505,7 @@ public class PdfService {
      * Este documento NÃO possui validade fiscal e NÃO é uma Nota Fiscal.
      */
     public byte[] gerarDocumentoServicoPdf(OrdemServico os, List<OrdemServicoItem> itens) {
+        ConfiguracaoOficina config = configuracaoOficinaService.obterEntidade();
         Document document = new Document(PageSize.A4, 24, 24, 24, 24);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -487,14 +513,14 @@ public class PdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            dsAdicionarCabecalho(document, os);
+            dsAdicionarCabecalho(document, os, config);
             dsAdicionarDadosCliente(document, os.getCliente());
             dsAdicionarDadosEquipamento(document, os.getMaquina(), os.getHorimetroAtual());
             dsAdicionarServicosRealizados(document, os);
             dsAdicionarTabelaPecas(document, itens);
             dsAdicionarResumoFinanceiro(document, os);
             dsAdicionarInformacoesOs(document, os);
-            dsAdicionarAssinaturas(document, os);
+            dsAdicionarAssinaturas(document, os, config);
 
             document.close();
             return out.toByteArray();
@@ -503,7 +529,20 @@ public class PdfService {
         }
     }
 
-    private void dsAdicionarCabecalho(Document document, OrdemServico os) throws DocumentException {
+    /** Monta linha de contato a partir dos dados reais da configuração da oficina */
+    private String montarLinhaContato(ConfiguracaoOficina config) {
+        StringBuilder sb = new StringBuilder();
+        if (config.getTelefone() != null && !config.getTelefone().isBlank()) {
+            sb.append("Tel: ").append(config.getTelefone());
+        }
+        if (config.getEmail() != null && !config.getEmail().isBlank()) {
+            if (!sb.isEmpty()) sb.append(" | ");
+            sb.append(config.getEmail());
+        }
+        return sb.isEmpty() ? "" : sb.toString();
+    }
+
+    private void dsAdicionarCabecalho(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
         // Linha superior: banner de identificação comercial
         PdfPTable bannerTable = new PdfPTable(1);
         bannerTable.setWidthPercentage(100);
@@ -525,16 +564,33 @@ public class PdfService {
         table.setWidths(new float[]{60, 40});
         table.setSpacingAfter(10);
 
-        // Coluna Esquerda: Dados da Empresa
+        // Coluna Esquerda: Dados da Empresa (Nome fantasia comercial da oficina)
+        String dsNomeFantasia = (config.getNomeFantasia() != null && !config.getNomeFantasia().isBlank())
+                ? config.getNomeFantasia().toUpperCase() : "OFICINA GESTÃO";
+        String dsCnpjLinha = (config.getCnpj() != null && !config.getCnpj().isBlank())
+                ? "CNPJ: " + config.getCnpj() : "";
+        String dsContato = montarLinhaContato(config);
+
         PdfPCell cellEmpresa = new PdfPCell();
         cellEmpresa.setBorder(PdfPCell.NO_BORDER);
-        cellEmpresa.addElement(new Paragraph("OFICINA GESTÃO", DS_FONT_TITLE));
+        cellEmpresa.addElement(new Paragraph(dsNomeFantasia, DS_FONT_TITLE));
         cellEmpresa.addElement(new Paragraph("ASSISTÊNCIA TÉCNICA ESPECIALIZADA",
                 FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, DS_COLOR_PRIMARY)));
         cellEmpresa.addElement(new Paragraph("Máquinas de Solda • Geradores de Energia • Manutenção Industrial",
                 DS_FONT_SUBTITLE));
-        cellEmpresa.addElement(new Paragraph("Telefone: (31) 3333-4444 | contato@oficinagestao.com.br",
-                DS_FONT_SUBTITLE));
+        if (!dsCnpjLinha.isBlank()) {
+            cellEmpresa.addElement(new Paragraph(dsCnpjLinha, DS_FONT_SUBTITLE));
+        }
+        if (!dsContato.isBlank()) {
+            cellEmpresa.addElement(new Paragraph(dsContato, DS_FONT_SUBTITLE));
+        }
+        if (config.getLogradouro() != null && !config.getLogradouro().isBlank()) {
+            String dsEndLinha = config.getLogradouro() +
+                    (config.getNumero() != null ? ", " + config.getNumero() : "") +
+                    (config.getMunicipio() != null ? " — " + config.getMunicipio() : "") +
+                    (config.getUf() != null ? "/" + config.getUf() : "");
+            cellEmpresa.addElement(new Paragraph(dsEndLinha, DS_FONT_SUBTITLE));
+        }
         cellEmpresa.addElement(new Paragraph("Data de Emissão: " + OffsetDateTime.now().format(DATA_FORMATTER),
                 DS_FONT_SUBTITLE));
         table.addCell(cellEmpresa);
@@ -761,7 +817,7 @@ public class PdfService {
         document.add(table);
     }
 
-    private void dsAdicionarAssinaturas(Document document, OrdemServico os) throws DocumentException {
+    private void dsAdicionarAssinaturas(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
         // Termos breves
         Paragraph pTermos = new Paragraph(
                 "Declaro que os serviços descritos neste documento foram realizados e o equipamento foi recebido " +
@@ -816,7 +872,9 @@ public class PdfService {
         pLabelTecnico.setAlignment(Element.ALIGN_CENTER);
         cTecnico.addElement(pLabelTecnico);
 
-        String tecNome = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : "Oficina Gestão";
+        String dsNomeOficina = (config.getNomeFantasia() != null && !config.getNomeFantasia().isBlank())
+                ? config.getNomeFantasia() : "Oficina Gestão";
+        String tecNome = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : dsNomeOficina;
         Paragraph pNomeTecnico = new Paragraph(tecNome, DS_FONT_SUBTITLE);
         pNomeTecnico.setAlignment(Element.ALIGN_CENTER);
         cTecnico.addElement(pNomeTecnico);
@@ -829,7 +887,7 @@ public class PdfService {
         tableAssinaturas.addCell(cTecnico);
         document.add(tableAssinaturas);
 
-        // Rodapé de aviso comercial
+        // Rodapé de aviso comercial — "Sistema Oficina Gestão" refere-se ao software
         PdfPTable avisoTable = new PdfPTable(1);
         avisoTable.setWidthPercentage(100);
         avisoTable.setSpacingBefore(10);
