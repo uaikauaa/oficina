@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -199,5 +200,199 @@ class OrdemServicoPdfTest {
         assertNotNull(pdf);
         assertEquals(StatusOrdemServico.CONCLUIDA, os.getStatus());
         assertNotNull(os.getDataConclusao());
+    }
+
+    @Test
+    @DisplayName("Deve gerar Documento de Serviço PDF válido (iniciando com %PDF-) sem peças")
+    void deveGerarDocumentoServicoPdfValidoParaOrdemServicoSemPecas() {
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of());
+
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 500, "O Documento de Serviço gerado deve ter tamanho substancial");
+        String header = new String(pdf, 0, 5, StandardCharsets.US_ASCII);
+        assertEquals("%PDF-", header, "O documento gerado deve ser um arquivo PDF válido");
+    }
+
+    @Test
+    @DisplayName("Deve gerar Documento de Serviço PDF válido com peças e valores aplicados")
+    void deveGerarDocumentoServicoPdfValidoParaOrdemServicoComPecas() {
+        Produto rele = new Produto();
+        rele.setId(2L);
+        rele.setCodigo("REL-12V");
+        rele.setNome("Relé Auxiliar 12V 40A");
+        rele.setMarca("DNI");
+        rele.setPrecoVenda(new BigDecimal("35.00"));
+
+        OrdemServicoItem item = new OrdemServicoItem();
+        item.setId(10L);
+        item.setOrdemServico(os);
+        item.setProduto(rele);
+        item.setTipoItem(TipoItemOrdemServico.PECA);
+        item.setQuantidade(new BigDecimal("1.000"));
+        item.setValorUnitario(new BigDecimal("35.00"));
+        item.setValorDesconto(BigDecimal.ZERO);
+        item.setValorTotal(new BigDecimal("35.00"));
+
+        os.setValorPecas(new BigDecimal("35.00"));
+        os.setValorTotal(new BigDecimal("285.00"));
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of(item));
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 1000);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário A — OS Simples: cliente, equipamento, serviço básico, sem peças e valor simples")
+    void cenarioA_OsSimples() {
+        os.setProblemaRelatado("Aparelho não liga ao acionar a chave seletora.");
+        os.setDiagnostico("Fusível de entrada rompido.");
+        os.setSolucaoAplicada("Substituição do fusível e limpeza técnica.");
+        os.setTestesRealizados("Teste de continuidade e teste em carga 10A.");
+        os.setValorMaoObra(new BigDecimal("120.00"));
+        os.setValorPecas(BigDecimal.ZERO);
+        os.setValorDesconto(BigDecimal.ZERO);
+        os.setValorTotal(new BigDecimal("120.00"));
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of());
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 500);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário B — OS com Várias Peças: múltiplos produtos, quantidades diferentes e desconto")
+    void cenarioB_OsComVariasPecas() {
+        List<OrdemServicoItem> itens = new ArrayList<>();
+        BigDecimal totalPecas = BigDecimal.ZERO;
+
+        for (int i = 1; i <= 5; i++) {
+            Produto p = new Produto();
+            p.setId((long) i);
+            p.setCodigo("PEC-00" + i);
+            p.setNome("Componente Eletrônico " + i);
+            p.setPrecoVenda(new BigDecimal("25.50"));
+
+            OrdemServicoItem item = new OrdemServicoItem();
+            item.setId((long) (100 + i));
+            item.setOrdemServico(os);
+            item.setProduto(p);
+            item.setTipoItem(TipoItemOrdemServico.PECA);
+            item.setQuantidade(new BigDecimal(i + ".000"));
+            item.setValorUnitario(new BigDecimal("25.50"));
+            item.setValorDesconto(i == 2 ? new BigDecimal("5.00") : BigDecimal.ZERO);
+            BigDecimal subtotal = item.getValorUnitario().multiply(item.getQuantidade()).subtract(item.getValorDesconto());
+            item.setValorTotal(subtotal);
+
+            totalPecas = totalPecas.add(subtotal);
+            itens.add(item);
+        }
+
+        os.setValorMaoObra(new BigDecimal("300.00"));
+        os.setValorPecas(totalPecas);
+        os.setValorDesconto(new BigDecimal("20.00"));
+        os.setValorTotal(totalPecas.add(new BigDecimal("300.00")).subtract(new BigDecimal("20.00")));
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, itens);
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 2000);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário C — OS com Textos Longos: laudos e observações extensas")
+    void cenarioC_OsComTextosLongos() {
+        String textoLongo = "Constatado após abertura completa da carenagem que o equipamento operava em ambiente altamente "
+                + "contaminado por poeira metálica condutiva e fuligem industrial. Isso provocou fuga de corrente e centelhamento "
+                + "nos terminais do módulo inversor primário, danificando os drivers de gate e as trilhas de cobre da placa de controle. "
+                + "Foram realizados procedimentos de desoxidação química com álcool isopropílico, ressoldagem de componentes SMD "
+                + "e aplicação de verniz de proteção dielétrica conforme especificações técnicas do fabricante da máquina.";
+
+        os.setProblemaRelatado("Equipamento desarmando disjuntor geral imediatamente ao acionar ignição de solda.");
+        os.setDiagnostico(textoLongo);
+        os.setSolucaoAplicada(textoLongo);
+        os.setTestesRealizados("Ensaio com carga resistiva artificial de 200A durante 45 minutos contínuos sem sobreaquecimento.");
+        os.setObservacoes("Recomendado ao cliente instalar filtro de ar externo na entrada da oficina e realizar limpeza a cada 60 dias.");
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of());
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 1000);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário D — Cliente Pessoa Física: CPF com máscara e dados de PF")
+    void cenarioD_ClientePessoaFisica() {
+        Cliente pf = new Cliente();
+        pf.setId(50L);
+        pf.setTipoPessoa(TipoPessoa.FISICA);
+        pf.setNomeRazaoSocial("Carlos Eduardo de Souza");
+        pf.setCpfCnpj("12345678901");
+        pf.setTelefone("31988887777");
+        pf.setEmail("carlos.souza@email.com");
+        os.setCliente(pf);
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of());
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 500);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário E — Cliente Pessoa Jurídica: CNPJ com máscara e Razão Social com Fantasia")
+    void cenarioE_ClientePessoaJuridica() {
+        Cliente pj = new Cliente();
+        pj.setId(51L);
+        pj.setTipoPessoa(TipoPessoa.JURIDICA);
+        pj.setNomeRazaoSocial("Construtora e Engenharia Vale do Aço Ltda");
+        pj.setNomeFantasia("Vale do Aço Construções");
+        pj.setCpfCnpj("12345678000195");
+        pj.setTelefone("3133332222");
+        pj.setEmail("compras@valedoaco.com.br");
+        os.setCliente(pj);
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, List.of());
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 500);
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Cenário F — OS com Muitas Informações: tabela extensa gerando quebra de página automática")
+    void cenarioF_OsComMuitasInformacoes_QuebraDePagina() {
+        List<OrdemServicoItem> muitasPecas = new ArrayList<>();
+        BigDecimal totalPecas = BigDecimal.ZERO;
+
+        for (int i = 1; i <= 25; i++) {
+            Produto p = new Produto();
+            p.setId((long) i);
+            p.setCodigo("ITEM-" + String.format("%03d", i));
+            p.setNome("Insumo / Peça de Reposição Número " + i + " para Manutenção Preventiva e Corretiva");
+            p.setPrecoVenda(new BigDecimal("15.00"));
+
+            OrdemServicoItem item = new OrdemServicoItem();
+            item.setId((long) (200 + i));
+            item.setOrdemServico(os);
+            item.setProduto(p);
+            item.setTipoItem(TipoItemOrdemServico.PECA);
+            item.setQuantidade(new BigDecimal("2.000"));
+            item.setValorUnitario(new BigDecimal("15.00"));
+            item.setValorDesconto(BigDecimal.ZERO);
+            item.setValorTotal(new BigDecimal("30.00"));
+
+            totalPecas = totalPecas.add(new BigDecimal("30.00"));
+            muitasPecas.add(item);
+        }
+
+        os.setValorMaoObra(new BigDecimal("500.00"));
+        os.setValorPecas(totalPecas);
+        os.setValorDesconto(new BigDecimal("50.00"));
+        os.setValorTotal(totalPecas.add(new BigDecimal("500.00")).subtract(new BigDecimal("50.00")));
+
+        byte[] pdf = pdfService.gerarDocumentoServicoPdf(os, muitasPecas);
+        assertNotNull(pdf);
+        // Com 25 itens, o PDF deve gerar múltiplas páginas com tamanho superior a 5KB
+        assertTrue(pdf.length > 5000, "PDF multi-páginas deve ter tamanho superior a 5000 bytes");
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
     }
 }

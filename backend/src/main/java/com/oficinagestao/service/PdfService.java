@@ -418,6 +418,30 @@ public class PdfService {
         return (texto != null && !texto.isBlank()) ? texto : "Não informado";
     }
 
+    private String formatarDocumento(String doc) {
+        if (doc == null || doc.isBlank()) return "Não informado";
+        String limpo = doc.replaceAll("\\D", "");
+        if (limpo.length() == 11) {
+            return limpo.substring(0, 3) + "." + limpo.substring(3, 6) + "." +
+                   limpo.substring(6, 9) + "-" + limpo.substring(9, 11);
+        } else if (limpo.length() == 14) {
+            return limpo.substring(0, 2) + "." + limpo.substring(2, 5) + "." +
+                   limpo.substring(5, 8) + "/" + limpo.substring(8, 12) + "-" + limpo.substring(12, 14);
+        }
+        return doc;
+    }
+
+    private String formatarTelefone(String fone) {
+        if (fone == null || fone.isBlank()) return "Não informado";
+        String limpo = fone.replaceAll("\\D", "");
+        if (limpo.length() == 11) {
+            return "(" + limpo.substring(0, 2) + ") " + limpo.substring(2, 7) + "-" + limpo.substring(7, 11);
+        } else if (limpo.length() == 10) {
+            return "(" + limpo.substring(0, 2) + ") " + limpo.substring(2, 6) + "-" + limpo.substring(6, 10);
+        }
+        return fone;
+    }
+
     private String obterEnderecoFormatado(Cliente cliente) {
         if (cliente.getEnderecos() != null && !cliente.getEnderecos().isEmpty()) {
             Endereco end = cliente.getEnderecos().get(0);
@@ -432,4 +456,459 @@ public class PdfService {
         }
         return "Não informado";
     }
+
+    // =========================================================================
+    // DOCUMENTO DE SERVIÇO — Comprovante Comercial (sem validade fiscal)
+    // =========================================================================
+
+    private static final Color DS_COLOR_PRIMARY   = new Color(20, 83, 45);   // green-900 — diferencia visualmente do OS
+    private static final Color DS_COLOR_BORDER    = new Color(187, 247, 208); // green-200
+    private static final Color DS_COLOR_BG_HEADER = new Color(240, 253, 244); // green-50
+    private static final Color DS_COLOR_MUTED     = new Color(100, 116, 139); // slate-500
+
+    private static final Font DS_FONT_TITLE        = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, new Color(20, 83, 45));
+    private static final Font DS_FONT_SECTION_TITLE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, Color.WHITE);
+    private static final Font DS_FONT_LABEL        = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, new Color(20, 83, 45));
+    private static final Font DS_FONT_VALUE        = FontFactory.getFont(FontFactory.HELVETICA, 8, Color.BLACK);
+    private static final Font DS_FONT_VALUE_BOLD   = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, Color.BLACK);
+    private static final Font DS_FONT_SUBTITLE     = FontFactory.getFont(FontFactory.HELVETICA, 8, new Color(100, 116, 139));
+    private static final Font DS_FONT_FOOTER       = FontFactory.getFont(FontFactory.HELVETICA, 7, new Color(100, 116, 139));
+    private static final Font DS_FONT_AVISO        = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, new Color(180, 83, 9));
+
+    /**
+     * Gera o Documento de Serviço — comprovante comercial interno da prestação de serviço.
+     * Este documento NÃO possui validade fiscal e NÃO é uma Nota Fiscal.
+     */
+    public byte[] gerarDocumentoServicoPdf(OrdemServico os, List<OrdemServicoItem> itens) {
+        Document document = new Document(PageSize.A4, 24, 24, 24, 24);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        try {
+            PdfWriter.getInstance(document, out);
+            document.open();
+
+            dsAdicionarCabecalho(document, os);
+            dsAdicionarDadosCliente(document, os.getCliente());
+            dsAdicionarDadosEquipamento(document, os.getMaquina(), os.getHorimetroAtual());
+            dsAdicionarServicosRealizados(document, os);
+            dsAdicionarTabelaPecas(document, itens);
+            dsAdicionarResumoFinanceiro(document, os);
+            dsAdicionarInformacoesOs(document, os);
+            dsAdicionarAssinaturas(document, os);
+
+            document.close();
+            return out.toByteArray();
+        } catch (DocumentException e) {
+            throw new RuntimeException("Erro ao gerar Documento de Serviço: " + e.getMessage(), e);
+        }
+    }
+
+    private void dsAdicionarCabecalho(Document document, OrdemServico os) throws DocumentException {
+        // Linha superior: banner de identificação comercial
+        PdfPTable bannerTable = new PdfPTable(1);
+        bannerTable.setWidthPercentage(100);
+        bannerTable.setSpacingAfter(6);
+        PdfPCell bannerCell = new PdfPCell(new Phrase(
+                "DOCUMENTO DE SERVIÇO — COMPROVANTE COMERCIAL DE PRESTAÇÃO DE SERVIÇOS  •  " +
+                "Comprovante de atendimento para simples conferência. Sem valor tributário.",
+                DS_FONT_AVISO));
+        bannerCell.setBackgroundColor(new Color(254, 243, 199)); // amber-100
+        bannerCell.setBorderColor(new Color(251, 191, 36));      // amber-400
+        bannerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        bannerCell.setPadding(4);
+        bannerTable.addCell(bannerCell);
+        document.add(bannerTable);
+
+        // Cabeçalho principal: empresa + identificação do documento
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{60, 40});
+        table.setSpacingAfter(10);
+
+        // Coluna Esquerda: Dados da Empresa
+        PdfPCell cellEmpresa = new PdfPCell();
+        cellEmpresa.setBorder(PdfPCell.NO_BORDER);
+        cellEmpresa.addElement(new Paragraph("OFICINA GESTÃO", DS_FONT_TITLE));
+        cellEmpresa.addElement(new Paragraph("ASSISTÊNCIA TÉCNICA ESPECIALIZADA",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, DS_COLOR_PRIMARY)));
+        cellEmpresa.addElement(new Paragraph("Máquinas de Solda • Geradores de Energia • Manutenção Industrial",
+                DS_FONT_SUBTITLE));
+        cellEmpresa.addElement(new Paragraph("Telefone: (31) 3333-4444 | contato@oficinagestao.com.br",
+                DS_FONT_SUBTITLE));
+        cellEmpresa.addElement(new Paragraph("Data de Emissão: " + OffsetDateTime.now().format(DATA_FORMATTER),
+                DS_FONT_SUBTITLE));
+        table.addCell(cellEmpresa);
+
+        // Coluna Direita: Box de Identificação
+        PdfPCell cellDoc = new PdfPCell();
+        cellDoc.setBorder(PdfPCell.BOX);
+        cellDoc.setBorderColor(DS_COLOR_BORDER);
+        cellDoc.setBackgroundColor(DS_COLOR_BG_HEADER);
+        cellDoc.setPadding(6);
+
+        Paragraph pTitulo = new Paragraph("DOCUMENTO DE SERVIÇO",
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, DS_COLOR_MUTED));
+        pTitulo.setAlignment(Element.ALIGN_CENTER);
+        cellDoc.addElement(pTitulo);
+
+        String refOs = os.getNumeroOs() != null ? os.getNumeroOs() : "OS-" + os.getId();
+        Paragraph pNum = new Paragraph("Ref. OS: " + refOs,
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13, DS_COLOR_PRIMARY));
+        pNum.setAlignment(Element.ALIGN_CENTER);
+        cellDoc.addElement(pNum);
+
+        Color statusColor = obterCorStatus(os.getStatus());
+        String statusDescricao = os.getStatus() != null ? os.getStatus().getDescricao() : "NÃO DEFINIDO";
+        Paragraph pStatus = new Paragraph("STATUS: " + statusDescricao.toUpperCase(),
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, statusColor));
+        pStatus.setAlignment(Element.ALIGN_CENTER);
+        cellDoc.addElement(pStatus);
+
+        Paragraph pDatas = new Paragraph(
+                "Abertura: " + formatarData(os.getDataEntrada()) +
+                (os.getDataConclusao() != null ? " | Conclusão: " + formatarData(os.getDataConclusao()) : ""),
+                FontFactory.getFont(FontFactory.HELVETICA, 7, DS_COLOR_MUTED));
+        pDatas.setAlignment(Element.ALIGN_CENTER);
+        cellDoc.addElement(pDatas);
+
+        table.addCell(cellDoc);
+        document.add(table);
+    }
+
+    private void dsAdicionarDadosCliente(Document document, Cliente cliente) throws DocumentException {
+        dsAdicionarTituloSecao(document, "1. DADOS DO CLIENTE");
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{30, 20, 25, 25});
+        table.setSpacingAfter(8);
+
+        if (cliente == null) {
+            dsAdicionarCelulaCampo(table, "Nome / Razão Social:", "Não informado", 4);
+            document.add(table);
+            return;
+        }
+
+        String nomeCompleto = cliente.getNomeRazaoSocial();
+        if (cliente.getNomeFantasia() != null && !cliente.getNomeFantasia().isBlank()) {
+            nomeCompleto += " (" + cliente.getNomeFantasia() + ")";
+        }
+        dsAdicionarCelulaCampo(table, "Nome / Razão Social:", nomeCompleto, 2);
+        dsAdicionarCelulaCampo(table, "CPF / CNPJ:", formatarDocumento(cliente.getCpfCnpj()), 1);
+        String fone = cliente.getTelefone() != null ? cliente.getTelefone() : cliente.getCelular();
+        dsAdicionarCelulaCampo(table, "Telefone / Contato:", formatarTelefone(fone), 1);
+
+        dsAdicionarCelulaCampo(table, "E-mail:", formatarVazio(cliente.getEmail()), 2);
+        dsAdicionarCelulaCampo(table, "Endereço:", obterEnderecoFormatado(cliente), 2);
+
+        document.add(table);
+    }
+
+    private void dsAdicionarDadosEquipamento(Document document, Maquina maquina, BigDecimal horimetroAtual)
+            throws DocumentException {
+        dsAdicionarTituloSecao(document, "2. EQUIPAMENTO ATENDIDO");
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{25, 25, 25, 25});
+        table.setSpacingAfter(8);
+
+        if (maquina == null) {
+            dsAdicionarCelulaCampo(table, "Equipamento:", "Não informado", 4);
+            document.add(table);
+            return;
+        }
+
+        String tipoDescricao = maquina.getTipoEquipamento() != null
+                ? maquina.getTipoEquipamento().getDescricao() : "Equipamento Técnico";
+        dsAdicionarCelulaCampo(table, "Tipo:", tipoDescricao, 1);
+        dsAdicionarCelulaCampo(table, "Marca:", formatarVazio(maquina.getMarca()), 1);
+        dsAdicionarCelulaCampo(table, "Modelo:", formatarVazio(maquina.getModelo()), 1);
+        dsAdicionarCelulaCampo(table, "Nº de Série:", formatarVazio(maquina.getNumeroSerie()), 1);
+
+        dsAdicionarCelulaCampo(table, "Tensão:", formatarVazio(maquina.getTensao()), 1);
+        dsAdicionarCelulaCampo(table, "Potência:", formatarVazio(maquina.getPotencia()), 1);
+        String horimetroStr = horimetroAtual != null ? horimetroAtual.toPlainString() + " h" :
+                (maquina.getHorimetro() != null ? maquina.getHorimetro().toPlainString() + " h" : "Não informado");
+        dsAdicionarCelulaCampo(table, "Horímetro:", horimetroStr, 2);
+
+        document.add(table);
+    }
+
+    private void dsAdicionarServicosRealizados(Document document, OrdemServico os) throws DocumentException {
+        dsAdicionarTituloSecao(document, "3. SERVIÇOS REALIZADOS");
+
+        PdfPTable table = new PdfPTable(1);
+        table.setWidthPercentage(100);
+        table.setSpacingAfter(8);
+
+        dsAdicionarCelulaTextoLongo(table, "Problema / Defeito Relatado:", os.getProblemaRelatado());
+
+        if (os.getDiagnostico() != null && !os.getDiagnostico().isBlank()) {
+            dsAdicionarCelulaTextoLongo(table, "Diagnóstico Técnico:", os.getDiagnostico());
+        }
+        if (os.getSolucaoAplicada() != null && !os.getSolucaoAplicada().isBlank()) {
+            dsAdicionarCelulaTextoLongo(table, "Serviços / Solução Aplicada:", os.getSolucaoAplicada());
+        }
+        if (os.getTestesRealizados() != null && !os.getTestesRealizados().isBlank()) {
+            dsAdicionarCelulaTextoLongo(table, "Testes Técnicos Realizados:", os.getTestesRealizados());
+        }
+        if (os.getObservacoes() != null && !os.getObservacoes().isBlank()) {
+            dsAdicionarCelulaTextoLongo(table, "Observações:", os.getObservacoes());
+        }
+
+        document.add(table);
+    }
+
+    private void dsAdicionarTabelaPecas(Document document, List<OrdemServicoItem> itens) throws DocumentException {
+        dsAdicionarTituloSecao(document, "4. PEÇAS / PRODUTOS UTILIZADOS");
+
+        if (itens == null || itens.isEmpty()) {
+            PdfPTable emptyTable = new PdfPTable(1);
+            emptyTable.setWidthPercentage(100);
+            emptyTable.setSpacingAfter(8);
+            PdfPCell cell = new PdfPCell(new Phrase(
+                    "Nenhuma peça foi utilizada nesta prestação de serviço.", DS_FONT_VALUE));
+            cell.setPadding(6);
+            cell.setBorderColor(DS_COLOR_BORDER);
+            cell.setBackgroundColor(DS_COLOR_BG_HEADER);
+            emptyTable.addCell(cell);
+            document.add(emptyTable);
+            return;
+        }
+
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{40, 10, 18, 18, 14});
+        table.setHeaderRows(1);
+        table.setSpacingAfter(8);
+
+        String[] cabecalhos = {"Descrição / Peça", "Qtd", "Valor Unit. (R$)", "Desconto (R$)", "Total (R$)"};
+        for (String col : cabecalhos) {
+            PdfPCell c = new PdfPCell(new Phrase(col,
+                    FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, DS_COLOR_PRIMARY)));
+            c.setBackgroundColor(DS_COLOR_BG_HEADER);
+            c.setBorderColor(DS_COLOR_BORDER);
+            c.setPadding(4);
+            if (!col.equals("Descrição / Peça")) {
+                c.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            }
+            table.addCell(c);
+        }
+
+        for (OrdemServicoItem item : itens) {
+            String nome = item.getProduto() != null ? item.getProduto().getNome() : "Componente Técnico";
+            String cod  = item.getProduto() != null && item.getProduto().getCodigo() != null
+                    ? " (" + item.getProduto().getCodigo() + ")" : "";
+            BigDecimal qtd  = item.getQuantidade() != null ? item.getQuantidade() : BigDecimal.ZERO;
+            BigDecimal unit = item.getValorUnitario() != null ? item.getValorUnitario() : BigDecimal.ZERO;
+            BigDecimal desc = item.getValorDesconto() != null ? item.getValorDesconto() : BigDecimal.ZERO;
+            BigDecimal tot  = item.getValorTotal() != null ? item.getValorTotal() : BigDecimal.ZERO;
+
+            dsAdicionarCelulaTabela(table, nome + cod, Element.ALIGN_LEFT);
+            dsAdicionarCelulaTabela(table, qtd.stripTrailingZeros().toPlainString(), Element.ALIGN_RIGHT);
+            dsAdicionarCelulaTabela(table, MOEDA_FORMAT.format(unit), Element.ALIGN_RIGHT);
+            dsAdicionarCelulaTabela(table, MOEDA_FORMAT.format(desc), Element.ALIGN_RIGHT);
+            dsAdicionarCelulaTabela(table, MOEDA_FORMAT.format(tot), Element.ALIGN_RIGHT);
+        }
+
+        document.add(table);
+    }
+
+    private void dsAdicionarResumoFinanceiro(Document document, OrdemServico os) throws DocumentException {
+        dsAdicionarTituloSecao(document, "5. RESUMO FINANCEIRO");
+
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{25, 25, 25, 25});
+        table.setKeepTogether(true);
+        table.setSpacingAfter(10);
+
+        BigDecimal maoObra = os.getValorMaoObra() != null ? os.getValorMaoObra() : BigDecimal.ZERO;
+        BigDecimal pecas   = os.getValorPecas()   != null ? os.getValorPecas()   : BigDecimal.ZERO;
+        BigDecimal desc    = os.getValorDesconto() != null ? os.getValorDesconto() : BigDecimal.ZERO;
+        BigDecimal total   = os.getValorTotal()    != null ? os.getValorTotal()    : BigDecimal.ZERO;
+
+        dsAdicionarCelulaFinanceira(table, "Mão de Obra:", MOEDA_FORMAT.format(maoObra), false);
+        dsAdicionarCelulaFinanceira(table, "Peças e Insumos:", MOEDA_FORMAT.format(pecas), false);
+        dsAdicionarCelulaFinanceira(table, "Desconto:", MOEDA_FORMAT.format(desc), false);
+        dsAdicionarCelulaFinanceira(table, "VALOR TOTAL:", MOEDA_FORMAT.format(total), true);
+
+        document.add(table);
+    }
+
+    private void dsAdicionarInformacoesOs(Document document, OrdemServico os) throws DocumentException {
+        dsAdicionarTituloSecao(document, "6. INFORMAÇÕES DA ORDEM DE SERVIÇO");
+
+        PdfPTable table = new PdfPTable(3);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{33, 33, 34});
+        table.setKeepTogether(true);
+        table.setSpacingAfter(10);
+
+        String numOs = os.getNumeroOs() != null ? os.getNumeroOs() : "OS-" + os.getId();
+        dsAdicionarCelulaCampo(table, "Número OS:", numOs, 1);
+        dsAdicionarCelulaCampo(table, "Data de Abertura:", formatarData(os.getDataEntrada()), 1);
+        dsAdicionarCelulaCampo(table, "Data de Conclusão:",
+                os.getDataConclusao() != null ? formatarData(os.getDataConclusao()) : "Em andamento", 1);
+
+        String statusDescricao = os.getStatus() != null ? os.getStatus().getDescricao() : "Não definido";
+        dsAdicionarCelulaCampo(table, "Status da OS:", statusDescricao, 1);
+
+        String tecnico = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : "Oficina Gestão";
+        dsAdicionarCelulaCampo(table, "Responsável Técnico:", tecnico, 2);
+
+        document.add(table);
+    }
+
+    private void dsAdicionarAssinaturas(Document document, OrdemServico os) throws DocumentException {
+        // Termos breves
+        Paragraph pTermos = new Paragraph(
+                "Declaro que os serviços descritos neste documento foram realizados e o equipamento foi recebido " +
+                "em perfeitas condições de funcionamento, conforme os serviços acima especificados.",
+                DS_FONT_FOOTER);
+        pTermos.setSpacingAfter(20);
+        document.add(pTermos);
+
+        // Área de Assinaturas
+        PdfPTable tableAssinaturas = new PdfPTable(2);
+        tableAssinaturas.setWidthPercentage(100);
+        tableAssinaturas.setWidths(new float[]{50, 50});
+        tableAssinaturas.setKeepTogether(true);
+        tableAssinaturas.setSpacingAfter(8);
+
+        // Responsável pelo recebimento
+        PdfPCell cCliente = new PdfPCell();
+        cCliente.setBorder(PdfPCell.NO_BORDER);
+        cCliente.setPaddingTop(30);
+
+        Paragraph pLinhaCliente = new Paragraph("________________________________________________", DS_FONT_VALUE);
+        pLinhaCliente.setAlignment(Element.ALIGN_CENTER);
+        cCliente.addElement(pLinhaCliente);
+
+        Paragraph pLabelCliente = new Paragraph("Responsável pelo Recebimento", DS_FONT_VALUE_BOLD);
+        pLabelCliente.setAlignment(Element.ALIGN_CENTER);
+        cCliente.addElement(pLabelCliente);
+
+        String clienteNome = (os.getCliente() != null && os.getCliente().getNomeRazaoSocial() != null)
+                ? os.getCliente().getNomeRazaoSocial() : "Cliente / Responsável";
+        Paragraph pNomeCliente = new Paragraph(clienteNome, DS_FONT_SUBTITLE);
+        pNomeCliente.setAlignment(Element.ALIGN_CENTER);
+        cCliente.addElement(pNomeCliente);
+
+        Paragraph pDataCliente = new Paragraph("Data: ____/____/________", DS_FONT_SUBTITLE);
+        pDataCliente.setAlignment(Element.ALIGN_CENTER);
+        pDataCliente.setSpacingBefore(4);
+        cCliente.addElement(pDataCliente);
+
+        tableAssinaturas.addCell(cCliente);
+
+        // Responsável Técnico
+        PdfPCell cTecnico = new PdfPCell();
+        cTecnico.setBorder(PdfPCell.NO_BORDER);
+        cTecnico.setPaddingTop(30);
+
+        Paragraph pLinhaTecnico = new Paragraph("________________________________________________", DS_FONT_VALUE);
+        pLinhaTecnico.setAlignment(Element.ALIGN_CENTER);
+        cTecnico.addElement(pLinhaTecnico);
+
+        Paragraph pLabelTecnico = new Paragraph("Responsável Técnico / Oficina", DS_FONT_VALUE_BOLD);
+        pLabelTecnico.setAlignment(Element.ALIGN_CENTER);
+        cTecnico.addElement(pLabelTecnico);
+
+        String tecNome = os.getTecnicoResponsavel() != null ? os.getTecnicoResponsavel().getNome() : "Oficina Gestão";
+        Paragraph pNomeTecnico = new Paragraph(tecNome, DS_FONT_SUBTITLE);
+        pNomeTecnico.setAlignment(Element.ALIGN_CENTER);
+        cTecnico.addElement(pNomeTecnico);
+
+        Paragraph pDataTecnico = new Paragraph("Data: ____/____/________", DS_FONT_SUBTITLE);
+        pDataTecnico.setAlignment(Element.ALIGN_CENTER);
+        pDataTecnico.setSpacingBefore(4);
+        cTecnico.addElement(pDataTecnico);
+
+        tableAssinaturas.addCell(cTecnico);
+        document.add(tableAssinaturas);
+
+        // Rodapé de aviso comercial
+        PdfPTable avisoTable = new PdfPTable(1);
+        avisoTable.setWidthPercentage(100);
+        avisoTable.setSpacingBefore(10);
+        PdfPCell avisoCell = new PdfPCell(new Phrase(
+                "Documento para fins exclusivamente comerciais e de conferência da prestação de serviços. Sem valor tributário. " +
+                "Emitido em: " + OffsetDateTime.now().format(DATA_HORA_FORMATTER) + " • Sistema Oficina Gestão v1.0",
+                DS_FONT_AVISO));
+        avisoCell.setBackgroundColor(new Color(255, 251, 235)); // amber-50
+        avisoCell.setBorderColor(new Color(251, 191, 36));
+        avisoCell.setPadding(5);
+        avisoCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        avisoTable.addCell(avisoCell);
+        document.add(avisoTable);
+    }
+
+    // --- Auxiliares DS ---
+
+    private void dsAdicionarTituloSecao(Document document, String titulo) throws DocumentException {
+        PdfPTable table = new PdfPTable(1);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(4);
+        table.setSpacingAfter(3);
+        PdfPCell cell = new PdfPCell(new Phrase(titulo, DS_FONT_SECTION_TITLE));
+        cell.setBackgroundColor(DS_COLOR_PRIMARY);
+        cell.setPadding(4);
+        cell.setBorder(PdfPCell.NO_BORDER);
+        table.addCell(cell);
+        document.add(table);
+    }
+
+    private void dsAdicionarCelulaCampo(PdfPTable table, String label, String valor, int colSpan) {
+        PdfPCell cell = new PdfPCell();
+        cell.setColspan(colSpan);
+        cell.setPadding(4);
+        cell.setBorderColor(new Color(187, 247, 208));
+        Paragraph p = new Paragraph();
+        p.add(new Phrase(label + " ", DS_FONT_LABEL));
+        p.add(new Phrase(valor != null ? valor : "-", DS_FONT_VALUE));
+        cell.addElement(p);
+        table.addCell(cell);
+    }
+
+    private void dsAdicionarCelulaTextoLongo(PdfPTable table, String label, String texto) {
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(4);
+        cell.setBorderColor(new Color(187, 247, 208));
+        Paragraph pLabel = new Paragraph(label, DS_FONT_LABEL);
+        cell.addElement(pLabel);
+        Paragraph pTexto = new Paragraph(texto != null ? texto : "-", DS_FONT_VALUE);
+        pTexto.setSpacingBefore(2);
+        cell.addElement(pTexto);
+        table.addCell(cell);
+    }
+
+    private void dsAdicionarCelulaTabela(PdfPTable table, String texto, int alignment) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, DS_FONT_VALUE));
+        cell.setPadding(4);
+        cell.setBorderColor(new Color(187, 247, 208));
+        cell.setHorizontalAlignment(alignment);
+        table.addCell(cell);
+    }
+
+    private void dsAdicionarCelulaFinanceira(PdfPTable table, String label, String valor, boolean destaque) {
+        PdfPCell cell = new PdfPCell();
+        cell.setPadding(5);
+        cell.setBorderColor(DS_COLOR_BORDER);
+        if (destaque) {
+            cell.setBackgroundColor(DS_COLOR_BG_HEADER);
+        }
+        Font fontLabel = destaque
+                ? FontFactory.getFont(FontFactory.HELVETICA_BOLD, 8, DS_COLOR_PRIMARY) : DS_FONT_LABEL;
+        cell.addElement(new Paragraph(label, fontLabel));
+
+        Paragraph pValor = new Paragraph("R$ " + valor,
+                destaque ? FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, DS_COLOR_PRIMARY)
+                         : DS_FONT_VALUE_BOLD);
+        pValor.setAlignment(Element.ALIGN_RIGHT);
+        cell.addElement(pValor);
+        table.addCell(cell);
+    }
 }
+

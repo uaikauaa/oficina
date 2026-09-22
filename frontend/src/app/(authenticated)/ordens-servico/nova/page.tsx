@@ -233,29 +233,6 @@ function NovaOrdemServicoContent() {
           </Link>
         </div>
 
-        {/* Título Principal */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-900 border border-slate-800 shadow-xl">
-          <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-              <Plus className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase">
-                  Recepção Técnica
-                </span>
-                <span className="text-xs text-slate-400">Status Inicial: ABERTA</span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-white mt-1">
-                Abertura de Ordem de Serviço
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-                Localize o cliente, selecione o equipamento cadastrado e registre o problema relatado.
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Notificação de Sucesso */}
         {toastSucesso && (
           <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in">

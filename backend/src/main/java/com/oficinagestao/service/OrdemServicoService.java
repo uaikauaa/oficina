@@ -138,6 +138,17 @@ public class OrdemServicoService {
     }
 
     @Transactional(readOnly = true)
+    public byte[] gerarDocumentoServico(Long id) {
+        OrdemServico os = ordemServicoRepository.findByIdWithClienteAndMaquina(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com ID: " + id));
+        if (os.getCliente() != null && os.getCliente().getEnderecos() != null) {
+            os.getCliente().getEnderecos().size(); // força inicialização da coleção
+        }
+        List<OrdemServicoItem> itens = ordemServicoItemRepository.findByOrdemServicoIdComProduto(id);
+        return pdfService.gerarDocumentoServicoPdf(os, itens);
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<OrdemServicoResponseDTO> listar(
             String termo,
             StatusOrdemServico status,

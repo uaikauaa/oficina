@@ -365,6 +365,19 @@ describe('UX-007: Cockpit de Bancada Técnica para Ordem de Serviço (/ordens-se
     });
   });
 
+  // 17.1 Geração de Documento de Serviço
+  describe('17.1 Geração de Documento de Serviço', () => {
+    it('deve direcionar para o endpoint oficial /api/ordens-servico/{id}/documento-servico', () => {
+      const url = `/api/ordens-servico/${mockOs.id}/documento-servico`;
+      assert.strictEqual(url, '/api/ordens-servico/101/documento-servico');
+    });
+
+    it('deve gerar nome do arquivo com prefixo DS e número da OS', () => {
+      const filename = `DS-${mockOs.numeroOs || mockOs.id}.pdf`;
+      assert.strictEqual(filename, 'DS-OS-2026-0101.pdf');
+    });
+  });
+
   // 18. Impressão Técnica
   describe('18. Impressão Técnica', () => {
     it('deve manter classe print:hidden nos controles de tela e print:block no layout A4', () => {

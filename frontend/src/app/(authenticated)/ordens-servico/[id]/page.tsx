@@ -129,6 +129,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
   // Download do PDF A4
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [isDownloadingDocServico, setIsDownloadingDocServico] = useState(false);
 
   // Timer para debounce de busca
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -247,6 +248,32 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
       showToast('error', err instanceof Error ? err.message : 'Erro ao baixar PDF.');
     } finally {
       setIsDownloadingPdf(false);
+    }
+  };
+
+  // Gerar Documento de Serviço em PDF A4
+  const handleGerarDocumentoServico = async () => {
+    if (!os) return;
+    setIsDownloadingDocServico(true);
+    try {
+      const res = await apiFetch(`/api/ordens-servico/${os.id}/documento-servico`);
+      if (!res.ok) {
+        throw new Error('Falha ao gerar Documento de Serviço.');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `DS-${os.numeroOs || os.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      showToast('success', 'Documento de Serviço gerado com sucesso!');
+    } catch (err: unknown) {
+      showToast('error', err instanceof Error ? err.message : 'Erro ao baixar Documento de Serviço.');
+    } finally {
+      setIsDownloadingDocServico(false);
     }
   };
 
@@ -630,7 +657,21 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
               ) : (
                 <Download className="w-3.5 h-3.5 text-amber-400" />
               )}
-              <span>PDF A4</span>
+              <span>PDF OS</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleGerarDocumentoServico}
+              disabled={isDownloadingDocServico}
+              className="px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 font-semibold text-xs border border-emerald-700/60 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              title="Baixar Documento de Serviço (comprovante comercial sem validade fiscal)"
+            >
+              {isDownloadingDocServico ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+              ) : (
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+              )}
+              <span>Doc. Serviço</span>
             </button>
             <button
               type="button"
