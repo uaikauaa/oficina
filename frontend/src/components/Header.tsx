@@ -61,7 +61,7 @@ export default function Header({ user }: HeaderProps) {
   }, []);
 
   const navLinkClass = (active: boolean) =>
-    `whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 ${
+    `whitespace-nowrap px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 xl:gap-1.5 transition-all shrink-0 ${
       active
         ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 shadow-sm'
         : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
@@ -71,8 +71,8 @@ export default function Header({ user }: HeaderProps) {
     <>
       <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
         {/* Barra principal */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-2.5 xl:gap-3 min-w-0">
 
             {/* Logo */}
             <Link href="/dashboard" className="flex items-center gap-2.5 group shrink-0">
@@ -86,10 +86,10 @@ export default function Header({ user }: HeaderProps) {
             </Link>
 
             {/* Separador vertical — apenas desktop */}
-            <div className="hidden lg:block w-px h-6 bg-slate-700/60 shrink-0 mx-1" />
+            <div className="hidden lg:block w-px h-6 bg-slate-700/60 shrink-0 mx-0.5 xl:mx-1" />
 
             {/* Navegação desktop — lg+ (≥1024px) */}
-            <nav className="hidden lg:flex items-center gap-0.5 flex-1 min-w-0 overflow-hidden">
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center">
               <Link href="/dashboard" className={navLinkClass(isDashboardActive)}>
                 <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
                 <span>Painel</span>
@@ -100,15 +100,18 @@ export default function Header({ user }: HeaderProps) {
               </Link>
               <Link href="/maquinas" className={navLinkClass(isMaquinasActive)}>
                 <Wrench className="w-3.5 h-3.5 shrink-0" />
-                <span>Equipamentos</span>
+                <span className="hidden xl:inline">Equipamentos</span>
+                <span className="xl:hidden">Equip.</span>
               </Link>
               <Link href="/ordens-servico" className={navLinkClass(isOsActive)}>
                 <FileText className="w-3.5 h-3.5 shrink-0" />
-                <span>Ordens de Serviço</span>
+                <span className="hidden 2xl:inline">Ordens de Serviço</span>
+                <span className="2xl:hidden">OS</span>
               </Link>
               <Link href="/produtos" className={navLinkClass(isProdutosActive)}>
                 <Package className="w-3.5 h-3.5 shrink-0" />
-                <span>Peças &amp; Produtos</span>
+                <span className="hidden 2xl:inline">Peças &amp; Produtos</span>
+                <span className="2xl:hidden">Peças</span>
               </Link>
               <Link href="/estoque" className={navLinkClass(isEstoqueActive)}>
                 <Boxes className="w-3.5 h-3.5 shrink-0" />
@@ -116,11 +119,13 @@ export default function Header({ user }: HeaderProps) {
               </Link>
               <Link href="/relatorios" className={navLinkClass(isRelatoriosActive)}>
                 <BarChart3 className="w-3.5 h-3.5 shrink-0" />
-                <span>Relatórios</span>
+                <span className="hidden xl:inline">Relatórios</span>
+                <span className="xl:hidden">Relat.</span>
               </Link>
               <Link href="/configuracoes" className={navLinkClass(isConfiguracaoActive)}>
                 <Settings className="w-3.5 h-3.5 shrink-0" />
-                <span>Configurações</span>
+                <span className="hidden xl:inline">Configurações</span>
+                <span className="xl:hidden">Config.</span>
               </Link>
             </nav>
 
@@ -128,7 +133,7 @@ export default function Header({ user }: HeaderProps) {
             <div className="flex-1 lg:hidden" />
 
             {/* Área direita: busca + usuário + sair */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
               {/* Botão Busca Rápida */}
               <button
                 id="busca-rapida-trigger"
@@ -138,14 +143,14 @@ export default function Header({ user }: HeaderProps) {
                 aria-label="Abrir busca rápida"
               >
                 <Search className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="hidden md:inline whitespace-nowrap">Busca rápida...</span>
+                <span className="hidden 2xl:inline whitespace-nowrap">Busca rápida...</span>
                 <kbd className="hidden xl:inline-flex px-1.5 py-0.5 bg-slate-800 text-slate-400 rounded text-[10px] font-mono border border-slate-700 whitespace-nowrap">
                   Ctrl+K
                 </kbd>
               </button>
 
-              {/* Dados do usuário — md+ */}
-              <div className="hidden md:block text-right">
+              {/* Dados do usuário — visível em xl+ no header, e no menu mobile para telas menores */}
+              <div className="hidden xl:block text-right">
                 <p className="text-xs font-medium text-white whitespace-nowrap leading-none">
                   {user?.nome || 'Proprietária'}
                 </p>
@@ -165,10 +170,10 @@ export default function Header({ user }: HeaderProps) {
                 aria-label="Encerrar Sessão"
               >
                 <LogOut className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Sair</span>
+                <span className="hidden sm:inline lg:hidden xl:inline whitespace-nowrap">Sair</span>
               </button>
 
-              {/* Botão hambúrguer — apenas md e abaixo */}
+              {/* Botão hambúrguer — apenas abaixo de lg */}
               <button
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                 className="lg:hidden p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-all cursor-pointer"

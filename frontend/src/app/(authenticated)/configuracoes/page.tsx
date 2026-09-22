@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Settings, Building2, Phone, Mail, MapPin, FileText, Shield, Save, RefreshCw, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings, Building2, Phone, MapPin, FileText, Shield, Save, RefreshCw, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { OFICINA } from '@/lib/oficina';
 
