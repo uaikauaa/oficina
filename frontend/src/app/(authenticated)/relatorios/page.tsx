@@ -1002,7 +1002,7 @@ export default function RelatoriosPage() {
 
                 <div className="px-3 py-2 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Faturamento Atual</span>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Valor de OS Concluídas</span>
                     <span className="text-base font-black text-white">
                       {formatarMoeda(osRelatorio.resumo.valorTotalConcluidas)}
                     </span>
@@ -1012,7 +1012,7 @@ export default function RelatoriosPage() {
 
                 <div className="px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block" title="Valor estimado das ordens de serviço em andamento (não concluídas e não canceladas)">A Receber (OS em Andamento)</span>
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block" title="Total das Ordens de Serviço que estão em andamento">Valor em OS em Andamento</span>
                     <span className="text-base font-black text-white">
                       {formatarMoeda(osRelatorio.resumo.valorTotalAReceber)}
                     </span>
@@ -1730,7 +1730,7 @@ export default function RelatoriosPage() {
                   <Users className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white">Consolidado Financeiro e Histórico por Cliente</h3>
+                  <h3 className="text-xs font-bold text-white">Histórico de Serviços por Cliente</h3>
                   <p className="text-[11px] text-slate-400">Volume de máquinas vinculadas, histórico de ordens de serviço e receita acumulada.</p>
                 </div>
               </div>
