@@ -67,6 +67,7 @@ export interface Cliente {
   email?: string | null;
   ativo: boolean;
   observacoes?: string | null;
+  codigoIbge?: string | null;
   enderecos: Endereco[];
   totalEquipamentos: number;
   createdAt: string;
@@ -83,6 +84,7 @@ export interface ClienteFormData {
   celular?: string;
   email?: string;
   observacoes?: string;
+  codigoIbge?: string;
   ativo?: boolean;
   endereco?: {
     cep?: string;
@@ -94,6 +96,91 @@ export interface ClienteFormData {
     estado: string;
     tipoEndereco?: TipoEndereco;
   };
+}
+
+export type StatusDpsFiscal =
+  | 'RASCUNHO'
+  | 'PREPARADA'
+  | 'PENDENTE_ENVIO'
+  | 'ENVIANDO'
+  | 'AUTORIZADA'
+  | 'REJEITADA'
+  | 'CANCELADA'
+  | 'ERRO';
+
+export const STATUS_DPS_LABELS: Record<StatusDpsFiscal, string> = {
+  RASCUNHO: 'Rascunho',
+  PREPARADA: 'Preparada',
+  PENDENTE_ENVIO: 'Pendente de Envio',
+  ENVIANDO: 'Enviando',
+  AUTORIZADA: 'Autorizada',
+  REJEITADA: 'Rejeitada',
+  CANCELADA: 'Cancelada',
+  ERRO: 'Erro no Processamento',
+};
+
+export interface DpsFiscalResponseDTO {
+  id: number;
+  ordemServicoId: number;
+  numeroOs?: string | null;
+  clienteId: number;
+  serie: string;
+  numero: number;
+  status: StatusDpsFiscal;
+  dataEmissao: string;
+  valorServico: number;
+  codigoTributacaoServico: string;
+  descricaoServico: string;
+  municipioPrestacao?: string | null;
+  codigoIbgePrestacao?: string | null;
+
+  // Snapshot Prestador
+  prestadorCnpj?: string | null;
+  prestadorRazaoSocial?: string | null;
+  prestadorNomeFantasia?: string | null;
+  prestadorInscricaoMunicipal?: string | null;
+  prestadorRegimeTributario?: string | null;
+  prestadorLogradouro?: string | null;
+  prestadorNumero?: string | null;
+  prestadorBairro?: string | null;
+  prestadorCep?: string | null;
+  prestadorMunicipio?: string | null;
+  prestadorUf?: string | null;
+  prestadorCodigoIbge?: string | null;
+
+  // Snapshot Tomador
+  tomadorTipoPessoa?: string | null;
+  tomadorCpfCnpj?: string | null;
+  tomadorRazaoSocial?: string | null;
+  tomadorNomeFantasia?: string | null;
+  tomadorRgIe?: string | null;
+  tomadorEmail?: string | null;
+  tomadorTelefone?: string | null;
+  tomadorLogradouro?: string | null;
+  tomadorNumero?: string | null;
+  tomadorComplemento?: string | null;
+  tomadorBairro?: string | null;
+  tomadorCidade?: string | null;
+  tomadorUf?: string | null;
+  tomadorCep?: string | null;
+  tomadorCodigoIbge?: string | null;
+
+  // Futura NFS-e
+  numeroNfse?: string | null;
+  chaveAcessoNfse?: string | null;
+  xmlAutorizado?: string | null;
+  mensagensRetorno?: string | null;
+
+  // Reforma Tributária IBS / CBS
+  aliquotaIbs?: number | null;
+  valorIbs?: number | null;
+  aliquotaCbs?: number | null;
+  valorCbs?: number | null;
+  codigoTributacaoIbsCbs?: string | null;
+
+  usuarioPreparacaoId?: number | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PageResponse<T> {

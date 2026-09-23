@@ -47,25 +47,25 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V12 foram aplicadas e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V13 foram aplicadas e as tabelas essenciais existem")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("12", current.getVersion().getVersion(), "A versão atual da migration deve ser 12.");
-        assertEquals("update admin and config defaults", current.getDescription());
+        assertEquals("13", current.getVersion().getVersion(), "A versão atual da migration deve ser 13.");
+        assertEquals("create fiscal dps and tomador ibge", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 16 tabelas no banco de dados (15 anteriores + configuracao_oficina)
+        // Validar existência das 18 tabelas no banco de dados (16 anteriores + dps_numeracao + dps_fiscal)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens", "configuracao_oficina");
+                "refresh_tokens", "configuracao_oficina", "dps_numeracao", "dps_fiscal");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {

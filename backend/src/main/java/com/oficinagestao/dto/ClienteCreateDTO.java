@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record ClienteCreateDTO(
@@ -37,7 +38,24 @@ public record ClienteCreateDTO(
 
         String observacoes,
 
+        @Pattern(regexp = "^$|^\\d{7}$", message = "Código IBGE deve conter exatamente 7 dígitos numéricos")
+        String codigoIbge,
+
         @Valid
         EnderecoDTO endereco
 ) {
+    public ClienteCreateDTO(
+            TipoPessoa tipoPessoa,
+            String nomeRazaoSocial,
+            String nomeFantasia,
+            String cpfCnpj,
+            String rgIe,
+            String telefone,
+            String celular,
+            String email,
+            String observacoes,
+            EnderecoDTO endereco
+    ) {
+        this(tipoPessoa, nomeRazaoSocial, nomeFantasia, cpfCnpj, rgIe, telefone, celular, email, observacoes, null, endereco);
+    }
 }

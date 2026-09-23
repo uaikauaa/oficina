@@ -207,3 +207,26 @@ export function formatarCodigoSku(codigo?: string | null, id?: number | null): s
   return limpo;
 }
 
+export const dpsApi = {
+  preparar: async (data: {
+    ordemServicoId: number;
+    serie?: string;
+    descricaoServico?: string;
+  }) => {
+    return apiFetchJson<import('./types').DpsFiscalResponseDTO>('/api/dps/preparar', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  obterPorId: async (id: number) => {
+    return apiFetchJson<import('./types').DpsFiscalResponseDTO>(`/api/dps/${id}`);
+  },
+  obterPorOs: async (ordemServicoId: number) => {
+    return apiFetchJson<import('./types').DpsFiscalResponseDTO>(`/api/dps/os/${ordemServicoId}`);
+  },
+  listarPorOs: async (ordemServicoId: number) => {
+    return apiFetchJson<import('./types').DpsFiscalResponseDTO[]>(`/api/dps/os/${ordemServicoId}/historico`);
+  },
+};
+
+
