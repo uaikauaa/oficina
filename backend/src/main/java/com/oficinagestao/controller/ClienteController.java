@@ -1,9 +1,18 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.ClienteContadoresStatusDTO;
+import com.oficinagestao.dto.ClienteCreateDTO;
+import com.oficinagestao.dto.ClienteResponseDTO;
+import com.oficinagestao.dto.ClienteResumoDTO;
+import com.oficinagestao.dto.ClienteUpdateDTO;
+import com.oficinagestao.dto.OrdemServicoResponseDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.dto.StatusUpdateDTO;
+import com.oficinagestao.entity.StatusOrdemServico;
+import com.oficinagestao.entity.TipoPessoa;
+import com.oficinagestao.security.IpAddressResolver;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.ClienteService;
+import com.oficinagestao.service.OrdemServicoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,28 +47,24 @@ public class ClienteController {
 
     private final ClienteService clienteService;
     private final OrdemServicoService ordemServicoService;
-    private final UsuarioRepository usuarioRepository;
-    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+    private final IpAddressResolver ipAddressResolver;
 
     @org.springframework.beans.factory.annotation.Autowired
     public ClienteController(
             ClienteService clienteService,
             OrdemServicoService ordemServicoService,
-            UsuarioRepository usuarioRepository,
-            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+            IpAddressResolver ipAddressResolver
     ) {
         this.clienteService = clienteService;
         this.ordemServicoService = ordemServicoService;
-        this.usuarioRepository = usuarioRepository;
-        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new IpAddressResolver();
     }
 
     public ClienteController(
             ClienteService clienteService,
-            OrdemServicoService ordemServicoService,
-            UsuarioRepository usuarioRepository
+            OrdemServicoService ordemServicoService
     ) {
-        this(clienteService, ordemServicoService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
+        this(clienteService, ordemServicoService, new IpAddressResolver());
     }
 
     @PostMapping
@@ -76,7 +81,7 @@ public class ClienteController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -172,7 +177,7 @@ public class ClienteController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.atualizar(id, dto, usuarioId, ip);
         return ResponseEntity.ok(response);
@@ -189,22 +194,13 @@ public class ClienteController {
     })
     public ResponseEntity<ClienteResponseDTO> alterarStatus(
             @PathVariable Long id,
-            @Valid @RequestBody ClienteStatusDTO dto,
+            @Valid @RequestBody StatusUpdateDTO dto,
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         ClienteResponseDTO response = clienteService.alterarStatus(id, dto.ativo(), usuarioId, ip);
         return ResponseEntity.ok(response);
-    }
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

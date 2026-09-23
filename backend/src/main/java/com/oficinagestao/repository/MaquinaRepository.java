@@ -1,6 +1,7 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.Maquina;
+import com.oficinagestao.entity.TipoEquipamento;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +26,9 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
     /** Conta quantos equipamentos (ativos ou não) pertencem a um cliente. */
     long countByClienteId(Long clienteId);
 
-    /** Conta equipamentos ativos de um cliente (para exibição no card do cliente). */
-    long countByClienteIdAndAtivo(Long clienteId, Boolean ativo);
+    /** Conta equipamentos agrupados por cliente para uma lista de IDs (elimina N+1 na listagem). */
+    @Query("SELECT m.cliente.id, COUNT(m) FROM Maquina m WHERE m.cliente.id IN :clienteIds GROUP BY m.cliente.id")
+    List<Object[]> countByClienteIds(@Param("clienteIds") List<Long> clienteIds);
 
     /** Busca equipamento por ID com JOIN FETCH do cliente (evita N+1). */
     @Query("SELECT m FROM Maquina m JOIN FETCH m.cliente WHERE m.id = :id")

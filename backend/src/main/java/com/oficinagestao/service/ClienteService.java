@@ -1,7 +1,17 @@
 package com.oficinagestao.service;
 
-import com.oficinagestao.dto.*;
-import com.oficinagestao.entity.*;
+import com.oficinagestao.dto.ClienteContadoresStatusDTO;
+import com.oficinagestao.dto.ClienteCreateDTO;
+import com.oficinagestao.dto.ClienteResponseDTO;
+import com.oficinagestao.dto.ClienteResumoDTO;
+import com.oficinagestao.dto.ClienteUpdateDTO;
+import com.oficinagestao.dto.EnderecoDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.entity.Cliente;
+import com.oficinagestao.entity.Endereco;
+import com.oficinagestao.entity.OrdemServico;
+import com.oficinagestao.entity.TipoEndereco;
+import com.oficinagestao.entity.TipoPessoa;
 import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
@@ -17,7 +27,9 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ClienteService {
@@ -81,8 +93,38 @@ public class ClienteService {
         String termoNormalizado = (termo != null && !termo.isBlank()) ? termo.trim() : null;
         String termoDigitos = apenasDigitos(termoNormalizado);
         Page<Cliente> page = clienteRepository.pesquisar(termoNormalizado, termoDigitos, tipoPessoa, ativo, pageable);
-        return PageResponse.from(page.map(cliente ->
-                toResponseDTO(cliente, maquinaRepository.countByClienteId(cliente.getId()))));
+
+        if (page.isEmpty()) {
+            return PageResponse.from(page.map(c -> toResponseDTO(c, Collections.emptyList(), 0L)));
+        }
+
+        List<Long> clienteIds = page.getContent().stream()
+                .map(Cliente::getId)
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        Map<Long, Long> contagemEquipamentos = clienteIds.isEmpty() ? Collections.emptyMap() :
+                maquinaRepository.countByClienteIds(clienteIds).stream()
+                        .collect(Collectors.toMap(
+                                row -> (Long) row[0],
+                                row -> (Long) row[1]
+                        ));
+
+        Map<Long, List<EnderecoDTO>> enderecosPorCliente = clienteIds.isEmpty() ? Collections.emptyMap() :
+                clienteRepository.findEnderecosByClienteIds(clienteIds).stream()
+                        .filter(e -> e.getCliente() != null && e.getCliente().getId() != null)
+                        .collect(Collectors.groupingBy(
+                                e -> e.getCliente().getId(),
+                                Collectors.mapping(this::toEnderecoDTO, Collectors.toList())
+                        ));
+
+        Page<ClienteResponseDTO> dtoPage = page.map(cliente -> {
+            long totalEquipamentos = contagemEquipamentos.getOrDefault(cliente.getId(), 0L);
+            List<EnderecoDTO> enderecosDTO = enderecosPorCliente.getOrDefault(cliente.getId(), Collections.emptyList());
+            return toResponseDTO(cliente, enderecosDTO, totalEquipamentos);
+        });
+
+        return PageResponse.from(dtoPage);
     }
 
     @Transactional(readOnly = true)
@@ -149,14 +191,10 @@ public class ClienteService {
 
     // --- Métodos de Mapeamento Diretos ---
 
-    public ClienteResponseDTO toResponseDTO(Cliente cliente, long totalEquipamentos) {
+    public ClienteResponseDTO toResponseDTO(Cliente cliente, List<EnderecoDTO> enderecosDTO, long totalEquipamentos) {
         if (cliente == null) {
             return null;
         }
-
-        List<EnderecoDTO> enderecosDTO = cliente.getEnderecos() != null
-                ? cliente.getEnderecos().stream().map(this::toEnderecoDTO).toList()
-                : Collections.emptyList();
 
         return new ClienteResponseDTO(
                 cliente.getId(),
@@ -170,11 +208,23 @@ public class ClienteService {
                 cliente.getEmail(),
                 cliente.getAtivo(),
                 cliente.getObservacoes(),
-                enderecosDTO,
+                enderecosDTO != null ? enderecosDTO : Collections.emptyList(),
                 totalEquipamentos,
                 cliente.getCreatedAt(),
                 cliente.getUpdatedAt()
         );
+    }
+
+    public ClienteResponseDTO toResponseDTO(Cliente cliente, long totalEquipamentos) {
+        if (cliente == null) {
+            return null;
+        }
+
+        List<EnderecoDTO> enderecosDTO = cliente.getEnderecos() != null
+                ? cliente.getEnderecos().stream().map(this::toEnderecoDTO).toList()
+                : Collections.emptyList();
+
+        return toResponseDTO(cliente, enderecosDTO, totalEquipamentos);
     }
 
     public EnderecoDTO toEnderecoDTO(Endereco endereco) {

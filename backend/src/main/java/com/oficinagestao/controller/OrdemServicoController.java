@@ -1,9 +1,18 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.OrdemServicoContadoresDashboardDTO;
+import com.oficinagestao.dto.OrdemServicoContadoresStatusDTO;
+import com.oficinagestao.dto.OrdemServicoCreateDTO;
+import com.oficinagestao.dto.OrdemServicoItemCreateDTO;
+import com.oficinagestao.dto.OrdemServicoItemResponseDTO;
+import com.oficinagestao.dto.OrdemServicoResponseDTO;
+import com.oficinagestao.dto.OrdemServicoStatusDTO;
+import com.oficinagestao.dto.OrdemServicoUpdateDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.entity.StatusOrdemServico;
+import com.oficinagestao.security.IpAddressResolver;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.OrdemServicoItemService;
+import com.oficinagestao.service.OrdemServicoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,28 +50,24 @@ public class OrdemServicoController {
 
     private final OrdemServicoService ordemServicoService;
     private final OrdemServicoItemService ordemServicoItemService;
-    private final UsuarioRepository usuarioRepository;
-    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+    private final IpAddressResolver ipAddressResolver;
 
     @org.springframework.beans.factory.annotation.Autowired
     public OrdemServicoController(
             OrdemServicoService ordemServicoService,
             OrdemServicoItemService ordemServicoItemService,
-            UsuarioRepository usuarioRepository,
-            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+            IpAddressResolver ipAddressResolver
     ) {
         this.ordemServicoService = ordemServicoService;
         this.ordemServicoItemService = ordemServicoItemService;
-        this.usuarioRepository = usuarioRepository;
-        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new IpAddressResolver();
     }
 
     public OrdemServicoController(
             OrdemServicoService ordemServicoService,
-            OrdemServicoItemService ordemServicoItemService,
-            UsuarioRepository usuarioRepository
+            OrdemServicoItemService ordemServicoItemService
     ) {
-        this(ordemServicoService, ordemServicoItemService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
+        this(ordemServicoService, ordemServicoItemService, new IpAddressResolver());
     }
 
     // =========================================================================
@@ -83,7 +88,7 @@ public class OrdemServicoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         OrdemServicoResponseDTO response = ordemServicoService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -210,7 +215,7 @@ public class OrdemServicoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(ordemServicoService.atualizar(id, dto, usuarioId, ip));
     }
@@ -229,7 +234,7 @@ public class OrdemServicoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(ordemServicoService.alterarStatus(id, dto, usuarioId, ip));
     }
@@ -296,7 +301,7 @@ public class OrdemServicoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         OrdemServicoItemResponseDTO response = ordemServicoItemService.adicionarPeca(id, dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -314,21 +319,8 @@ public class OrdemServicoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         ordemServicoItemService.removerItem(id, itemId, usuarioId, request);
         return ResponseEntity.noContent().build();
-    }
-
-    // =========================================================================
-    // Helpers
-    // =========================================================================
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

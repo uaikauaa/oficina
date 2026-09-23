@@ -1,6 +1,8 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.Cliente;
+import com.oficinagestao.entity.Endereco;
+import com.oficinagestao.entity.TipoPessoa;
 
 import com.oficinagestao.dto.ClienteContadoresStatusDTO;
 
@@ -50,6 +52,10 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     // Busca detalhada com JOIN FETCH dos endereços (evita N+1 na visualização/edição)
     @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.enderecos WHERE c.id = :id")
     Optional<Cliente> findByIdWithEnderecos(@Param("id") Long id);
+
+    // Busca endereços em lote para múltiplos clientes (elimina N+1 na listagem)
+    @Query("SELECT e FROM Endereco e WHERE e.cliente.id IN :clienteIds ORDER BY e.id ASC")
+    List<Endereco> findEnderecosByClienteIds(@Param("clienteIds") List<Long> clienteIds);
 
     // Pesquisa paginada com múltiplos critérios e suporte a dígitos de CPF/CNPJ/Telefone
     @Query(value = "SELECT c FROM Cliente c WHERE " +

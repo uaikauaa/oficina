@@ -1,6 +1,6 @@
 package com.oficinagestao.dto;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.TipoEndereco;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

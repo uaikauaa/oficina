@@ -1,6 +1,11 @@
 package com.oficinagestao.controller;
 
-import com.oficinagestao.dto.*;
+import com.oficinagestao.dto.EstoqueMovimentacaoResponseDTO;
+import com.oficinagestao.dto.PecaMaisUtilizadaDTO;
+import com.oficinagestao.dto.RelatorioClienteItemDTO;
+import com.oficinagestao.dto.RelatorioEstoqueItemDTO;
+import com.oficinagestao.dto.RelatorioMaquinaItemDTO;
+import com.oficinagestao.dto.RelatorioOsResponseDTO;
 import com.oficinagestao.entity.StatusOrdemServico;
 import com.oficinagestao.entity.TipoMovimentacaoEstoque;
 import com.oficinagestao.service.RelatorioService;

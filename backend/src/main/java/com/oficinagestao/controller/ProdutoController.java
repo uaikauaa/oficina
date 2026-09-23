@@ -1,9 +1,14 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.CompatibilidadeResponseDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.dto.ProdutoCompatibilidadeDTO;
+import com.oficinagestao.dto.ProdutoCreateDTO;
+import com.oficinagestao.dto.ProdutoResponseDTO;
+import com.oficinagestao.dto.ProdutoUpdateDTO;
+import com.oficinagestao.dto.StatusUpdateDTO;
+import com.oficinagestao.entity.TipoProduto;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.ProdutoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,11 +45,9 @@ import java.util.List;
 public class ProdutoController {
 
     private final ProdutoService produtoService;
-    private final UsuarioRepository usuarioRepository;
 
-    public ProdutoController(ProdutoService produtoService, UsuarioRepository usuarioRepository) {
+    public ProdutoController(ProdutoService produtoService) {
         this.produtoService = produtoService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping
@@ -59,7 +62,7 @@ public class ProdutoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         ProdutoResponseDTO response = produtoService.cadastrar(dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -103,7 +106,7 @@ public class ProdutoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(produtoService.atualizar(id, dto, usuarioId, request));
     }
 
@@ -119,7 +122,7 @@ public class ProdutoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(produtoService.alterarStatus(id, dto.ativo(), usuarioId, request));
     }
 
@@ -146,7 +149,7 @@ public class ProdutoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         CompatibilidadeResponseDTO response = produtoService.adicionarCompatibilidade(id, dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -163,17 +166,8 @@ public class ProdutoController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         produtoService.removerCompatibilidade(id, maquinaId, usuarioId, request);
         return ResponseEntity.noContent().build();
-    }
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

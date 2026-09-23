@@ -1,6 +1,11 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.AlterarSenhaRequest;
+import com.oficinagestao.dto.CurrentUserResponse;
+import com.oficinagestao.dto.LoginRequest;
+import com.oficinagestao.dto.LoginResponse;
+import com.oficinagestao.dto.LoginResult;
+import com.oficinagestao.dto.MensagemResponse;
+import com.oficinagestao.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,7 +19,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")

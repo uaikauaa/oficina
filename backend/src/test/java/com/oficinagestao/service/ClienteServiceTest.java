@@ -77,11 +77,13 @@ class ClienteServiceTest {
         Pageable pageable = PageRequest.of(0, 15);
 
         Cliente cliente = new Cliente(TipoPessoa.FISICA, "João da Silva", null, "00014014000", null, null, null, null, null);
+        org.springframework.test.util.ReflectionTestUtils.setField(cliente, "id", 1L);
         Page<Cliente> pageMock = new PageImpl<>(List.of(cliente));
 
         when(clienteRepository.pesquisar(eq("000.140.140-00"), eq("00014014000"), isNull(), isNull(), eq(pageable)))
                 .thenReturn(pageMock);
-        when(maquinaRepository.countByClienteId(any())).thenReturn(2L);
+        when(maquinaRepository.countByClienteIds(List.of(1L))).thenReturn(List.<Object[]>of(new Object[]{1L, 2L}));
+        when(clienteRepository.findEnderecosByClienteIds(List.of(1L))).thenReturn(java.util.Collections.emptyList());
 
         PageResponse<ClienteResponseDTO> response = clienteService.listar(cpfMascarado, null, null, pageable);
 
@@ -96,6 +98,93 @@ class ClienteServiceTest {
         verify(clienteRepository).pesquisar(termoCaptor.capture(), digitosCaptor.capture(), isNull(), isNull(), eq(pageable));
         assertEquals("000.140.140-00", termoCaptor.getValue());
         assertEquals("00014014000", digitosCaptor.getValue());
+        verify(maquinaRepository, never()).countByClienteId(any());
+    }
+
+    @Test
+    @DisplayName("Deve listar múltiplos clientes eliminando N+1 via consultas em lote para equipamentos e endereços")
+    void deveListarMultiplosClientesEliminandoNPlus1() {
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Cliente c1 = new Cliente(TipoPessoa.FISICA, "Cliente Um", null, "11111111111", null, null, null, null, null);
+        org.springframework.test.util.ReflectionTestUtils.setField(c1, "id", 10L);
+
+        Cliente c2 = new Cliente(TipoPessoa.JURIDICA, "Cliente Dois LTDA", null, "22222222000122", null, null, null, null, null);
+        org.springframework.test.util.ReflectionTestUtils.setField(c2, "id", 20L);
+
+        com.oficinagestao.entity.Endereco endC1 = new com.oficinagestao.entity.Endereco("30000000", "Rua A", "100", null, "Bairro A", "Belo Horizonte", "MG", com.oficinagestao.entity.TipoEndereco.PRINCIPAL);
+        endC1.setCliente(c1);
+
+        Page<Cliente> pageMock = new PageImpl<>(List.of(c1, c2), pageable, 2);
+
+        when(clienteRepository.pesquisar(isNull(), isNull(), isNull(), isNull(), eq(pageable)))
+                .thenReturn(pageMock);
+        when(maquinaRepository.countByClienteIds(List.of(10L, 20L)))
+                .thenReturn(List.<Object[]>of(new Object[]{10L, 3L}, new Object[]{20L, 1L}));
+        when(clienteRepository.findEnderecosByClienteIds(List.of(10L, 20L)))
+                .thenReturn(List.of(endC1));
+
+        PageResponse<ClienteResponseDTO> response = clienteService.listar(null, null, null, pageable);
+
+        assertNotNull(response);
+        assertEquals(2, response.content().size());
+
+        ClienteResponseDTO dto1 = response.content().get(0);
+        assertEquals(10L, dto1.id());
+        assertEquals("Cliente Um", dto1.nomeRazaoSocial());
+        assertEquals(3L, dto1.totalEquipamentos());
+        assertEquals(1, dto1.enderecos().size());
+        assertEquals("Rua A", dto1.enderecos().get(0).logradouro());
+
+        ClienteResponseDTO dto2 = response.content().get(1);
+        assertEquals(20L, dto2.id());
+        assertEquals("Cliente Dois LTDA", dto2.nomeRazaoSocial());
+        assertEquals(1L, dto2.totalEquipamentos());
+        assertTrue(dto2.enderecos().isEmpty());
+
+        // Verificação crucial de ausência de N+1:
+        verify(maquinaRepository, times(1)).countByClienteIds(List.of(10L, 20L));
+        verify(clienteRepository, times(1)).findEnderecosByClienteIds(List.of(10L, 20L));
+        verify(maquinaRepository, never()).countByClienteId(any());
+    }
+
+    @Test
+    @DisplayName("Deve retornar página vazia sem executar queries de lote quando não houver clientes")
+    void deveRetornarPaginaVaziaSemExecutarQueriesLote() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Cliente> pageMock = Page.empty(pageable);
+
+        when(clienteRepository.pesquisar(isNull(), isNull(), isNull(), isNull(), eq(pageable)))
+                .thenReturn(pageMock);
+
+        PageResponse<ClienteResponseDTO> response = clienteService.listar(null, null, null, pageable);
+
+        assertNotNull(response);
+        assertTrue(response.content().isEmpty());
+        assertEquals(0, response.totalElements());
+        verify(maquinaRepository, never()).countByClienteIds(any());
+        verify(clienteRepository, never()).findEnderecosByClienteIds(any());
+        verify(maquinaRepository, never()).countByClienteId(any());
+    }
+
+    @Test
+    @DisplayName("Deve listar clientes filtrando por status ativo ou inativo")
+    void deveListarClientesFiltrandoPorStatusAtivoOuInativo() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Cliente> pageMock = Page.empty(pageable);
+
+        when(clienteRepository.pesquisar(isNull(), isNull(), isNull(), eq(true), eq(pageable)))
+                .thenReturn(pageMock);
+        when(clienteRepository.pesquisar(isNull(), isNull(), isNull(), eq(false), eq(pageable)))
+                .thenReturn(pageMock);
+
+        PageResponse<ClienteResponseDTO> ativos = clienteService.listar(null, null, true, pageable);
+        PageResponse<ClienteResponseDTO> inativos = clienteService.listar(null, null, false, pageable);
+
+        assertNotNull(ativos);
+        assertNotNull(inativos);
+        verify(clienteRepository).pesquisar(isNull(), isNull(), isNull(), eq(true), eq(pageable));
+        verify(clienteRepository).pesquisar(isNull(), isNull(), isNull(), eq(false), eq(pageable));
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.oficinagestao.dto;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.TipoPessoa;
 
 import java.time.OffsetDateTime;
 import java.util.List;

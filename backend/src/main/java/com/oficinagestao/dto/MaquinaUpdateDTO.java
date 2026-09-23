@@ -1,6 +1,6 @@
 package com.oficinagestao.dto;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.TipoEquipamento;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

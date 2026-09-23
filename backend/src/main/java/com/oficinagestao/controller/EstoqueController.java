@@ -1,9 +1,14 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.EstoqueAjusteDTO;
+import com.oficinagestao.dto.EstoqueEntradaDTO;
+import com.oficinagestao.dto.EstoqueMovimentacaoResponseDTO;
+import com.oficinagestao.dto.EstoqueResumoDTO;
+import com.oficinagestao.dto.EstoqueSaidaDTO;
+import com.oficinagestao.dto.MovimentacaoManualDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.entity.TipoMovimentacaoEstoque;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.EstoqueService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,11 +41,9 @@ import java.time.OffsetDateTime;
 public class EstoqueController {
 
     private final EstoqueService estoqueService;
-    private final UsuarioRepository usuarioRepository;
 
-    public EstoqueController(EstoqueService estoqueService, UsuarioRepository usuarioRepository) {
+    public EstoqueController(EstoqueService estoqueService) {
         this.estoqueService = estoqueService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping("/resumo")
@@ -61,7 +64,7 @@ public class EstoqueController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         EstoqueMovimentacaoResponseDTO response = estoqueService.registrarMovimentacaoManual(dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -78,7 +81,7 @@ public class EstoqueController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
                 dto.produtoId(),
                 TipoMovimentacaoEstoque.ENTRADA,
@@ -102,7 +105,7 @@ public class EstoqueController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
                 dto.produtoId(),
                 TipoMovimentacaoEstoque.SAIDA,
@@ -126,7 +129,7 @@ public class EstoqueController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         MovimentacaoManualDTO movDTO = new MovimentacaoManualDTO(
                 dto.produtoId(),
                 dto.tipoMovimentacao(),
@@ -159,14 +162,5 @@ public class EstoqueController {
                 pageable
         );
         return ResponseEntity.ok(PageResponse.from(page));
-    }
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

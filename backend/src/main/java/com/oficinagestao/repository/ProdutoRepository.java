@@ -1,6 +1,7 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.Produto;
+import com.oficinagestao.entity.TipoProduto;
 
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -28,8 +29,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     boolean existsByCodigo(String codigo);
 
     boolean existsByCodigoAndIdNot(String codigo, Long id);
-
-    Optional<Produto> findByCodigo(String codigo);
 
     /**
      * Busca o produto aplicando Lock Pessimista de Escrita (SELECT ... FOR UPDATE).

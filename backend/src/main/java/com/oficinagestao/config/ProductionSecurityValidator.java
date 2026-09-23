@@ -4,7 +4,6 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,7 +17,7 @@ public class ProductionSecurityValidator {
 
     private static final Logger log = LoggerFactory.getLogger(ProductionSecurityValidator.class);
 
-    public static final String DEFAULT_DEV_JWT_SECRET = "default-secret-key-oficina-gestao-dev-environment-2026-secure-token";
+    public static final String DEFAULT_DEV_JWT_SECRET = com.oficinagestao.security.JwtService.DEFAULT_DEV_SECRET;
 
     private final Environment environment;
 
@@ -28,7 +27,7 @@ public class ProductionSecurityValidator {
 
     @PostConstruct
     public void validate() {
-        boolean isProduction = environment.acceptsProfiles(Profiles.of("prod", "production"));
+        boolean isProduction = com.oficinagestao.security.JwtService.isProductionEnvironment(environment);
 
         String jwtSecret = environment.getProperty("security.jwt.secret");
         String corsOrigins = environment.getProperty("cors.allowed-origins");
@@ -36,18 +35,8 @@ public class ProductionSecurityValidator {
         if (isProduction) {
             log.info("Executando validação mandatória de segurança para o profile de Produção...");
 
-            // 1. Validação de JWT_SECRET
-            if (jwtSecret == null || jwtSecret.isBlank()) {
-                throw new IllegalStateException("FALHA DE INICIALIZAÇÃO EM PRODUÇÃO: A variável de ambiente JWT_SECRET é mandatória e não foi fornecida.");
-            }
-
-            if (DEFAULT_DEV_JWT_SECRET.equals(jwtSecret.trim())) {
-                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: O segredo JWT padrão de desenvolvimento foi detectado. Forneça uma chave secreta exclusiva via variável de ambiente JWT_SECRET.");
-            }
-
-            if (jwtSecret.trim().length() < 32) {
-                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: A chave JWT_SECRET deve possuir no mínimo 32 caracteres (256 bits) para conformidade com HMAC-SHA256.");
-            }
+            // 1. Validação centralizada e unificada do JWT_SECRET via JwtService
+            com.oficinagestao.security.JwtService.validarSecretParaAmbiente(jwtSecret, environment);
 
             // 2. Validação de CORS
             if (corsOrigins == null || corsOrigins.isBlank()) {

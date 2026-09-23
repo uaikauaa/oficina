@@ -382,14 +382,14 @@ class ClienteControllerTest {
         // Inativar
         mockMvc.perform(patch("/api/clientes/{id}/status", salvo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ClienteStatusDTO(false))))
+                        .content(objectMapper.writeValueAsString(new StatusUpdateDTO(false))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ativo").value(false));
 
         // Reativar
         mockMvc.perform(patch("/api/clientes/{id}/status", salvo.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ClienteStatusDTO(true))))
+                        .content(objectMapper.writeValueAsString(new StatusUpdateDTO(true))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ativo").value(true));
     }

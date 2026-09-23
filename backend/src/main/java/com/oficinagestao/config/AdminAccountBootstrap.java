@@ -47,15 +47,6 @@ public class AdminAccountBootstrap implements ApplicationRunner {
         long userCount = usuarioRepository.count();
 
         if (userCount > 0) {
-            // Migração de integridade: atualiza registros legados com "Proprietária Oficina" para "Geisa"
-            usuarioRepository.findAll().forEach(u -> {
-                if ("Proprietária Oficina".equalsIgnoreCase(u.getNome())) {
-                    String novoNome = (adminName != null && !adminName.isBlank()) ? adminName.trim() : "Geisa";
-                    u.setNome(novoNome);
-                    usuarioRepository.save(u);
-                    log.info("Inicialização: Nome da usuária ID {} atualizado de 'Proprietária Oficina' para '{}'.", u.getId(), novoNome);
-                }
-            });
             log.info("Inicialização: Base de usuários já contém {} registro(s). Bootstrap ignorado.", userCount);
             return;
         }

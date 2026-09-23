@@ -1,6 +1,7 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.OrdemServico;
+import com.oficinagestao.entity.StatusOrdemServico;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +24,6 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
            "LEFT JOIN FETCH os.tecnicoResponsavel " +
            "WHERE os.id = :id")
     Optional<OrdemServico> findByIdWithClienteAndMaquina(@Param("id") Long id);
-
-    Optional<OrdemServico> findByNumeroOs(String numeroOs);
 
     boolean existsByNumeroOs(String numeroOs);
 

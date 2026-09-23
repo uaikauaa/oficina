@@ -1,5 +1,5 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.dto.*;
+import com.oficinagestao.dto.SystemStatusResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

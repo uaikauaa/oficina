@@ -1,6 +1,7 @@
 package com.oficinagestao.dto;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.StatusOrdemServico;
+import com.oficinagestao.entity.TipoEquipamento;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

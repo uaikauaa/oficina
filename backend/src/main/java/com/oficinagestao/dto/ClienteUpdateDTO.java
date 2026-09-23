@@ -1,6 +1,6 @@
 package com.oficinagestao.dto;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.TipoPessoa;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;

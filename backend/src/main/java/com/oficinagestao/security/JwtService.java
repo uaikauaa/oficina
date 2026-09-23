@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class JwtService {
 
     public static final String DEFAULT_DEV_SECRET = "default-secret-key-oficina-gestao-dev-environment-2026-secure-token";
+    public static final int MIN_SECRET_LENGTH = 32;
 
     private final SecretKey secretKey;
     private final long expirationMs;
@@ -45,27 +46,30 @@ public class JwtService {
         this(secret, expirationMs, null);
     }
 
-    private void validarSecretParaAmbiente(String secret, Environment environment) {
-        boolean isProduction = false;
-        if (environment != null) {
-            isProduction = environment.acceptsProfiles(Profiles.of("prod", "production"))
-                    || "prod".equalsIgnoreCase(environment.getProperty("environment"))
-                    || "production".equalsIgnoreCase(environment.getProperty("environment"));
+    public static boolean isProductionEnvironment(Environment environment) {
+        if (environment != null && environment.acceptsProfiles(Profiles.of("prod", "production"))) {
+            return true;
         }
-        if (!isProduction) {
-            String envVar = System.getenv("ENVIRONMENT");
-            isProduction = "prod".equalsIgnoreCase(envVar)
-                    || "production".equalsIgnoreCase(envVar)
-                    || Boolean.parseBoolean(System.getenv("RENDER"))
-                    || System.getenv("RAILWAY_ENVIRONMENT") != null;
+        String envVar = System.getenv("ENVIRONMENT");
+        return "prod".equalsIgnoreCase(envVar)
+                || "production".equalsIgnoreCase(envVar)
+                || Boolean.parseBoolean(System.getenv("RENDER"))
+                || System.getenv("RAILWAY_ENVIRONMENT") != null;
+    }
+
+    public static void validarSecretParaAmbiente(String secret, Environment environment) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("FALHA DE INICIALIZAÇÃO EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): A variável de ambiente JWT_SECRET é mandatória e não foi fornecida.");
         }
 
+        boolean isProduction = isProductionEnvironment(environment);
+
         if (isProduction) {
-            if (secret == null || secret.isBlank() || DEFAULT_DEV_SECRET.equals(secret.trim())) {
-                throw new IllegalStateException("CRITICAL SECURITY CONFIGURATION ERROR: A inicialização em ambiente de produção (prod/production) requer a definição obrigatória da variável de ambiente JWT_SECRET com uma chave segura de produção. O valor padrão de desenvolvimento é estritamente proibido.");
+            if (DEFAULT_DEV_SECRET.equals(secret.trim())) {
+                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): O segredo JWT padrão de desenvolvimento foi detectado. O valor padrão de desenvolvimento é estritamente proibido em produção. Forneça uma chave secreta exclusiva via variável de ambiente JWT_SECRET.");
             }
-            if (secret.trim().length() < 32) {
-                throw new IllegalStateException("CRITICAL SECURITY CONFIGURATION ERROR: A chave JWT_SECRET em produção deve conter pelo menos 32 caracteres (256 bits).");
+            if (secret.trim().length() < MIN_SECRET_LENGTH) {
+                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): A chave JWT_SECRET em produção deve possuir no mínimo 32 caracteres (pelo menos 32 caracteres / 256 bits) para conformidade com HMAC-SHA256.");
             }
         }
     }
@@ -114,6 +118,15 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return extractClaims(token).getSubject();
+    }
+
+    public Long extractUserId(String token) {
+        Claims claims = extractClaims(token);
+        Object userId = claims.get("userId");
+        if (userId instanceof Number number) {
+            return number.longValue();
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")

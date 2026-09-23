@@ -1,6 +1,6 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.ProdutoMaquina;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

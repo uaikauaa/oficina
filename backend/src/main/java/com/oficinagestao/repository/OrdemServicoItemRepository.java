@@ -1,6 +1,7 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.OrdemServicoItem;
+import com.oficinagestao.entity.TipoItemOrdemServico;
 
 import com.oficinagestao.dto.PecaMaisUtilizadaDTO;
 import org.springframework.data.domain.Page;

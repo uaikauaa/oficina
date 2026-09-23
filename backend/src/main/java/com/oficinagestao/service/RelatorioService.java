@@ -1,10 +1,22 @@
 package com.oficinagestao.service;
 
-import com.oficinagestao.dto.*;
+import com.oficinagestao.dto.EstoqueMovimentacaoResponseDTO;
+import com.oficinagestao.dto.OrdemServicoResponseDTO;
+import com.oficinagestao.dto.PecaMaisUtilizadaDTO;
+import com.oficinagestao.dto.RelatorioClienteItemDTO;
+import com.oficinagestao.dto.RelatorioEstoqueItemDTO;
+import com.oficinagestao.dto.RelatorioMaquinaItemDTO;
+import com.oficinagestao.dto.RelatorioOsResumoDTO;
+import com.oficinagestao.dto.RelatorioOsResponseDTO;
 import com.oficinagestao.entity.Produto;
 import com.oficinagestao.entity.StatusOrdemServico;
 import com.oficinagestao.entity.TipoMovimentacaoEstoque;
-import com.oficinagestao.repository.*;
+import com.oficinagestao.repository.ClienteRepository;
+import com.oficinagestao.repository.EstoqueMovimentacaoRepository;
+import com.oficinagestao.repository.MaquinaRepository;
+import com.oficinagestao.repository.OrdemServicoItemRepository;
+import com.oficinagestao.repository.OrdemServicoRepository;
+import com.oficinagestao.repository.ProdutoRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

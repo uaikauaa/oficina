@@ -1,6 +1,7 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.EstoqueMovimentacao;
+import com.oficinagestao.entity.TipoMovimentacaoEstoque;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 
 @Repository
 public interface EstoqueMovimentacaoRepository extends JpaRepository<EstoqueMovimentacao, Long> {
@@ -50,6 +50,4 @@ public interface EstoqueMovimentacaoRepository extends JpaRepository<EstoqueMovi
             @Param("termo") String termo,
             Pageable pageable
     );
-
-    List<EstoqueMovimentacao> findByOrdemServicoId(Long ordemServicoId);
 }

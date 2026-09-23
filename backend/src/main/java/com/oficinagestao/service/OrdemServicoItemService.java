@@ -2,7 +2,13 @@ package com.oficinagestao.service;
 
 import com.oficinagestao.dto.OrdemServicoItemCreateDTO;
 import com.oficinagestao.dto.OrdemServicoItemResponseDTO;
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.EstoqueMovimentacao;
+import com.oficinagestao.entity.OrdemServico;
+import com.oficinagestao.entity.OrdemServicoItem;
+import com.oficinagestao.entity.Produto;
+import com.oficinagestao.entity.TipoItemOrdemServico;
+import com.oficinagestao.entity.TipoMovimentacaoEstoque;
+import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.exception.BusinessException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.EstoqueMovimentacaoRepository;

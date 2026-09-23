@@ -1,9 +1,11 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.FornecedorCreateDTO;
+import com.oficinagestao.dto.FornecedorResponseDTO;
+import com.oficinagestao.dto.FornecedorUpdateDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.dto.StatusUpdateDTO;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.FornecedorService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -38,11 +40,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class FornecedorController {
 
     private final FornecedorService fornecedorService;
-    private final UsuarioRepository usuarioRepository;
 
-    public FornecedorController(FornecedorService fornecedorService, UsuarioRepository usuarioRepository) {
+    public FornecedorController(FornecedorService fornecedorService) {
         this.fornecedorService = fornecedorService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping
@@ -56,7 +56,7 @@ public class FornecedorController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         FornecedorResponseDTO response = fornecedorService.cadastrar(dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -95,7 +95,7 @@ public class FornecedorController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(fornecedorService.atualizar(id, dto, usuarioId, request));
     }
 
@@ -111,16 +111,7 @@ public class FornecedorController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(fornecedorService.alterarStatus(id, dto.ativo(), usuarioId, request));
-    }
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

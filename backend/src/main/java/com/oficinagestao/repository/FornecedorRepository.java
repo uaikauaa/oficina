@@ -1,6 +1,6 @@
 package com.oficinagestao.repository;
 
-import com.oficinagestao.entity.*;
+import com.oficinagestao.entity.Fornecedor;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -5,8 +5,7 @@ import com.oficinagestao.dto.CategoriaResponseDTO;
 import com.oficinagestao.dto.CategoriaUpdateDTO;
 import com.oficinagestao.dto.PageResponse;
 import com.oficinagestao.dto.StatusUpdateDTO;
-import com.oficinagestao.entity.Usuario;
-import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.security.SecurityUtils;
 import com.oficinagestao.service.CategoriaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,11 +41,9 @@ import java.util.List;
 public class CategoriaController {
 
     private final CategoriaService categoriaService;
-    private final UsuarioRepository usuarioRepository;
 
-    public CategoriaController(CategoriaService categoriaService, UsuarioRepository usuarioRepository) {
+    public CategoriaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
-        this.usuarioRepository = usuarioRepository;
     }
 
     @PostMapping
@@ -61,7 +58,7 @@ public class CategoriaController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         CategoriaResponseDTO response = categoriaService.cadastrar(dto, usuarioId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -107,7 +104,7 @@ public class CategoriaController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(categoriaService.atualizar(id, dto, usuarioId, request));
     }
 
@@ -123,16 +120,7 @@ public class CategoriaController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         return ResponseEntity.ok(categoriaService.alterarStatus(id, dto.ativo(), usuarioId, request));
-    }
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }

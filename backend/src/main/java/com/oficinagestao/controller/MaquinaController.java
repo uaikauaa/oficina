@@ -1,9 +1,15 @@
 package com.oficinagestao.controller;
-import com.oficinagestao.repository.*;
-
-import com.oficinagestao.entity.*;
-import com.oficinagestao.dto.*;
-import com.oficinagestao.service.*;
+import com.oficinagestao.dto.MaquinaCreateDTO;
+import com.oficinagestao.dto.MaquinaResponseDTO;
+import com.oficinagestao.dto.MaquinaResumoDTO;
+import com.oficinagestao.dto.MaquinaUpdateDTO;
+import com.oficinagestao.dto.OrdemServicoResponseDTO;
+import com.oficinagestao.dto.PageResponse;
+import com.oficinagestao.dto.StatusUpdateDTO;
+import com.oficinagestao.entity.TipoEquipamento;
+import com.oficinagestao.security.IpAddressResolver;
+import com.oficinagestao.security.SecurityUtils;
+import com.oficinagestao.service.MaquinaService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,22 +41,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class MaquinaController {
 
     private final MaquinaService maquinaService;
-    private final UsuarioRepository usuarioRepository;
-    private final com.oficinagestao.security.IpAddressResolver ipAddressResolver;
+    private final IpAddressResolver ipAddressResolver;
 
     @org.springframework.beans.factory.annotation.Autowired
     public MaquinaController(
             MaquinaService maquinaService,
-            UsuarioRepository usuarioRepository,
-            com.oficinagestao.security.IpAddressResolver ipAddressResolver
+            IpAddressResolver ipAddressResolver
     ) {
         this.maquinaService = maquinaService;
-        this.usuarioRepository = usuarioRepository;
-        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new com.oficinagestao.security.IpAddressResolver();
+        this.ipAddressResolver = ipAddressResolver != null ? ipAddressResolver : new IpAddressResolver();
     }
 
-    public MaquinaController(MaquinaService maquinaService, UsuarioRepository usuarioRepository) {
-        this(maquinaService, usuarioRepository, new com.oficinagestao.security.IpAddressResolver());
+    public MaquinaController(MaquinaService maquinaService) {
+        this(maquinaService, new IpAddressResolver());
     }
 
     // =========================================================================
@@ -70,7 +73,7 @@ public class MaquinaController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         MaquinaResponseDTO response = maquinaService.criar(dto, usuarioId, ip);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -148,7 +151,7 @@ public class MaquinaController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(maquinaService.atualizar(id, dto, usuarioId, ip));
     }
@@ -163,11 +166,11 @@ public class MaquinaController {
     })
     public ResponseEntity<MaquinaResponseDTO> alterarStatus(
             @PathVariable Long id,
-            @Valid @RequestBody MaquinaStatusDTO dto,
+            @Valid @RequestBody StatusUpdateDTO dto,
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Long usuarioId = extrairUsuarioId(authentication);
+        Long usuarioId = SecurityUtils.extractUserId(authentication);
         String ip = ipAddressResolver.extrairIp(request);
         return ResponseEntity.ok(maquinaService.alterarStatus(id, dto.ativo(), usuarioId, ip));
     }
@@ -204,18 +207,5 @@ public class MaquinaController {
         return ResponseEntity.ok(
                 maquinaService.listarPorCliente(clienteId, termo, tipoEquipamento, ativo, pageable)
         );
-    }
-
-    // =========================================================================
-    // Helpers
-    // =========================================================================
-
-    private Long extrairUsuarioId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        return usuarioRepository.findByEmail(authentication.getName())
-                .map(Usuario::getId)
-                .orElse(null);
     }
 }
