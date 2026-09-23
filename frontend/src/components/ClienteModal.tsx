@@ -39,11 +39,6 @@ const clienteSchema = z.object({
   telefone: z.string().max(20).optional(),
   celular: z.string().max(20).optional(),
   email: z.string().email('E-mail inválido').max(150).or(z.literal('')).optional(),
-  codigoIbge: z
-    .string()
-    .regex(/^\d{7}$/, 'Código IBGE deve conter exatamente 7 dígitos numéricos')
-    .or(z.literal(''))
-    .optional(),
   observacoes: z.string().optional(),
   ativo: z.boolean().optional(),
   endereco: z.object({
@@ -141,7 +136,6 @@ export default function ClienteModal({
       telefone: cliente?.telefone || '',
       celular: cliente?.celular || '',
       email: cliente?.email || '',
-      codigoIbge: cliente?.codigoIbge || '',
       observacoes: cliente?.observacoes || '',
       ativo: cliente?.ativo !== undefined ? cliente.ativo : true,
       endereco: {
@@ -177,7 +171,6 @@ export default function ClienteModal({
           telefone: cliente?.telefone || '',
           celular: cliente?.celular || '',
           email: cliente?.email || '',
-          codigoIbge: cliente?.codigoIbge || '',
           observacoes: cliente?.observacoes || '',
           ativo: cliente?.ativo !== undefined ? cliente.ativo : true,
           endereco: {
@@ -666,23 +659,6 @@ export default function ClienteModal({
                       placeholder={tipoPessoaAtual === 'JURIDICA' ? 'Inscrição Estadual' : 'Número do RG'}
                       className={INPUT_CLASS}
                     />
-                  </div>
-
-                  <div>
-                    <label className={LABEL_CLASS}>
-                      Código IBGE (Município)
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={7}
-                      {...register('codigoIbge')}
-                      placeholder="Ex: 3534708 (opcional)"
-                      className={INPUT_CLASS}
-                    />
-                    {errors.codigoIbge && (
-                      <p className="text-[11px] text-red-400 mt-1">{errors.codigoIbge.message}</p>
-                    )}
-                    <p className="text-[10px] text-slate-500 mt-1">Opcional. Código IBGE do município com 7 dígitos (ex: 3534708).</p>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 /**
  * oficina.ts — Fonte central de dados da oficina Bruno Soldas
  *
- * Este arquivo é a ÚNICA fonte de verdade dos dados da oficina no frontend.
+ * Este arquivo é a ÚNICA fonte de verdade dos dados padrão da oficina no frontend.
  * Todos os componentes que precisem exibir dados da oficina devem importar
  * daqui — nunca hardcodar essas informações em outros arquivos.
  *
@@ -9,13 +9,7 @@
  * - "Oficina Gestão" = nome do SISTEMA/SOFTWARE
  * - "Bruno Soldas"   = nome fantasia/comercial da OFICINA
  *
- * Os dados abaixo são baseados na NFS-e de referência fornecida.
- * Inscrição municipal: null pois constava como "-" no documento de referência.
- *
- * PREPARAÇÃO PARA NFS-e FUTURA:
- * Os campos fiscais (cnpj, codigoIbge, codigoTributacao, etc.) estão
- * disponíveis para futura integração com emissor oficial de NFS-e.
- * O sistema NÃO emite NFS-e automaticamente.
+ * O sistema é exclusivamente comercial e operacional (não emite NFS-e).
  */
 export const OFICINA = {
   /** Nome do sistema/software. Usado em header, title, login, etc. */
@@ -24,26 +18,11 @@ export const OFICINA = {
   /** Nome fantasia/comercial da oficina. Usado em documentos, WhatsApp, etc. */
   nomeFantasia: 'Bruno Soldas',
 
-  /** Nome empresarial conforme cadastro fiscal na Receita Federal. */
+  /** Nome empresarial conforme cadastro da Receita Federal. */
   nomeEmpresarial: '45.076.507 BRUNO SOARES RODRIGUES',
 
   /** CNPJ formatado. */
   cnpj: '45.076.507/0001-67',
-
-  /**
-   * Inscrição municipal.
-   * Deixada null pois constava como "-" na NFS-e de referência.
-   */
-  inscricaoMunicipal: null as string | null,
-
-  /** Regime tributário de referência. */
-  regime: 'Simples Nacional / MEI',
-
-  /**
-   * Código de tributação de serviço conforme NFS-e de referência.
-   * Não deve ser assumido como padrão fixo para todas as emissões futuras.
-   */
-  codigoTributacaoServico: '14.01.01',
 
   /** Responsável/proprietária da oficina (dado administrativo). */
   responsavel: 'Geisa',
@@ -51,7 +30,7 @@ export const OFICINA = {
   /** Telefone de contato. */
   telefone: '(14) 9886-7223',
 
-  /** E-mail de contato (preservado em maiúsculas conforme NFS-e de referência). */
+  /** E-mail de contato. */
   email: 'INDUTECSERVICE@HOTMAIL.COM',
 
   // --- Endereço ---
@@ -61,12 +40,6 @@ export const OFICINA = {
   cep: '19.914-080',
   municipio: 'Ourinhos',
   uf: 'SP',
-
-  /**
-   * Código IBGE do município conforme constou na NFS-e de referência.
-   * Preservado exatamente como apresentado no documento.
-   */
-  codigoIbge: '35.34708',
 } as const;
 
 /** Endereço completo formatado para uso em documentos e telas. */

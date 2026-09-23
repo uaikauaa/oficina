@@ -348,13 +348,6 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                     </span>
                   )}
 
-                  {cliente.codigoIbge && (
-                    <span className="inline-flex items-center gap-1 font-mono">
-                      <span className="text-slate-500">IBGE:</span>
-                      <strong className="text-slate-200">{cliente.codigoIbge}</strong>
-                    </span>
-                  )}
-
                   <span className="inline-flex items-center gap-1 text-slate-500">
                     <Clock className="w-3.5 h-3.5" />
                     <span>ID #{cliente.id}</span>
@@ -497,16 +490,10 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                     {enderecoPrincipal.cidade} / {enderecoPrincipal.estado}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-800/60">
+                <div className="flex items-center justify-between py-2">
                   <span className="text-slate-400">CEP:</span>
                   <span className="text-slate-200 font-medium">{formatarCep(enderecoPrincipal.cep)}</span>
                 </div>
-                {cliente.codigoIbge && (
-                  <div className="flex items-center justify-between py-2 border-b border-slate-800/60">
-                    <span className="text-slate-400">Código IBGE (Município):</span>
-                    <span className="text-slate-200 font-mono font-medium">{cliente.codigoIbge}</span>
-                  </div>
-                )}
               </div>
             ) : (
               <p className="text-xs text-slate-500 py-4">Nenhum endereço cadastrado para este cliente.</p>

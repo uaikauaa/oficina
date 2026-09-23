@@ -21,18 +21,6 @@ public record ConfiguracaoOficinaResponseDTO(
         /** CNPJ. Ex: "45.076.507/0001-67" */
         String cnpj,
 
-        /** Inscrição municipal (pode ser null) */
-        String inscricaoMunicipal,
-
-        /** Regime tributário de referência. Ex: "Simples Nacional / MEI" */
-        String regimeTributario,
-
-        /**
-         * Código de tributação de referência baseado na NFS-e.
-         * Não deve ser assumido como padrão fixo para todas as emissões futuras.
-         */
-        String codigoTributacaoServico,
-
         /** Nome do responsável/proprietário (dado administrativo) */
         String responsavel,
 
@@ -44,9 +32,6 @@ public record ConfiguracaoOficinaResponseDTO(
         String cep,
         String municipio,
         String uf,
-
-        /** Código IBGE do município conforme NFS-e de referência. Ex: "35.34708" */
-        String codigoIbge,
 
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt

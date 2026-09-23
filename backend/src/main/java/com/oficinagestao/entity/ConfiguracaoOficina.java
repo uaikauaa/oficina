@@ -6,13 +6,12 @@ import java.time.OffsetDateTime;
 /**
  * Configuração centralizada da oficina.
  *
- * Armazena os dados cadastrais, comerciais e fiscais de referência da oficina.
+ * Armazena os dados cadastrais e comerciais de referência da oficina.
  * Esta entidade é um SINGLETON: existe exatamente um registro na tabela.
  *
  * IMPORTANTE: Este registro NÃO emite NFS-e. Serve como:
- * 1. Fonte de dados para documentos comerciais (PDF da OS, Documento de Serviço, etc.)
- * 2. Referência fiscal para futura integração com emissor oficial de NFS-e.
- * 3. Configuração editável pelo administrador do sistema.
+ * 1. Fonte de dados para documentos comerciais (PDF da OS, Documento de Serviço, Recibo, etc.)
+ * 2. Configuração editável pelo administrador do sistema.
  */
 @Entity
 @Table(name = "configuracao_oficina")
@@ -37,22 +36,6 @@ public class ConfiguracaoOficina {
     /** CNPJ da oficina. Ex: "45.076.507/0001-67" */
     @Column(name = "cnpj", length = 20)
     private String cnpj;
-
-    /** Inscrição municipal. Pode ser NULL caso não informado. */
-    @Column(name = "inscricao_municipal", length = 50)
-    private String inscricaoMunicipal;
-
-    /** Regime tributário de referência. Ex: "Simples Nacional / MEI" */
-    @Column(name = "regime_tributario", length = 100)
-    private String regimeTributario;
-
-    /**
-     * Código de tributação nacional/municipal de referência.
-     * Baseado na NFS-e de referência fornecida. Ex: "14.01.01"
-     * ATENÇÃO: Não assumir que este código deve ser usado obrigatoriamente em todas as emissões futuras.
-     */
-    @Column(name = "codigo_tributacao_servico", length = 20)
-    private String codigoTributacaoServico;
 
     /** Nome do responsável/proprietário da oficina (dado administrativo). Ex: "Geisa" */
     @Column(name = "responsavel", length = 200)
@@ -90,13 +73,6 @@ public class ConfiguracaoOficina {
     @Column(name = "uf", length = 2)
     private String uf;
 
-    /**
-     * Código IBGE do município conforme constou na NFS-e de referência.
-     * Ex: "35.34708" — preservado exatamente como apresentado no documento.
-     */
-    @Column(name = "codigo_ibge", length = 20)
-    private String codigoIbge;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -122,9 +98,6 @@ public class ConfiguracaoOficina {
             String nomeFantasia,
             String nomeEmpresarial,
             String cnpj,
-            String inscricaoMunicipal,
-            String regimeTributario,
-            String codigoTributacaoServico,
             String responsavel,
             String telefone,
             String email,
@@ -133,16 +106,12 @@ public class ConfiguracaoOficina {
             String bairro,
             String cep,
             String municipio,
-            String uf,
-            String codigoIbge
+            String uf
     ) {
         this.nomeSistema = nomeSistema;
         this.nomeFantasia = nomeFantasia;
         this.nomeEmpresarial = nomeEmpresarial;
         this.cnpj = cnpj;
-        this.inscricaoMunicipal = inscricaoMunicipal;
-        this.regimeTributario = regimeTributario;
-        this.codigoTributacaoServico = codigoTributacaoServico;
         this.responsavel = responsavel;
         this.telefone = telefone;
         this.email = email;
@@ -152,7 +121,6 @@ public class ConfiguracaoOficina {
         this.cep = cep;
         this.municipio = municipio;
         this.uf = uf;
-        this.codigoIbge = codigoIbge;
     }
 
     // --- Getters e Setters ---
@@ -170,15 +138,6 @@ public class ConfiguracaoOficina {
 
     public String getCnpj() { return cnpj; }
     public void setCnpj(String cnpj) { this.cnpj = cnpj; }
-
-    public String getInscricaoMunicipal() { return inscricaoMunicipal; }
-    public void setInscricaoMunicipal(String inscricaoMunicipal) { this.inscricaoMunicipal = inscricaoMunicipal; }
-
-    public String getRegimeTributario() { return regimeTributario; }
-    public void setRegimeTributario(String regimeTributario) { this.regimeTributario = regimeTributario; }
-
-    public String getCodigoTributacaoServico() { return codigoTributacaoServico; }
-    public void setCodigoTributacaoServico(String codigoTributacaoServico) { this.codigoTributacaoServico = codigoTributacaoServico; }
 
     public String getResponsavel() { return responsavel; }
     public void setResponsavel(String responsavel) { this.responsavel = responsavel; }
@@ -206,9 +165,6 @@ public class ConfiguracaoOficina {
 
     public String getUf() { return uf; }
     public void setUf(String uf) { this.uf = uf; }
-
-    public String getCodigoIbge() { return codigoIbge; }
-    public void setCodigoIbge(String codigoIbge) { this.codigoIbge = codigoIbge; }
 
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

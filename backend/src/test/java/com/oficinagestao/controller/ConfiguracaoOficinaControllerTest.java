@@ -33,9 +33,6 @@ class ConfiguracaoOficinaControllerTest {
                 "Bruno Soldas",
                 "45.076.507 BRUNO SOARES RODRIGUES",
                 "45.076.507/0001-67",
-                null,
-                "Simples Nacional / MEI",
-                "14.01.01",
                 "Geisa",
                 "(14) 9886-7223",
                 "INDUTECSERVICE@HOTMAIL.COM",
@@ -45,7 +42,6 @@ class ConfiguracaoOficinaControllerTest {
                 "19.914-080",
                 "Ourinhos",
                 "SP",
-                "35.34708",
                 OffsetDateTime.now(),
                 OffsetDateTime.now()
         );
@@ -75,9 +71,6 @@ class ConfiguracaoOficinaControllerTest {
                 "Bruno Soldas",
                 "45.076.507 BRUNO SOARES RODRIGUES",
                 "45.076.507/0001-67",
-                null,
-                "Simples Nacional / MEI",
-                "14.01.01",
                 "Geisa",
                 "(14) 9886-7223",
                 "INDUTECSERVICE@HOTMAIL.COM",
@@ -86,8 +79,7 @@ class ConfiguracaoOficinaControllerTest {
                 "Vila Sandano",
                 "19.914-080",
                 "Ourinhos",
-                "SP",
-                "35.34708"
+                "SP"
         );
 
         ConfiguracaoOficinaResponseDTO responseDto = criarDtoExemplo();

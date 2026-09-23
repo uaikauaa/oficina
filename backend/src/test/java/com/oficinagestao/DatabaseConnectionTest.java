@@ -47,25 +47,25 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V13 foram aplicadas e as tabelas essenciais existem")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V15 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("13", current.getVersion().getVersion(), "A versão atual da migration deve ser 13.");
-        assertEquals("create fiscal dps and tomador ibge", current.getDescription());
+        assertEquals("15", current.getVersion().getVersion(), "A versão atual da migration deve ser 15.");
+        assertEquals("remove cliente codigo ibge", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 18 tabelas no banco de dados (16 anteriores + dps_numeracao + dps_fiscal)
+        // Validar existência das 16 tabelas essenciais no banco de dados (sem as tabelas fiscais removidas)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens", "configuracao_oficina", "dps_numeracao", "dps_fiscal");
+                "refresh_tokens", "configuracao_oficina");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {
@@ -80,8 +80,25 @@ class DatabaseConnectionTest {
 
             for (String table : expectedTables) {
                 assertTrue(existingTables.contains(table),
-                        "A tabela '" + table + "' deveria ter sido criada pela migration Flyway.");
+                        "A tabela '" + table + "' deveria existir no banco de dados.");
             }
+
+            // Validar que tabelas fiscais foram devidamente removidas pela V14
+            assertFalse(existingTables.contains("dps_fiscal"),
+                    "A tabela 'dps_fiscal' deve ter sido removida pela migration V14.");
+            assertFalse(existingTables.contains("dps_numeracao"),
+                    "A tabela 'dps_numeracao' deve ter sido removida pela migration V14.");
+
+            // Validar que a coluna codigo_ibge foi removida da tabela clientes pela migration V15
+            List<String> colunasClientes = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'clientes'")) {
+                while (rs.next()) {
+                    colunasClientes.add(rs.getString("column_name").toLowerCase());
+                }
+            }
+            assertFalse(colunasClientes.contains("codigo_ibge"),
+                    "A coluna 'codigo_ibge' deve ter sido removida de 'clientes' pela migration V15.");
         }
     }
 

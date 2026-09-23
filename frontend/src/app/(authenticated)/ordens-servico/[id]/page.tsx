@@ -48,7 +48,6 @@ import {
   OrdemServicoItemFormData,
   Produto,
   PageResponse,
-  DpsFiscalResponseDTO,
 } from '@/lib/types';
 import {
   apiFetch,
@@ -178,11 +177,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   }, [osId]);
 
-  // Estados da DPS Fiscal (Preparação Fase 6.3)
-  const [dps, setDps] = useState<DpsFiscalResponseDTO | null>(null);
-  const [isLoadingDps, setIsLoadingDps] = useState(false);
-  const [isPreparandoDps, setIsPreparandoDps] = useState(false);
-
   // Carrega Itens da OS
   const fetchItens = useCallback(async () => {
     setIsLoadingItens(true);
@@ -196,60 +190,13 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   }, [osId]);
 
-  // Carrega DPS da OS
-  const fetchDps = useCallback(async () => {
-    setIsLoadingDps(true);
-    try {
-      const res = await apiFetch(`/api/dps/os/${osId}`);
-      if (res.ok) {
-        const data: DpsFiscalResponseDTO = await res.json();
-        setDps(data);
-      } else {
-        setDps(null);
-      }
-    } catch {
-      setDps(null);
-    } finally {
-      setIsLoadingDps(false);
-    }
-  }, [osId]);
-
-  const handlePrepararDps = async () => {
-    if (!os) return;
-    setIsPreparandoDps(true);
-    try {
-      const res = await apiFetch('/api/dps/preparar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ordemServicoId: os.id,
-          serie: '1',
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Falha ao preparar DPS.');
-      }
-
-      const novaDps: DpsFiscalResponseDTO = await res.json();
-      setDps(novaDps);
-      showToast('success', `DPS Série ${novaDps.serie} Nº ${novaDps.numero} preparada com sucesso!`);
-    } catch (err: unknown) {
-      showToast('error', err instanceof Error ? err.message : 'Erro ao preparar DPS.');
-    } finally {
-      setIsPreparandoDps(false);
-    }
-  };
-
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchOs();
       fetchItens();
-      fetchDps();
     }, 0);
     return () => clearTimeout(timer);
-  }, [fetchOs, fetchItens, fetchDps]);
+  }, [fetchOs, fetchItens]);
 
   // Lazy loading do histórico da máquina ao acessar a aba correspondente
   const carregarHistoricoMaquina = useCallback(async (maquinaId: number) => {
@@ -952,93 +899,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
               )}
             </div>
 
-            {/* Card 5: Documento Fiscal (DPS / NFS-e) - Preparação Fase 6.3 */}
-            <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Receipt className="w-3.5 h-3.5 text-indigo-400" />
-                  Documento Fiscal (DPS / NFS-e)
-                </span>
-                {dps ? (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    {dps.status}
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">
-                    Não preparado
-                  </span>
-                )}
-              </div>
-
-              {isLoadingDps ? (
-                <div className="py-2 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                  <span>Verificando DPS...</span>
-                </div>
-              ) : dps ? (
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Série / Número:</span>
-                    <strong className="text-white font-mono">{dps.serie} / #{dps.numero}</strong>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Data Preparação:</span>
-                    <span className="text-slate-300">{formatarDataHora(dps.dataEmissao)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Valor do Serviço:</span>
-                    <span className="font-semibold text-emerald-400">{formatarMoeda(dps.valorServico)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>Cód. Tributação:</span>
-                    <span className="font-mono text-slate-300">{dps.codigoTributacaoServico}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-slate-400">
-                    <span>IBGE Tomador:</span>
-                    <span className="font-mono text-slate-300">{dps.tomadorCodigoIbge || 'Não informado'}</span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-800/80">
-                    <p className="text-[10px] text-amber-400/90 leading-relaxed bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
-                      Registro de DPS preparado para futura transmissão. Emissão real de NFS-e não habilitada nesta fase.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full py-1.5 px-3 rounded-lg bg-slate-800 text-slate-500 text-xs font-semibold border border-slate-700 cursor-not-allowed opacity-75"
-                    title="Emissão fiscal real desativada nesta fase"
-                  >
-                    Transmitir NFS-e Nacional (Em breve)
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    Gera o registro técnico preparatório da DPS vinculada a esta Ordem de Serviço e ao tomador, alocando a numeração sequencial segura.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handlePrepararDps}
-                    disabled={isPreparandoDps}
-                    className="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-                  >
-                    {isPreparandoDps ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Preparando DPS...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Receipt className="w-3.5 h-3.5" />
-                        <span>Preparar DPS</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* ========================================================================= */}

@@ -3,7 +3,6 @@ package com.oficinagestao.service;
 import com.oficinagestao.entity.OrdemServico;
 import com.oficinagestao.entity.OrdemServicoItem;
 import com.oficinagestao.entity.Produto;
-import com.oficinagestao.entity.TipoItemOrdemServico;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

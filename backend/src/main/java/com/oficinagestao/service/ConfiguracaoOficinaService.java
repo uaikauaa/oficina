@@ -11,16 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Serviço de gerenciamento da configuração central da oficina.
  *
  * A configuração da oficina é um SINGLETON: existe exatamente um registro.
- * Ela contém os dados comerciais e fiscais de referência da oficina.
+ * Ela contém os dados comerciais e de contato de referência da oficina.
  *
  * USO NOS DOCUMENTOS:
- * - PDFs da OS e Documento de Serviço utilizam nomeFantasia, telefone, email, etc.
+ * - PDFs da OS, Recibo e Documento de Serviço utilizam nomeFantasia, telefone, email, etc.
  * - Mensagens de WhatsApp utilizam nomeFantasia como fallback.
- *
- * PREPARAÇÃO PARA NFS-e:
- * - Os campos fiscais (cnpj, inscricaoMunicipal, regime, codigoTributacao, codigoIbge)
- *   ficam disponíveis para futura integração com emissor oficial de NFS-e.
- * - NÃO são calculados nem validados tributariamente pelo sistema.
  */
 @Service
 @Transactional(readOnly = true)
@@ -59,9 +54,6 @@ public class ConfiguracaoOficinaService {
                 "Bruno Soldas",
                 "45.076.507 BRUNO SOARES RODRIGUES",
                 "45.076.507/0001-67",
-                null,
-                "Simples Nacional / MEI",
-                "14.01.01",
                 "Geisa",
                 "(14) 9886-7223",
                 "INDUTECSERVICE@HOTMAIL.COM",
@@ -70,8 +62,7 @@ public class ConfiguracaoOficinaService {
                 "Vila Sandano",
                 "19.914-080",
                 "Ourinhos",
-                "SP",
-                "35.34708"
+                "SP"
         );
     }
 
@@ -90,15 +81,6 @@ public class ConfiguracaoOficinaService {
         }
         if (dto.cnpj() != null) {
             config.setCnpj(dto.cnpj().isBlank() ? null : dto.cnpj().trim());
-        }
-        if (dto.inscricaoMunicipal() != null) {
-            config.setInscricaoMunicipal(dto.inscricaoMunicipal().isBlank() ? null : dto.inscricaoMunicipal().trim());
-        }
-        if (dto.regimeTributario() != null) {
-            config.setRegimeTributario(dto.regimeTributario().isBlank() ? null : dto.regimeTributario().trim());
-        }
-        if (dto.codigoTributacaoServico() != null) {
-            config.setCodigoTributacaoServico(dto.codigoTributacaoServico().isBlank() ? null : dto.codigoTributacaoServico().trim());
         }
         if (dto.responsavel() != null) {
             config.setResponsavel(dto.responsavel().isBlank() ? null : dto.responsavel().trim());
@@ -127,9 +109,6 @@ public class ConfiguracaoOficinaService {
         if (dto.uf() != null) {
             config.setUf(dto.uf().isBlank() ? null : dto.uf().trim().toUpperCase());
         }
-        if (dto.codigoIbge() != null) {
-            config.setCodigoIbge(dto.codigoIbge().isBlank() ? null : dto.codigoIbge().trim());
-        }
 
         ConfiguracaoOficina salvo = repository.save(config);
         return toResponseDTO(salvo);
@@ -144,9 +123,6 @@ public class ConfiguracaoOficinaService {
                 c.getNomeFantasia(),
                 c.getNomeEmpresarial(),
                 c.getCnpj(),
-                c.getInscricaoMunicipal(),
-                c.getRegimeTributario(),
-                c.getCodigoTributacaoServico(),
                 c.getResponsavel(),
                 c.getTelefone(),
                 c.getEmail(),
@@ -156,7 +132,6 @@ public class ConfiguracaoOficinaService {
                 c.getCep(),
                 c.getMunicipio(),
                 c.getUf(),
-                c.getCodigoIbge(),
                 c.getCreatedAt(),
                 c.getUpdatedAt()
         );

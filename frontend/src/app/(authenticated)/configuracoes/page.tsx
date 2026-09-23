@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Settings, Building2, Phone, MapPin, FileText, Shield, Save, RefreshCw, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings, Building2, Phone, MapPin, Shield, Save, RefreshCw, Info } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { OFICINA } from '@/lib/oficina';
 
@@ -11,9 +11,6 @@ interface ConfiguracaoOficina {
   nomeFantasia: string;
   nomeEmpresarial: string | null;
   cnpj: string | null;
-  inscricaoMunicipal: string | null;
-  regimeTributario: string | null;
-  codigoTributacaoServico: string | null;
   responsavel: string | null;
   telefone: string | null;
   email: string | null;
@@ -23,7 +20,6 @@ interface ConfiguracaoOficina {
   cep: string | null;
   municipio: string | null;
   uf: string | null;
-  codigoIbge: string | null;
   updatedAt: string;
 }
 
@@ -46,15 +42,11 @@ export default function ConfiguracoesPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [showFiscal, setShowFiscal] = useState(false);
 
   const [form, setForm] = useState({
     nomeFantasia: '',
     nomeEmpresarial: '',
     cnpj: '',
-    inscricaoMunicipal: '',
-    regimeTributario: '',
-    codigoTributacaoServico: '',
     responsavel: '',
     telefone: '',
     email: '',
@@ -64,7 +56,6 @@ export default function ConfiguracoesPage() {
     cep: '',
     municipio: '',
     uf: '',
-    codigoIbge: '',
   });
 
   useEffect(() => {
@@ -83,9 +74,6 @@ export default function ConfiguracoesPage() {
         nomeFantasia: data.nomeFantasia || '',
         nomeEmpresarial: data.nomeEmpresarial || '',
         cnpj: data.cnpj || '',
-        inscricaoMunicipal: data.inscricaoMunicipal || '',
-        regimeTributario: data.regimeTributario || '',
-        codigoTributacaoServico: data.codigoTributacaoServico || '',
         responsavel: data.responsavel || '',
         telefone: data.telefone || '',
         email: data.email || '',
@@ -95,7 +83,6 @@ export default function ConfiguracoesPage() {
         cep: data.cep || '',
         municipio: data.municipio || '',
         uf: data.uf || '',
-        codigoIbge: data.codigoIbge || '',
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar configuração.');
@@ -114,7 +101,6 @@ export default function ConfiguracoesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          inscricaoMunicipal: form.inscricaoMunicipal || null,
           nomeEmpresarial: form.nomeEmpresarial || null,
           cnpj: form.cnpj || null,
         }),
@@ -141,9 +127,6 @@ export default function ConfiguracoesPage() {
         nomeFantasia: config.nomeFantasia || '',
         nomeEmpresarial: config.nomeEmpresarial || '',
         cnpj: config.cnpj || '',
-        inscricaoMunicipal: config.inscricaoMunicipal || '',
-        regimeTributario: config.regimeTributario || '',
-        codigoTributacaoServico: config.codigoTributacaoServico || '',
         responsavel: config.responsavel || '',
         telefone: config.telefone || '',
         email: config.email || '',
@@ -153,7 +136,6 @@ export default function ConfiguracoesPage() {
         cep: config.cep || '',
         municipio: config.municipio || '',
         uf: config.uf || '',
-        codigoIbge: config.codigoIbge || '',
       });
     }
     setEditMode(false);
@@ -202,7 +184,7 @@ export default function ConfiguracoesPage() {
           <div>
             <h1 className="text-lg font-bold text-white">Configurações da Oficina</h1>
             <p className="text-sm text-slate-400 mt-0.5">
-              Dados comerciais e fiscais de referência — usados nos documentos da oficina
+              Dados comerciais de referência — usados nos documentos da oficina
             </p>
           </div>
         </div>
@@ -233,8 +215,7 @@ export default function ConfiguracoesPage() {
           <strong>Sistema:</strong> {OFICINA.nomeSistema} &nbsp;•&nbsp;
           <strong>Oficina:</strong> {config?.nomeFantasia || OFICINA.nomeFantasia}
           <br />
-          Os dados abaixo são utilizados nos documentos comerciais da oficina (PDF da OS, Documento de Serviço, mensagens do WhatsApp).
-          O sistema <strong>não emite NFS-e automaticamente</strong> — os dados fiscais são de referência para futura integração oficial.
+          Os dados abaixo são utilizados nos documentos comerciais da oficina (PDF da OS, Recibo, Documento de Serviço, mensagens do WhatsApp).
         </p>
       </div>
 
@@ -387,63 +368,6 @@ export default function ConfiguracoesPage() {
             <Campo label="CEP" valor={config?.cep} />
             <Campo label="Município" valor={config?.municipio} />
             <Campo label="UF" valor={config?.uf} />
-          </div>
-        )}
-      </div>
-
-      {/* Seção 4: Dados Fiscais (expansível) */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden">
-        <button
-          onClick={() => setShowFiscal(!showFiscal)}
-          className="w-full flex items-center justify-between gap-2 p-5 text-slate-200 font-semibold hover:bg-slate-800/40 transition-all"
-        >
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-amber-400" />
-            <span>Dados Fiscais de Referência</span>
-            <span className="text-xs text-slate-500 font-normal ml-1">(para futura integração NFS-e)</span>
-          </div>
-          {showFiscal ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
-        </button>
-
-        {showFiscal && (
-          <div className="px-5 pb-5 space-y-4 border-t border-slate-800">
-            <div className="mt-4 p-3 bg-amber-950/20 border border-amber-500/20 rounded-lg flex items-start gap-2">
-              <Info className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-              <p className="text-xs text-amber-300/80 leading-relaxed">
-                Estes dados são armazenados para <strong>futura integração com emissor oficial de NFS-e</strong>.
-                O sistema Oficina Gestão <strong>não emite notas fiscais automaticamente</strong>.
-                Os dados são de referência comercial e cadastral. A Inscrição Municipal é opcional — confirme com o contador/prefeitura caso aplicável.
-              </p>
-            </div>
-
-            {editMode ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1 font-medium">Inscrição Municipal</label>
-                  <p className="text-[11px] text-slate-500 mb-1.5">Opcional — confirme com o contador/prefeitura caso aplicável.</p>
-                  <input className={inputClass} value={form.inscricaoMunicipal} onChange={e => setForm(f => ({ ...f, inscricaoMunicipal: e.target.value }))} placeholder="Deixar vazio se não informado" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1.5 font-medium">Regime Tributário</label>
-                  <input className={inputClass} value={form.regimeTributario} onChange={e => setForm(f => ({ ...f, regimeTributario: e.target.value }))} placeholder="Ex: Simples Nacional / MEI" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1.5 font-medium">Código de Tributação (Ref.)</label>
-                  <input className={inputClass} value={form.codigoTributacaoServico} onChange={e => setForm(f => ({ ...f, codigoTributacaoServico: e.target.value }))} placeholder="Ex: 14.01.01" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-400 mb-1.5 font-medium">Código IBGE do Município</label>
-                  <input className={inputClass} value={form.codigoIbge} onChange={e => setForm(f => ({ ...f, codigoIbge: e.target.value }))} placeholder="Ex: 35.34708" />
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Campo label="Inscrição Municipal" valor={config?.inscricaoMunicipal || 'Não informada (opcional)'} />
-                <Campo label="Regime Tributário" valor={config?.regimeTributario} />
-                <Campo label="Código de Tributação (Ref.)" valor={config?.codigoTributacaoServico} />
-                <Campo label="Código IBGE do Município" valor={config?.codigoIbge} />
-              </div>
-            )}
           </div>
         )}
       </div>

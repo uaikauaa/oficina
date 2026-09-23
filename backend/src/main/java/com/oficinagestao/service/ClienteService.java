@@ -170,7 +170,6 @@ public class ClienteService {
                 cliente.getEmail(),
                 cliente.getAtivo(),
                 cliente.getObservacoes(),
-                cliente.getCodigoIbge(),
                 enderecosDTO,
                 totalEquipamentos,
                 cliente.getCreatedAt(),
@@ -257,8 +256,6 @@ public class ClienteService {
                 dto.observacoes()
         );
 
-        cliente.setCodigoIbge(dto.codigoIbge() != null && !dto.codigoIbge().isBlank() ? dto.codigoIbge().trim() : null);
-
         if (dto.endereco() != null && dto.endereco().logradouro() != null && !dto.endereco().logradouro().isBlank()) {
             Endereco endereco = toEnderecoEntity(dto.endereco());
             cliente.adicionarEndereco(endereco);
@@ -283,7 +280,6 @@ public class ClienteService {
             cliente.setAtivo(dto.ativo());
         }
         cliente.setObservacoes(dto.observacoes());
-        cliente.setCodigoIbge(dto.codigoIbge() != null && !dto.codigoIbge().isBlank() ? dto.codigoIbge().trim() : null);
 
         if (dto.endereco() != null && dto.endereco().logradouro() != null && !dto.endereco().logradouro().isBlank()) {
             if (!cliente.getEnderecos().isEmpty()) {

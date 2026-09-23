@@ -56,9 +56,6 @@ public class Cliente {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @Column(name = "codigo_ibge", length = 20)
-    private String codigoIbge;
-
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Endereco> enderecos = new ArrayList<>();
 
@@ -208,14 +205,6 @@ public class Cliente {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
-    }
-
-    public String getCodigoIbge() {
-        return codigoIbge;
-    }
-
-    public void setCodigoIbge(String codigoIbge) {
-        this.codigoIbge = codigoIbge;
     }
 
     public List<Endereco> getEnderecos() {
