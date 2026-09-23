@@ -333,4 +333,45 @@ class OrdemServicoControllerTest {
                 .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
                 .andExpect(jsonPath("$.content[0].maquinaId").value(maquinaCliente1.getId()));
     }
+
+    // =========================================================================
+    // FASE 6.4.1 — ENDPOINT DO RECIBO (TESTES 3, 12 e 13)
+    // =========================================================================
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 12 e 13: GET /api/ordens-servico/{id}/recibo com autenticação gera PDF com filename RECIBO-OS-... e Content-Type application/pdf")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void gerarRecibo_comSucesso() throws Exception {
+        OrdemServico os = new OrdemServico();
+        os.setNumeroOs("OS-REC-001");
+        os.setCliente(cliente1);
+        os.setMaquina(maquinaCliente1);
+        os.setProblemaRelatado("Teste recibo endpoint");
+        os.setStatus(StatusOrdemServico.CONCLUIDA);
+        os.setValorMaoObra(new BigDecimal("150.00"));
+        os.setValorPecas(BigDecimal.ZERO);
+        os.setValorDesconto(BigDecimal.ZERO);
+        os.setValorTotal(new BigDecimal("150.00"));
+        os = ordemServicoRepository.save(os);
+
+        mockMvc.perform(get("/api/ordens-servico/{id}/recibo", os.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/pdf"))
+                .andExpect(header().string("Content-Disposition", containsString("RECIBO-OS-OS-REC-001.pdf")));
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 3: GET /api/ordens-servico/{id}/recibo para OS inexistente retorna 404 Not Found")
+    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    void gerarRecibo_osInexistente_deveRetornar404() throws Exception {
+        mockMvc.perform(get("/api/ordens-servico/{id}/recibo", 999999L))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1: GET /api/ordens-servico/{id}/recibo sem autenticação retorna 401 Unauthorized")
+    void gerarRecibo_semAutenticacao_deveRetornar401() throws Exception {
+        mockMvc.perform(get("/api/ordens-servico/{id}/recibo", 1L))
+                .andExpect(status().isUnauthorized());
+    }
 }

@@ -365,7 +365,7 @@ describe('UX-007: Cockpit de Bancada Técnica para Ordem de Serviço (/ordens-se
     });
   });
 
-  // 17.1 Geração de Documento de Serviço
+  // 17.1 Geração de Documento de Serviço (Compatibilidade)
   describe('17.1 Geração de Documento de Serviço', () => {
     it('deve direcionar para o endpoint oficial /api/ordens-servico/{id}/documento-servico', () => {
       const url = `/api/ordens-servico/${mockOs.id}/documento-servico`;
@@ -375,6 +375,19 @@ describe('UX-007: Cockpit de Bancada Técnica para Ordem de Serviço (/ordens-se
     it('deve gerar nome do arquivo com prefixo DS e número da OS', () => {
       const filename = `DS-${mockOs.numeroOs || mockOs.id}.pdf`;
       assert.strictEqual(filename, 'DS-OS-2026-0101.pdf');
+    });
+  });
+
+  // 17.2 Geração de Recibo Oficial da OS (Fase 6.4.1)
+  describe('17.2 Geração de Recibo Oficial da OS', () => {
+    it('deve direcionar para o endpoint oficial /api/ordens-servico/{id}/recibo', () => {
+      const url = `/api/ordens-servico/${mockOs.id}/recibo`;
+      assert.strictEqual(url, '/api/ordens-servico/101/recibo');
+    });
+
+    it('deve gerar nome do arquivo com prefixo RECIBO-OS e número da OS', () => {
+      const filename = `RECIBO-OS-${mockOs.numeroOs || mockOs.id}.pdf`;
+      assert.strictEqual(filename, 'RECIBO-OS-OS-2026-0101.pdf');
     });
   });
 

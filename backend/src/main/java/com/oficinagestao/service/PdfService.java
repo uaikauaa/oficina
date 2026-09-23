@@ -501,10 +501,26 @@ public class PdfService {
     private static final Font DS_FONT_AVISO        = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, new Color(180, 83, 9));
 
     /**
+     * Gera o Recibo de Prestação de Serviços — comprovante comercial oficial da Bruno Soldas referente à Ordem de Serviço.
+     * Este documento NÃO possui validade fiscal e NÃO substitui a NFS-e.
+     */
+    public byte[] gerarReciboOsPdf(OrdemServico os, List<OrdemServicoItem> itens) {
+        return gerarDocumentoComercialPdf(os, itens, true);
+    }
+
+    /**
      * Gera o Documento de Serviço — comprovante comercial interno da prestação de serviço.
-     * Este documento NÃO possui validade fiscal e NÃO é uma Nota Fiscal.
+     * Mantido para total retrocompatibilidade, compartilhando a mesma infraestrutura do Recibo.
      */
     public byte[] gerarDocumentoServicoPdf(OrdemServico os, List<OrdemServicoItem> itens) {
+        return gerarDocumentoComercialPdf(os, itens, false);
+    }
+
+    /**
+     * Método central de composição de documentos comerciais em PDF vetorial A4.
+     * Reutiliza 100% dos helpers de layout, fontes, dados de cliente, máquina, serviços e valores da OS.
+     */
+    private byte[] gerarDocumentoComercialPdf(OrdemServico os, List<OrdemServicoItem> itens, boolean isRecibo) {
         ConfiguracaoOficina config = configuracaoOficinaService.obterEntidade();
         Document document = new Document(PageSize.A4, 24, 24, 24, 24);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -513,19 +529,20 @@ public class PdfService {
             PdfWriter.getInstance(document, out);
             document.open();
 
-            dsAdicionarCabecalho(document, os, config);
+            dsAdicionarCabecalho(document, os, config, isRecibo);
             dsAdicionarDadosCliente(document, os.getCliente());
             dsAdicionarDadosEquipamento(document, os.getMaquina(), os.getHorimetroAtual());
             dsAdicionarServicosRealizados(document, os);
             dsAdicionarTabelaPecas(document, itens);
             dsAdicionarResumoFinanceiro(document, os);
             dsAdicionarInformacoesOs(document, os);
-            dsAdicionarAssinaturas(document, os, config);
+            dsAdicionarAssinaturas(document, os, config, isRecibo);
 
             document.close();
             return out.toByteArray();
         } catch (DocumentException e) {
-            throw new RuntimeException("Erro ao gerar Documento de Serviço: " + e.getMessage(), e);
+            String tipoDoc = isRecibo ? "Recibo da Ordem de Serviço" : "Documento de Serviço";
+            throw new RuntimeException("Erro ao gerar " + tipoDoc + ": " + e.getMessage(), e);
         }
     }
 
@@ -542,15 +559,17 @@ public class PdfService {
         return sb.isEmpty() ? "" : sb.toString();
     }
 
-    private void dsAdicionarCabecalho(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
+    private void dsAdicionarCabecalho(Document document, OrdemServico os, ConfiguracaoOficina config, boolean isRecibo) throws DocumentException {
         // Linha superior: banner de identificação comercial
         PdfPTable bannerTable = new PdfPTable(1);
         bannerTable.setWidthPercentage(100);
         bannerTable.setSpacingAfter(6);
-        PdfPCell bannerCell = new PdfPCell(new Phrase(
-                "DOCUMENTO DE SERVIÇO — COMPROVANTE COMERCIAL DE PRESTAÇÃO DE SERVIÇOS  •  " +
-                "Comprovante de atendimento para simples conferência. Sem valor tributário.",
-                DS_FONT_AVISO));
+        String textoBanner = isRecibo
+                ? "RECIBO DE PRESTAÇÃO DE SERVIÇOS — COMPROVANTE COMERCIAL  •  " +
+                  "Documento comercial referente à Ordem de Serviço. Sem valor fiscal e não substitui a NFS-e."
+                : "DOCUMENTO DE SERVIÇO — COMPROVANTE COMERCIAL DE PRESTAÇÃO DE SERVIÇOS  •  " +
+                  "Comprovante de atendimento para simples conferência. Sem valor tributário.";
+        PdfPCell bannerCell = new PdfPCell(new Phrase(textoBanner, DS_FONT_AVISO));
         bannerCell.setBackgroundColor(new Color(254, 243, 199)); // amber-100
         bannerCell.setBorderColor(new Color(251, 191, 36));      // amber-400
         bannerCell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -602,8 +621,9 @@ public class PdfService {
         cellDoc.setBackgroundColor(DS_COLOR_BG_HEADER);
         cellDoc.setPadding(6);
 
-        Paragraph pTitulo = new Paragraph("DOCUMENTO DE SERVIÇO",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, DS_COLOR_MUTED));
+        String tituloDoc = isRecibo ? "RECIBO DE PRESTAÇÃO DE SERVIÇOS" : "DOCUMENTO DE SERVIÇO";
+        Paragraph pTitulo = new Paragraph(tituloDoc,
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, isRecibo ? 8 : 9, DS_COLOR_MUTED));
         pTitulo.setAlignment(Element.ALIGN_CENTER);
         cellDoc.addElement(pTitulo);
 
@@ -817,12 +837,13 @@ public class PdfService {
         document.add(table);
     }
 
-    private void dsAdicionarAssinaturas(Document document, OrdemServico os, ConfiguracaoOficina config) throws DocumentException {
+    private void dsAdicionarAssinaturas(Document document, OrdemServico os, ConfiguracaoOficina config, boolean isRecibo) throws DocumentException {
         // Termos breves
-        Paragraph pTermos = new Paragraph(
-                "Declaro que os serviços descritos neste documento foram realizados e o equipamento foi recebido " +
-                "em perfeitas condições de funcionamento, conforme os serviços acima especificados.",
-                DS_FONT_FOOTER);
+        String textoTermos = isRecibo
+                ? "Declaro que recebi o equipamento acima descrito juntamente com os serviços e peças discriminados neste recibo, conforme as informações registradas nesta Ordem de Serviço."
+                : "Declaro que os serviços descritos neste documento foram realizados e o equipamento foi recebido " +
+                  "em perfeitas condições de funcionamento, conforme os serviços acima especificados.";
+        Paragraph pTermos = new Paragraph(textoTermos, DS_FONT_FOOTER);
         pTermos.setSpacingAfter(20);
         document.add(pTermos);
 
@@ -891,10 +912,12 @@ public class PdfService {
         PdfPTable avisoTable = new PdfPTable(1);
         avisoTable.setWidthPercentage(100);
         avisoTable.setSpacingBefore(10);
-        PdfPCell avisoCell = new PdfPCell(new Phrase(
-                "Documento para fins exclusivamente comerciais e de conferência da prestação de serviços. Sem valor tributário. " +
-                "Emitido em: " + OffsetDateTime.now().format(DATA_HORA_FORMATTER) + " • Sistema Oficina Gestão v1.0",
-                DS_FONT_AVISO));
+        String textoAviso = isRecibo
+                ? "Documento para fins exclusivamente comerciais e de conferência da prestação de serviços. Não possui valor fiscal e não substitui a NFS-e. " +
+                  "Emitido em: " + OffsetDateTime.now().format(DATA_HORA_FORMATTER) + " • Sistema Oficina Gestão v1.0"
+                : "Documento para fins exclusivamente comerciais e de conferência da prestação de serviços. Sem valor tributário. " +
+                  "Emitido em: " + OffsetDateTime.now().format(DATA_HORA_FORMATTER) + " • Sistema Oficina Gestão v1.0";
+        PdfPCell avisoCell = new PdfPCell(new Phrase(textoAviso, DS_FONT_AVISO));
         avisoCell.setBackgroundColor(new Color(255, 251, 235)); // amber-50
         avisoCell.setBorderColor(new Color(251, 191, 36));
         avisoCell.setPadding(5);

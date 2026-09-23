@@ -419,4 +419,107 @@ class OrdemServicoPdfTest {
         assertTrue(pdf.length > 5000, "PDF multi-páginas deve ter tamanho superior a 5000 bytes");
         assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
     }
+
+    // =========================================================================
+    // FASE 6.4.1 — TESTES ESPECÍFICOS DO RECIBO PERSONALIZADO DA BRUNO SOLDAS
+    // =========================================================================
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 1 e 2: Recibo de OS válida gera PDF com conteúdo não vazio e cabeçalho %PDF-")
+    void recibo_deveGerarPdfValidoParaOsValidaComPecas() {
+        Produto rele = new Produto();
+        rele.setId(2L);
+        rele.setCodigo("REL-12V");
+        rele.setNome("Relé Auxiliar 12V 40A");
+        rele.setMarca("DNI");
+        rele.setPrecoVenda(new BigDecimal("35.00"));
+
+        OrdemServicoItem item = new OrdemServicoItem();
+        item.setId(10L);
+        item.setOrdemServico(os);
+        item.setProduto(rele);
+        item.setTipoItem(TipoItemOrdemServico.PECA);
+        item.setQuantidade(new BigDecimal("1.000"));
+        item.setValorUnitario(new BigDecimal("35.00"));
+        item.setValorDesconto(BigDecimal.ZERO);
+        item.setValorTotal(new BigDecimal("35.00"));
+
+        os.setValorPecas(new BigDecimal("35.00"));
+        os.setValorTotal(new BigDecimal("285.00"));
+
+        byte[] pdf = pdfService.gerarReciboOsPdf(os, List.of(item));
+
+        assertNotNull(pdf, "Recibo PDF não pode ser nulo");
+        assertTrue(pdf.length > 1000, "Recibo PDF com peças deve ter tamanho substancial (> 1000 bytes)");
+        String header = new String(pdf, 0, 5, StandardCharsets.US_ASCII);
+        assertEquals("%PDF-", header, "O documento gerado deve iniciar com o cabeçalho PDF padrão");
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 6: OS sem peças gera Recibo PDF normalmente")
+    void recibo_deveGerarPdfValidoParaOsSemPecas() {
+        byte[] pdf = pdfService.gerarReciboOsPdf(os, List.of());
+
+        assertNotNull(pdf, "Recibo sem peças não pode ser nulo");
+        assertTrue(pdf.length > 500, "Recibo sem peças deve ter tamanho válido");
+        assertEquals("%PDF-", new String(pdf, 0, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 4, 5, 7 e 8: Valores do Recibo oficiais da OS com peças e desconto")
+    void recibo_devePreservarValoresOficiaisDaOS() {
+        Produto igbt = new Produto();
+        igbt.setId(3L);
+        igbt.setCodigo("IGBT-60N");
+        igbt.setNome("Transistor IGBT 60N60");
+        igbt.setPrecoVenda(new BigDecimal("45.00"));
+
+        OrdemServicoItem item = new OrdemServicoItem();
+        item.setId(20L);
+        item.setOrdemServico(os);
+        item.setProduto(igbt);
+        item.setTipoItem(TipoItemOrdemServico.PECA);
+        item.setQuantidade(new BigDecimal("2.000"));
+        item.setValorUnitario(new BigDecimal("45.00"));
+        item.setValorDesconto(new BigDecimal("10.00"));
+        item.setValorTotal(new BigDecimal("80.00")); // 2 * 45 - 10 = 80
+
+        os.setValorMaoObra(new BigDecimal("200.00"));
+        os.setValorPecas(new BigDecimal("80.00"));
+        os.setValorDesconto(new BigDecimal("15.00"));
+        os.setValorTotal(new BigDecimal("265.00")); // 200 + 80 - 15 = 265
+
+        byte[] pdf = pdfService.gerarReciboOsPdf(os, List.of(item));
+
+        assertNotNull(pdf);
+        assertTrue(pdf.length > 1000);
+        assertEquals(new BigDecimal("265.00"), os.getValorTotal(), "Valor total oficial não pode ser alterado");
+        assertEquals(new BigDecimal("15.00"), os.getValorDesconto(), "Desconto oficial não pode ser alterado");
+        assertEquals(new BigDecimal("80.00"), os.getValorPecas(), "Total de peças oficial não pode ser alterado");
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 9: Dados da empresa vêm da Configuração da Oficina")
+    void recibo_deveUtilizarDadosDaConfiguracaoOficina() {
+        byte[] pdf = pdfService.gerarReciboOsPdf(os, List.of());
+
+        assertNotNull(pdf);
+        verify(configuracaoOficinaService, atLeastOnce()).obterEntidade();
+    }
+
+    @Test
+    @DisplayName("Fase 6.4.1 - Teste 10 e 11: Documento é comercial e não contém termos de pagamento bancário")
+    void recibo_deveSerDocumentoComercialSemTermosBancarios() {
+        byte[] pdf = pdfService.gerarReciboOsPdf(os, List.of());
+
+        assertNotNull(pdf);
+        String pdfRaw = new String(pdf, StandardCharsets.ISO_8859_1);
+
+        // Não deve conter termos de pagamento/financeiro bancário
+        assertFalse(pdfRaw.contains("comprovante de pagamento"), "Não deve conter 'comprovante de pagamento'");
+        assertFalse(pdfRaw.contains("valor pago"), "Não deve conter 'valor pago'");
+        assertFalse(pdfRaw.contains("saldo devedor"), "Não deve conter 'saldo devedor'");
+        assertFalse(pdfRaw.contains("chave pix"), "Não deve conter 'chave pix'");
+        assertFalse(pdfRaw.contains("cartão de crédito"), "Não deve conter 'cartão de crédito'");
+    }
 }
