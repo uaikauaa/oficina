@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Produto, TipoProduto, PageResponse, TipoMovimentacaoEstoque } from './types.ts';
 import { TIPO_PRODUTO_LABELS } from './types.ts';
+import { formatarCodigoSku } from './api.ts';
 
 describe('UX-006: Tela Operacional de Produtos & Estoque — Contratos e Comportamentos', () => {
 
@@ -485,6 +486,32 @@ describe('UX-006: Tela Operacional de Produtos & Estoque — Contratos e Comport
 
       const resultado500 = tratarErroApi(500);
       assert.strictEqual(resultado500.redirecionar, false);
+    });
+  });
+
+  describe('11. Formatação Visual de Código/SKU Compacto e Profissional', () => {
+    it('deve formatar códigos legados com timestamp longo usando o ID do produto', () => {
+      assert.strictEqual(formatarCodigoSku('IGBT-1789603117312', 1), 'IGBT-001');
+      assert.strictEqual(formatarCodigoSku('IGBT-1789603483299', 2), 'IGBT-002');
+      assert.strictEqual(formatarCodigoSku('P-1789605039194', 3), 'P-003');
+    });
+
+    it('deve usar sufixo numérico quando ID não for informado para código com timestamp', () => {
+      assert.strictEqual(formatarCodigoSku('IGBT-1789603117312', null), 'IGBT-312');
+      assert.strictEqual(formatarCodigoSku('P-1789605039194', undefined), 'P-194');
+    });
+
+    it('deve preservar códigos normais e técnicos exatamente como foram cadastrados', () => {
+      assert.strictEqual(formatarCodigoSku('IGBT-60N60', 10), 'IGBT-60N60');
+      assert.strictEqual(formatarCodigoSku('AVR-5KW', 15), 'AVR-5KW');
+      assert.strictEqual(formatarCodigoSku('PEC-001', 1), 'PEC-001');
+      assert.strictEqual(formatarCodigoSku('ROL-6204', 42), 'ROL-6204');
+    });
+
+    it('deve tratar valores nulos ou vazios com hífen seguro', () => {
+      assert.strictEqual(formatarCodigoSku(null), '-');
+      assert.strictEqual(formatarCodigoSku(undefined), '-');
+      assert.strictEqual(formatarCodigoSku(''), '-');
     });
   });
 });

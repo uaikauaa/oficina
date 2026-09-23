@@ -493,6 +493,7 @@ export interface RelatorioOsResumo {
   abertas: number;
   canceladas: number;
   valorTotalConcluidas: number;
+  valorTotalAReceber: number;
 }
 
 export interface RelatorioOsResponse {

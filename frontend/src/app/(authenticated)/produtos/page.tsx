@@ -31,7 +31,7 @@ import {
   Fornecedor,
   Categoria,
 } from '@/lib/types';
-import { apiFetch, apiFetchJson, formatarMoeda } from '@/lib/api';
+import { apiFetch, apiFetchJson, formatarMoeda, formatarCodigoSku } from '@/lib/api';
 
 type PillTipo = 'TODAS' | 'PECA' | 'CONSUMIVEL' | 'PRODUTO' | 'CRITICO';
 
@@ -694,8 +694,11 @@ export default function ProdutosPage() {
                       >
                         {/* Código / SKU */}
                         <td className="py-2.5 px-3.5 whitespace-nowrap">
-                          <span className="font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]">
-                            {p.codigo}
+                          <span
+                            className="font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]"
+                            title={p.codigo}
+                          >
+                            {formatarCodigoSku(p.codigo, p.id)}
                           </span>
                           {p.codigoBarras && (
                             <span className="block font-mono text-[10px] text-slate-500 mt-0.5">

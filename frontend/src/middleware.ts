@@ -12,7 +12,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/maquinas') ||
     pathname.startsWith('/produtos') ||
     pathname.startsWith('/estoque') ||
-    pathname.startsWith('/relatorios');
+    pathname.startsWith('/relatorios') ||
+    pathname.startsWith('/configuracoes');
   const isAuthRoute = pathname === '/login';
 
   // Se tentar acessar rota protegida sem token, redireciona para o login
@@ -45,6 +46,8 @@ export const config = {
     '/estoque',
     '/relatorios/:path*',
     '/relatorios',
+    '/configuracoes/:path*',
+    '/configuracoes',
     '/login',
   ],
 };

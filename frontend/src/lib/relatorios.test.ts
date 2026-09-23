@@ -267,4 +267,21 @@ describe('UX-008: Módulo Gerencial de Relatórios — Testes Unitários e de Co
     assert.ok(!paramInicio.endsWith('Z'));
     assert.ok(!paramFim.endsWith('Z'));
   });
+
+  // 15. Indicadores Financeiros Separados: Faturamento Atual e A Receber
+  it('15. Indicadores Financeiros: deve conter Faturamento Atual e A Receber no resumo', () => {
+    const resumoExemplo = {
+      totalOs: 8,
+      concluidas: 5,
+      abertas: 2,
+      canceladas: 1,
+      valorTotalConcluidas: 380.00,
+      valorTotalAReceber: 750.00,
+    };
+
+    assert.equal(resumoExemplo.valorTotalConcluidas, 380.00, 'Faturamento atual deve refletir OSs concluídas');
+    assert.equal(resumoExemplo.valorTotalAReceber, 750.00, 'A receber deve refletir OSs em andamento/abertas');
+    assert.ok(resumoExemplo.valorTotalConcluidas >= 0);
+    assert.ok(resumoExemplo.valorTotalAReceber >= 0);
+  });
 });

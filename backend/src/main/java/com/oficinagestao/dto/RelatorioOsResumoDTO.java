@@ -7,6 +7,16 @@ public record RelatorioOsResumoDTO(
         long concluidas,
         long abertas,
         long canceladas,
-        BigDecimal valorTotalConcluidas
+        BigDecimal valorTotalConcluidas,
+        BigDecimal valorTotalAReceber
 ) {
+    public RelatorioOsResumoDTO(
+            long totalOs,
+            long concluidas,
+            long abertas,
+            long canceladas,
+            BigDecimal valorTotalConcluidas
+    ) {
+        this(totalOs, concluidas, abertas, canceladas, valorTotalConcluidas, BigDecimal.ZERO);
+    }
 }

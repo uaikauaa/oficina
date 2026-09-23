@@ -205,6 +205,7 @@ export default function RelatoriosPage() {
           abertas: 0,
           canceladas: 0,
           valorTotalConcluidas: 0,
+          valorTotalAReceber: 0,
         },
         itens: data.itens,
       }));
@@ -966,7 +967,7 @@ export default function RelatoriosPage() {
 
             {/* MINI-CARDS DE RESUMO CONDENSADOS (UX008-02 / UX008-08) */}
             {osRelatorio?.resumo && (
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <div className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">Total OS</span>
@@ -999,11 +1000,21 @@ export default function RelatoriosPage() {
                   <Ban className="w-4 h-4 text-rose-500 shrink-0" />
                 </div>
 
-                <div className="col-span-2 sm:col-span-1 px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
+                <div className="px-3 py-2 rounded-xl bg-slate-900 border border-emerald-500/30 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">Faturamento</span>
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Faturamento Atual</span>
                     <span className="text-base font-black text-white">
                       {formatarMoeda(osRelatorio.resumo.valorTotalConcluidas)}
+                    </span>
+                  </div>
+                  <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+                </div>
+
+                <div className="px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">A Receber</span>
+                    <span className="text-base font-black text-white">
+                      {formatarMoeda(osRelatorio.resumo.valorTotalAReceber)}
                     </span>
                   </div>
                   <DollarSign className="w-4 h-4 text-amber-400 shrink-0" />

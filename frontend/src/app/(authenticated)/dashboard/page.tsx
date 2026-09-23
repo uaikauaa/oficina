@@ -169,7 +169,7 @@ export default function DashboardPage() {
             aria-label="Abrir Nova Ordem de Serviço"
           >
             <Plus className="w-5 h-5 stroke-[2.5]" />
-            <span>+ NOVA ORDEM DE SERVIÇO</span>
+            <span>NOVA ORDEM DE SERVIÇO</span>
           </Link>
         </div>
 

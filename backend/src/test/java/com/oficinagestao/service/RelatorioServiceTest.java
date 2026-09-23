@@ -71,6 +71,7 @@ class RelatorioServiceTest {
         when(ordemServicoRepository.contarAbertasPorPeriodo(inicio, fim)).thenReturn(3L);
         when(ordemServicoRepository.contarPorPeriodoEStatus(inicio, fim, StatusOrdemServico.CANCELADA)).thenReturn(1L);
         when(ordemServicoRepository.somarValorConcluidasPorPeriodo(inicio, fim)).thenReturn(new BigDecimal("4500.00"));
+        when(ordemServicoRepository.somarValorAReceberPorPeriodo(inicio, fim)).thenReturn(new BigDecimal("1500.00"));
 
         OrdemServico os = new OrdemServico();
         os.setId(1L);
@@ -86,6 +87,7 @@ class RelatorioServiceTest {
         assertEquals(3L, resultado.resumo().abertas());
         assertEquals(1L, resultado.resumo().canceladas());
         assertEquals(new BigDecimal("4500.00"), resultado.resumo().valorTotalConcluidas());
+        assertEquals(new BigDecimal("1500.00"), resultado.resumo().valorTotalAReceber());
         assertEquals(1, resultado.itens().getTotalElements());
     }
 

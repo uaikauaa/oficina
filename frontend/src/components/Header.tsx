@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Wrench, Users, LayoutDashboard, LogOut, FileText, Package, Boxes, Search, BarChart3, Menu, X, Settings } from 'lucide-react';
 import { CurrentUser } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
+import { OFICINA } from '@/lib/oficina';
 import BuscaRapidaModal from '@/components/BuscaRapidaModal';
 
 interface HeaderProps {
@@ -38,6 +39,11 @@ export default function Header({ user }: HeaderProps) {
 
   const [isBuscaOpen, setIsBuscaOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const userName =
+    user?.nome && user.nome.trim() !== 'Proprietária Oficina'
+      ? user.nome
+      : (OFICINA.responsavel || 'Geisa');
 
   const [, startTransition] = useTransition();
 
@@ -80,7 +86,9 @@ export default function Header({ user }: HeaderProps) {
                 <Wrench className="w-4.5 h-4.5" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-sm font-bold text-white leading-none whitespace-nowrap">Oficina Gestão</h1>
+                <h1 className="text-sm font-bold text-white leading-none whitespace-nowrap">
+                  {OFICINA.nomeFantasia.toUpperCase()}
+                </h1>
                 <span className="text-[10px] text-slate-400 whitespace-nowrap">Soldas &amp; Geradores</span>
               </div>
             </Link>
@@ -152,7 +160,7 @@ export default function Header({ user }: HeaderProps) {
               {/* Dados do usuário — visível em xl+ no header, e no menu mobile para telas menores */}
               <div className="hidden xl:block text-right">
                 <p className="text-xs font-medium text-white whitespace-nowrap leading-none">
-                  {user?.nome || 'Proprietária'}
+                  {userName}
                 </p>
                 <div className="flex items-center justify-end gap-1 mt-0.5">
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 whitespace-nowrap">
@@ -281,14 +289,17 @@ export default function Header({ user }: HeaderProps) {
               </nav>
 
               {/* Info do usuário no menu mobile */}
-              {user && (
-                <div className="mt-3 pt-3 border-t border-slate-800/60 flex items-center gap-2">
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                    {user.roles?.[0] || 'ROLE_ADMIN'}
+              <div className="mt-3 pt-3 border-t border-slate-800/60 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 shrink-0">
+                    {user?.roles?.[0] || 'ROLE_ADMIN'}
                   </span>
-                  <span className="text-xs text-slate-400 truncate">{user.email}</span>
+                  <span className="text-xs text-slate-300 truncate font-medium">{userName}</span>
                 </div>
-              )}
+                {user?.email && (
+                  <span className="text-[11px] text-slate-500 truncate max-w-[140px]">{user.email}</span>
+                )}
+              </div>
             </div>
           </div>
         )}

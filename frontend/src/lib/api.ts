@@ -186,3 +186,24 @@ export function formatarData(dataStr?: string | null): string {
   }
 }
 
+/**
+ * Formata um código de produto/peça para exibição compacta e profissional.
+ * - Códigos com timestamp longo (ex: 'IGBT-1789603117312', 'P-1789605039194')
+ *   são formatados visualmente como 'IGBT-001', 'P-001' (utilizando o ID do produto ou sufixo numérico).
+ * - Códigos regulares (ex: 'IGBT-60N60', 'AVR-5KW') são mantidos exatamente como foram cadastrados.
+ */
+export function formatarCodigoSku(codigo?: string | null, id?: number | null): string {
+  if (!codigo) return '-';
+  const limpo = codigo.trim();
+  const match = limpo.match(/^([A-Za-z0-9_]+)-(\d{8,})$/);
+  if (match) {
+    const [, prefixo, numStr] = match;
+    if (id !== undefined && id !== null && id > 0) {
+      return `${prefixo}-${String(id).padStart(3, '0')}`;
+    }
+    const sufixo = numStr.slice(-3).padStart(3, '0');
+    return `${prefixo}-${sufixo}`;
+  }
+  return limpo;
+}
+

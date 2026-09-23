@@ -22,7 +22,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${INITIAL_ADMIN_NAME:Proprietária Oficina}")
+    @Value("${INITIAL_ADMIN_NAME:Geisa}")
     private String adminName;
 
     @Value("${INITIAL_ADMIN_EMAIL:}")
@@ -47,6 +47,15 @@ public class AdminAccountBootstrap implements ApplicationRunner {
         long userCount = usuarioRepository.count();
 
         if (userCount > 0) {
+            // Migração de integridade: atualiza registros legados com "Proprietária Oficina" para "Geisa"
+            usuarioRepository.findAll().forEach(u -> {
+                if ("Proprietária Oficina".equalsIgnoreCase(u.getNome())) {
+                    String novoNome = (adminName != null && !adminName.isBlank()) ? adminName.trim() : "Geisa";
+                    u.setNome(novoNome);
+                    usuarioRepository.save(u);
+                    log.info("Inicialização: Nome da usuária ID {} atualizado de 'Proprietária Oficina' para '{}'.", u.getId(), novoNome);
+                }
+            });
             log.info("Inicialização: Base de usuários já contém {} registro(s). Bootstrap ignorado.", userCount);
             return;
         }
@@ -68,7 +77,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_ADMIN", "Administrador com acesso irrestrito ao sistema")));
 
         Usuario admin = new Usuario(
-                adminName != null && !adminName.isBlank() ? adminName.trim() : "Proprietária Oficina",
+                adminName != null && !adminName.isBlank() ? adminName.trim() : "Geisa",
                 adminEmail.trim().toLowerCase(),
                 passwordEncoder.encode(adminPassword),
                 true

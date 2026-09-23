@@ -73,18 +73,34 @@ public class RelatorioService {
     ) {
         RelatorioOsResumoDTO resumo = null;
         if (incluirResumo) {
-            long totalOs = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, null);
-            long concluidas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CONCLUIDA);
-            long abertas = ordemServicoRepository.contarAbertasPorPeriodo(dataInicio, dataFim);
-            long canceladas = ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CANCELADA);
-            BigDecimal valorTotalConcluidas = ordemServicoRepository.somarValorConcluidasPorPeriodo(dataInicio, dataFim);
+            long totalOs = status == null
+                    ? ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, null)
+                    : ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, status);
+            long concluidas = (status == null || status == StatusOrdemServico.CONCLUIDA)
+                    ? ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CONCLUIDA)
+                    : 0L;
+            long abertas = (status == null)
+                    ? ordemServicoRepository.contarAbertasPorPeriodo(dataInicio, dataFim)
+                    : (status != StatusOrdemServico.CONCLUIDA && status != StatusOrdemServico.CANCELADA
+                            ? ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, status)
+                            : 0L);
+            long canceladas = (status == null || status == StatusOrdemServico.CANCELADA)
+                    ? ordemServicoRepository.contarPorPeriodoEStatus(dataInicio, dataFim, StatusOrdemServico.CANCELADA)
+                    : 0L;
+            BigDecimal valorTotalConcluidas = (status == null || status == StatusOrdemServico.CONCLUIDA)
+                    ? ordemServicoRepository.somarValorConcluidasPorPeriodo(dataInicio, dataFim)
+                    : BigDecimal.ZERO;
+            BigDecimal valorTotalAReceber = (status == null || (status != StatusOrdemServico.CONCLUIDA && status != StatusOrdemServico.CANCELADA))
+                    ? ordemServicoRepository.somarValorAReceberPorPeriodo(dataInicio, dataFim)
+                    : BigDecimal.ZERO;
 
             resumo = new RelatorioOsResumoDTO(
                     totalOs,
                     concluidas,
                     abertas,
                     canceladas,
-                    valorTotalConcluidas
+                    valorTotalConcluidas,
+                    valorTotalAReceber
             );
         }
 

@@ -161,8 +161,16 @@ export default function ProdutoModal({
   };
 
   const handleGerarCodigo = () => {
-    const prefixo = formData.tipo === 'PECA' ? 'PEC' : formData.tipo === 'CONSUMIVEL' ? 'CON' : 'PRD';
-    const aleatorio = Math.floor(1000 + Math.random() * 9000);
+    let prefixo = 'PEC';
+    if (formData.nome && formData.nome.trim()) {
+      const match = formData.nome.trim().match(/^([A-Za-z0-9]+)/);
+      if (match && match[1].length >= 2 && match[1].length <= 5) {
+        prefixo = match[1].toUpperCase();
+      }
+    } else {
+      prefixo = formData.tipo === 'PECA' ? 'PEC' : formData.tipo === 'CONSUMIVEL' ? 'CON' : 'PRD';
+    }
+    const aleatorio = Math.floor(1 + Math.random() * 999).toString().padStart(3, '0');
     setFormData((prev) => ({
       ...prev,
       codigo: `${prefixo}-${aleatorio}`,

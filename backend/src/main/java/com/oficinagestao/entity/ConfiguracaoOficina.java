@@ -114,6 +114,47 @@ public class ConfiguracaoOficina {
         updatedAt = OffsetDateTime.now();
     }
 
+    public ConfiguracaoOficina() {
+    }
+
+    public ConfiguracaoOficina(
+            String nomeSistema,
+            String nomeFantasia,
+            String nomeEmpresarial,
+            String cnpj,
+            String inscricaoMunicipal,
+            String regimeTributario,
+            String codigoTributacaoServico,
+            String responsavel,
+            String telefone,
+            String email,
+            String logradouro,
+            String numero,
+            String bairro,
+            String cep,
+            String municipio,
+            String uf,
+            String codigoIbge
+    ) {
+        this.nomeSistema = nomeSistema;
+        this.nomeFantasia = nomeFantasia;
+        this.nomeEmpresarial = nomeEmpresarial;
+        this.cnpj = cnpj;
+        this.inscricaoMunicipal = inscricaoMunicipal;
+        this.regimeTributario = regimeTributario;
+        this.codigoTributacaoServico = codigoTributacaoServico;
+        this.responsavel = responsavel;
+        this.telefone = telefone;
+        this.email = email;
+        this.logradouro = logradouro;
+        this.numero = numero;
+        this.bairro = bairro;
+        this.cep = cep;
+        this.municipio = municipio;
+        this.uf = uf;
+        this.codigoIbge = codigoIbge;
+    }
+
     // --- Getters e Setters ---
 
     public Long getId() { return id; }
