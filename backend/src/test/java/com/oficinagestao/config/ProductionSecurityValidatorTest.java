@@ -74,6 +74,19 @@ class ProductionSecurityValidatorTest {
     }
 
     @Test
+    @DisplayName("PROD001-03: Profile prod com CORS contendo wildcard '*' deve ser rejeitado")
+    void shouldFailInProductionWhenCorsIsWildcard() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn("*");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
+        assertTrue(ex.getMessage().contains("não pode conter wildcard '*'"));
+    }
+
+    @Test
     @DisplayName("PROD001-01 & PROD001-03: Profile prod com secret forte e CORS válido deve inicializar com sucesso")
     void shouldSucceedInProductionWithValidConfigurations() {
         when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);

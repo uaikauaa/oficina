@@ -19,6 +19,8 @@ public class LoginAttemptService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginAttemptService.class);
 
+    private static final int MAX_CACHE_SIZE = 10_000;
+
     private final int maxAttempts;
     private final Duration lockDuration;
 
@@ -146,6 +148,14 @@ public class LoginAttemptService {
     }
 
     private void recordFailure(String key, Instant now) {
+        if (attemptsCache.size() >= MAX_CACHE_SIZE) {
+            cleanupExpiredEntries();
+            if (attemptsCache.size() >= MAX_CACHE_SIZE) {
+                log.warn("Capacidade máxima do cache de tentativas atingida ({}); ignorando novo registro temporariamente.", MAX_CACHE_SIZE);
+                return;
+            }
+        }
+
         attemptsCache.compute(key, (k, existing) -> {
             if (existing == null) {
                 return new AttemptInfo(1, now);
@@ -166,6 +176,31 @@ public class LoginAttemptService {
             }
             return existing;
         });
+    }
+
+    /**
+     * Limpa entradas expiradas do cache para prevenir crescimento indefinido de memória em ambiente single-node.
+     * Retorna a quantidade de entradas removidas.
+     */
+    public int cleanupExpiredEntries() {
+        Instant now = Instant.now();
+        int removedCount = 0;
+        for (Map.Entry<String, AttemptInfo> entry : attemptsCache.entrySet()) {
+            AttemptInfo info = entry.getValue();
+            boolean isExpired = (info.getBlockedUntil() != null && !now.isBefore(info.getBlockedUntil()))
+                    || (info.getBlockedUntil() == null && info.getLastAttempt() != null
+                    && !now.isBefore(info.getLastAttempt().plus(lockDuration)));
+            if (isExpired) {
+                if (attemptsCache.remove(entry.getKey(), info)) {
+                    removedCount++;
+                }
+            }
+        }
+        return removedCount;
+    }
+
+    public int getAttemptsCacheSize() {
+        return attemptsCache.size();
     }
 
     public int getAttemptsForKey(String key) {

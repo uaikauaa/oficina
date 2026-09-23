@@ -58,6 +58,10 @@ public class ProductionSecurityValidator {
                 throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: CORS_ALLOWED_ORIGINS não pode conter referências a 'localhost' ou '127.0.0.1' em ambiente de produção.");
             }
 
+            if (corsOrigins.contains("*")) {
+                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: CORS_ALLOWED_ORIGINS não pode conter wildcard '*' quando autenticação com cookies seguros está habilitada.");
+            }
+
             log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte e CORS estrito validados.");
         } else {
             // Em desenvolvimento / testes

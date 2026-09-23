@@ -126,4 +126,25 @@ class LoginAttemptServiceTest {
         // Tenta atacar a mesma conta a partir de um IP B diferente
         assertTrue(loginAttemptService.isBlocked("10.0.0.2", email));
     }
+
+    @Test
+    @DisplayName("cleanupExpiredEntries: deve remover do cache entradas não bloqueadas com última tentativa expirada")
+    void deveLimparEntradasExpiradasDoCache() {
+        // Registra uma tentativa simples (não bloqueada)
+        loginAttemptService.loginFailed("192.168.1.200", "temporario@oficina.com");
+        assertTrue(loginAttemptService.getAttemptsCacheSize() > 0);
+
+        // Se chamarmos o cleanup imediatamente, nada deve ser removido porque não passou o lockDuration
+        int removidosImediatos = loginAttemptService.cleanupExpiredEntries();
+        assertEquals(0, removidosImediatos);
+
+        // Instancia um serviço com lockDuration de 0 minutos para simular expiração imediata
+        LoginAttemptService shortLivedService = new LoginAttemptService(5, 0);
+        shortLivedService.loginFailed("192.168.1.201", "expirado@oficina.com");
+        assertTrue(shortLivedService.getAttemptsCacheSize() > 0);
+
+        int removidos = shortLivedService.cleanupExpiredEntries();
+        assertTrue(removidos >= 2); // chave ip e chave email
+        assertEquals(0, shortLivedService.getAttemptsCacheSize());
+    }
 }

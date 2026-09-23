@@ -1012,7 +1012,7 @@ export default function RelatoriosPage() {
 
                 <div className="px-3 py-2 rounded-xl bg-slate-900 border border-amber-500/30 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">A Receber</span>
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block" title="Valor estimado das ordens de serviço em andamento (não concluídas e não canceladas)">A Receber (OS em Andamento)</span>
                     <span className="text-base font-black text-white">
                       {formatarMoeda(osRelatorio.resumo.valorTotalAReceber)}
                     </span>

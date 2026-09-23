@@ -219,4 +219,24 @@ class RelatorioServiceTest {
         assertEquals("ESAB", resultado.getContent().get(0).marca());
         assertEquals(new BigDecimal("3200.00"), resultado.getContent().get(0).valorAcumulado());
     }
+
+    @Test
+    @DisplayName("Fase 6.1 / GAP 09: Quando status for CONCLUIDA, valorTotalAReceber deve ser zero")
+    void quandoStatusForConcluidaValorTotalAReceberDeveSerZero() {
+        OffsetDateTime inicio = OffsetDateTime.now().minusDays(30);
+        OffsetDateTime fim = OffsetDateTime.now();
+
+        when(ordemServicoRepository.contarPorPeriodoEStatus(inicio, fim, StatusOrdemServico.CONCLUIDA)).thenReturn(5L);
+        when(ordemServicoRepository.somarValorConcluidasPorPeriodo(inicio, fim)).thenReturn(new BigDecimal("3000.00"));
+
+        Page<OrdemServico> pageOs = new PageImpl<>(List.of(), pageable, 0);
+        when(ordemServicoRepository.pesquisarGlobal(isNull(), eq(StatusOrdemServico.CONCLUIDA), eq(inicio), eq(fim), eq(pageable))).thenReturn(pageOs);
+
+        RelatorioOsResponseDTO resultado = relatorioService.obterRelatorioOsPorPeriodo(inicio, fim, StatusOrdemServico.CONCLUIDA, pageable);
+
+        assertNotNull(resultado.resumo());
+        assertEquals(new BigDecimal("3000.00"), resultado.resumo().valorTotalConcluidas());
+        assertEquals(BigDecimal.ZERO, resultado.resumo().valorTotalAReceber(), "Quando filtro é CONCLUIDA, a receber deve ser zero");
+        verify(ordemServicoRepository, never()).somarValorAReceberPorPeriodo(any(), any());
+    }
 }

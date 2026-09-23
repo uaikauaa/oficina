@@ -412,14 +412,15 @@ export default function ConfiguracoesPage() {
               <p className="text-xs text-amber-300/80 leading-relaxed">
                 Estes dados são armazenados para <strong>futura integração com emissor oficial de NFS-e</strong>.
                 O sistema Oficina Gestão <strong>não emite notas fiscais automaticamente</strong>.
-                Os dados são de referência baseados na NFS-e fornecida — inscrição municipal deixada em branco pois não constava no documento.
+                Os dados são de referência comercial e cadastral. A Inscrição Municipal é opcional — confirme com o contador/prefeitura caso aplicável.
               </p>
             </div>
 
             {editMode ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5 font-medium">Inscrição Municipal</label>
+                  <label className="block text-xs text-slate-400 mb-1 font-medium">Inscrição Municipal</label>
+                  <p className="text-[11px] text-slate-500 mb-1.5">Opcional — confirme com o contador/prefeitura caso aplicável.</p>
                   <input className={inputClass} value={form.inscricaoMunicipal} onChange={e => setForm(f => ({ ...f, inscricaoMunicipal: e.target.value }))} placeholder="Deixar vazio se não informado" />
                 </div>
                 <div>
@@ -437,7 +438,7 @@ export default function ConfiguracoesPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Campo label="Inscrição Municipal" valor={config?.inscricaoMunicipal} />
+                <Campo label="Inscrição Municipal" valor={config?.inscricaoMunicipal || 'Não informada (opcional)'} />
                 <Campo label="Regime Tributário" valor={config?.regimeTributario} />
                 <Campo label="Código de Tributação (Ref.)" valor={config?.codigoTributacaoServico} />
                 <Campo label="Código IBGE do Município" valor={config?.codigoIbge} />
