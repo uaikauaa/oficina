@@ -270,8 +270,10 @@ function ClientesContent() {
         {/* ========================================================================= */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">CLIENTES</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              Clientes
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
               Gestão cadastral, contatos e equipamentos dos clientes da oficina
             </p>
           </div>
@@ -282,10 +284,10 @@ function ClientesContent() {
               setClienteParaEditar(null);
               setIsModalOpen(true);
             }}
-            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer shrink-0"
+            className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>+ NOVO CLIENTE</span>
+            <span>Novo Cliente</span>
           </button>
         </div>
 

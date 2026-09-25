@@ -300,27 +300,27 @@ export default function ProdutosPage() {
               <Package className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">
-                  Peças & Produtos
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
+                  Peças &amp; Produtos
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-900 border border-slate-800 text-slate-400">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300">
                   {totalElements} {totalElements === 1 ? 'item' : 'itens'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5 hidden sm:block">
                 Catálogo técnico de componentes de reposição e controle de estoque
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             <Link
               href="/estoque"
-              className="px-3 py-2 rounded-xl border border-slate-800 bg-slate-900/90 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition-all shadow-sm"
+              className="px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-all shadow-sm"
               title="Acessar painel consolidado de estoque"
             >
-              <Boxes className="w-3.5 h-3.5 text-amber-400" />
+              <Boxes className="w-4 h-4 text-amber-400" />
               <span className="hidden sm:inline">Painel de Estoque</span>
               <span className="sm:hidden">Estoque</span>
             </Link>
@@ -328,10 +328,10 @@ export default function ProdutosPage() {
             <button
               id="novo-produto-btn"
               onClick={handleNovoProduto}
-              className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              <span> NOVA PEÇA / PRODUTO</span>
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Nova Peça / Produto</span>
             </button>
           </div>
         </div>
