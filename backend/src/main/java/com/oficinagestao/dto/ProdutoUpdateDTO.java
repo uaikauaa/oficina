@@ -8,13 +8,15 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.Pattern;
+
 public record ProdutoUpdateDTO(
-        @NotBlank(message = "O código do produto é obrigatório.")
         @Size(max = 50, message = "O código deve ter no máximo 50 caracteres.")
         String codigo,
 
-        @Size(max = 50, message = "O código de barras deve ter no máximo 50 caracteres.")
-        String codigoBarras,
+        @Pattern(regexp = "^(https?://\\S+)?$", message = "O link de compra deve ser uma URL válida iniciando com http:// ou https:// sem espaços.")
+        @Size(max = 1000, message = "O link de compra deve ter no máximo 1000 caracteres.")
+        String linkCompra,
 
         @NotBlank(message = "O nome do produto é obrigatório.")
         @Size(max = 200, message = "O nome deve ter no máximo 200 caracteres.")

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import {
   X,
   Package,
-  Barcode,
+  Link2,
   DollarSign,
   Boxes,
   MapPin,
@@ -30,14 +30,25 @@ interface ProdutoModalProps {
 const TIPO_OPTIONS: { value: TipoProduto; label: string; icon: string }[] = [
   { value: 'PECA', label: 'Peça / Componente', icon: '🔌' },
   { value: 'PRODUTO', label: 'Produto Acabado', icon: '📦' },
-  { value: 'CONSUMIVEL', label: 'Consumível de Solda', icon: '⚡' },
+  { value: 'CONSUMIVEL', label: 'Consumível de Manutenção', icon: '⚡' },
   { value: 'SERVICO', label: 'Serviço Técnico', icon: '🛠️' },
 ];
 
-const UNIDADES = ['UN', 'PC', 'KG', 'M', 'PAR', 'CJ', 'L'];
+const UNIDADES: { value: string; label: string }[] = [
+  { value: 'UN', label: 'Unidade' },
+  { value: 'PC', label: 'Peça' },
+  { value: 'KG', label: 'Quilograma' },
+  { value: 'M', label: 'Metro' },
+  { value: 'PAR', label: 'Par' },
+  { value: 'CJ', label: 'Conjunto' },
+  { value: 'L', label: 'Litro' },
+];
 
 const INPUT_CLASS =
-  'w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors';
+  'w-full min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors';
+
+const INPUT_WITH_ICON_CLASS =
+  'w-full min-w-0 bg-slate-950 border border-slate-700 rounded-xl pl-3 pr-10 py-2.5 text-sm text-white placeholder-slate-500 placeholder:truncate focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors';
 
 const LABEL_CLASS = 'block text-xs font-semibold text-slate-400 mb-1.5';
 
@@ -55,7 +66,7 @@ export default function ProdutoModal({
   const categorias = categoriasProp && categoriasProp.length > 0 ? categoriasProp : categoriasLocais;
   const [formData, setFormData] = useState<Partial<ProdutoFormData>>({
     codigo: '',
-    codigoBarras: '',
+    linkCompra: '',
     nome: '',
     descricao: '',
     marca: '',
@@ -87,7 +98,7 @@ export default function ProdutoModal({
       if (produto) {
         setFormData({
           codigo: produto.codigo,
-          codigoBarras: produto.codigoBarras || '',
+          linkCompra: produto.linkCompra || '',
           nome: produto.nome,
           descricao: produto.descricao || '',
           marca: produto.marca || '',
@@ -103,7 +114,7 @@ export default function ProdutoModal({
       } else {
         setFormData({
           codigo: '',
-          codigoBarras: '',
+          linkCompra: '',
           nome: '',
           descricao: '',
           marca: '',
@@ -160,29 +171,12 @@ export default function ProdutoModal({
     }));
   };
 
-  const handleGerarCodigo = () => {
-    let prefixo = 'PEC';
-    if (formData.nome && formData.nome.trim()) {
-      const match = formData.nome.trim().match(/^([A-Za-z0-9]+)/);
-      if (match && match[1].length >= 2 && match[1].length <= 5) {
-        prefixo = match[1].toUpperCase();
-      }
-    } else {
-      prefixo = formData.tipo === 'PECA' ? 'PEC' : formData.tipo === 'CONSUMIVEL' ? 'CON' : 'PRD';
-    }
-    const aleatorio = Math.floor(1 + Math.random() * 999).toString().padStart(3, '0');
-    setFormData((prev) => ({
-      ...prev,
-      codigo: `${prefixo}-${aleatorio}`,
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessMsg(null);
 
-    if (!formData.codigo?.trim()) {
+    if (isEditing && !formData.codigo?.trim()) {
       setError('O código da peça/produto é obrigatório.');
       return;
     }
@@ -197,13 +191,26 @@ export default function ProdutoModal({
       return;
     }
 
+    if (formData.linkCompra && formData.linkCompra.trim()) {
+      try {
+        const parsedUrl = new URL(formData.linkCompra.trim());
+        if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+          setError('O link de compra deve começar com http:// ou https://');
+          return;
+        }
+      } catch {
+        setError('Por favor, informe uma URL válida para o link de compra (ex: https://...).');
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
-      const payload = {
+      const payload: Partial<ProdutoFormData> = {
         ...formData,
-        codigo: formData.codigo.trim(),
-        codigoBarras: formData.codigoBarras?.trim() || null,
+        ...(isEditing && formData.codigo ? { codigo: formData.codigo.trim() } : {}),
+        linkCompra: formData.linkCompra?.trim() || null,
         nome: formData.nome.trim(),
         descricao: formData.descricao?.trim() || null,
         marca: formData.marca?.trim() || null,
@@ -247,20 +254,20 @@ export default function ProdutoModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="produto-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
     >
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 shrink-0">
+          <div className="flex items-center gap-3 min-w-0 pr-2">
+            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
               <Package className="w-5 h-5" />
             </div>
-            <div>
-              <h2 id="produto-modal-title" className="text-base font-bold text-white">
+            <div className="min-w-0">
+              <h2 id="produto-modal-title" className="text-sm sm:text-base font-bold text-white truncate">
                 {isEditing ? 'Editar Peça / Componente' : 'Cadastrar Nova Peça / Componente'}
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 truncate">
                 {isEditing
                   ? `Atualizando ${produto?.codigo} - ${produto?.nome}`
                   : 'Componentes para máquinas de solda, geradores e manutenção'}
@@ -269,7 +276,7 @@ export default function ProdutoModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
             aria-label="Fechar modal"
           >
             <X className="w-5 h-5" />
@@ -277,7 +284,7 @@ export default function ProdutoModal({
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-4 sm:space-y-5">
           {error && (
             <div className="flex items-start gap-2.5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -295,68 +302,65 @@ export default function ProdutoModal({
           {/* Tipo de Item */}
           <div>
             <label className={LABEL_CLASS}>Tipo do Registro *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {TIPO_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, tipo: opt.value }))}
-                  className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                  className={`p-3 min-h-[46px] rounded-xl border text-xs font-semibold flex items-center justify-start sm:justify-center gap-2.5 transition-all cursor-pointer ${
                     formData.tipo === opt.value
                       ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-sm'
                       : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
                   }`}
                 >
-                  <span>{opt.icon}</span>
-                  <span className="truncate">{opt.label}</span>
+                  <span className="shrink-0 text-base">{opt.icon}</span>
+                  <span className="leading-snug break-words whitespace-normal text-left sm:text-center">
+                    {opt.label}
+                  </span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Código e Código de Barras */}
+          {/* Código e Link de Compra */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-slate-400">Código da Peça *</label>
-                <button
-                  type="button"
-                  onClick={handleGerarCodigo}
-                  className="text-[11px] text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
-                >
-                  Gerar automático
-                </button>
+                <label className={LABEL_CLASS}>Código da Peça</label>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {isEditing ? 'Identificador fixo' : 'Gerado pelo servidor'}
+                </span>
               </div>
               <input
                 type="text"
                 name="codigo"
-                value={formData.codigo || ''}
-                onChange={handleChange}
-                placeholder="Ex: IGBT-60N100, AVR-5KW"
-                className={INPUT_CLASS}
-                required
+                value={isEditing ? (formData.codigo || '') : 'P-### (Gerado ao salvar)'}
+                disabled
+                readOnly
+                className={`${INPUT_CLASS} bg-slate-950/70 text-amber-400 font-mono font-bold cursor-not-allowed border-dashed border-slate-700`}
               />
             </div>
 
-            <div>
-              <label className={LABEL_CLASS}>Código de Barras / SKU</label>
+            <div className="min-w-0">
+              <label className={LABEL_CLASS}>Link de Compra</label>
               <div className="relative">
                 <input
-                  type="text"
-                  name="codigoBarras"
-                  value={formData.codigoBarras || ''}
+                  type="url"
+                  name="linkCompra"
+                  value={formData.linkCompra || ''}
                   onChange={handleChange}
-                  placeholder="Ex: 7891234567890"
-                  className={INPUT_CLASS}
+                  placeholder="Ex: https://www.fornecedor.com.br/produto/..."
+                  className={INPUT_WITH_ICON_CLASS}
                 />
-                <Barcode className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                <Link2 className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Nome e Marca */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="sm:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="min-w-0 md:col-span-2">
               <label className={LABEL_CLASS}>Nome / Descrição Resumida *</label>
               <input
                 type="text"
@@ -364,12 +368,12 @@ export default function ProdutoModal({
                 value={formData.nome || ''}
                 onChange={handleChange}
                 placeholder="Ex: Módulo IGBT 60N100 60A 1000V, Regulador AVR Gerador 5kVA"
-                className={INPUT_CLASS}
+                className={`${INPUT_CLASS} placeholder:truncate`}
                 required
               />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Marca / Fabricante</label>
               <div className="relative">
                 <input
@@ -378,23 +382,23 @@ export default function ProdutoModal({
                   value={formData.marca || ''}
                   onChange={handleChange}
                   placeholder="Ex: Toshiba, ESAB, Stamford"
-                  className={INPUT_CLASS}
+                  className={INPUT_WITH_ICON_CLASS}
                 />
-                <Award className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                <Award className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Categoria e Fornecedor */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Categoria Técnica</label>
               <div className="relative">
                 <select
                   name="categoriaId"
                   value={formData.categoriaId || ''}
                   onChange={handleChange}
-                  className={INPUT_CLASS}
+                  className={`${INPUT_CLASS} pr-14`}
                 >
                   <option value="">Nenhuma categoria vinculada</option>
                   {categorias.map((c) => (
@@ -403,18 +407,18 @@ export default function ProdutoModal({
                     </option>
                   ))}
                 </select>
-                <Tag className="w-4 h-4 text-slate-500 absolute right-8 top-3 pointer-events-none" />
+                <Tag className="w-4 h-4 text-slate-500 absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Fornecedor Preferencial</label>
               <div className="relative">
                 <select
                   name="fornecedorId"
                   value={formData.fornecedorId || ''}
                   onChange={handleChange}
-                  className={INPUT_CLASS}
+                  className={`${INPUT_CLASS} pr-14`}
                 >
                   <option value="">Nenhum fornecedor vinculado</option>
                   {fornecedores.map((f) => (
@@ -423,14 +427,14 @@ export default function ProdutoModal({
                     </option>
                   ))}
                 </select>
-                <Building2 className="w-4 h-4 text-slate-500 absolute right-8 top-3 pointer-events-none" />
+                <Building2 className="w-4 h-4 text-slate-500 absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Preços e Unidade */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Preço de Custo (R$)</label>
               <div className="relative">
                 <input
@@ -440,13 +444,13 @@ export default function ProdutoModal({
                   name="precoCusto"
                   value={formData.precoCusto ?? 0}
                   onChange={handleChange}
-                  className={INPUT_CLASS}
+                  className={INPUT_WITH_ICON_CLASS}
                 />
-                <DollarSign className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                <DollarSign className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Preço de Venda (R$) *</label>
               <div className="relative">
                 <input
@@ -456,14 +460,14 @@ export default function ProdutoModal({
                   name="precoVenda"
                   value={formData.precoVenda ?? 0}
                   onChange={handleChange}
-                  className={INPUT_CLASS}
+                  className={INPUT_WITH_ICON_CLASS}
                   required
                 />
-                <DollarSign className="w-4 h-4 text-amber-500 absolute right-3 top-3 pointer-events-none" />
+                <DollarSign className="w-4 h-4 text-amber-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Unidade de Medida</label>
               <select
                 name="unidadeMedida"
@@ -472,8 +476,8 @@ export default function ProdutoModal({
                 className={INPUT_CLASS}
               >
                 {UNIDADES.map((u) => (
-                  <option key={u} value={u}>
-                    {u}
+                  <option key={u.value} value={u.value} className="bg-slate-900 text-white">
+                    {u.label}
                   </option>
                 ))}
               </select>
@@ -481,9 +485,9 @@ export default function ProdutoModal({
           </div>
 
           {/* Estoque e Localização */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {!isEditing && (
-              <div>
+              <div className="min-w-0">
                 <label className={LABEL_CLASS}>Estoque Inicial</label>
                 <div className="relative">
                   <input
@@ -493,14 +497,14 @@ export default function ProdutoModal({
                     name="estoqueInicial"
                     value={formData.estoqueInicial ?? 0}
                     onChange={handleChange}
-                    className={INPUT_CLASS}
+                    className={INPUT_WITH_ICON_CLASS}
                   />
-                  <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                  <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
                 </div>
               </div>
             )}
 
-            <div>
+            <div className="min-w-0">
               <label className={LABEL_CLASS}>Estoque Mínimo (Alerta)</label>
               <div className="relative">
                 <input
@@ -510,13 +514,13 @@ export default function ProdutoModal({
                   name="estoqueMinimo"
                   value={formData.estoqueMinimo ?? 1}
                   onChange={handleChange}
-                  className={INPUT_CLASS}
+                  className={INPUT_WITH_ICON_CLASS}
                 />
-                <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
-            <div className={isEditing ? 'sm:col-span-2' : ''}>
+            <div className={`min-w-0 ${isEditing ? 'sm:col-span-2 md:col-span-2' : 'sm:col-span-2 md:col-span-1'}`}>
               <label className={LABEL_CLASS}>Localização Física</label>
               <div className="relative">
                 <input
@@ -525,15 +529,15 @@ export default function ProdutoModal({
                   value={formData.localizacao || ''}
                   onChange={handleChange}
                   placeholder="Ex: Prateleira B3, Gaveta 2"
-                  className={INPUT_CLASS}
+                  className={INPUT_WITH_ICON_CLASS}
                 />
-                <MapPin className="w-4 h-4 text-slate-500 absolute right-3 top-3 pointer-events-none" />
+                <MapPin className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Detalhes Técnicos e Aplicação */}
-          <div>
+          <div className="min-w-0">
             <label className={LABEL_CLASS}>Observações Técnicas / Aplicação</label>
             <textarea
               name="descricao"
@@ -546,7 +550,7 @@ export default function ProdutoModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 sm:pt-4 border-t border-slate-800 shrink-0">
             <button
               type="button"
               onClick={onClose}

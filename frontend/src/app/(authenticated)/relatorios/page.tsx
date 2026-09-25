@@ -41,7 +41,6 @@ import {
   Categoria,
   Fornecedor,
   PageResponse,
-  OrdemServico,
 } from '@/lib/types';
 import { gerarCsv, baixarArquivoCsv } from '@/lib/csvHelper';
 import type { ColunaCsv } from '@/lib/csvHelper';
@@ -348,53 +347,7 @@ export default function RelatoriosPage() {
   // EXPORTAÇÃO CSV — ZERO WINDOW.ALERT() (UX008-01)
   // ----------------------------------------------------
 
-  const handleExportarCsvOs = async () => {
-    if (isExporting) return;
-    setIsExporting(true);
-    try {
-      const dados = await fetchTodosRegistrosRelatorio<OrdemServico>(async (page, size) => {
-        const params = new URLSearchParams();
-        if (osDataInicio) params.append('dataInicio', formatarDataInicioParaApi(osDataInicio));
-        if (osDataFim) params.append('dataFim', formatarDataFimParaApi(osDataFim));
-        if (osStatus) params.append('status', osStatus);
-        params.append('incluirResumo', 'false'); // UX008-08: não reexecuta agregações por página
-        params.append('page', String(page));
-        params.append('size', String(size));
 
-        const res = await apiFetchJson<RelatorioOsResponse>(`/api/relatorios/ordens-servico?${params.toString()}`);
-        return res.itens;
-      });
-
-      if (dados.length === 0) {
-        mostrarToast('Não há dados de Ordens de Serviço para exportar com os filtros atuais.', 'aviso');
-        return;
-      }
-      const colunas: ColunaCsv<OrdemServico>[] = [
-        { cabecalho: 'Número OS', acessar: (i) => i.numeroOs },
-        { cabecalho: 'Cliente', acessar: (i) => i.clienteNome },
-        { cabecalho: 'Documento', acessar: (i) => formatarDocumento(i.clienteCpfCnpj) },
-        { cabecalho: 'Telefone', acessar: (i) => formatarTelefone(i.clienteTelefone) },
-        { cabecalho: 'Tipo Equipamento', acessar: (i) => i.maquinaTipoDescricao || '' },
-        { cabecalho: 'Marca', acessar: (i) => i.maquinaMarca || '' },
-        { cabecalho: 'Modelo', acessar: (i) => i.maquinaModelo || '' },
-        { cabecalho: 'Nº Série', acessar: (i) => i.maquinaNumeroSerie || '' },
-        { cabecalho: 'Status', acessar: (i) => i.statusDescricao },
-        { cabecalho: 'Data Entrada', acessar: (i) => formatarDataHora(i.dataEntrada) },
-        { cabecalho: 'Data Conclusão', acessar: (i) => (i.dataConclusao ? formatarDataHora(i.dataConclusao) : '') },
-        { cabecalho: 'Valor Peças (R$)', acessar: (i) => (i.valorPecas ?? 0).toFixed(2).replace('.', ',') },
-        { cabecalho: 'Valor Mão de Obra (R$)', acessar: (i) => (i.valorMaoObra ?? 0).toFixed(2).replace('.', ',') },
-        { cabecalho: 'Desconto (R$)', acessar: (i) => (i.valorDesconto ?? 0).toFixed(2).replace('.', ',') },
-        { cabecalho: 'Valor Total (R$)', acessar: (i) => (i.valorTotal ?? 0).toFixed(2).replace('.', ',') },
-      ];
-      const csv = gerarCsv(colunas, dados);
-      baixarArquivoCsv(csv, `relatorio-ordens-servico-${new Date().toISOString().split('T')[0]}`);
-      mostrarToast(`Exportação concluída com sucesso (${dados.length} Ordens de Serviço).`, 'sucesso');
-    } catch (err: unknown) {
-      mostrarToast(err instanceof Error ? err.message : 'Erro ao exportar relatório de Ordens de Serviço.', 'erro');
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   const handleExportarCsvEstoque = async () => {
     if (isExporting) return;
@@ -589,7 +542,6 @@ export default function RelatoriosPage() {
 
   const handleExportarCsvAtivo = async () => {
     switch (activeTab) {
-      case 'ordens-servico': await handleExportarCsvOs(); break;
       case 'estoque': await handleExportarCsvEstoque(); break;
       case 'movimentacoes': await handleExportarCsvMovimentacoes(); break;
       case 'pecas-mais-utilizadas': await handleExportarCsvPecas(); break;
@@ -600,12 +552,12 @@ export default function RelatoriosPage() {
 
   const rotuloExportarAtivo = useMemo(() => {
     switch (activeTab) {
-      case 'ordens-servico': return 'Exportar OS (CSV)';
       case 'estoque': return 'Exportar Estoque (CSV)';
       case 'movimentacoes': return 'Exportar Movimentações (CSV)';
       case 'pecas-mais-utilizadas': return 'Exportar Peças (CSV)';
       case 'clientes': return 'Exportar Clientes (CSV)';
       case 'equipamentos': return 'Exportar Equipamentos (CSV)';
+      default: return '';
     }
   }, [activeTab]);
 
@@ -749,16 +701,18 @@ export default function RelatoriosPage() {
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
             {/* Botão de Exportação CSV Unificado Contextual (UX008-04) */}
-            <button
-              type="button"
-              onClick={handleExportarCsvAtivo}
-              disabled={isLoading || isExporting}
-              className="px-3 py-1.5 rounded-lg bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
-              title="Exportar dados filtrados da aba ativa em formato CSV completo"
-            >
-              <Download className={`w-3.5 h-3.5 text-emerald-400 ${isExporting ? 'animate-bounce' : ''}`} />
-              <span>{isExporting ? 'Exportando...' : rotuloExportarAtivo}</span>
-            </button>
+            {activeTab !== 'ordens-servico' && (
+              <button
+                type="button"
+                onClick={handleExportarCsvAtivo}
+                disabled={isLoading || isExporting}
+                className="px-3 py-1.5 rounded-lg bg-emerald-600/15 hover:bg-emerald-600/25 border border-emerald-500/30 text-emerald-400 hover:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
+                title="Exportar dados filtrados da aba ativa em formato CSV completo"
+              >
+                <Download className={`w-3.5 h-3.5 text-emerald-400 ${isExporting ? 'animate-bounce' : ''}`} />
+                <span>{isExporting ? 'Exportando...' : rotuloExportarAtivo}</span>
+              </button>
+            )}
 
             {/* Botão Atualizar */}
             <button

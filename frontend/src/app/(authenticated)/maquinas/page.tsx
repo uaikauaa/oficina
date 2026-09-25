@@ -395,7 +395,7 @@ export default function MaquinasPage() {
                               title={`Abrir nova OS para ${m.marca} ${m.modelo}`}
                             >
                               <Plus className="w-3.5 h-3.5" />
-                              <span>+ OS</span>
+                              <span>OS</span>
                             </Link>
                           ) : (
                             <button
@@ -405,7 +405,7 @@ export default function MaquinasPage() {
                               title="Equipamento inativo. Reative o equipamento para abrir nova Ordem de Serviço."
                             >
                               <Plus className="w-3.5 h-3.5" />
-                              <span>+ OS</span>
+                              <span>OS</span>
                             </button>
                           )}
                         </div>

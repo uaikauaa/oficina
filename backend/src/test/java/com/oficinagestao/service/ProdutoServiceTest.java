@@ -3,7 +3,6 @@ package com.oficinagestao.service;
 import com.oficinagestao.dto.*;
 import com.oficinagestao.entity.*;
 import com.oficinagestao.exception.BusinessException;
-import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +19,11 @@ import org.springframework.data.domain.PageRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -70,7 +74,7 @@ class ProdutoServiceTest {
 
         produto = new Produto();
         produto.setId(10L);
-        produto.setCodigo("IGBT-60N100");
+        produto.setCodigo("P-001");
         produto.setNome("Módulo IGBT 60A 1000V");
         produto.setMarca("Toshiba");
         produto.setTipo(TipoProduto.PECA);
@@ -91,11 +95,11 @@ class ProdutoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve cadastrar produto/peça com sucesso com categoria, marca e sem estoque inicial")
+    @DisplayName("Deve cadastrar produto/peça com sucesso gerando código sequencial e persistindo link de compra")
     void deveCadastrarProdutoComSucesso() {
         ProdutoCreateDTO dto = new ProdutoCreateDTO(
-                "IGBT-60N100",
                 null,
+                "https://www.fornecedor.com.br/peca-123",
                 "Módulo IGBT 60A 1000V",
                 "Chaveador inversor para solda TIG/MIG",
                 "Toshiba",
@@ -110,7 +114,7 @@ class ProdutoServiceTest {
                 1L
         );
 
-        when(produtoRepository.existsByCodigo("IGBT-60N100")).thenReturn(false);
+        when(produtoRepository.gerarProximoCodigo()).thenReturn("P-001");
         when(categoriaRepository.findById(5L)).thenReturn(Optional.of(categoria));
         when(fornecedorRepository.findById(1L)).thenReturn(Optional.of(fornecedor));
         when(produtoRepository.save(any(Produto.class))).thenAnswer(i -> {
@@ -122,7 +126,8 @@ class ProdutoServiceTest {
         ProdutoResponseDTO response = produtoService.cadastrar(dto, 1L, null);
 
         assertNotNull(response);
-        assertEquals("IGBT-60N100", response.codigo());
+        assertEquals("P-001", response.codigo());
+        assertEquals("https://www.fornecedor.com.br/peca-123", response.linkCompra());
         assertEquals("Toshiba", response.marca());
         assertEquals(5L, response.categoriaId());
         assertEquals("Eletrônica", response.categoriaNome());
@@ -133,10 +138,10 @@ class ProdutoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve cadastrar produto com estoque inicial e gerar movimentação de entrada")
+    @DisplayName("Deve cadastrar produto com estoque inicial e gerar movimentação de entrada com código sequencial")
     void deveCadastrarProdutoComEstoqueInicial() {
         ProdutoCreateDTO dto = new ProdutoCreateDTO(
-                "AVR-10KVA",
+                null,
                 null,
                 "Regulador Automático de Voltagem AVR 10kVA",
                 "Para geradores trifásicos",
@@ -152,7 +157,7 @@ class ProdutoServiceTest {
                 1L
         );
 
-        when(produtoRepository.existsByCodigo("AVR-10KVA")).thenReturn(false);
+        when(produtoRepository.gerarProximoCodigo()).thenReturn("P-002");
         when(categoriaRepository.findById(5L)).thenReturn(Optional.of(categoria));
         when(fornecedorRepository.findById(1L)).thenReturn(Optional.of(fornecedor));
         when(produtoRepository.save(any(Produto.class))).thenAnswer(i -> {
@@ -164,21 +169,53 @@ class ProdutoServiceTest {
         ProdutoResponseDTO response = produtoService.cadastrar(dto, 1L, null);
 
         assertNotNull(response);
-        assertEquals("AVR-10KVA", response.codigo());
+        assertEquals("P-002", response.codigo());
         assertEquals("Stamford", response.marca());
         assertEquals(new BigDecimal("5.000"), response.estoqueAtual());
         verify(estoqueMovimentacaoRepository).save(any(EstoqueMovimentacao.class));
     }
 
     @Test
+    @DisplayName("Deve ignorar código enviado pelo cliente e gerar código controlado pelo servidor")
+    void deveIgnorarCodigoClienteEGerarSequencial() {
+        ProdutoCreateDTO dto = new ProdutoCreateDTO(
+                "CODIGO-MANUAL-TENTATIVA",
+                null,
+                "Peça com tentativa de código manual",
+                null,
+                "Marca",
+                TipoProduto.PECA,
+                "UN",
+                BigDecimal.TEN,
+                BigDecimal.TEN,
+                BigDecimal.ZERO,
+                null,
+                null,
+                null,
+                null
+        );
+
+        when(produtoRepository.gerarProximoCodigo()).thenReturn("P-003");
+        when(produtoRepository.save(any(Produto.class))).thenAnswer(i -> {
+            Produto p = i.getArgument(0);
+            p.setId(30L);
+            return p;
+        });
+
+        ProdutoResponseDTO response = produtoService.cadastrar(dto, 1L, null);
+
+        assertNotNull(response);
+        assertEquals("P-003", response.codigo());
+    }
+
+    @Test
     @DisplayName("Deve lançar ResourceNotFoundException ao cadastrar com categoria inexistente")
     void deveRejeitarCadastroComCategoriaInexistente() {
         ProdutoCreateDTO dto = new ProdutoCreateDTO(
-                "IGBT-60N100", null, "Nome", null, "Toshiba", TipoProduto.PECA, "UN",
+                null, null, "Nome", null, "Toshiba", TipoProduto.PECA, "UN",
                 BigDecimal.TEN, BigDecimal.TEN, BigDecimal.ZERO, null, null, 999L, null
         );
 
-        when(produtoRepository.existsByCodigo("IGBT-60N100")).thenReturn(false);
         when(categoriaRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> produtoService.cadastrar(dto, 1L, null));
@@ -186,25 +223,11 @@ class ProdutoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve rejeitar cadastro com código de produto duplicado")
-    void deveRejeitarCadastroComCodigoDuplicado() {
-        ProdutoCreateDTO dto = new ProdutoCreateDTO(
-                "IGBT-60N100", null, "Nome", null, null, TipoProduto.PECA, "UN",
-                BigDecimal.TEN, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, null
-        );
-
-        when(produtoRepository.existsByCodigo("IGBT-60N100")).thenReturn(true);
-
-        assertThrows(ConflictException.class, () -> produtoService.cadastrar(dto, 1L, null));
-        verify(produtoRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Deve atualizar produto com sucesso, incluindo alteração de marca e categoria")
+    @DisplayName("Deve atualizar produto preservando o código original e atualizando link de compra")
     void deveAtualizarProdutoComSucesso() {
         ProdutoUpdateDTO dto = new ProdutoUpdateDTO(
-                "IGBT-60N100-MOD",
-                null,
+                "TENTATIVA-MUDAR-CODIGO",
+                "https://www.novofornecedor.com.br/peca-123",
                 "Módulo IGBT 60A 1000V Revisado",
                 "Chaveador rápido",
                 "Infineon",
@@ -219,7 +242,6 @@ class ProdutoServiceTest {
         );
 
         when(produtoRepository.findById(10L)).thenReturn(Optional.of(produto));
-        when(produtoRepository.existsByCodigoAndIdNot("IGBT-60N100-MOD", 10L)).thenReturn(false);
         when(categoriaRepository.findById(5L)).thenReturn(Optional.of(categoria));
         when(fornecedorRepository.findById(1L)).thenReturn(Optional.of(fornecedor));
         when(produtoRepository.save(any(Produto.class))).thenReturn(produto);
@@ -227,7 +249,9 @@ class ProdutoServiceTest {
         ProdutoResponseDTO response = produtoService.atualizar(10L, dto, 1L, null);
 
         assertNotNull(response);
-        assertEquals("IGBT-60N100-MOD", response.codigo());
+        // Código deve permanecer inalterado (P-001)
+        assertEquals("P-001", response.codigo());
+        assertEquals("https://www.novofornecedor.com.br/peca-123", response.linkCompra());
         assertEquals("Infineon", response.marca());
         assertEquals(new BigDecimal("95.00"), response.precoVenda());
         verify(auditoriaService).registrarComRequest(eq(1L), eq("Produto"), eq("10"), eq("UPDATE"), any());
@@ -257,7 +281,7 @@ class ProdutoServiceTest {
 
         assertFalse(resultado.isEmpty());
         assertEquals(1, resultado.getTotalElements());
-        assertEquals("IGBT-60N100", resultado.getContent().get(0).codigo());
+        assertEquals("P-001", resultado.getContent().get(0).codigo());
     }
 
     @Test
@@ -307,5 +331,53 @@ class ProdutoServiceTest {
 
         verify(produtoMaquinaRepository).delete(pm);
         verify(auditoriaService).registrarComRequest(eq(1L), eq("ProdutoMaquina"), eq("1"), eq("DELETE"), any());
+    }
+
+    @Test
+    @DisplayName("Deve validar URLs válidas, nulas ou vazias para link de compra")
+    void deveValidarLinksCompraValidos() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        String[] linksValidos = {
+                "https://google.com",
+                "https://www.fornecedor.com.br/produto/123",
+                "http://fornecedor.com.br/produto",
+                "",
+                null
+        };
+
+        for (String link : linksValidos) {
+            ProdutoCreateDTO dto = new ProdutoCreateDTO(
+                    null, link, "Nome Peça", null, "Marca", TipoProduto.PECA, "UN",
+                    BigDecimal.TEN, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, null
+            );
+            Set<ConstraintViolation<ProdutoCreateDTO>> violations = validator.validateProperty(dto, "linkCompra");
+            assertTrue(violations.isEmpty(), "Link deveria ser válido: " + link);
+        }
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar URLs com espaços, incompletas ou esquemas não permitidos para link de compra")
+    void deveRejeitarLinksCompraInvalidos() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        String[] linksInvalidos = {
+                "https://meu link.com",
+                "https://",
+                "javascript:alert(1)",
+                "data:text/html,teste",
+                "ftp://ftp.exemplo.com/arquivo"
+        };
+
+        for (String link : linksInvalidos) {
+            ProdutoCreateDTO dto = new ProdutoCreateDTO(
+                    null, link, "Nome Peça", null, "Marca", TipoProduto.PECA, "UN",
+                    BigDecimal.TEN, BigDecimal.TEN, BigDecimal.ZERO, null, null, null, null
+            );
+            Set<ConstraintViolation<ProdutoCreateDTO>> violations = validator.validateProperty(dto, "linkCompra");
+            assertFalse(violations.isEmpty(), "Link deveria ser inválido: " + link);
+        }
     }
 }

@@ -171,16 +171,6 @@ export default function EstoquePage() {
               <History className="w-4 h-4 text-cyan-400" />
               <span>Histórico de Movimentações</span>
             </Link>
-
-            <button
-              id="nova-movimentacao-btn"
-              onClick={() => handleAbrirMovimentacao()}
-              disabled={produtos.length === 0}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              <span>Registrar Movimentação</span>
-            </button>
           </div>
         </div>
 

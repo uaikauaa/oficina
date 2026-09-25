@@ -15,7 +15,6 @@ import com.oficinagestao.entity.TipoMovimentacaoEstoque;
 import com.oficinagestao.entity.TipoProduto;
 import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.exception.BusinessException;
-import com.oficinagestao.exception.ConflictException;
 import com.oficinagestao.exception.ResourceNotFoundException;
 import com.oficinagestao.repository.CategoriaRepository;
 import com.oficinagestao.repository.EstoqueMovimentacaoRepository;
@@ -68,11 +67,6 @@ public class ProdutoService {
 
     @Transactional
     public ProdutoResponseDTO cadastrar(ProdutoCreateDTO dto, Long usuarioId, HttpServletRequest request) {
-        String codigoLimpo = dto.codigo().trim();
-        if (produtoRepository.existsByCodigo(codigoLimpo)) {
-            throw new ConflictException("Já existe um produto/peça cadastrado com o código: " + codigoLimpo);
-        }
-
         Categoria categoria = null;
         if (dto.categoriaId() != null) {
             categoria = categoriaRepository.findById(dto.categoriaId())
@@ -85,7 +79,10 @@ public class ProdutoService {
                     .orElseThrow(() -> new ResourceNotFoundException("Fornecedor não encontrado com o ID: " + dto.fornecedorId()));
         }
 
+        String novoCodigo = produtoRepository.gerarProximoCodigo();
+
         Produto produto = toEntity(dto, categoria, fornecedor);
+        produto.setCodigo(novoCodigo);
         Produto salvo = produtoRepository.save(produto);
 
         if (dto.estoqueInicial() != null && dto.estoqueInicial().compareTo(BigDecimal.ZERO) > 0) {
@@ -119,11 +116,6 @@ public class ProdutoService {
     public ProdutoResponseDTO atualizar(Long id, ProdutoUpdateDTO dto, Long usuarioId, HttpServletRequest request) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto/Peça não encontrado com o ID: " + id));
-
-        String codigoLimpo = dto.codigo().trim();
-        if (produtoRepository.existsByCodigoAndIdNot(codigoLimpo, id)) {
-            throw new ConflictException("Já existe outro produto/peça cadastrado com o código: " + codigoLimpo);
-        }
 
         Categoria categoria = null;
         if (dto.categoriaId() != null) {
@@ -258,8 +250,7 @@ public class ProdutoService {
     public Produto toEntity(ProdutoCreateDTO dto, Categoria categoria, Fornecedor fornecedor) {
         if (dto == null) return null;
         Produto p = new Produto();
-        p.setCodigo(dto.codigo().trim());
-        p.setCodigoBarras(dto.codigoBarras() != null ? dto.codigoBarras().trim() : null);
+        p.setLinkCompra(dto.linkCompra() != null && !dto.linkCompra().isBlank() ? dto.linkCompra().trim() : null);
         p.setNome(dto.nome().trim());
         p.setDescricao(dto.descricao() != null ? dto.descricao().trim() : null);
         p.setMarca(dto.marca() != null ? dto.marca().trim() : null);
@@ -279,8 +270,8 @@ public class ProdutoService {
 
     public void updateEntity(Produto p, ProdutoUpdateDTO dto, Categoria categoria, Fornecedor fornecedor) {
         if (p == null || dto == null) return;
-        p.setCodigo(dto.codigo().trim());
-        p.setCodigoBarras(dto.codigoBarras() != null ? dto.codigoBarras().trim() : null);
+        // Código do produto é preservado e não alterado na edição
+        p.setLinkCompra(dto.linkCompra() != null && !dto.linkCompra().isBlank() ? dto.linkCompra().trim() : null);
         p.setNome(dto.nome().trim());
         p.setDescricao(dto.descricao() != null ? dto.descricao().trim() : null);
         p.setMarca(dto.marca() != null ? dto.marca().trim() : null);
@@ -306,7 +297,7 @@ public class ProdutoService {
         return new ProdutoResponseDTO(
                 p.getId(),
                 p.getCodigo(),
-                p.getCodigoBarras(),
+                p.getLinkCompra(),
                 p.getNome(),
                 p.getDescricao(),
                 p.getMarca(),

@@ -306,7 +306,7 @@ export const TIPO_PRODUTO_LABELS: Record<TipoProduto, string> = {
 export interface Produto {
   id: number;
   codigo: string;
-  codigoBarras?: string | null;
+  linkCompra?: string | null;
   nome: string;
   descricao?: string | null;
   marca?: string | null;
@@ -332,20 +332,20 @@ export interface Produto {
 }
 
 export interface ProdutoFormData {
-  codigo: string;
-  codigoBarras?: string;
+  codigo?: string | null;
+  linkCompra?: string | null;
   nome: string;
-  descricao?: string;
-  marca?: string;
+  descricao?: string | null;
+  marca?: string | null;
   tipo: TipoProduto;
   unidadeMedida?: string;
   precoCusto: number;
   precoVenda: number;
   estoqueMinimo?: number;
   estoqueInicial?: number;
-  localizacao?: string;
-  categoriaId?: number;
-  fornecedorId?: number;
+  localizacao?: string | null;
+  categoriaId?: number | null;
+  fornecedorId?: number | null;
 }
 
 export interface Compatibilidade {

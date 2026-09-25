@@ -32,8 +32,8 @@ public class Produto {
     @Column(name = "codigo", nullable = false, unique = true, length = 50)
     private String codigo;
 
-    @Column(name = "codigo_barras", length = 50)
-    private String codigoBarras;
+    @Column(name = "link_compra", length = 1000)
+    private String linkCompra;
 
     @Column(name = "nome", nullable = false, length = 200)
     private String nome;
@@ -148,12 +148,12 @@ public class Produto {
         this.codigo = codigo;
     }
 
-    public String getCodigoBarras() {
-        return codigoBarras;
+    public String getLinkCompra() {
+        return linkCompra;
     }
 
-    public void setCodigoBarras(String codigoBarras) {
-        this.codigoBarras = codigoBarras;
+    public void setLinkCompra(String linkCompra) {
+        this.linkCompra = linkCompra;
     }
 
     public String getNome() {

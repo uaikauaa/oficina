@@ -207,3 +207,24 @@ export function formatarCodigoSku(codigo?: string | null, id?: number | null): s
   return limpo;
 }
 
+/**
+ * Retorna o nome por extenso da unidade de medida para exibição na interface sem abreviações.
+ */
+export function formatarUnidadeMedida(unidade?: string | null): string {
+  if (!unidade) return 'Unidade';
+  const mapa: Record<string, string> = {
+    UN: 'Unidade',
+    UNIDADE: 'Unidade',
+    PC: 'Peça',
+    PECA: 'Peça',
+    KG: 'Quilograma',
+    M: 'Metro',
+    MT: 'Metro',
+    PAR: 'Par',
+    CJ: 'Conjunto',
+    L: 'Litro',
+    LT: 'Litro',
+  };
+  return mapa[unidade.toUpperCase()] || unidade;
+}
+

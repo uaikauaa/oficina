@@ -26,9 +26,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
            "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))))")
     List<Produto> buscarRapida(@Param("termo") String termo, Pageable pageable);
 
-    boolean existsByCodigo(String codigo);
-
-    boolean existsByCodigoAndIdNot(String codigo, Long id);
+    @Query(value = "SELECT 'P-' || LPAD(curr_val::text, GREATEST(3, LENGTH(curr_val::text)), '0') " +
+                   "FROM (SELECT nextval('produtos_codigo_seq') AS curr_val) t", nativeQuery = true)
+    String gerarProximoCodigo();
 
     /**
      * Busca o produto aplicando Lock Pessimista de Escrita (SELECT ... FOR UPDATE).
@@ -44,8 +44,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             "LEFT JOIN FETCH p.fornecedor f WHERE " +
             "(CAST(:termo AS string) IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
             "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
-            "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))) " +
-            "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', CAST(:termo AS string), '%'))) " +
+            "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))) " +
             "AND (:tipo IS NULL OR p.tipo = :tipo) " +
             "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
             "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +
@@ -57,8 +56,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                     "LEFT JOIN p.fornecedor f WHERE " +
                     "(CAST(:termo AS string) IS NULL OR LOWER(p.codigo) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
                     "  OR LOWER(p.nome) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')) " +
-                    "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%'))) " +
-                    "  OR (p.codigoBarras IS NOT NULL AND p.codigoBarras LIKE CONCAT('%', CAST(:termo AS string), '%'))) " +
+                    "  OR (p.marca IS NOT NULL AND LOWER(p.marca) LIKE LOWER(CONCAT('%', CAST(:termo AS string), '%')))) " +
                     "AND (:tipo IS NULL OR p.tipo = :tipo) " +
                     "AND (:categoriaId IS NULL OR (c IS NOT NULL AND c.id = :categoriaId)) " +
                     "AND (:fornecedorId IS NULL OR (f IS NOT NULL AND f.id = :fornecedorId)) " +

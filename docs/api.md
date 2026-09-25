@@ -441,12 +441,11 @@ Ativa ou inativa a categoria.
 
 #### `POST /api/produtos`
 Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, reguladores AVR, pontes retificadoras).
-- **Regra**: `codigo` único obrigatório, `precoVenda >= 0`, `estoqueMinimo >= 0`.
+- **Regra**: O código da peça/produto é gerado automaticamente pelo servidor no formato sequencial (`P-001`, `P-002`...). Qualquer código enviado no payload é ignorado na criação. `precoVenda >= 0`, `estoqueMinimo >= 0`. `linkCompra` opcional (deve ser uma URL válida iniciando com `http://` ou `https://` sem espaços).
 - **Payload**:
   ```json
   {
-    "codigo": "IGBT-60N100",
-    "codigoBarras": "7891234567890",
+    "linkCompra": "https://www.fornecedor.com.br/produto/123",
     "nome": "Módulo IGBT 60N100 60A 1000V",
     "descricao": "Módulo de potência para inversores de solda TIG/MIG",
     "marca": "Toshiba",
@@ -461,11 +460,11 @@ Cadastra uma nova peça ou produto técnico (IGBTs, diodos, capacitores, regulad
     "fornecedorId": 1
   }
   ```
-- **Resposta Sucesso (201 Created)**: `ProdutoResponseDTO` com `categoriaNome` e `marca`.
+- **Resposta Sucesso (201 Created)**: `ProdutoResponseDTO` com `codigo` sequencial gerado pelo servidor (`P-001`, etc.), `linkCompra`, `categoriaNome` e `marca`.
 
 #### `GET /api/produtos`
 Lista produtos com paginação e filtros combinados:
-- `termo`: Busca por código, nome, marca ou código de barras.
+- `termo`: Busca por código, nome ou marca.
 - `tipo`: `PRODUTO`, `PECA`, `SERVICO`, `CONSUMIVEL`.
 - `categoriaId`: ID numérico da categoria.
 - `fornecedorId`: ID numérico do fornecedor.
@@ -596,7 +595,7 @@ Executa busca global transversal e agregada em frações de segundo para balcão
   - Clientes (nome, razão social, nome fantasia, CPF/CNPJ, telefone);
   - Equipamentos (marca, modelo, número de série, nome do cliente vinculado);
   - Ordens de Serviço (número da OS, cliente, equipamento, problema relatado);
-  - Peças / Produtos (código, nome, código de barras/SKU, marca).
+  - Peças / Produtos (código/SKU, nome, marca).
 - **Limite**: Máximo 5 registros por categoria (total até 20 itens).
 - **Resposta Sucesso (200 OK)**: `BuscaRapidaDTO` contendo arrays tipados com `{ id, titulo, subtitulo, tag, url }`.
 

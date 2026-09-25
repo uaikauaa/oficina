@@ -47,14 +47,14 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V15 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V16 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("15", current.getVersion().getVersion(), "A versão atual da migration deve ser 15.");
-        assertEquals("remove cliente codigo ibge", current.getDescription());
+        assertEquals("16", current.getVersion().getVersion(), "A versão atual da migration deve ser 16.");
+        assertEquals("refactor produto codigo and link compra", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
@@ -99,6 +99,19 @@ class DatabaseConnectionTest {
             }
             assertFalse(colunasClientes.contains("codigo_ibge"),
                     "A coluna 'codigo_ibge' deve ter sido removida de 'clientes' pela migration V15.");
+
+            // Validar que codigo_barras foi removido e link_compra adicionado na tabela produtos pela migration V16
+            List<String> colunasProdutos = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'produtos'")) {
+                while (rs.next()) {
+                    colunasProdutos.add(rs.getString("column_name").toLowerCase());
+                }
+            }
+            assertFalse(colunasProdutos.contains("codigo_barras"),
+                    "A coluna 'codigo_barras' deve ter sido removida de 'produtos' pela migration V16.");
+            assertTrue(colunasProdutos.contains("link_compra"),
+                    "A coluna 'link_compra' deve existir em 'produtos' após a migration V16.");
         }
     }
 
