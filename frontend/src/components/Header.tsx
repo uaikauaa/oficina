@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useTransition, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Wrench,
@@ -203,7 +204,7 @@ export default function Header({ user }: HeaderProps) {
   }, []);
 
   const navLinkClass = (active: boolean) =>
-    `whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
+    `whitespace-nowrap px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 xl:gap-1.5 transition-all shrink-0 cursor-pointer ${
       active
         ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50 shadow-sm shadow-amber-500/10'
         : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
@@ -213,25 +214,39 @@ export default function Header({ user }: HeaderProps) {
     <>
       <header className="border-b border-slate-800 bg-[#070a10]/95 backdrop-blur-md sticky top-0 z-30">
         {/* Barra Principal */}
-        <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-4 sm:px-6 py-2.5">
-          <div className="flex items-center justify-between gap-3 min-w-0">
+        <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 py-2.5">
+          <div className="flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 min-w-0">
 
-            {/* Logo Mobile / Tablet (oculto no desktop lg+ para dar lugar à barra do protótipo) */}
-            <div className="flex items-center gap-2.5 lg:hidden shrink-0">
-              <Link href="/dashboard" className="flex items-center gap-2 group">
-                <div className="h-8 w-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 group-hover:bg-amber-500/20 transition-all">
-                  <Wrench className="w-4 h-4" />
+            {/* 1. ESQUERDA: Ícone e Nome da Empresa */}
+            <div className="flex items-center justify-start shrink-0 min-w-0">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 sm:gap-2.5 group transition-all"
+                title={`${OFICINA.nomeFantasia} - Painel`}
+              >
+                <div className="relative w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 group-hover:border-amber-500/40 flex items-center justify-center p-1 transition-all shadow-sm shadow-amber-500/5 shrink-0">
+                  <Image
+                    src="/logo-icone.png"
+                    alt={OFICINA.nomeFantasia}
+                    width={26}
+                    height={26}
+                    priority
+                    className="w-full h-full object-contain drop-shadow-[0_1px_4px_rgba(245,158,11,0.3)]"
+                  />
                 </div>
-                <div className="hidden sm:block">
-                  <span className="text-xs font-bold text-white leading-none whitespace-nowrap">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs sm:text-sm font-black text-white tracking-wide group-hover:text-amber-400 transition-colors leading-none whitespace-nowrap">
                     {OFICINA.nomeFantasia.toUpperCase()}
+                  </span>
+                  <span className="text-[10px] text-amber-500/80 font-medium leading-none mt-1 hidden sm:inline">
+                    Oficina Especializada
                   </span>
                 </div>
               </Link>
             </div>
 
-            {/* Navegação Desktop (lg+) — fiel à esquerda do protótipo */}
-            <nav className="hidden lg:flex items-center gap-1 flex-1 min-w-0">
+            {/* 2. CENTRO: Painel de Navegação Centralizado (Desktop lg+) */}
+            <nav className="hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 min-w-0">
               <Link href="/dashboard" className={navLinkClass(isDashboardActive)}>
                 <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
                 <span>Painel</span>
@@ -262,19 +277,19 @@ export default function Header({ user }: HeaderProps) {
               </Link>
             </nav>
 
-            {/* Área Direita: Busca Global + Notificações + Usuário */}
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* 3. DIREITA: Busca Global + Notificações + Usuário + Menu Hambúrguer (Mobile) */}
+            <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
               {/* Botão de Busca Rápida (Pill com Ctrl+K) */}
               <button
                 id="busca-rapida-trigger"
                 onClick={() => setIsBuscaOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0c101a] border border-slate-800 hover:border-amber-500/40 text-slate-400 hover:text-slate-200 text-xs transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#0c101a] border border-slate-800 hover:border-amber-500/40 text-slate-400 hover:text-slate-200 text-xs transition-all cursor-pointer shadow-sm"
                 title="Busca Global (Ctrl+K)"
                 aria-label="Abrir busca rápida"
               >
                 <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span className="hidden sm:inline whitespace-nowrap">Buscar...</span>
-                <kbd className="hidden md:inline-flex px-1.5 py-0.5 bg-slate-900 text-slate-400 rounded text-[10px] font-mono border border-slate-700/80 whitespace-nowrap ml-1">
+                <span className="hidden sm:inline lg:hidden xl:inline whitespace-nowrap">Buscar...</span>
+                <kbd className="hidden 2xl:inline-flex px-1.5 py-0.5 bg-slate-900 text-slate-400 rounded text-[10px] font-mono border border-slate-700/80 whitespace-nowrap ml-1">
                   Ctrl + K
                 </kbd>
               </button>
@@ -386,7 +401,7 @@ export default function Header({ user }: HeaderProps) {
                   <div className="w-8 h-8 rounded-full bg-[#1b263b] border border-slate-700 flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0">
                     {userInitials}
                   </div>
-                  <span className="text-xs font-semibold text-white whitespace-nowrap hidden sm:inline">
+                  <span className="text-xs font-semibold text-white whitespace-nowrap hidden sm:inline lg:hidden xl:inline">
                     {firstName}
                   </span>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -523,7 +538,7 @@ export default function Header({ user }: HeaderProps) {
                 </Link>
                 <Link
                   href="/relatorios"
-                  className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+                  className={`col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center sm:justify-start gap-2 transition-all ${
                     isRelatoriosActive
                       ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
                       : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
