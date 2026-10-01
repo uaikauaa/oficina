@@ -33,6 +33,7 @@ public class OrdemServicoItemService {
     private final EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final AuditoriaService auditoriaService;
+    private final NotificacaoService notificacaoService;
 
     public OrdemServicoItemService(
             OrdemServicoRepository ordemServicoRepository,
@@ -40,7 +41,8 @@ public class OrdemServicoItemService {
             ProdutoRepository produtoRepository,
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
             UsuarioRepository usuarioRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            NotificacaoService notificacaoService
     ) {
         this.ordemServicoRepository = ordemServicoRepository;
         this.ordemServicoItemRepository = ordemServicoItemRepository;
@@ -48,6 +50,7 @@ public class OrdemServicoItemService {
         this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaService = auditoriaService;
+        this.notificacaoService = notificacaoService;
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +99,7 @@ public class OrdemServicoItemService {
         BigDecimal saldoPosterior = saldoAnterior.subtract(quantidade);
         produto.setEstoqueAtual(saldoPosterior);
         produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(produto);
 
         BigDecimal precoUnitarioCongelado = (produto.getPrecoVenda() != null ? produto.getPrecoVenda() : BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
         BigDecimal desconto = (dto.valorDesconto() != null ? dto.valorDesconto() : BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
@@ -166,6 +170,7 @@ public class OrdemServicoItemService {
 
         produto.setEstoqueAtual(saldoPosterior);
         produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(produto);
 
         Usuario usuario = usuarioId != null ? usuarioRepository.findById(usuarioId).orElse(null) : null;
         EstoqueMovimentacao mov = new EstoqueMovimentacao(

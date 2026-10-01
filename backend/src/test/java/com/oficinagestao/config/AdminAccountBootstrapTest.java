@@ -104,4 +104,34 @@ class AdminAccountBootstrapTest {
 
         verify(usuarioRepository, never()).save(any(Usuario.class));
     }
+
+    @Test
+    @DisplayName("Não deve alterar ou sobrescrever conta existente quando o e-mail configurado for diferente")
+    void shouldNotOverwriteExistingAccountWhenConfiguredEmailDiffers() {
+        ReflectionTestUtils.setField(bootstrap, "adminName", "Proprietária Oficina");
+        ReflectionTestUtils.setField(bootstrap, "adminEmail", "novo@oficina.com");
+        ReflectionTestUtils.setField(bootstrap, "adminPassword", "SenhaSegura@123");
+
+        Usuario adminExistente = new Usuario("Geisa", "admin@oficina.com", "hash_antigo", true);
+        adminExistente.setId(1L);
+
+        when(usuarioRepository.findByEmail("novo@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.count()).thenReturn(1L);
+
+        bootstrap.run(new DefaultApplicationArguments(new String[]{}));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Não deve alterar usuários existentes quando houver múltiplos usuários na base")
+    void shouldNotMigrateWhenMultipleUsersExist() {
+        ReflectionTestUtils.setField(bootstrap, "adminEmail", "novo@oficina.com");
+        when(usuarioRepository.findByEmail("novo@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.count()).thenReturn(2L);
+
+        bootstrap.run(new DefaultApplicationArguments(new String[]{}));
+
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
 }

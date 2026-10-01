@@ -37,6 +37,9 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(name = "token_version", nullable = false)
+    private Integer tokenVersion = 0;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuario_roles",
@@ -127,6 +130,18 @@ public class Usuario {
 
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    public Integer getTokenVersion() {
+        return tokenVersion != null ? tokenVersion : 0;
+    }
+
+    public void setTokenVersion(Integer tokenVersion) {
+        this.tokenVersion = tokenVersion != null ? tokenVersion : 0;
+    }
+
+    public void incrementTokenVersion() {
+        this.tokenVersion = (this.tokenVersion != null ? this.tokenVersion : 0) + 1;
     }
 
     public OffsetDateTime getCreatedAt() {

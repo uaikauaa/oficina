@@ -11,7 +11,7 @@ test.describe('Autenticação e Login E2E', () => {
 
     await page.goto('/login');
 
-    await expect(page.locator('h1')).toHaveText('Oficina Gestão');
+    await expect(page.getByRole('heading', { name: 'Oficina Gestão', level: 1 })).toBeVisible();
     await expect(page.locator('input#email')).toBeVisible();
     await expect(page.locator('input#senha')).toBeVisible();
     await expect(page.locator('button[type="submit"]')).toBeVisible();
@@ -53,7 +53,9 @@ test.describe('Autenticação e Login E2E', () => {
     expect(apiRequestUrl).not.toContain('localhost:8080');
   });
 
-  test('3. Login com credenciais válidas deve autenticar e navegar para /dashboard', async ({ page }) => {
+  test('3. Login com credenciais válidas deve autenticar e solicitar 2FA ou navegar para /dashboard', async ({
+    page,
+  }) => {
     const email = process.env.INITIAL_ADMIN_EMAIL;
     const password = process.env.INITIAL_ADMIN_PASSWORD;
 
@@ -68,10 +70,10 @@ test.describe('Autenticação e Login E2E', () => {
     await page.locator('input#senha').fill(password);
     await page.locator('button[type="submit"]').click();
 
-    // Deve redirecionar para o dashboard
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    // Com o 2FA ativo, deve exibir o campo de código 2FA; se 2FA desativado, redireciona ao dashboard
+    const twoFactorInput = page.locator('#two-factor-code, #modal-two-factor-code').first();
+    const dashboardTitle = page.getByText('Painel Operacional');
 
-    // Header e Dashboard devem carregar
-    await expect(page.getByText('Painel Operacional')).toBeVisible();
+    await expect(twoFactorInput.or(dashboardTitle)).toBeVisible({ timeout: 15000 });
   });
 });

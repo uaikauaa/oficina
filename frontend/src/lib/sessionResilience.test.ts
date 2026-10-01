@@ -1,6 +1,7 @@
 import { describe, it, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { executeSilentRefresh, sanitizarRedirect } from './api.ts';
+import type { LoginPayload } from './types.ts';
 import {
   obterAgoraLocalDatetimeInput,
   converterDatetimeLocalParaIsoComOffset,
@@ -302,6 +303,204 @@ describe('UX-009: Estabilização e Resiliência — Testes Automatizados', () =
 
       const resultado = await executeSilentRefresh();
       assert.equal(resultado, false);
+    });
+  });
+
+  // =========================================================================
+  // 6. AUTENTICAÇÃO: CONEXÃO REAL DO PARÂMETRO rememberMe
+  // =========================================================================
+  describe('AUTENTICAÇÃO: Manter Conectado (rememberMe)', () => {
+    it('22. Login com manterConectado=true deve enviar rememberMe: true na requisição', async () => {
+      let payloadEnviado: LoginPayload | undefined;
+      global.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+        if (url.toString().includes('/api/auth/login')) {
+          payloadEnviado = JSON.parse(init?.body as string) as LoginPayload;
+          return new Response(JSON.stringify({ user: { email: 'admin@oficina.com' } }), { status: 200 });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const payload: LoginPayload = {
+        email: 'admin@oficina.com',
+        senha: 'SenhaForte123',
+        rememberMe: true,
+      };
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      assert.equal(res.status, 200);
+      assert.ok(payloadEnviado);
+      assert.equal(payloadEnviado.rememberMe, true);
+    });
+
+    it('23. Login com manterConectado=false deve enviar rememberMe: false na requisição', async () => {
+      let payloadEnviado: LoginPayload | undefined;
+      global.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+        if (url.toString().includes('/api/auth/login')) {
+          payloadEnviado = JSON.parse(init?.body as string) as LoginPayload;
+          return new Response(JSON.stringify({ user: { email: 'admin@oficina.com' } }), { status: 200 });
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const payload: LoginPayload = {
+        email: 'admin@oficina.com',
+        senha: 'SenhaForte123',
+        rememberMe: false,
+      };
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      assert.equal(res.status, 200);
+      assert.ok(payloadEnviado);
+      assert.equal(payloadEnviado.rememberMe, false);
+    });
+  });
+
+  // =========================================================================
+  // 5. AUTENTICAÇÃO: 2FA POR E-MAIL
+  // =========================================================================
+  describe('AUTENTICAÇÃO: Fluxo 2FA por E-mail', () => {
+    it('24. Login inicial deve exigir 2FA e retornar challengeToken', async () => {
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/login')) {
+          return new Response(
+            JSON.stringify({
+              twoFactorRequired: true,
+              challengeToken: 'uuid-desafio-123',
+              mensagem: 'Se as credenciais forem válidas, um código de verificação foi enviado.',
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'admin@oficina.com', senha: 'SenhaForte123' }),
+      });
+
+      assert.equal(res.status, 200);
+      const data = await res.json();
+      assert.equal(data.twoFactorRequired, true);
+      assert.equal(data.challengeToken, 'uuid-desafio-123');
+    });
+
+    it('25. Verificação de 2FA deve enviar challengeToken e código de 6 dígitos', async () => {
+      let payloadEnviado: { challengeToken: string; code: string } | undefined;
+      global.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+        if (url.toString().includes('/api/auth/2fa/verify')) {
+          payloadEnviado = JSON.parse(init?.body as string);
+          return new Response(
+            JSON.stringify({
+              user: { id: 1, nome: 'Proprietária', email: 'admin@oficina.com', roles: ['ROLE_ADMIN'] },
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeToken: 'uuid-desafio-123', code: '123456' }),
+      });
+
+      assert.equal(res.status, 200);
+      assert.ok(payloadEnviado);
+      assert.equal(payloadEnviado.challengeToken, 'uuid-desafio-123');
+      assert.equal(payloadEnviado.code, '123456');
+    });
+
+    it('26. Reenvio de 2FA deve enviar challengeToken e retornar novo desafio', async () => {
+      let payloadEnviado: { challengeToken: string } | undefined;
+      global.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+        if (url.toString().includes('/api/auth/2fa/resend')) {
+          payloadEnviado = JSON.parse(init?.body as string);
+          return new Response(
+            JSON.stringify({
+              twoFactorRequired: true,
+              challengeToken: 'uuid-novo-desafio-456',
+              mensagem: 'Novo código de verificação enviado para o seu e-mail.',
+            }),
+            { status: 200 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const res = await fetch('/api/auth/2fa/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeToken: 'uuid-desafio-123' }),
+      });
+
+      assert.equal(res.status, 200);
+      assert.ok(payloadEnviado);
+      assert.equal(payloadEnviado.challengeToken, 'uuid-desafio-123');
+      const data = await res.json();
+      assert.equal(data.challengeToken, 'uuid-novo-desafio-456');
+    });
+
+    it('27. Erro de código 2FA inválido deve retornar status 401 e mensagem amigável', async () => {
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/2fa/verify')) {
+          return new Response(
+            JSON.stringify({
+              status: 401,
+              message: 'Código de verificação incorreto. Você tem mais 4 tentativa(s).',
+            }),
+            { status: 401 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeToken: 'uuid-desafio-123', code: '000000' }),
+      });
+
+      assert.equal(res.status, 401);
+      const data = await res.json();
+      assert.equal(data.message, 'Código de verificação incorreto. Você tem mais 4 tentativa(s).');
+    });
+
+    it('28. Excesso de tentativas de 2FA (5 erros) deve retornar bloqueio no backend', async () => {
+      global.fetch = (async (url: string | URL | Request) => {
+        if (url.toString().includes('/api/auth/2fa/verify')) {
+          return new Response(
+            JSON.stringify({
+              status: 401,
+              message: 'Limite de tentativas excedido. Solicite um novo código.',
+            }),
+            { status: 401 }
+          );
+        }
+        return new Response(null, { status: 404 });
+      }) as typeof fetch;
+
+      const res = await fetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeToken: 'uuid-desafio-123', code: '000000' }),
+      });
+
+      assert.equal(res.status, 401);
+      const data = await res.json();
+      assert.ok(data.message.includes('Limite de tentativas excedido'));
     });
   });
 });

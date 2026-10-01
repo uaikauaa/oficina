@@ -58,6 +58,9 @@ class IntegracaoEstoqueOSTest {
     @Mock
     private AuditoriaService auditoriaService;
 
+    @Mock
+    private NotificacaoService notificacaoService;
+
     @InjectMocks
     private EstoqueService estoqueService;
 

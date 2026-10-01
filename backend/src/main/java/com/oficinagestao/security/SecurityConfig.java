@@ -70,7 +70,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
                     // Endpoint de health check público (avaliando conectividade com PostgreSQL)
-                    auth.requestMatchers("/api/health").permitAll();
+                    auth.requestMatchers("/api/health").permitAll()
+                            .requestMatchers("/actuator/health").permitAll();
 
                     // Documentação Swagger / OpenAPI permitida publicamente apenas se habilitada na configuração (PROD001-09)
                     if (swaggerEnabled) {
@@ -81,6 +82,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/auth/2fa/**").permitAll()
                             // Qualquer outro endpoint da API exige autenticação com ROLE_ADMIN
                             .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")
                             .anyRequest().authenticated();

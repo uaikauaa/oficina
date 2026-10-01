@@ -115,6 +115,27 @@ export interface CurrentUser {
   roles: string[];
 }
 
+export interface LoginPayload {
+  email: string;
+  senha: string;
+  rememberMe?: boolean;
+}
+
+export interface LoginChallengeResponse {
+  twoFactorRequired: boolean;
+  challengeToken: string;
+  mensagem: string;
+}
+
+export interface TwoFactorVerifyPayload {
+  challengeToken: string;
+  code: string;
+}
+
+export interface TwoFactorResendPayload {
+  challengeToken: string;
+}
+
 export type StatusOrdemServico =
   | 'ABERTA'
   | 'EM_DIAGNOSTICO'
@@ -579,5 +600,27 @@ export interface ClienteContadoresStatus {
   ativos: number;
   inativos: number;
 }
+
+export type TipoNotificacao = 'OS_AGUARDANDO_APROVACAO' | 'OS_PRONTA' | 'ESTOQUE_BAIXO';
+
+export interface Notificacao {
+  id: number;
+  tipo: TipoNotificacao;
+  titulo: string;
+  mensagem: string;
+  lida: boolean;
+  criadoEm: string;
+  lidoEm: string | null;
+  recursoTipo: string | null;
+  recursoId: number | null;
+  link: string | null;
+}
+
+export interface NotificacoesResumo {
+  total: number;
+  naoLidas: number;
+  notificacoes: Notificacao[];
+}
+
 
 

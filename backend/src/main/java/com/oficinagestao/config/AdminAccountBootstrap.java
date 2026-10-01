@@ -25,7 +25,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
     @Value("${INITIAL_ADMIN_NAME:Geisa}")
     private String adminName;
 
-    @Value("${INITIAL_ADMIN_EMAIL:}")
+    @Value("${INITIAL_ADMIN_EMAIL:brunosoldasourinhos@hotmail.com}")
     private String adminEmail;
 
     @Value("${INITIAL_ADMIN_PASSWORD:}")
@@ -44,10 +44,18 @@ public class AdminAccountBootstrap implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
+        String targetEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
+
+        // Se a conta com o e-mail configurado já existe no sistema, nada a fazer
+        if (!targetEmail.isEmpty() && usuarioRepository.findByEmail(targetEmail).isPresent()) {
+            log.info("Inicialização: Conta administrativa [{}] já existe e está ativa.", targetEmail);
+            return;
+        }
+
         long userCount = usuarioRepository.count();
 
         if (userCount > 0) {
-            log.info("Inicialização: Base de usuários já contém {} registro(s). Bootstrap ignorado.", userCount);
+            log.info("Inicialização: Base de usuários já contém {} registro(s). Bootstrap ignorado para preservar a integridade da conta existente.", userCount);
             return;
         }
 

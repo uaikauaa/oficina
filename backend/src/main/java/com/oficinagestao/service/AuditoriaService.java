@@ -24,14 +24,30 @@ public class AuditoriaService {
 
     @Transactional
     public void registrar(Long usuarioId, String entidade, String entidadeId, String acao, String ipOrigem) {
+        String acaoNormalizada = normalizarAcao(acao);
         Auditoria auditoria = new Auditoria(
                 usuarioId,
                 entidade,
                 entidadeId,
-                acao,
+                acaoNormalizada,
                 ipOrigem != null && !ipOrigem.isBlank() ? ipOrigem : "127.0.0.1"
         );
         auditoriaRepository.save(auditoria);
+    }
+
+    private String normalizarAcao(String acao) {
+        if (acao == null) return "UPDATE";
+        String upper = acao.trim().toUpperCase();
+        if ("INSERT".equals(upper) || "UPDATE".equals(upper) || "DELETE".equals(upper) || "LOGIN".equals(upper) || "LOGOUT".equals(upper)) {
+            return upper;
+        }
+        if (upper.contains("REQUEST") || upper.contains("RESENT") || upper.contains("CREATE") || upper.contains("INSERT")) {
+            return "INSERT";
+        }
+        if (upper.contains("DELETE") || upper.contains("REMOVE")) {
+            return "DELETE";
+        }
+        return "UPDATE";
     }
 
     @Transactional

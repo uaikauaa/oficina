@@ -18,6 +18,10 @@ import {
   LogIn,
   AlertCircle,
   X,
+  KeyRound,
+  ArrowLeft,
+  RefreshCw,
+  Clock,
 } from 'lucide-react';
 
 import { sanitizarRedirect, apiFetch, extrairMensagemErroLogin } from '@/lib/api';
@@ -25,6 +29,7 @@ import { sanitizarRedirect, apiFetch, extrairMensagemErroLogin } from '@/lib/api
 const loginSchema = z.object({
   email: z.string().min(1, 'O email é obrigatório').email('Formato de email inválido'),
   senha: z.string().min(1, 'A senha é obrigatória'),
+  rememberMe: z.boolean().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -38,6 +43,15 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [manterConectado, setManterConectado] = useState(true);
+
+  // Estados da etapa de Autenticação em Duas Etapas (2FA)
+  const [twoFactorStep, setTwoFactorStep] = useState(false);
+  const [challengeToken, setChallengeToken] = useState<string | null>(null);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [countdownSeconds, setCountdownSeconds] = useState(300);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+  const [attemptsExceeded, setAttemptsExceeded] = useState(false);
 
   // Estado e referências do Modal Mobile/Tablet (< 1024px)
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,12 +83,28 @@ function LoginForm() {
     try {
       const response = await apiFetch('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          email: data.email,
+          senha: data.senha,
+          rememberMe: Boolean(manterConectado),
+        }),
       });
 
       if (!response.ok) {
         const errorMsg = await extrairMensagemErroLogin(response);
         throw new Error(errorMsg);
+      }
+
+      const resData = await response.json();
+      if (resData.twoFactorRequired) {
+        setChallengeToken(resData.challengeToken);
+        setTwoFactorStep(true);
+        setTwoFactorCode('');
+        setCountdownSeconds(300);
+        setResendCooldown(30);
+        setAttemptsExceeded(false);
+        setErrorMessage(null);
+        return;
       }
 
       // Sucesso na autenticação
@@ -90,6 +120,127 @@ function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  const onVerify2FA = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (twoFactorCode.length !== 6 || !challengeToken) return;
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiFetch('/api/auth/2fa/verify', {
+        method: 'POST',
+        body: JSON.stringify({
+          challengeToken,
+          code: twoFactorCode,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const msg = errorData?.message || 'Código de verificação incorreto ou expirado.';
+        if (msg.includes('Limite de tentativas excedido') || msg.includes('5 tentativas')) {
+          setAttemptsExceeded(true);
+        }
+        throw new Error(msg);
+      }
+
+      // Sucesso na autenticação 2FA: cookies definidos no navegador
+      router.push(redirectUrl);
+      router.refresh();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Ocorreu um erro ao verificar o código.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onResend2FA = async () => {
+    if (!challengeToken || isResending || resendCooldown > 0) return;
+
+    setIsResending(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await apiFetch('/api/auth/2fa/resend', {
+        method: 'POST',
+        body: JSON.stringify({ challengeToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.message || 'Falha ao reenviar código de verificação.');
+      }
+
+      const resData = await response.json();
+      if (resData.challengeToken) {
+        setChallengeToken(resData.challengeToken);
+      }
+      setTwoFactorCode('');
+      setCountdownSeconds(300);
+      setResendCooldown(30);
+      setAttemptsExceeded(false);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Não foi possível reenviar o código no momento.');
+      }
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const voltarParaLogin = () => {
+    setTwoFactorStep(false);
+    setChallengeToken(null);
+    setTwoFactorCode('');
+    setErrorMessage(null);
+    setAttemptsExceeded(false);
+    setCountdownSeconds(300);
+    setResendCooldown(0);
+  };
+
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  // Contagem regressiva de 5 minutos do código 2FA
+  useEffect(() => {
+    if (!twoFactorStep || countdownSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setCountdownSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [twoFactorStep, countdownSeconds]);
+
+  // Contagem regressiva do cooldown de reenvio (30s)
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
+  // Foco automático no campo de 2FA ao entrar na etapa
+  useEffect(() => {
+    if (twoFactorStep) {
+      const timer = setTimeout(() => {
+        const id = isModalOpen ? 'modal-two-factor-code' : 'two-factor-code';
+        const input = document.getElementById(id) as HTMLInputElement | null;
+        input?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [twoFactorStep, isModalOpen]);
 
   const abrirModal = () => {
     setErrorMessage(null);
@@ -279,10 +430,12 @@ function LoginForm() {
               <div className="w-1.5 h-12 bg-[#f59e0b] rounded-full shrink-0 mt-1" />
               <div>
                 <h2 className="text-2xl sm:text-[26px] font-bold tracking-tight text-white leading-tight">
-                  Bem-vindo de volta!
+                  {twoFactorStep ? 'Código de Verificação' : 'Bem-vindo de volta!'}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-400 mt-1 font-normal">
-                  Faça login para continuar
+                  {twoFactorStep
+                    ? 'Informe o código de 6 dígitos enviado para seu e-mail'
+                    : 'Faça login para continuar'}
                 </p>
               </div>
             </div>
@@ -300,126 +453,242 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Formulário Desktop */}
-            <form onSubmit={desktopForm.handleSubmit(onSubmit)} className="space-y-4" noValidate>
-              {/* Campo E-mail ou Usuário */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="email"
-                  className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
-                >
-                  <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <span>E-mail ou usuário</span>
-                </label>
-                <div className="relative">
+            {/* Alerta de código expirado */}
+            {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
+              <div
+                role="alert"
+                className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs sm:text-sm flex items-start gap-2.5 shadow-lg"
+              >
+                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <div className="flex-1 font-medium leading-relaxed">
+                  O código de verificação expirou após 5 minutos. Solicite um novo código.
+                </div>
+              </div>
+            )}
+
+            {twoFactorStep ? (
+              /* Formulário 2FA Desktop */
+              <form onSubmit={onVerify2FA} className="space-y-4" noValidate>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="two-factor-code"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-[#f59e0b]" />
+                    <span>Código de 6 dígitos</span>
+                  </label>
                   <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
+                    id="two-factor-code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="one-time-code"
                     disabled={isLoading}
-                    aria-invalid={desktopForm.formState.errors.email ? 'true' : 'false'}
-                    placeholder="Digite seu e-mail ou usuário"
-                    className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
-                      desktopForm.formState.errors.email
-                        ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                        : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
-                    }`}
-                    {...desktopForm.register('email')}
+                    placeholder="000000"
+                    maxLength={6}
+                    value={twoFactorCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                      setTwoFactorCode(val);
+                    }}
+                    className="w-full text-center font-mono tracking-[0.4em] text-2xl py-3 px-4 rounded-lg bg-[#0e1422] border border-slate-800 text-white placeholder:text-slate-700 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] focus:outline-none transition-all"
                   />
                 </div>
-                {desktopForm.formState.errors.email && (
-                  <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{desktopForm.formState.errors.email.message}</span>
-                  </p>
-                )}
-              </div>
 
-              {/* Campo Senha */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="senha"
-                  className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
-                >
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Senha</span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="senha"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    disabled={isLoading}
-                    aria-invalid={desktopForm.formState.errors.senha ? 'true' : 'false'}
-                    placeholder="Digite sua senha"
-                    className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
-                      desktopForm.formState.errors.senha
-                        ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                        : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
-                    }`}
-                    {...desktopForm.register('senha')}
-                  />
+                {/* Linha do Timer e Reenvio */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <span>
+                      {countdownSeconds > 0 ? (
+                        <>
+                          Expira em{' '}
+                          <strong className="text-amber-400 font-mono">
+                            {formatTimer(countdownSeconds)}
+                          </strong>
+                        </>
+                      ) : (
+                        <span className="text-red-400 font-semibold">Expirado</span>
+                      )}
+                    </span>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-                    tabIndex={0}
+                    id="resend-2fa-btn"
+                    onClick={onResend2FA}
+                    disabled={isResending || resendCooldown > 0}
+                    className="text-xs font-medium text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {isResending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                    <span>
+                      {resendCooldown > 0
+                        ? `Reenviar (${resendCooldown}s)`
+                        : isResending
+                        ? 'Reenviando...'
+                        : 'Reenviar código'}
+                    </span>
                   </button>
                 </div>
-                {desktopForm.formState.errors.senha && (
-                  <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{desktopForm.formState.errors.senha.message}</span>
-                  </p>
-                )}
-              </div>
 
-              {/* Linha de Manter Conectado & Esqueceu Senha */}
-              <div className="flex items-center justify-between pt-1 text-xs">
-                <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={manterConectado}
-                    onChange={(e) => setManterConectado(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
-                  />
-                  <span>Manter conectado</span>
-                </label>
+                {/* Botão Verificar */}
+                <button
+                  id="verify-2fa-submit-btn"
+                  type="submit"
+                  disabled={
+                    isLoading ||
+                    twoFactorCode.length !== 6 ||
+                    countdownSeconds === 0 ||
+                    attemptsExceeded
+                  }
+                  className="w-full mt-4 py-3 px-4 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <span>Verificando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
+                      <span>Verificar código</span>
+                    </>
+                  )}
+                </button>
 
+                {/* Botão Voltar */}
                 <button
                   type="button"
-                  onClick={() =>
-                    alert('Para recuperação de senha, contate o administrador do sistema.')
-                  }
-                  className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                  onClick={voltarParaLogin}
+                  disabled={isLoading}
+                  className="w-full py-2 text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  Esqueceu sua senha?
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Voltar para o login</span>
                 </button>
-              </div>
-
-              {/* Botão Entrar em Destaque Âmbar */}
-              <button
-                id="login-submit-btn"
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-4 py-3 px-4 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Autenticando...</span>
+              </form>
+            ) : (
+              /* Formulário Desktop */
+              <form onSubmit={desktopForm.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                {/* Campo E-mail ou Usuário */}
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="email"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>E-mail ou usuário</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      disabled={isLoading}
+                      aria-invalid={desktopForm.formState.errors.email ? 'true' : 'false'}
+                      placeholder="Digite seu e-mail ou usuário"
+                      className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                        desktopForm.formState.errors.email
+                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                      }`}
+                      {...desktopForm.register('email')}
+                    />
                   </div>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4 stroke-[2.5]" />
-                    <span>Entrar</span>
-                  </>
-                )}
-              </button>
-            </form>
+                  {desktopForm.formState.errors.email && (
+                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{desktopForm.formState.errors.email.message}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Campo Senha */}
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="senha"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Senha</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="senha"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      disabled={isLoading}
+                      aria-invalid={desktopForm.formState.errors.senha ? 'true' : 'false'}
+                      placeholder="Digite sua senha"
+                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                        desktopForm.formState.errors.senha
+                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                      }`}
+                      {...desktopForm.register('senha')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                      aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                      tabIndex={0}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {desktopForm.formState.errors.senha && (
+                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{desktopForm.formState.errors.senha.message}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Linha de Manter Conectado & Esqueceu Senha */}
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={manterConectado}
+                      onChange={(e) => setManterConectado(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
+                    />
+                    <span>Manter conectado</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      alert('Para recuperação de senha, contate o administrador do sistema.')
+                    }
+                    className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                  >
+                    Esqueceu sua senha?
+                  </button>
+                </div>
+
+                {/* Botão Entrar em Destaque Âmbar */}
+                <button
+                  id="login-submit-btn"
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full mt-4 py-3 px-4 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <span>Autenticando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4 stroke-[2.5]" />
+                      <span>Entrar</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -592,10 +861,12 @@ function LoginForm() {
                   id="modal-login-title"
                   className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight"
                 >
-                  Entrar no Sistema
+                  {twoFactorStep ? 'Código de Verificação' : 'Entrar no Sistema'}
                 </h2>
                 <p className="text-xs text-slate-400 mt-1 font-normal">
-                  Faça login para continuar
+                  {twoFactorStep
+                    ? 'Informe o código de 6 dígitos enviado para seu e-mail'
+                    : 'Faça login para continuar'}
                 </p>
               </div>
             </div>
@@ -612,125 +883,239 @@ function LoginForm() {
               </div>
             )}
 
-            {/* Formulário do Modal */}
-            <form onSubmit={mobileForm.handleSubmit(onSubmit)} className="space-y-4" noValidate>
-              {/* Campo E-mail ou Usuário */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="modal-email"
-                  className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
-                >
-                  <Mail className="w-3.5 h-3.5 text-slate-400" />
-                  <span>E-mail ou usuário</span>
-                </label>
-                <div className="relative">
+            {/* Alerta de código expirado */}
+            {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
+              <div
+                role="alert"
+                className="mb-4 p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 shadow-md"
+              >
+                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <div className="flex-1 font-medium leading-relaxed">
+                  O código de verificação expirou após 5 minutos. Solicite um novo código.
+                </div>
+              </div>
+            )}
+
+            {twoFactorStep ? (
+              /* Formulário 2FA Mobile */
+              <form onSubmit={onVerify2FA} className="space-y-4" noValidate>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="modal-two-factor-code"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-[#f59e0b]" />
+                    <span>Código de 6 dígitos</span>
+                  </label>
                   <input
-                    id="modal-email"
-                    type="email"
-                    autoComplete="email"
+                    id="modal-two-factor-code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="one-time-code"
                     disabled={isLoading}
-                    aria-invalid={mobileForm.formState.errors.email ? 'true' : 'false'}
-                    placeholder="Digite seu e-mail ou usuário"
-                    className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
-                      mobileForm.formState.errors.email
-                        ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                        : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
-                    }`}
-                    {...mobileForm.register('email')}
+                    placeholder="000000"
+                    maxLength={6}
+                    value={twoFactorCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                      setTwoFactorCode(val);
+                    }}
+                    className="w-full text-center font-mono tracking-[0.4em] text-2xl py-3 px-4 rounded-xl bg-[#0e1422] border border-slate-800 text-white placeholder:text-slate-700 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] focus:outline-none transition-all"
                   />
                 </div>
-                {mobileForm.formState.errors.email && (
-                  <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{mobileForm.formState.errors.email.message}</span>
-                  </p>
-                )}
-              </div>
 
-              {/* Campo Senha */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="modal-senha"
-                  className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
-                >
-                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Senha</span>
-                </label>
-                <div className="relative">
-                  <input
-                    id="modal-senha"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    disabled={isLoading}
-                    aria-invalid={mobileForm.formState.errors.senha ? 'true' : 'false'}
-                    placeholder="Digite sua senha"
-                    className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
-                      mobileForm.formState.errors.senha
-                        ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                        : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
-                    }`}
-                    {...mobileForm.register('senha')}
-                  />
+                {/* Linha do Timer e Reenvio */}
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <div className="flex items-center gap-1.5 text-slate-400">
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <span>
+                      {countdownSeconds > 0 ? (
+                        <>
+                          Expira em{' '}
+                          <strong className="text-amber-400 font-mono">
+                            {formatTimer(countdownSeconds)}
+                          </strong>
+                        </>
+                      ) : (
+                        <span className="text-red-400 font-semibold">Expirado</span>
+                      )}
+                    </span>
+                  </div>
+
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
-                    tabIndex={0}
+                    onClick={onResend2FA}
+                    disabled={isResending || resendCooldown > 0}
+                    className="text-xs font-medium text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {isResending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                    <span>
+                      {resendCooldown > 0
+                        ? `Reenviar (${resendCooldown}s)`
+                        : isResending
+                        ? 'Reenviando...'
+                        : 'Reenviar código'}
+                    </span>
                   </button>
                 </div>
-                {mobileForm.formState.errors.senha && (
-                  <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{mobileForm.formState.errors.senha.message}</span>
-                  </p>
-                )}
-              </div>
 
-              {/* Linha de Manter Conectado & Esqueceu Senha */}
-              <div className="flex items-center justify-between pt-1 text-xs">
-                <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={manterConectado}
-                    onChange={(e) => setManterConectado(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
-                  />
-                  <span>Manter conectado</span>
-                </label>
+                {/* Botão Verificar */}
+                <button
+                  type="submit"
+                  disabled={
+                    isLoading ||
+                    twoFactorCode.length !== 6 ||
+                    countdownSeconds === 0 ||
+                    attemptsExceeded
+                  }
+                  className="w-full mt-4 py-3 px-4 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <span>Verificando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
+                      <span>Verificar código</span>
+                    </>
+                  )}
+                </button>
 
+                {/* Botão Voltar */}
                 <button
                   type="button"
-                  onClick={() =>
-                    alert('Para recuperação de senha, contate o administrador do sistema.')
-                  }
-                  className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                  onClick={voltarParaLogin}
+                  disabled={isLoading}
+                  className="w-full py-2 text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  Esqueceu sua senha?
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Voltar para o login</span>
                 </button>
-              </div>
-
-              {/* Botão Entrar em Destaque Âmbar */}
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-4 py-3 px-4 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
-              >
-                {isLoading ? (
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Autenticando...</span>
+              </form>
+            ) : (
+              /* Formulário do Modal */
+              <form onSubmit={mobileForm.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                {/* Campo E-mail ou Usuário */}
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="modal-email"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>E-mail ou usuário</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="modal-email"
+                      type="email"
+                      autoComplete="email"
+                      disabled={isLoading}
+                      aria-invalid={mobileForm.formState.errors.email ? 'true' : 'false'}
+                      placeholder="Digite seu e-mail ou usuário"
+                      className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                        mobileForm.formState.errors.email
+                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                      }`}
+                      {...mobileForm.register('email')}
+                    />
                   </div>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4 stroke-[2.5]" />
-                    <span>Entrar</span>
-                  </>
-                )}
-              </button>
-            </form>
+                  {mobileForm.formState.errors.email && (
+                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{mobileForm.formState.errors.email.message}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Campo Senha */}
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="modal-senha"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Senha</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="modal-senha"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      disabled={isLoading}
+                      aria-invalid={mobileForm.formState.errors.senha ? 'true' : 'false'}
+                      placeholder="Digite sua senha"
+                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                        mobileForm.formState.errors.senha
+                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                      }`}
+                      {...mobileForm.register('senha')}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                      aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
+                      tabIndex={0}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  {mobileForm.formState.errors.senha && (
+                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{mobileForm.formState.errors.senha.message}</span>
+                    </p>
+                  )}
+                </div>
+
+                {/* Linha de Manter Conectado & Esqueceu Senha */}
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={manterConectado}
+                      onChange={(e) => setManterConectado(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
+                    />
+                    <span>Manter conectado</span>
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      alert('Para recuperação de senha, contate o administrador do sistema.')
+                    }
+                    className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                  >
+                    Esqueceu sua senha?
+                  </button>
+                </div>
+
+                {/* Botão Entrar em Destaque Âmbar */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full mt-4 py-3 px-4 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <span>Autenticando...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <LogIn className="w-4 h-4 stroke-[2.5]" />
+                      <span>Entrar</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

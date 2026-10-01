@@ -1,10 +1,13 @@
 package com.oficinagestao.controller;
 import com.oficinagestao.dto.AlterarSenhaRequest;
 import com.oficinagestao.dto.CurrentUserResponse;
+import com.oficinagestao.dto.LoginChallengeResponse;
 import com.oficinagestao.dto.LoginRequest;
 import com.oficinagestao.dto.LoginResponse;
 import com.oficinagestao.dto.LoginResult;
 import com.oficinagestao.dto.MensagemResponse;
+import com.oficinagestao.dto.TwoFactorResendRequest;
+import com.oficinagestao.dto.TwoFactorVerifyRequest;
 import com.oficinagestao.service.AuthService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,38 +47,55 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login administrativo", description = "Autentica a usuária via e-mail e senha. Define cookies HttpOnly e retorna dados do usuário sem expor JWT no corpo.")
+    @Operation(summary = "Login administrativo com desafio 2FA", description = "Valida e-mail e senha. Se corretos, cria o desafio de 2FA e envia o código para o e-mail. Não emite cookies de sessão antes da validação do 2FA.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
+            @ApiResponse(responseCode = "200", description = "Desafio 2FA criado com sucesso"),
             @ApiResponse(responseCode = "400", description = "Validação inválida nos campos informados"),
             @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
     })
-    public ResponseEntity<LoginResponse> login(
+    public ResponseEntity<LoginChallengeResponse> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-        LoginResult result = authService.login(request, httpRequest);
+        LoginChallengeResponse response = authService.login(request, httpRequest);
+        return ResponseEntity.ok(response);
+    }
 
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", result.accessToken())
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/")
-                .maxAge(result.accessExpiresIn())
-                .sameSite("Lax")
-                .build();
+    @PostMapping("/2fa/verify")
+    @Operation(summary = "Verificação de 2FA", description = "Valida o código de 6 dígitos numéricos. Emite os cookies HttpOnly de sessão e retorna os dados do usuário.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Código inválido"),
+            @ApiResponse(responseCode = "401", description = "Código incorreto, expirado ou desafio inválido")
+    })
+    public ResponseEntity<LoginResponse> verifyTwoFactor(
+            @Valid @RequestBody TwoFactorVerifyRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        LoginResult result = authService.verificarTwoFactor(request, httpRequest);
 
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", result.refreshToken())
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/api/auth")
-                .maxAge(result.refreshExpiresIn())
-                .sameSite("Strict")
-                .build();
+        ResponseCookie accessCookie = buildAccessCookie(result.accessToken(), result.accessExpiresIn(), result.rememberMe());
+        ResponseCookie refreshCookie = buildRefreshCookie(result.refreshToken(), result.refreshExpiresIn(), result.rememberMe());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .body(new LoginResponse(result.user()));
+    }
+
+    @PostMapping("/2fa/resend")
+    @Operation(summary = "Reenvio de código 2FA", description = "Invalida o código anterior e gera um novo código com 5 minutos de validade.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Novo código enviado"),
+            @ApiResponse(responseCode = "400", description = "Aguarde cooldown ou dados inválidos"),
+            @ApiResponse(responseCode = "401", description = "Desafio não encontrado ou inválido")
+    })
+    public ResponseEntity<LoginChallengeResponse> resendTwoFactor(
+            @Valid @RequestBody TwoFactorResendRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        LoginChallengeResponse response = authService.reenviarTwoFactor(request, httpRequest);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/refresh")
@@ -90,21 +110,8 @@ public class AuthController {
     ) {
         LoginResult result = authService.refresh(refreshToken, httpRequest);
 
-        ResponseCookie accessCookie = ResponseCookie.from("access_token", result.accessToken())
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/")
-                .maxAge(result.accessExpiresIn())
-                .sameSite("Lax")
-                .build();
-
-        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", result.refreshToken())
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .path("/api/auth")
-                .maxAge(result.refreshExpiresIn())
-                .sameSite("Strict")
-                .build();
+        ResponseCookie accessCookie = buildAccessCookie(result.accessToken(), result.accessExpiresIn(), result.rememberMe());
+        ResponseCookie refreshCookie = buildRefreshCookie(result.refreshToken(), result.refreshExpiresIn(), result.rememberMe());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
@@ -184,5 +191,33 @@ public class AuthController {
         }
         authService.alterarSenha(authentication.getName(), request, httpRequest);
         return ResponseEntity.ok(new MensagemResponse("Senha alterada com sucesso."));
+    }
+
+    private ResponseCookie buildAccessCookie(String token, long accessExpiresIn, boolean rememberMe) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from("access_token", token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .sameSite("Lax");
+        if (rememberMe) {
+            builder.maxAge(accessExpiresIn);
+        } else {
+            builder.maxAge(-1);
+        }
+        return builder.build();
+    }
+
+    private ResponseCookie buildRefreshCookie(String token, long refreshExpiresIn, boolean rememberMe) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from("refresh_token", token)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/api/auth")
+                .sameSite("Strict");
+        if (rememberMe) {
+            builder.maxAge(refreshExpiresIn);
+        } else {
+            builder.maxAge(-1);
+        }
+        return builder.build();
     }
 }

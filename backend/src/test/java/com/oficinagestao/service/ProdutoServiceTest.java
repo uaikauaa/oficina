@@ -56,6 +56,9 @@ class ProdutoServiceTest {
     @Mock
     private AuditoriaService auditoriaService;
 
+    @Mock
+    private NotificacaoService notificacaoService;
+
     @InjectMocks
     private ProdutoService produtoService;
 

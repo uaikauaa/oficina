@@ -32,7 +32,7 @@ public class JwtService {
 
     @Autowired
     public JwtService(
-            @Value("${security.jwt.secret:default-secret-key-oficina-gestao-dev-environment-2026-secure-token}") String secret,
+            @Value("${security.jwt.secret}") String secret,
             @Value("${security.jwt.expiration-ms:900000}") long expirationMs,
             Environment environment
     ) {
@@ -57,19 +57,28 @@ public class JwtService {
                 || System.getenv("RAILWAY_ENVIRONMENT") != null;
     }
 
+    public static boolean isDevEnvironment(Environment environment) {
+        if (environment == null) {
+            return false;
+        }
+        if (isProductionEnvironment(environment)) {
+            return false;
+        }
+        return environment.acceptsProfiles(Profiles.of("dev", "test"));
+    }
+
     public static void validarSecretParaAmbiente(String secret, Environment environment) {
         if (secret == null || secret.isBlank()) {
-            throw new IllegalStateException("FALHA DE INICIALIZAÇÃO EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): A variável de ambiente JWT_SECRET é mandatória e não foi fornecida.");
+            throw new IllegalStateException("FALHA DE INICIALIZAÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): A variável de ambiente JWT_SECRET é mandatória e não foi fornecida.");
         }
 
-        boolean isProduction = isProductionEnvironment(environment);
+        if (secret.trim().length() < MIN_SECRET_LENGTH) {
+            throw new IllegalStateException("FALHA DE SEGURANÇA (CRITICAL SECURITY CONFIGURATION ERROR): A chave JWT_SECRET deve possuir no mínimo 32 caracteres (pelo menos 32 caracteres / 256 bits) para conformidade com HMAC-SHA256.");
+        }
 
-        if (isProduction) {
-            if (DEFAULT_DEV_SECRET.equals(secret.trim())) {
-                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): O segredo JWT padrão de desenvolvimento foi detectado. O valor padrão de desenvolvimento é estritamente proibido em produção. Forneça uma chave secreta exclusiva via variável de ambiente JWT_SECRET.");
-            }
-            if (secret.trim().length() < MIN_SECRET_LENGTH) {
-                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO (CRITICAL SECURITY CONFIGURATION ERROR): A chave JWT_SECRET em produção deve possuir no mínimo 32 caracteres (pelo menos 32 caracteres / 256 bits) para conformidade com HMAC-SHA256.");
+        if (DEFAULT_DEV_SECRET.equals(secret.trim())) {
+            if (!isDevEnvironment(environment)) {
+                throw new IllegalStateException("FALHA DE SEGURANÇA (CRITICAL SECURITY CONFIGURATION ERROR): O segredo JWT padrão de desenvolvimento foi detectado. O valor padrão de desenvolvimento é estritamente proibido fora do ambiente explicitamente configurado como desenvolvimento ('dev'). Forneça uma chave secreta exclusiva via variável de ambiente JWT_SECRET.");
             }
         }
     }
@@ -86,6 +95,11 @@ public class JwtService {
     }
 
     public String generateToken(Usuario usuario) {
+        int tokenVersion = usuario.getTokenVersion() != null ? usuario.getTokenVersion() : 0;
+        return generateToken(usuario, tokenVersion);
+    }
+
+    public String generateToken(Usuario usuario, int tokenVersion) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
@@ -98,6 +112,7 @@ public class JwtService {
                 .claim("userId", usuario.getId())
                 .claim("nome", usuario.getNome())
                 .claim("roles", roles)
+                .claim("tokenVersion", tokenVersion)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey)
@@ -127,6 +142,19 @@ public class JwtService {
             return number.longValue();
         }
         return null;
+    }
+
+    public Integer extractTokenVersion(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            Object version = claims.get("tokenVersion");
+            if (version instanceof Number number) {
+                return number.intValue();
+            }
+            return null;
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
     }
 
     @SuppressWarnings("unchecked")

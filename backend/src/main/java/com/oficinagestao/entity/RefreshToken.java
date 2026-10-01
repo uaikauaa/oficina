@@ -25,8 +25,8 @@ public class RefreshToken {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false, unique = true, length = 255)
-    private String token;
+    @Column(name = "token_hash", nullable = false, unique = true, length = 64)
+    private String tokenHash;
 
     @Column(name = "data_expiracao", nullable = false)
     private OffsetDateTime dataExpiracao;
@@ -34,17 +34,25 @@ public class RefreshToken {
     @Column(nullable = false)
     private Boolean revogado = false;
 
+    @Column(name = "remember_me", nullable = false)
+    private Boolean rememberMe = false;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm;
 
     public RefreshToken() {
     }
 
-    public RefreshToken(Usuario usuario, String token, OffsetDateTime dataExpiracao) {
+    public RefreshToken(Usuario usuario, String tokenHash, OffsetDateTime dataExpiracao, Boolean rememberMe) {
         this.usuario = usuario;
-        this.token = token;
+        this.tokenHash = tokenHash;
         this.dataExpiracao = dataExpiracao;
+        this.rememberMe = rememberMe != null ? rememberMe : false;
         this.revogado = false;
+    }
+
+    public RefreshToken(Usuario usuario, String tokenHash, OffsetDateTime dataExpiracao) {
+        this(usuario, tokenHash, dataExpiracao, false);
     }
 
     @PrePersist
@@ -54,6 +62,9 @@ public class RefreshToken {
         }
         if (this.revogado == null) {
             this.revogado = false;
+        }
+        if (this.rememberMe == null) {
+            this.rememberMe = false;
         }
     }
 
@@ -85,12 +96,12 @@ public class RefreshToken {
         this.usuario = usuario;
     }
 
-    public String getToken() {
-        return token;
+    public String getTokenHash() {
+        return tokenHash;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setTokenHash(String tokenHash) {
+        this.tokenHash = tokenHash;
     }
 
     public OffsetDateTime getDataExpiracao() {
@@ -117,15 +128,27 @@ public class RefreshToken {
         this.criadoEm = criadoEm;
     }
 
+    public Boolean getRememberMe() {
+        return rememberMe;
+    }
+
+    public void setRememberMe(Boolean rememberMe) {
+        this.rememberMe = rememberMe != null ? rememberMe : false;
+    }
+
+    public boolean isRememberMe() {
+        return Boolean.TRUE.equals(this.rememberMe);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof RefreshToken that)) return false;
-        return Objects.equals(token, that.token);
+        return Objects.equals(tokenHash, that.tokenHash);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(token);
+        return Objects.hash(tokenHash);
     }
 }

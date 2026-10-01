@@ -1,5 +1,6 @@
 package com.oficinagestao.security;
 
+import com.oficinagestao.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,9 +23,11 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
         this.jwtService = jwtService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -39,22 +43,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtService.extractEmail(token);
             Long userId = jwtService.extractUserId(token);
             Set<String> roles = jwtService.extractRoles(token);
+            Integer tokenVersion = jwtService.extractTokenVersion(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                List<SimpleGrantedAuthority> authorities = roles.stream()
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                if (isTokenVersionValida(userId, email, tokenVersion)) {
+                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
 
-                AuthenticatedUser principal = new AuthenticatedUser(userId, email);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(principal, null, authorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    AuthenticatedUser principal = new AuthenticatedUser(userId, email);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(principal, null, authorities);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isTokenVersionValida(Long userId, String email, Integer tokenVersionInJwt) {
+        if (tokenVersionInJwt == null) {
+            return false;
+        }
+
+        if (userId != null) {
+            Optional<Integer> currentVersion = usuarioRepository.findActiveTokenVersionById(userId);
+            return currentVersion.isPresent() && currentVersion.get().equals(tokenVersionInJwt);
+        }
+
+        if (email != null && !email.isBlank()) {
+            Optional<Integer> currentVersion = usuarioRepository.findActiveTokenVersionByEmail(email);
+            return currentVersion.isPresent() && currentVersion.get().equals(tokenVersionInJwt);
+        }
+
+        return false;
     }
 
     private String resolveToken(HttpServletRequest request) {

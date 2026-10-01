@@ -44,6 +44,7 @@ public class ProdutoService {
     private final EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final AuditoriaService auditoriaService;
+    private final NotificacaoService notificacaoService;
 
     public ProdutoService(
             ProdutoRepository produtoRepository,
@@ -53,7 +54,8 @@ public class ProdutoService {
             MaquinaRepository maquinaRepository,
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
             UsuarioRepository usuarioRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            NotificacaoService notificacaoService
     ) {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
@@ -63,6 +65,7 @@ public class ProdutoService {
         this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaService = auditoriaService;
+        this.notificacaoService = notificacaoService;
     }
 
     @Transactional
@@ -84,6 +87,7 @@ public class ProdutoService {
         Produto produto = toEntity(dto, categoria, fornecedor);
         produto.setCodigo(novoCodigo);
         Produto salvo = produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(salvo);
 
         if (dto.estoqueInicial() != null && dto.estoqueInicial().compareTo(BigDecimal.ZERO) > 0) {
             Usuario usuario = usuarioId != null ? usuarioRepository.findById(usuarioId).orElse(null) : null;
@@ -131,6 +135,7 @@ public class ProdutoService {
 
         updateEntity(produto, dto, categoria, fornecedor);
         Produto salvo = produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(salvo);
 
         auditoriaService.registrarComRequest(
                 usuarioId,
@@ -172,6 +177,7 @@ public class ProdutoService {
 
         produto.setAtivo(ativo);
         Produto salvo = produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(salvo);
 
         auditoriaService.registrarComRequest(
                 usuarioId,

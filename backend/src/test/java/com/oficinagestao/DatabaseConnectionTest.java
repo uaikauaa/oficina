@@ -47,25 +47,25 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V16 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V21 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("16", current.getVersion().getVersion(), "A versão atual da migration deve ser 16.");
-        assertEquals("refactor produto codigo and link compra", current.getDescription());
+        assertEquals("21", current.getVersion().getVersion(), "A versão atual da migration deve ser 21.");
+        assertEquals("hash refresh tokens", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
         assertEquals("1", v1.getVersion().getVersion());
 
-        // Validar existência das 16 tabelas essenciais no banco de dados (sem as tabelas fiscais removidas)
+        // Validar existência das 18 tabelas essenciais no banco de dados (incluindo notificacoes)
         List<String> expectedTables = List.of(
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens", "configuracao_oficina");
+                "refresh_tokens", "configuracao_oficina", "two_factor_challenges", "notificacoes");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {
@@ -112,6 +112,19 @@ class DatabaseConnectionTest {
                     "A coluna 'codigo_barras' deve ter sido removida de 'produtos' pela migration V16.");
             assertTrue(colunasProdutos.contains("link_compra"),
                     "A coluna 'link_compra' deve existir em 'produtos' após a migration V16.");
+
+            // ADC-01: Validar que token em texto puro foi removido e token_hash adicionado na tabela refresh_tokens pela migration V21
+            List<String> colunasRefreshTokens = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT column_name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'refresh_tokens'")) {
+                while (rs.next()) {
+                    colunasRefreshTokens.add(rs.getString("column_name").toLowerCase());
+                }
+            }
+            assertFalse(colunasRefreshTokens.contains("token"),
+                    "A coluna em texto puro 'token' deve ter sido removida de 'refresh_tokens' pela migration V21.");
+            assertTrue(colunasRefreshTokens.contains("token_hash"),
+                    "A coluna 'token_hash' deve existir em 'refresh_tokens' após a migration V21.");
         }
     }
 
@@ -214,7 +227,7 @@ class DatabaseConnectionTest {
             assertFalse(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE não deve existir no MVP.");
 
             // Validar que nenhum usuário fictício foi criado
-            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE email != 'admin@oficina.com'")) {
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE email NOT IN ('admin@oficina.com', 'brunosoldasourinhos@hotmail.com')")) {
                 assertTrue(rs.next());
                 int userCount = rs.getInt(1);
                 assertEquals(0, userCount, "Nenhum usuário fictício deve existir na tabela usuarios.");

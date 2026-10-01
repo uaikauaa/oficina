@@ -51,6 +51,7 @@ public class OrdemServicoService {
     private final EstoqueMovimentacaoRepository estoqueMovimentacaoRepository;
     private final UsuarioRepository usuarioRepository;
     private final PdfService pdfService;
+    private final NotificacaoService notificacaoService;
 
     public OrdemServicoService(
             OrdemServicoRepository ordemServicoRepository,
@@ -61,7 +62,8 @@ public class OrdemServicoService {
             ProdutoRepository produtoRepository,
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
             UsuarioRepository usuarioRepository,
-            PdfService pdfService
+            PdfService pdfService,
+            NotificacaoService notificacaoService
     ) {
         this.ordemServicoRepository = ordemServicoRepository;
         this.clienteRepository = clienteRepository;
@@ -72,6 +74,7 @@ public class OrdemServicoService {
         this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.pdfService = pdfService;
+        this.notificacaoService = notificacaoService;
     }
 
     @Transactional
@@ -285,6 +288,7 @@ public class OrdemServicoService {
                 BigDecimal saldoPosterior = saldoAnterior.add(qtdDevolvida);
                 produto.setEstoqueAtual(saldoPosterior);
                 produtoRepository.save(produto);
+                notificacaoService.verificarEstoqueProduto(produto);
 
                 EstoqueMovimentacao mov = new EstoqueMovimentacao(
                         produto,
@@ -311,6 +315,18 @@ public class OrdemServicoService {
 
         os.setStatus(novoStatus);
         OrdemServico salva = ordemServicoRepository.save(os);
+
+        if (novoStatus == StatusOrdemServico.AGUARDANDO_APROVACAO) {
+            notificacaoService.criarNotificacaoOsAguardandoAprovacao(salva);
+        } else if (statusAtual == StatusOrdemServico.AGUARDANDO_APROVACAO) {
+            notificacaoService.resolverNotificacaoOsAguardandoAprovacao(salva.getId());
+        }
+
+        if (novoStatus == StatusOrdemServico.PRONTA) {
+            notificacaoService.criarNotificacaoOsPronta(salva);
+        } else if (statusAtual == StatusOrdemServico.PRONTA) {
+            notificacaoService.resolverNotificacaoOsPronta(salva.getId());
+        }
 
         if (usuarioId != null) {
             auditoriaService.registrar(

@@ -146,4 +146,85 @@ class JwtServiceTest {
                 new JwtService(JwtService.DEFAULT_DEV_SECRET, 900000L, env)
         );
     }
+
+    // =========================================================================
+    // CASOS ADICIONAIS FORENSES (SEC-01): VALIDAÇÕES SEM PROFILE E PRECEDÊNCIA
+    // =========================================================================
+
+    @Test
+    @DisplayName("SEC-01: Profile ausente (sem profile) com DEFAULT_DEV_SECRET deve ser rejeitado (não permite uso silencioso)")
+    void sec01_profileAusenteComDefaultSecret_deveRejeitar() {
+        MockEnvironment envSemProfile = new MockEnvironment(); // Nenhum profile ativo
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                new JwtService(JwtService.DEFAULT_DEV_SECRET, 900000L, envSemProfile)
+        );
+
+        assertTrue(ex.getMessage().contains("O segredo JWT padrão de desenvolvimento foi detectado"));
+        assertTrue(ex.getMessage().contains("estritamente proibido fora do ambiente explicitamente configurado como desenvolvimento"));
+    }
+
+    @Test
+    @DisplayName("SEC-01: Profile ausente com secret ausente (null) deve falhar de forma segura")
+    void sec01_profileAusenteComSecretAusente_deveRejeitar() {
+        MockEnvironment envSemProfile = new MockEnvironment();
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                new JwtService(null, 900000L, envSemProfile)
+        );
+
+        assertTrue(ex.getMessage().contains("JWT_SECRET é mandatória e não foi fornecida"));
+    }
+
+    @Test
+    @DisplayName("SEC-01: Profile ausente com secret vazio ou em branco deve falhar de forma segura")
+    void sec01_profileAusenteComSecretVazioOuEspacos_deveRejeitar() {
+        MockEnvironment envSemProfile = new MockEnvironment();
+
+        assertThrows(IllegalStateException.class, () ->
+                new JwtService("", 900000L, envSemProfile)
+        );
+
+        assertThrows(IllegalStateException.class, () ->
+                new JwtService("     ", 900000L, envSemProfile)
+        );
+    }
+
+    @Test
+    @DisplayName("SEC-01: Profile ausente com secret menor que 32 caracteres deve ser rejeitado")
+    void sec01_profileAusenteComSecretCurto_deveRejeitar() {
+        MockEnvironment envSemProfile = new MockEnvironment();
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                new JwtService("chave-insegura-curta", 900000L, envSemProfile)
+        );
+
+        assertTrue(ex.getMessage().contains("mínimo 32 caracteres"));
+    }
+
+    @Test
+    @DisplayName("SEC-01: Profile ausente com secret válido (>= 32 caracteres) deve inicializar com sucesso")
+    void sec01_profileAusenteComSecretValido_deveAceitar() {
+        MockEnvironment envSemProfile = new MockEnvironment();
+        String secretValido = "uma-chave-secreta-totalmente-personalizada-de-producao-2026";
+
+        JwtService service = assertDoesNotThrow(() ->
+                new JwtService(secretValido, 900000L, envSemProfile)
+        );
+
+        assertNotNull(service);
+    }
+
+    @Test
+    @DisplayName("SEC-01: Ambiente com profile dev mas com profile prod ativo conjuntamente deve priorizar prod e rejeitar default secret")
+    void sec01_profileDevEProdConjuntamente_devePriorizarProdERejeitarDefaultSecret() {
+        MockEnvironment env = new MockEnvironment();
+        env.setActiveProfiles("dev", "prod");
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                new JwtService(JwtService.DEFAULT_DEV_SECRET, 900000L, env)
+        );
+
+        assertTrue(ex.getMessage().contains("O segredo JWT padrão de desenvolvimento foi detectado"));
+    }
 }

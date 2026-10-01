@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useTransition, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useTransition, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -23,22 +23,15 @@ import {
   Clock,
   AlertTriangle,
   ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
-import { CurrentUser } from '@/lib/types';
+import { CurrentUser, Notificacao, NotificacoesResumo } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 import { OFICINA } from '@/lib/oficina';
 import BuscaRapidaModal from '@/components/BuscaRapidaModal';
 
 interface HeaderProps {
   user: CurrentUser | null;
-}
-
-interface AlertaNotificacao {
-  id: string;
-  titulo: string;
-  descricao: string;
-  href: string;
-  tipo: 'success' | 'warning' | 'danger';
 }
 
 export default function Header({ user }: HeaderProps) {
@@ -69,7 +62,13 @@ export default function Header({ user }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificacoesOpen, setIsNotificacoesOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [alertas, setAlertas] = useState<AlertaNotificacao[]>([]);
+
+  // Estados de Notificações Reais Persistentes
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [naoLidas, setNaoLidas] = useState(0);
+  const [isLoadingNotificacoes, setIsLoadingNotificacoes] = useState(false);
+  const [notificacoesError, setNotificacoesError] = useState<string | null>(null);
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
 
   const notificacoesRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -101,68 +100,103 @@ export default function Header({ user }: HeaderProps) {
     });
   }, [pathname, startTransition]);
 
-  // Carrega alertas reais da oficina (ordens pendentes e estoque crítico)
-  useEffect(() => {
+  // Carrega notificações reais persistentes da API
+  const carregarNotificacoes = useCallback(async () => {
     if (!user) return;
-    let cancel = false;
+    setIsLoadingNotificacoes(true);
+    setNotificacoesError(null);
 
-    async function carregarAlertasReais() {
+    try {
+      const res = await apiFetch('/api/notificacoes');
+      if (res.ok) {
+        const data: NotificacoesResumo = await res.json();
+        setNotificacoes(data.notificacoes || []);
+        setNaoLidas(data.naoLidas || 0);
+      } else {
+        setNotificacoesError('Não foi possível carregar as notificações.');
+      }
+    } catch {
+      setNotificacoesError('Falha de conexão ao carregar notificações.');
+    } finally {
+      setIsLoadingNotificacoes(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    let ativo = true;
+    if (!user) return;
+
+    apiFetch('/api/notificacoes')
+      .then(async (res) => {
+        if (!ativo) return;
+        if (res.ok) {
+          const data: NotificacoesResumo = await res.json();
+          if (ativo) {
+            setNotificacoes(data.notificacoes || []);
+            setNaoLidas(data.naoLidas || 0);
+            setNotificacoesError(null);
+          }
+        } else {
+          if (ativo) setNotificacoesError('Não foi possível carregar as notificações.');
+        }
+      })
+      .catch(() => {
+        if (ativo) setNotificacoesError('Falha de conexão ao carregar notificações.');
+      })
+      .finally(() => {
+        if (ativo) setIsLoadingNotificacoes(false);
+      });
+
+    return () => {
+      ativo = false;
+    };
+  }, [user, pathname]);
+
+  const handleNotificacaoClick = async (notificacao: Notificacao) => {
+    // 1. Marca como lida no backend se ainda não estiver
+    if (!notificacao.lida) {
+      setNotificacoes((prev) =>
+        prev.map((n) =>
+          n.id === notificacao.id ? { ...n, lida: true, lidoEm: new Date().toISOString() } : n
+        )
+      );
+      setNaoLidas((prev) => Math.max(0, prev - 1));
+
       try {
-        const [resOs, resEstoque] = await Promise.all([
-          apiFetch('/api/ordens-servico/contadores-dashboard').catch(() => null),
-          apiFetch('/api/estoque/resumo').catch(() => null),
-        ]);
-
-        const itens: AlertaNotificacao[] = [];
-
-        if (resOs && resOs.ok) {
-          const contadores = await resOs.json();
-          if (contadores?.prontas && contadores.prontas > 0) {
-            itens.push({
-              id: 'prontas',
-              titulo: 'Prontas para Retirada',
-              descricao: `${contadores.prontas} equipamento(s) pronto(s) para entrega ao cliente`,
-              href: '/ordens-servico?status=PRONTA',
-              tipo: 'success',
-            });
-          }
-          if (contadores?.aguardandoAprovacao && contadores.aguardandoAprovacao > 0) {
-            itens.push({
-              id: 'aprovacao',
-              titulo: 'Aguardando Aprovação',
-              descricao: `${contadores.aguardandoAprovacao} orçamento(s) pendente(s) de resposta`,
-              href: '/ordens-servico?status=AGUARDANDO_APROVACAO',
-              tipo: 'warning',
-            });
-          }
-        }
-
-        if (resEstoque && resEstoque.ok) {
-          const estoque = await resEstoque.json();
-          if (estoque?.itensEstoqueBaixo && estoque.itensEstoqueBaixo > 0) {
-            itens.push({
-              id: 'estoque',
-              titulo: 'Estoque Crítico',
-              descricao: `${estoque.itensEstoqueBaixo} produto(s) no limite mínimo ou zerados`,
-              href: '/estoque',
-              tipo: 'danger',
-            });
-          }
-        }
-
-        if (!cancel) {
-          setAlertas(itens);
-        }
+        await apiFetch(`/api/notificacoes/${notificacao.id}/ler`, { method: 'PATCH' });
       } catch {
-        // Silencioso em caso de falha de conexão
+        // Silencioso se der erro na persistência
       }
     }
 
-    carregarAlertasReais();
-    return () => {
-      cancel = true;
-    };
-  }, [user, pathname]);
+    // 2. Fecha painel
+    setIsNotificacoesOpen(false);
+
+    // 3. Navega para recurso se rota existir
+    if (notificacao.link) {
+      router.push(notificacao.link);
+    }
+  };
+
+  const handleMarcarTodasComoLidas = async () => {
+    if (isMarkingAllRead || naoLidas === 0) return;
+    setIsMarkingAllRead(true);
+
+    // Atualização otimista
+    setNotificacoes((prev) =>
+      prev.map((n) => ({ ...n, lida: true, lidoEm: new Date().toISOString() }))
+    );
+    setNaoLidas(0);
+
+    try {
+      await apiFetch('/api/notificacoes/ler-todas', { method: 'PATCH' });
+    } catch {
+      // Reverte se houver falha de conexão
+      carregarNotificacoes();
+    } finally {
+      setIsMarkingAllRead(false);
+    }
+  };
 
   // Fecha popovers ao clicar fora ou pressionar Escape
   useEffect(() => {
@@ -304,14 +338,17 @@ export default function Header({ user }: HeaderProps) {
                       ? 'border-amber-500/50 text-amber-400 bg-amber-500/10'
                       : 'border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
                   }`}
-                  aria-label="Notificações da oficina"
+                  aria-label={naoLidas > 0 ? `Notificações da oficina (${naoLidas} não lidas)` : 'Notificações da oficina'}
                   aria-haspopup="dialog"
                   aria-expanded={isNotificacoesOpen}
                 >
                   <Bell className="w-4 h-4" />
-                  {alertas.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-md animate-in zoom-in-75">
-                      {alertas.length}
+                  {naoLidas > 0 && (
+                    <span
+                      data-testid="notification-badge"
+                      className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-md animate-in zoom-in-75"
+                    >
+                      {naoLidas > 99 ? '99+' : naoLidas}
                     </span>
                   )}
                 </button>
@@ -321,61 +358,110 @@ export default function Header({ user }: HeaderProps) {
                   <div
                     role="dialog"
                     aria-label="Painel de Notificações"
-                    className="fixed sm:absolute top-14 sm:top-auto left-4 right-4 sm:left-auto sm:right-0 sm:mt-2 sm:w-88 rounded-2xl bg-[#0c101a] border border-slate-800 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+                    className="fixed sm:absolute top-14 sm:top-auto left-3 right-3 sm:left-auto sm:right-0 sm:mt-2 w-auto sm:w-96 rounded-2xl bg-[#0c101a] border border-slate-800 shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
                   >
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80 px-1">
+                    <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-800/80 px-1">
                       <div className="flex items-center gap-2">
                         <Bell className="w-4 h-4 text-amber-400" />
                         <span className="text-xs font-bold text-white uppercase tracking-wider">
                           Notificações
                         </span>
                       </div>
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                        {alertas.length} {alertas.length === 1 ? 'pendência' : 'pendências'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {naoLidas > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleMarcarTodasComoLidas}
+                            disabled={isMarkingAllRead}
+                            className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 hover:underline transition-colors cursor-pointer disabled:opacity-50"
+                          >
+                            Marcar todas como lidas
+                          </button>
+                        )}
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                          {naoLidas > 0 ? `${naoLidas} não lida${naoLidas > 1 ? 's' : ''}` : 'Tudo lido'}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-72 overflow-y-auto pr-0.5">
-                      {alertas.length === 0 ? (
+                    <div className="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
+                      {isLoadingNotificacoes ? (
+                        <div className="py-6 px-3 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
+                          <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
+                          <p>Carregando notificações...</p>
+                        </div>
+                      ) : notificacoesError ? (
+                        <div className="py-6 px-3 text-center text-xs text-rose-400 flex flex-col items-center justify-center gap-1.5">
+                          <AlertTriangle className="w-5 h-5 text-rose-400" />
+                          <p>{notificacoesError}</p>
+                          <button
+                            type="button"
+                            onClick={carregarNotificacoes}
+                            className="mt-1 text-[11px] font-bold text-amber-400 hover:underline cursor-pointer"
+                          >
+                            Tentar novamente
+                          </button>
+                        </div>
+                      ) : notificacoes.length === 0 ? (
                         <div className="py-6 px-3 text-center text-xs text-slate-400">
+                          <CheckSquare className="w-6 h-6 mx-auto mb-1 text-emerald-400/80" />
                           <p className="font-semibold text-slate-300">Tudo em dia!</p>
                           <p className="text-[11px] text-slate-500 mt-0.5">
                             Nenhum alerta ou pendência crítica no momento.
                           </p>
                         </div>
                       ) : (
-                        alertas.map((alerta) => {
+                        notificacoes.map((item) => {
                           const iconColor =
-                            alerta.tipo === 'success'
+                            item.tipo === 'OS_PRONTA'
                               ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                              : alerta.tipo === 'warning'
-                              ? 'text-purple-400 bg-purple-500/10 border-purple-500/20'
+                              : item.tipo === 'OS_AGUARDANDO_APROVACAO'
+                              ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
                               : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
 
                           return (
-                            <Link
-                              key={alerta.id}
-                              href={alerta.href}
-                              onClick={() => setIsNotificacoesOpen(false)}
-                              className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800/80 border border-slate-800/80 hover:border-slate-700 transition-all flex items-start gap-2.5 group"
+                            <button
+                              key={item.id}
+                              type="button"
+                              onClick={() => handleNotificacaoClick(item)}
+                              className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-start gap-2.5 group cursor-pointer ${
+                                !item.lida
+                                  ? 'bg-slate-900/90 border-slate-700/80 hover:border-amber-500/40 shadow-sm'
+                                  : 'bg-slate-950/40 border-slate-800/60 opacity-80 hover:opacity-100 hover:border-slate-700'
+                              }`}
                             >
                               <div
                                 className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${iconColor}`}
                               >
-                                {alerta.tipo === 'success' && <CheckSquare className="w-3.5 h-3.5" />}
-                                {alerta.tipo === 'warning' && <Clock className="w-3.5 h-3.5" />}
-                                {alerta.tipo === 'danger' && <AlertTriangle className="w-3.5 h-3.5" />}
+                                {item.tipo === 'OS_PRONTA' && <CheckSquare className="w-3.5 h-3.5" />}
+                                {item.tipo === 'OS_AGUARDANDO_APROVACAO' && <Clock className="w-3.5 h-3.5" />}
+                                {item.tipo === 'ESTOQUE_BAIXO' && <AlertTriangle className="w-3.5 h-3.5" />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-bold text-white group-hover:text-amber-400 transition-colors">
-                                  {alerta.titulo}
-                                </p>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p
+                                    className={`text-xs transition-colors ${
+                                      !item.lida
+                                        ? 'font-bold text-white group-hover:text-amber-400'
+                                        : 'font-medium text-slate-300 group-hover:text-white'
+                                    }`}
+                                  >
+                                    {item.titulo}
+                                  </p>
+                                  {!item.lida && (
+                                    <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                      Nova
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
-                                  {alerta.descricao}
+                                  {item.mensagem}
                                 </p>
                               </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all mt-1" />
-                            </Link>
+                              {item.link && (
+                                <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all mt-1 shrink-0" />
+                              )}
+                            </button>
                           );
                         })
                       )}

@@ -58,6 +58,9 @@ class OrdemServicoServiceTest {
     @Mock
     private PdfService pdfService;
 
+    @Mock
+    private NotificacaoService notificacaoService;
+
     @InjectMocks
     private OrdemServicoService ordemServicoService;
 

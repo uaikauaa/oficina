@@ -25,6 +25,8 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
            "WHERE os.id = :id")
     Optional<OrdemServico> findByIdWithClienteAndMaquina(@Param("id") Long id);
 
+    List<OrdemServico> findByStatus(StatusOrdemServico status);
+
     boolean existsByNumeroOs(String numeroOs);
 
     @Query(value = "SELECT nextval('ordens_servico_seq')", nativeQuery = true)

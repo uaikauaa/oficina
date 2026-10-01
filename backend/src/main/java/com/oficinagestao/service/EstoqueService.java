@@ -28,17 +28,20 @@ public class EstoqueService {
     private final ProdutoRepository produtoRepository;
     private final UsuarioRepository usuarioRepository;
     private final AuditoriaService auditoriaService;
+    private final NotificacaoService notificacaoService;
 
     public EstoqueService(
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
             ProdutoRepository produtoRepository,
             UsuarioRepository usuarioRepository,
-            AuditoriaService auditoriaService
+            AuditoriaService auditoriaService,
+            NotificacaoService notificacaoService
     ) {
         this.estoqueMovimentacaoRepository = estoqueMovimentacaoRepository;
         this.produtoRepository = produtoRepository;
         this.usuarioRepository = usuarioRepository;
         this.auditoriaService = auditoriaService;
+        this.notificacaoService = notificacaoService;
     }
 
     @Transactional(readOnly = true)
@@ -92,6 +95,7 @@ public class EstoqueService {
 
         produto.setEstoqueAtual(saldoPosterior);
         produtoRepository.save(produto);
+        notificacaoService.verificarEstoqueProduto(produto);
 
         Usuario usuario = usuarioId != null ? usuarioRepository.findById(usuarioId).orElse(null) : null;
         BigDecimal valorUnitario = dto.valorUnitario() != null ? dto.valorUnitario() : produto.getPrecoCusto();
