@@ -35,7 +35,14 @@ class ProductionOpenApiSecurityTest {
 
     @Nested
     @SpringBootTest(properties = {
-            "CORS_ALLOWED_ORIGINS=https://app.oficinagestao.com.br"
+            "CORS_ALLOWED_ORIGINS=https://app.oficinagestao.com.br",
+            "JWT_SECRET=chave-secreta-sintetica-de-testes-com-mais-de-32-caracteres-para-ci",
+            "MAIL_HOST=localhost",
+            "MAIL_PORT=587",
+            "MAIL_USERNAME=ci-test@oficinagestao.local",
+            "MAIL_PASSWORD=ci-test-fake-password",
+            "MAIL_SMTP_AUTH=true",
+            "MAIL_SMTP_STARTTLS=true"
     })
     @AutoConfigureMockMvc
     @ActiveProfiles("prod")
