@@ -25,7 +25,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
     @Value("${INITIAL_ADMIN_NAME:Geisa}")
     private String adminName;
 
-    @Value("${INITIAL_ADMIN_EMAIL:brunosoldasourinhos@hotmail.com}")
+    @Value("${INITIAL_ADMIN_EMAIL:}")
     private String adminEmail;
 
     @Value("${INITIAL_ADMIN_PASSWORD:}")

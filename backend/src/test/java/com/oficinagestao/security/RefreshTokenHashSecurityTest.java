@@ -12,6 +12,8 @@ import com.oficinagestao.repository.UsuarioRepository;
 import com.oficinagestao.service.AuditoriaService;
 import com.oficinagestao.service.AuthService;
 import com.oficinagestao.service.EmailService;
+import com.oficinagestao.repository.RoleRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,6 +61,9 @@ class RefreshTokenHashSecurityTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private TwoFactorChallengeRepository twoFactorChallengeRepository;
 
     @Autowired
@@ -73,6 +78,9 @@ class RefreshTokenHashSecurityTest {
     @Autowired
     private TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @MockitoBean
     private AuditoriaService auditoriaService;
 
@@ -83,19 +91,29 @@ class RefreshTokenHashSecurityTest {
 
     @BeforeEach
     void setUp() {
-        testUser = usuarioRepository.findByEmail("brunosoldasourinhos@hotmail.com")
-                .or(() -> usuarioRepository.findByEmail("admin@oficina.com"))
-                .or(() -> usuarioRepository.findAll().stream().findFirst())
-                .orElseThrow(() -> new IllegalStateException("Usuário de teste deve existir na base."));
+        String testEmail = "teste.refresh-hash-" + UUID.randomUUID() + "@oficina.local";
+        testUser = new Usuario("Teste Refresh Hash", testEmail, passwordEncoder.encode("SenhaInicial@12345"), true);
+        testUser.setTokenVersion(0);
+        roleRepository.findByNome("ROLE_ADMIN").ifPresent(testUser::addRole);
+        testUser = transactionTemplate.execute(status -> usuarioRepository.save(testUser));
     }
 
     @AfterEach
     void tearDown() {
         if (testUser != null && testUser.getId() != null) {
+            Long userId = testUser.getId();
             transactionTemplate.execute(status -> {
-                refreshTokenRepository.revokeAllByUsuarioId(testUser.getId());
+                jdbcTemplate.update("DELETE FROM two_factor_challenges WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM refresh_tokens WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM usuario_roles WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM usuarios WHERE id = ?", userId);
                 return null;
             });
+            assertFalse(usuarioRepository.existsById(userId), "Usuário efêmero deve ser removido após o teste.");
+            Integer rfCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM refresh_tokens WHERE usuario_id = ?", Integer.class, userId);
+            assertEquals(0, rfCount, "Não devem restar refresh_tokens para o usuário efêmero.");
+            Integer tfCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM two_factor_challenges WHERE usuario_id = ?", Integer.class, userId);
+            assertEquals(0, tfCount, "Não devem restar two_factor_challenges para o usuário efêmero.");
         }
     }
 

@@ -7,9 +7,10 @@ import com.oficinagestao.dto.TwoFactorResendRequest;
 import com.oficinagestao.dto.TwoFactorVerifyRequest;
 import com.oficinagestao.entity.TwoFactorChallenge;
 import com.oficinagestao.entity.Usuario;
-import com.oficinagestao.repository.RefreshTokenRepository;
 import com.oficinagestao.repository.TwoFactorChallengeRepository;
 import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.repository.RoleRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,13 +46,16 @@ class TwoFactorConcurrencyIntegrationTest {
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @MockitoBean
     private AuditoriaService auditoriaService;
@@ -63,20 +67,29 @@ class TwoFactorConcurrencyIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        testUser = usuarioRepository.findByEmail("brunosoldasourinhos@hotmail.com")
-                .or(() -> usuarioRepository.findByEmail("admin@oficina.com"))
-                .or(() -> usuarioRepository.findAll().stream().findFirst())
-                .orElseThrow(() -> new IllegalStateException("Usuário administrador deve existir na base de dados."));
+        String testEmail = "teste.2fa-concurrency-" + UUID.randomUUID() + "@oficina.local";
+        testUser = new Usuario("Teste 2FA Concorrencia", testEmail, passwordEncoder.encode("Senha@2FA12345"), true);
+        testUser.setTokenVersion(0);
+        roleRepository.findByNome("ROLE_ADMIN").ifPresent(testUser::addRole);
+        testUser = transactionTemplate.execute(status -> usuarioRepository.save(testUser));
     }
 
     @AfterEach
     void tearDown() {
         if (testUser != null && testUser.getId() != null) {
+            Long userId = testUser.getId();
             transactionTemplate.execute(status -> {
-                twoFactorChallengeRepository.revokeAllActiveByUsuarioId(testUser.getId());
-                refreshTokenRepository.revokeAllByUsuarioId(testUser.getId());
+                jdbcTemplate.update("DELETE FROM two_factor_challenges WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM refresh_tokens WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM usuario_roles WHERE usuario_id = ?", userId);
+                jdbcTemplate.update("DELETE FROM usuarios WHERE id = ?", userId);
                 return null;
             });
+            assertFalse(usuarioRepository.existsById(userId), "Usuário efêmero deve ser removido após o teste.");
+            Integer rfCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM refresh_tokens WHERE usuario_id = ?", Integer.class, userId);
+            assertEquals(0, rfCount, "Não devem restar refresh_tokens para o usuário efêmero.");
+            Integer tfCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM two_factor_challenges WHERE usuario_id = ?", Integer.class, userId);
+            assertEquals(0, tfCount, "Não devem restar two_factor_challenges para o usuário efêmero.");
         }
     }
 

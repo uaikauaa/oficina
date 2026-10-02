@@ -205,14 +205,14 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que apenas ROLE_ADMIN existe e nenhum usuário fictício foi criado")
+    @DisplayName("Deve validar que apenas ROLE_ADMIN existe e que exatamente o administrador oficial está cadastrado")
     void shouldValidateSingleAdminRoleAndNoUsers() throws Exception {
         assertNotNull(dataSource, "O DataSource deve estar presente.");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {
 
-            // Validar roles existentes
+            // 1. Validar roles existentes na tabela roles
             List<String> existingRoles = new ArrayList<>();
             try (ResultSet rs = stmt.executeQuery("SELECT nome FROM roles")) {
                 while (rs.next()) {
@@ -226,11 +226,24 @@ class DatabaseConnectionTest {
             assertFalse(existingRoles.contains("ROLE_MECANICO"), "ROLE_MECANICO não deve existir no MVP.");
             assertFalse(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE não deve existir no MVP.");
 
-            // Validar que nenhum usuário fictício foi criado
-            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE email NOT IN ('admin@oficina.com', 'brunosoldasourinhos@hotmail.com')")) {
+            // 2. Validar que existe exatamente 1 usuário na tabela usuarios
+            try (ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios")) {
                 assertTrue(rs.next());
-                int userCount = rs.getInt(1);
-                assertEquals(0, userCount, "Nenhum usuário fictício deve existir na tabela usuarios.");
+                int totalUsuarios = rs.getInt(1);
+                assertEquals(1, totalUsuarios, "A tabela usuarios deve conter exatamente 1 usuário cadastrado.");
+            }
+
+            // 3. Validar que o único usuário é o administrador oficial ativo com ROLE_ADMIN associado
+            try (ResultSet rs = stmt.executeQuery(
+                    "SELECT u.email, u.ativo, r.nome AS role_nome " +
+                    "FROM usuarios u " +
+                    "JOIN usuario_roles ur ON ur.usuario_id = u.id " +
+                    "JOIN roles r ON r.id = ur.role_id")) {
+                assertTrue(rs.next(), "Deve encontrar o registro do administrador oficial com seu papel.");
+                assertEquals("brunosoldasourinhos@gmail.com", rs.getString("email"), "O e-mail deve ser estritamente o do administrador oficial.");
+                assertTrue(rs.getBoolean("ativo"), "O administrador oficial deve estar ativo.");
+                assertEquals("ROLE_ADMIN", rs.getString("role_nome"), "O administrador oficial deve possuir o papel ROLE_ADMIN.");
+                assertFalse(rs.next(), "Não deve haver nenhum outro usuário ou papel adicional associado.");
             }
         }
     }
