@@ -40,36 +40,31 @@ Verifica a disponibilidade do serviço backend.
 
 ### `POST /api/auth/login`
 
-Autentica a proprietária via e-mail e senha. Define cookies `HttpOnly` seguros para access token e refresh token. **Não expõe tokens JWT no corpo da resposta**. Registra auditoria com ação `LOGIN`.
+Valida as credenciais da usuária (e-mail e senha) e, opcionalmente, a preferência `rememberMe`. Se corretas, cria o desafio de autenticação em dois fatores (2FA), envia o código numérico de 6 dígitos para o e-mail cadastrado e retorna o identificador do desafio (`challengeToken`). **NÃO emite `access_token` nem `refresh_token` nesta etapa**. A sessão só é estabelecida após a confirmação do código em `POST /api/auth/2fa/verify`.
 
 - **Método**: `POST`
 - **URL**: `/api/auth/login`
 - **Autenticação**: Não requerida
 - **Headers**: `Content-Type: application/json`
-- **Corpo da Requisição**:
+- **Corpo da Requisição (`LoginRequest`)**:
   ```json
   {
     "email": "admin@oficina.com",
-    "senha": "sua_senha_segura"
+    "senha": "sua_senha_segura",
+    "rememberMe": false
   }
   ```
-- **Resposta Sucesso (200 OK)**:
-  - **Set-Cookie (Access)**: `access_token=<JWT>; Path=/; Max-Age=900; HttpOnly; SameSite=Lax`
-  - **Set-Cookie (Refresh)**: `refresh_token=<UUID>; Path=/api/auth; Max-Age=604800; HttpOnly; SameSite=Strict`
-  - **Body**:
-    ```json
-    {
-      "user": {
-        "id": 1,
-        "nome": "Proprietária",
-        "email": "admin@oficina.com",
-        "roles": ["ROLE_ADMIN"]
-      }
-    }
-    ```
+- **Resposta Sucesso (200 OK) (`LoginChallengeResponse`)**:
+  ```json
+  {
+    "twoFactorRequired": true,
+    "challengeToken": "550e8400-e29b-41d4-a716-446655440000",
+    "mensagem": "Código de verificação enviado para o seu e-mail."
+  }
+  ```
 - **Respostas de Erro**:
   - `400 Bad Request`: E-mail ou senha em branco/inválido.
-  - `401 Unauthorized`: "Credenciais inválidas." (Protegido contra enumeração de usuários).
+  - `401 Unauthorized`: "Credenciais inválidas." (Protegido contra enumeração de usuários por timing via `DUMMY_PASSWORD_HASH`).
 
 ---
 
@@ -737,8 +732,83 @@ A Versão 1.1 introduz melhorias operacionais mantendo compatibilidade total com
 - **Arquitetura**: Client-side stream/blob export a partir dos dados já consumidos dos endpoints de relatórios (`/api/relatorios/*`).
 - **Especificação**: Delimitador `;`, RFC 4180 (aspas duplicadas `""`), quebra `\r\n`, UTF-8 com BOM (`\uFEFF`) para compatibilidade perfeita com Microsoft Excel e Bloco de Notas, respeitando rigorosamente os filtros aplicados pelo usuário em tela.
 
+---
 
+## 15. Endpoints de Segurança Avançada, 2FA e Notificações (Fase de Hardening)
 
+### 15.1. `POST /api/auth/2fa/verify`
+Valida o código de verificação de 6 dígitos enviado por e-mail para concluir a autenticação.
 
+- **Método**: `POST`
+- **URL**: `/api/auth/2fa/verify`
+- **Autenticação**: Não requerida via cookie (usa o `challengeToken` no payload)
+- **Corpo da Requisição**:
+  ```json
+  {
+    "challengeToken": "uuid-do-desafio-gerado-no-login",
+    "code": "123456"
+  }
+  ```
+- **Resposta Sucesso (200 OK)**:
+  - **Set-Cookie (Access)**: `access_token=<JWT>; Path=/; Max-Age=900; HttpOnly; SameSite=Lax`
+  - **Set-Cookie (Refresh)**: `refresh_token=<UUID>; Path=/api/auth; Max-Age=604800; HttpOnly; SameSite=Strict`
+  - **Body**: `{ "user": { "id": 1, "nome": "Proprietária", "email": "usuario@oficinagestao.com.br", "roles": ["ROLE_ADMIN"] } }`
+- **Respostas de Erro**:
+  - `400 Bad Request`: Código inválido, expirado (5 minutos) ou excedido o limite de tentativas (5 tentativas).
 
+### 15.2. `POST /api/auth/2fa/resend`
+Reenvia um novo código de verificação para o e-mail cadastrado, respeitando cooldown mínimo de 30 segundos.
 
+- **Método**: `POST`
+- **URL**: `/api/auth/2fa/resend`
+- **Corpo da Requisição**:
+  ```json
+  {
+    "challengeToken": "uuid-do-desafio-gerado-no-login"
+  }
+  ```
+- **Resposta Sucesso (200 OK)**: `{ "mensagem": "Novo código de verificação enviado com sucesso." }`
+- **Resposta Erro (429 Too Many Requests)**: Tentativa antes do término do cooldown de 30 segundos.
+
+### 15.3. `GET /api/notificacoes`
+Lista as notificações recentes da oficina acompanhadas dos contadores gerais e de pendências. Não utiliza paginação.
+
+- **Método**: `GET`
+- **URL**: `/api/notificacoes`
+- **Autenticação**: Requerida (`ROLE_ADMIN`)
+- **Resposta Sucesso (200 OK) (`NotificacoesResumoDTO`)**:
+  ```json
+  {
+    "total": 5,
+    "naoLidas": 2,
+    "notificacoes": [
+      {
+        "id": 1,
+        "tipo": "ESTOQUE_BAIXO",
+        "titulo": "Estoque Baixo: Bico de Contato 1.2mm",
+        "mensagem": "O item P-003 está abaixo do estoque mínimo configurado.",
+        "lida": false,
+        "linkAcao": "/estoque",
+        "criadoEm": "2026-09-30T10:00:00Z"
+      }
+    ]
+  }
+  ```
+
+### 15.4. `PATCH /api/notificacoes/{id}/ler` ou `PUT /api/notificacoes/{id}/ler`
+Marca uma notificação específica como lida.
+
+- **Métodos**: `PATCH`, `PUT`
+- **URL**: `/api/notificacoes/{id}/ler`
+- **Autenticação**: Requerida (`ROLE_ADMIN`)
+- **Resposta Sucesso (200 OK)**: `NotificacaoResponseDTO` atualizado.
+- **Respostas de Erro**:
+  - `404 Not Found`: Notificação não localizada.
+
+### 15.5. `PATCH /api/notificacoes/ler-todas` ou `PUT /api/notificacoes/ler-todas`
+Marca todas as notificações pendentes como lidas.
+
+- **Métodos**: `PATCH`, `PUT`
+- **URL**: `/api/notificacoes/ler-todas`
+- **Autenticação**: Requerida (`ROLE_ADMIN`)
+- **Resposta Sucesso (204 No Content)**: Vazio (sem conteúdo).

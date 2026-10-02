@@ -124,10 +124,67 @@ Provisiona as 14 tabelas centrais:
     - *Mecânica* (rolamentos, eixos, ventiladores, carcaças);
     - *Consumíveis* (bicos de contato, bocais cerâmicos, difusores, filtros).
 
+### Migration V10 — FK Composta OS → Máquina → Cliente (`V10__add_composite_foreign_key_os_maquina_cliente.sql`)
+- **Contexto de Integridade**: Garantia relacional estrita de que a máquina associada a uma Ordem de Serviço pertence obrigatoriamente ao cliente titular daquela OS.
+- **Alterações**:
+  - Constraint de unicidade composta `uq_maquinas_id_cliente` na tabela `maquinas`.
+  - Chave estrangeira composta `fk_os_maquina_cliente` vinculando `(maquina_id, cliente_id)` em `ordens_servico` a `(id, cliente_id)` em `maquinas`.
+
+### Migration V11 — Configuração da Oficina (`V11__create_configuracao_oficina.sql`)
+- **Contexto de Negócio**: Tabela singleton para armazenar identidade visual, dados cadastrais e parâmetros operacionais da oficina técnica.
+- **Tabela Criada**: `configuracao_oficina`.
+- **Campos**: Nome fantasia, razão social, CNPJ, telefone, e-mail, endereço completo, termos de garantia e textos de cabeçalho/rodapé de ordens de serviço.
+
+### Migration V12 — Atualização de Defaults da Oficina (`V12__update_admin_and_config_defaults.sql`)
+- **Contexto de Negócio**: Saneamento de dados iniciais e alinhamento dos padrões cadastrais da oficina.
+
+### Migration V13 — Estruturas Fiscais Transitórias (`V13__create_fiscal_dps_and_tomador_ibge.sql`)
+- **Contexto**: Criação transitória de tabelas de DPS (`dps_numeracao`, `dps_fiscal`) e coluna `codigo_ibge` em clientes.
+
+### Migration V14 — Desacoplamento Fiscal (`V14__remove_unused_fiscal_structures.sql`)
+- **Contexto de Simplificação**: Desacoplamento do escopo de emissão de NFS-e direta.
+- **Alterações**:
+  - Remoção (`DROP TABLE`) de `dps_fiscal` e `dps_numeracao`.
+  - Remoção de coluna `codigo_ibge` em `configuracao_oficina`.
+
+### Migration V15 — Remoção de Código IBGE em Clientes (`V15__remove_cliente_codigo_ibge.sql`)
+- **Contexto**: Eliminação de resíduos fiscais no cadastro de clientes.
+- **Alterações**: `ALTER TABLE clientes DROP COLUMN IF EXISTS codigo_ibge`.
+
+### Migration V16 — Código Sequencial P-XXX e Link de Compra (`V16__refactor_produto_codigo_and_link_compra.sql`)
+- **Contexto**: Facilidade de identificação visual de peças na bancada e cotação rápida.
+- **Alterações**:
+  - Sequence nativa `produtos_codigo_seq` para formatação amigável `P-001`, `P-002`.
+  - Nova coluna `link_compra VARCHAR(500)` para links diretos de reposição de insumos com fornecedores.
+
+### Migration V17 — Remember Me em Refresh Tokens (`V17__add_remember_me_to_refresh_tokens.sql`)
+- **Contexto de UX/Sessão**: Persistência de preferência de sessão estendida pelo usuário.
+- **Alterações**: Nova coluna `remember_me BOOLEAN NOT NULL DEFAULT FALSE` na tabela `refresh_tokens`.
+
+### Migration V18 — Desafios de Autenticação 2FA (`V18__create_two_factor_challenges.sql`)
+- **Contexto de Segurança**: Armazenamento efêmero dos códigos do segundo fator de autenticação.
+- **Tabela Criada**: `two_factor_challenges`.
+- **Campos**: `id`, `usuario_id`, `codigo_hash` (VARCHAR(60) — BCrypt), `expiracao` (TIMESTAMPTZ — 5 min), `tentativas` (INTEGER DEFAULT 0), `utilizado` (BOOLEAN DEFAULT FALSE), `criado_em`.
+
+### Migration V19 — Central de Notificações (`V19__create_notificacoes.sql`)
+- **Contexto Operacional**: Persistência de alertas internos de estoque crítico e alterações em ordens de serviço.
+- **Tabela Criada**: `notificacoes`.
+- **Campos**: `id`, `tipo` (`ESTOQUE_BAIXO`, `ORDEM_SERVICO`, `SISTEMA`), `titulo`, `mensagem`, `lida`, `link_acao`, `criado_em`.
+
+### Migration V20 — Invalidação Imediata de Sessões (`V20__add_token_version_to_usuarios.sql`)
+- **Contexto de Segurança SEC-07**: Invalidação imediata de JWTs de acesso em caso de logout ou alteração de credenciais.
+- **Alterações**: Nova coluna `token_version INTEGER NOT NULL DEFAULT 1` na tabela `usuarios`.
+
+### Migration V21 — Hashing de Refresh Tokens (`V21__hash_refresh_tokens.sql`)
+- **Contexto de Hardening ADC-01**: Proteção contra vazamento de tokens de renovação em dumps ou consultas não autorizadas.
+- **Alterações**:
+  - Remoção da coluna de texto claro `token`.
+  - Criação da coluna `token_hash VARCHAR(64) NOT NULL UNIQUE` (hash SHA-256 do token gerado).
+  - Atualização dos índices de busca por hash.
+
 ---
 
 ## 5. Inspeção e Validação com DBeaver
 
 - O **DBeaver** (ou qualquer cliente SQL) deve ser utilizado exclusivamente para **inspeção e consulta** do schema.
 - Nenhuma alteração estrutural deve ser executada diretamente pelo DBeaver; toda alteração deve passar pelo versionamento do Flyway.
-

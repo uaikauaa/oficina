@@ -78,3 +78,21 @@ O logout e a troca de senha revogam os refresh tokens, mas não invalidam imedia
 - Tokens armazenados no `localStorage`.
 - Chaves privadas ou credenciais reais versionadas.
 - Endpoints de negócio públicos sem exigência de `ROLE_ADMIN`.
+
+---
+
+## Status das Correções e Hardening (Outubro de 2026)
+
+Todas as 8 vulnerabilidades identificadas nesta auditoria foram integralmente tratadas, homologadas e consolidadas nos commits `b5c6037` e `e0beb46`:
+
+1. **Item 1 (JWT sem valor padrão em produção - SEC-01):** `ProductionSecurityValidator` implementado; o Spring Boot aborta o startup em produção se `JWT_SECRET` for nulo, vazio ou default.
+2. **Item 2 (Rate limit DoS e bloqueio de conta - SEC-02):** Implementada chave composta dupla (IP e IP+Email), com scheduler de limpeza e desalocação por eviction.
+3. **Item 3 (Falsificação de IP / Spoofing - SEC-03):** `IpAddressResolver` aceita `X-Forwarded-For` e `CF-Connecting-IP` estritamente a partir de proxies explicitamente listados em `TRUSTED_PROXIES`.
+4. **Item 4 (Concorrência no Refresh Token - SEC-04):** Adicionado bloqueio pessimista (`PESSIMISTIC_WRITE`) na consulta de refresh tokens no PostgreSQL Neon.
+5. **Item 5 (Enumeração de Usuários por Timing - SEC-05):** `DUMMY_PASSWORD_HASH` implementado para equalizar o tempo de comparação de senhas via BCrypt mesmo quando o usuário não existe.
+6. **Item 6 (CORS e Headers - SEC-06):** CORS restrito com validação fail-fast em produção e `allowedHeaders` configurados estritamente para `Content-Type` e `Authorization`.
+7. **Item 7 (Invalidação Imediata de Sessões - SEC-07):** Adicionado `tokenVersion` por usuário na tabela `usuarios` (migration V20) e no payload JWT; qualquer logout ou alteração de senha invalida instantaneamente todos os tokens ativos.
+8. **Item 8 (Atualização de Dependências - SEC-08):** Next.js atualizado para `16.3.8` e Spring Boot para `3.4.13` (com Spring Framework `6.2.19`).
+
+### Riscos Residuais Conhecidos e Documentados:
+* **CSP (`unsafe-inline`):** Mantido para dar suporte aos estilos injetados e aos scripts de hidratação do framework Next.js/React. Não foram encontrados usos de `eval`, `new Function` ou `dangerouslySetInnerHTML`.

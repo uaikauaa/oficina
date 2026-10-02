@@ -1,6 +1,6 @@
 # Guia de Implantação em Produção — Oficina Gestão
 
-Este documento descreve a estratégia oficial, os requisitos e os procedimentos passo a passo para a implantação em ambiente de produção da aplicação **Oficina Gestão** (Release 1.0.0).
+Este documento descreve a estratégia oficial, os requisitos e os procedimentos passo a passo para a implantação em ambiente de produção da aplicação **Oficina Gestão** (Fase de Homologação / Pré-Produção).
 
 ---
 
@@ -12,13 +12,13 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
                    ▼ (HTTPS / TLS 1.3)
       +──────────────────────────+
       │   Frontend (Next.js)     │  Hospedagem: Vercel / Cloudflare / Node
-      │   Domínio: app.oficina...│  Next.js 16.3.5 (Turbopack)
+      │   Domínio: app.oficina...│  Next.js 16.3.8 (Turbopack)
       +──────────────────────────+
                    │
                    ▼ (REST JSON / Cookies HttpOnly Secure)
       +──────────────────────────+
       │   Backend (Spring Boot)  │  Hospedagem: Railway / Render / AWS App Runner
-      │   Domínio: api.oficina...│  Java 21 (Docker ou Native Buildpack)
+      │   Domínio: api.oficina...│  Java 21 (Spring Boot 3.4.13)
       +──────────────────────────+
                    │
                    ▼ (TLS com SSLMode=require / PgBouncer Pooler)
@@ -57,9 +57,17 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 | `JWT_EXPIRATION_MS` | Validade do Access Token (15 minutos) | `900000` |
 | `SECURITY_COOKIE_SECURE` | Força flag `Secure` nos cookies HttpOnly | `true` |
 | `CORS_ALLOWED_ORIGINS` | Origem autorizada do frontend em produção | `https://app.oficinagestao.com.br` |
-| `INITIAL_ADMIN_EMAIL` | E-mail do usuário administrativo da proprietária | `oficina.soldas@oficinagestao.com.br` |
-| `INITIAL_ADMIN_PASSWORD` | Senha forte inicial (mínimo 8 caracteres) | `[SENHA_INICIAL_ADMIN]` |
-| `INITIAL_ADMIN_NAME` | Nome completo da dona da oficina | `Proprietária Oficina` |
+| `TRUSTED_PROXIES` | Lista de IPs ou CIDR dos proxies reversos confiáveis (Cloudflare/Vercel) | `173.245.48.0/20,103.21.244.0/22` |
+| `MAIL_HOST` | Host do servidor SMTP para envio de 2FA | `smtp.gmail.com` |
+| `MAIL_PORT` | Porta SMTP | `587` |
+| `MAIL_SMTP_AUTH` | Habilita autenticação SMTP | `true` |
+| `MAIL_SMTP_STARTTLS` | Habilita STARTTLS obrigatório | `true` |
+| `MAIL_USERNAME` | Usuário da conta SMTP de envio | `notificacoes@oficinagestao.com.br` |
+| `MAIL_PASSWORD` | Senha de aplicativo Google (App Password) | `[SENHA_APP_GOOGLE_16_CHARS]` |
+| `MAIL_FROM` | Endereço do remetente das mensagens | `notificacoes@oficinagestao.com.br` |
+| `INITIAL_ADMIN_EMAIL` | E-mail do usuário administrativo oficial | `brunosoldasourinhos@gmail.com` |
+| `INITIAL_ADMIN_PASSWORD` | Senha forte inicial (mínimo 12 caracteres) | `[SENHA_INICIAL_ADMIN]` |
+| `INITIAL_ADMIN_NAME` | Nome completo da proprietária | `Proprietária Oficina` |
 
 ### 3.2. Frontend (Next.js)
 
@@ -77,7 +85,7 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 2. Verifique a branch padrão `production` (`br-wispy-truth-acn1bsbe`) do projeto `summer-frost-22688608`.
 3. Verifique a existência do snapshot de recuperação `snap-spring-thunder-acvzytef` (`snapshot-pre-release-1-0-0`).
 4. Utilize a connection string do **Connection Pooler** (porta 5432 / pooled mode) com `sslmode=require`.
-5. O Flyway aplica automaticamente todas as migrações estruturais `V1` até `V9` na inicialização do backend.
+5. O Flyway aplica automaticamente todas as migrações estruturais `V1` até `V21` na inicialização do backend.
 
 ### Etapa 2: Implantação do Backend (Spring Boot)
 1. Vincule o repositório GitHub ao serviço de nuvem (ex: Railway, Render ou AWS App Runner).
@@ -102,6 +110,6 @@ Este documento descreve a estratégia oficial, os requisitos e os procedimentos 
 
 - [ ] Endpoint `/api/health` retornando HTTP 200 e `{"status":"UP"}`.
 - [ ] Cookies `access_token` e `refresh_token` recebendo as flags `HttpOnly`, `Secure` e `SameSite` corretas no navegador.
-- [ ] Login da proprietária realizado com sucesso.
+- [ ] Login da proprietária realizado com sucesso (incluindo validação de código 2FA no e-mail).
 - [ ] Abertura de OS, inclusão de peça e conferência de dedução atômica no estoque.
 - [ ] Download do PDF de Ordem de Serviço (`/api/ordens-servico/{id}/pdf`) abrindo em visualizador A4 sem falhas.

@@ -1,66 +1,84 @@
 # Guia de Desenvolvimento — Oficina Gestão
 
-Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local do projeto **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda e geradores de energia).
+Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local do projeto **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda, geradores de energia, compressores e equipamentos industriais/elétricos).
+
+---
 
 ## 1. Pré-Requisitos
 
-- **Java JDK**: Versão 21 (LTS) instalada e configurada no PATH (`JAVA_HOME`).
-- **Node.js**: Versão >= 20.x (recomendado LTS) e npm >= 10.x.
+- **Java JDK**: Versão 21 (LTS — Eclipse Adoptium Temurin recomendado) instalada e configurada no PATH (`JAVA_HOME`).
+- **Node.js**: Versão >= 20.x (LTS) e npm >= 10.x.
 - **Git**: Versão recente.
 - **Banco de Dados**: Conta e projeto no **Neon** (PostgreSQL Serverless).
-- **Docker & Docker Compose**: Exclusivamente para execução de Testcontainers e serviços auxiliares locais. **O banco de desenvolvimento principal roda no Neon.**
+- **Docker & Docker Compose**: Opcional, reservado para execução de Testcontainers em testes isolados. **O banco de desenvolvimento principal conecta-se diretamente ao Neon.**
 
 ---
 
 ## 2. Estrutura do Workspace
 
 ```text
-oficina-gestao/
-├── frontend/             # Next.js (App Router, Tailwind)
-├── backend/              # Spring Boot (Java 21, JPA, Flyway, Maven Wrapper)
+oficina/
+├── frontend/             # Next.js 16 (App Router, React 19, Tailwind CSS 4)
+├── backend/              # Spring Boot 3.4 (Java 21, JPA, Flyway, Maven Wrapper)
 │   ├── src/main/java/com/oficinagestao/
-│   │   ├── config/       # Swagger, OpenAPI, bootstrap
+│   │   ├── config/       # Swagger, OpenAPI, bootstrap, validadores
 │   │   ├── controller/   # Endpoints REST (HTTP)
-│   │   ├── dto/          # Records de entrada e saída
+│   │   ├── dto/          # Records imutáveis de entrada e saída
 │   │   ├── entity/       # Entidades JPA
 │   │   ├── exception/    # Exceções e handler global
-│   │   ├── repository/   # Repositórios Spring Data
-│   │   ├── security/     # JWT e configurações de segurança
-│   │   └── service/      # Regras de negócio e transações
-├── docs/                 # Documentação técnica
-├── scripts/              # Utilitários de desenvolvimento
-├── .env.example          # Modelo de variáveis de ambiente
+│   │   ├── repository/   # Repositórios Spring Data JPA
+│   │   ├── security/     # JWT, 2FA, filtros e rate limiting
+│   │   └── service/      # Regras de negócio, transações e e-mail
+│   └── src/main/resources/
+│       ├── application.properties
+│       ├── application-dev.properties
+│       ├── application-prod.properties
+│       └── db/migration/ # 21 Migrations Flyway
+├── docs/                 # Documentação técnica e arquitetura
+├── .env.example          # Modelo oficial de variáveis de ambiente
 └── .env                  # Variáveis locais com credenciais (ignorado no Git)
 ```
 
 ---
 
-## 3. Configuração do Banco de Dados (Neon)
+## 3. Configuração do Banco de Dados (Neon) e Variáveis Locais
 
 1. Crie ou acesse seu projeto no [Neon](https://neon.tech).
-2. Obtenha a connection string do banco de desenvolvimento.
+2. Obtenha a connection string do banco de desenvolvimento (SSL mode obrigatório: `sslmode=require`).
 3. Copie o arquivo `.env.example` para `.env` na raiz do projeto:
    ```bash
    cp .env.example .env
    # No Windows PowerShell: Copy-Item .env.example .env
    ```
-4. Preencha as variáveis com as credenciais do seu banco Neon e configurações de segurança:
+4. Preencha as variáveis com suas credenciais de desenvolvimento (utilize placeholders seguros):
    ```env
-   DB_URL=jdbc:postgresql://<neon-host>/neondb?sslmode=require
+   # Banco de Dados Neon
+   DB_URL=jdbc:postgresql://<seu-endpoint-neon>.sa-east-1.aws.neon.tech/neondb?sslmode=require
    DB_USERNAME=neondb_owner
    DB_PASSWORD=sua_senha_neon
    SERVER_PORT=8080
 
    # Segurança JWT
-   JWT_SECRET=chave_secreta_jwt_de_pelo_menos_32_caracteres_aleatorios
-   JWT_EXPIRATION_MS=86400000
+   JWT_SECRET=chave_secreta_jwt_de_pelo_menos_32_caracteres_aleatorios_123
+
+   # Configuração de CORS
+   CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+
+   # Configuração SMTP para 2FA (Gmail)
+   MAIL_HOST=smtp.gmail.com
+   MAIL_PORT=587
+   MAIL_SMTP_AUTH=true
+   MAIL_SMTP_STARTTLS=true
+   MAIL_USERNAME=seu_email@gmail.com
+   MAIL_PASSWORD=sua_app_password_google
+   MAIL_FROM=seu_email@gmail.com
 
    # Bootstrap da Proprietária (executado apenas se a tabela usuarios estiver vazia)
    INITIAL_ADMIN_NAME=Proprietária Oficina
-   INITIAL_ADMIN_EMAIL=admin@oficina.com
-   INITIAL_ADMIN_PASSWORD=sua_senha_segura
+   INITIAL_ADMIN_EMAIL=seu_email@exemplo.com
+   INITIAL_ADMIN_PASSWORD=sua_senha_segura_123
    ```
-   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` não forem fornecidos, nenhuma conta fictícia é criada.
+   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` não forem fornecidos, o sistema emite um alerta e nenhuma conta com credencial padrão é criada.
 
 ---
 
@@ -70,65 +88,78 @@ oficina-gestao/
    ```bash
    cd backend
    ```
-2. Compile e execute os testes automatizados (valida compilação, conexão com Neon e migrations Flyway):
-   ```bash
-   ./mvnw clean test
-   ```
-   *(No Windows PowerShell: `.\mvnw.cmd clean test`)*
-3. Inicie o servidor da aplicação:
+2. Inicie o servidor da aplicação via Maven Wrapper:
    ```bash
    ./mvnw spring-boot:run
    ```
    *(No Windows PowerShell: `.\mvnw.cmd spring-boot:run`)*
-4. A API estará acessível em `http://localhost:8080`.
-   - Endpoint de verificação pública: `http://localhost:8080/api/health`
-   - Documentação interativa Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+3. A API estará acessível em `http://localhost:8080`.
+   - Endpoint de saúde pública: `http://localhost:8080/api/health`
+   - Documentação interativa Swagger UI (dev): `http://localhost:8080/swagger-ui/index.html`
    - Especificação OpenAPI (JSON): `http://localhost:8080/v3/api-docs`
-   - Endpoint autenticado de status (requer `ROLE_ADMIN`): `http://localhost:8080/api/system/status`
-5. Na inicialização, o Flyway executa automaticamente as migrations pendentes localizadas em `src/main/resources/db/migration/` e o Hibernate valida o schema (`validate`).
+4. Na inicialização, o Flyway aplica automaticamente todas as 21 migrations pendentes localizadas em `src/main/resources/db/migration/` e o Hibernate valida o schema (`ddl-auto=validate`).
 
 ---
 
 ## 5. Executando o Frontend (Next.js)
 
-1. Acesse o diretório do frontend:
+1. Abra um segundo terminal e acesse o diretório do frontend:
    ```bash
    cd frontend
    ```
 2. Instale as dependências:
    ```bash
    npm install
-   # No Windows se houver bloqueio de script: npm.cmd install
    ```
-3. Execute o servidor de desenvolvimento:
+3. Inicie o servidor de desenvolvimento:
    ```bash
    npm run dev
-   # No Windows: npm.cmd run dev
    ```
 4. A interface web estará acessível em `http://localhost:3000`.
+   > O Next.js possui rewrite configurado para redirecionar `/api/*` para `http://localhost:8080/api/*`.
 
 ---
 
-## 6. Padrões de Qualidade e Boas Práticas (V1.1)
+## 6. Padrões de Qualidade e Testes Automatizados
+
+O projeto mantém rigoroso padrão de qualidade assegurado por testes automatizados contínuos:
 
 - **Testes Automatizados do Backend**:
   ```bash
   cd backend
   .\mvnw.cmd clean test
+  # No Linux/macOS: ./mvnw clean test
   ```
-  Executa a suíte completa de 174 testes unitários e de integração (0 failures, 0 errors, 0 skipped).
+  Executa a suíte de **477 testes** unitários, de segurança e de integração com PostgreSQL Neon (0 falhas, 0 erros, 0 ignorados).
+
 - **Testes Automatizados do Frontend**:
   ```bash
   cd frontend
   npm test
   ```
-  Executa a suíte de 21 testes unitários dos módulos `whatsappHelper` e `csvHelper` utilizando o executor nativo do Node.js (`--experimental-strip-types`).
-- **Verificação de Lint e Build do Frontend**:
+  Executa a suíte de **306 testes** em 122 suites via Node.js Native Test Runner (`node:test` e `node:assert/strict` sobre `src/lib/*.test.ts`) com 0 falhas.
+
+- **Verificação de Tipagem TypeScript**:
   ```bash
+  cd frontend
+  npx tsc --noEmit
+  ```
+  Valida strict mode sem erros de compilação (0 erros).
+
+- **Linter de Código**:
+  ```bash
+  cd frontend
   npm run lint
+  ```
+  Garante 0 erros e 0 warnings no ESLint.
+
+- **Build de Produção do Frontend**:
+  ```bash
+  cd frontend
   npm run build
   ```
-  Garante 0 erros e 0 warnings no ESLint e compilação sem falhas de todas as páginas e rotas dinâmicas no Next.js.
-- Nunca commite arquivos `.env`, credenciais ou artefatos gerados em diretórios de compilação (`target/`, `.next/`).
-- O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway (0 migrations necessárias na V1.1).
+  Compilação e otimização das 15 rotas estáticas e dinâmicas da aplicação.
 
+- **Boas Práticas de versionamento:**
+  - Nunca commite arquivos `.env`, credenciais ou chaves privadas.
+  - O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway versionadas.
