@@ -70,7 +70,7 @@ public class OrdemServicoItemService {
             Long usuarioId,
             HttpServletRequest request
     ) {
-        OrdemServico os = ordemServicoRepository.findById(ordemServicoId)
+        OrdemServico os = ordemServicoRepository.findByIdWithLock(ordemServicoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com o ID: " + ordemServicoId));
 
         if (os.getStatus().isTerminal()) {
@@ -150,7 +150,7 @@ public class OrdemServicoItemService {
 
     @Transactional
     public void removerItem(Long ordemServicoId, Long itemId, Long usuarioId, HttpServletRequest request) {
-        OrdemServico os = ordemServicoRepository.findById(ordemServicoId)
+        OrdemServico os = ordemServicoRepository.findByIdWithLock(ordemServicoId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com o ID: " + ordemServicoId));
 
         if (os.getStatus().isTerminal()) {

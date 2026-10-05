@@ -20,6 +20,14 @@ public interface OrdemServicoItemRepository extends JpaRepository<OrdemServicoIt
     @Query("SELECT i FROM OrdemServicoItem i JOIN FETCH i.produto p WHERE i.ordemServico.id = :ordemServicoId ORDER BY i.id ASC")
     List<OrdemServicoItem> findByOrdemServicoIdComProduto(@Param("ordemServicoId") Long ordemServicoId);
 
+    @Query("SELECT i.produto.id, SUM(i.quantidade) " +
+           "FROM OrdemServicoItem i " +
+           "WHERE i.ordemServico.id = :ordemServicoId " +
+           "AND i.tipoItem = com.oficinagestao.entity.TipoItemOrdemServico.PECA " +
+           "GROUP BY i.produto.id " +
+           "ORDER BY i.produto.id ASC")
+    List<Object[]> somarQuantidadePecasPorProduto(@Param("ordemServicoId") Long ordemServicoId);
+
     Optional<OrdemServicoItem> findByIdAndOrdemServicoId(Long id, Long ordemServicoId);
 
     boolean existsByOrdemServicoIdAndTipoItem(Long ordemServicoId, TipoItemOrdemServico tipoItem);

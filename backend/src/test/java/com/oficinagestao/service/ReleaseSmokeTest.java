@@ -131,8 +131,7 @@ class ReleaseSmokeTest {
         os.setValorDesconto(BigDecimal.ZERO);
         os.setValorTotal(new BigDecimal("180.00"));
 
-        when(ordemServicoRepository.findById(501L)).thenReturn(Optional.of(os));
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(501L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(501L)).thenReturn(Optional.of(os));
         when(produtoRepository.findByIdWithLock(301L)).thenReturn(Optional.of(peca));
         when(produtoRepository.save(any(Produto.class))).thenAnswer(inv -> inv.getArgument(0));
         when(ordemServicoItemRepository.save(any(OrdemServicoItem.class))).thenAnswer(inv -> {

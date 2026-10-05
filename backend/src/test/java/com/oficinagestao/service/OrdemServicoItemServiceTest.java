@@ -98,7 +98,7 @@ class OrdemServicoItemServiceTest {
                 "Troca preventiva dos IGBTs do inversor de solda"
         );
 
-        when(ordemServicoRepository.findById(100L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(100L)).thenReturn(Optional.of(os));
         when(produtoRepository.findByIdWithLock(50L)).thenReturn(Optional.of(produto));
         List<OrdemServicoItem> itensOs = new ArrayList<>();
         when(ordemServicoItemRepository.findByOrdemServicoIdComProduto(100L)).thenAnswer(i -> itensOs);
@@ -159,7 +159,7 @@ class OrdemServicoItemServiceTest {
         produto.setEstoqueAtual(new BigDecimal("1.000")); // Apenas 1 disponível
         OrdemServicoItemCreateDTO dto = new OrdemServicoItemCreateDTO(50L, new BigDecimal("2.000"), null, null);
 
-        when(ordemServicoRepository.findById(100L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(100L)).thenReturn(Optional.of(os));
         when(produtoRepository.findByIdWithLock(50L)).thenReturn(Optional.of(produto));
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
@@ -178,7 +178,7 @@ class OrdemServicoItemServiceTest {
         os.setStatus(StatusOrdemServico.CONCLUIDA);
         OrdemServicoItemCreateDTO dto = new OrdemServicoItemCreateDTO(50L, BigDecimal.ONE, null, null);
 
-        when(ordemServicoRepository.findById(100L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(100L)).thenReturn(Optional.of(os));
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 ordemServicoItemService.adicionarPeca(100L, dto, 1L, null)
@@ -194,7 +194,7 @@ class OrdemServicoItemServiceTest {
         os.setStatus(StatusOrdemServico.CANCELADA);
         OrdemServicoItemCreateDTO dto = new OrdemServicoItemCreateDTO(50L, BigDecimal.ONE, null, null);
 
-        when(ordemServicoRepository.findById(100L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(100L)).thenReturn(Optional.of(os));
 
         assertThrows(BusinessException.class, () ->
                 ordemServicoItemService.adicionarPeca(100L, dto, 1L, null)
@@ -211,7 +211,7 @@ class OrdemServicoItemServiceTest {
         );
         item.setId(5L);
 
-        when(ordemServicoRepository.findById(100L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(100L)).thenReturn(Optional.of(os));
         when(ordemServicoItemRepository.findByIdAndOrdemServicoId(5L, 100L)).thenReturn(Optional.of(item));
         when(produtoRepository.findByIdWithLock(50L)).thenReturn(Optional.of(produto));
         when(ordemServicoItemRepository.findByOrdemServicoIdComProduto(100L)).thenReturn(List.of());

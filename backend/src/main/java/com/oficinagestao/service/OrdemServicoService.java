@@ -36,8 +36,6 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.Year;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class OrdemServicoService {
@@ -210,7 +208,7 @@ public class OrdemServicoService {
 
     @Transactional
     public OrdemServicoResponseDTO atualizar(Long id, OrdemServicoUpdateDTO dto, Long usuarioId, String ipOrigem) {
-        OrdemServico os = ordemServicoRepository.findByIdWithClienteAndMaquina(id)
+        OrdemServico os = ordemServicoRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com ID: " + id));
 
         if (os.getStatus() == StatusOrdemServico.CONCLUIDA) {
@@ -234,7 +232,7 @@ public class OrdemServicoService {
 
     @Transactional
     public OrdemServicoResponseDTO alterarStatus(Long id, OrdemServicoStatusDTO dto, Long usuarioId, String ipOrigem) {
-        OrdemServico os = ordemServicoRepository.findByIdWithClienteAndMaquina(id)
+        OrdemServico os = ordemServicoRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ordem de Serviço não encontrada com ID: " + id));
 
         StatusOrdemServico statusAtual = os.getStatus();
@@ -267,22 +265,16 @@ public class OrdemServicoService {
 
         if (novoStatus == StatusOrdemServico.CANCELADA) {
             // P0 — BUG-001: Estorno atômico de peças de volta ao estoque físico
-            List<OrdemServicoItem> itens = ordemServicoItemRepository.findByOrdemServicoIdComProduto(os.getId());
-            Map<Produto, BigDecimal> pecasAgrupadas = itens.stream()
-                    .filter(i -> i.getTipoItem() == TipoItemOrdemServico.PECA)
-                    .collect(Collectors.groupingBy(
-                            OrdemServicoItem::getProduto,
-                            Collectors.reducing(BigDecimal.ZERO, OrdemServicoItem::getQuantidade, BigDecimal::add)
-                    ));
+            List<Object[]> pecasAgrupadas = ordemServicoItemRepository.somarQuantidadePecasPorProduto(os.getId());
 
             Usuario usuario = usuarioId != null ? usuarioRepository.findById(usuarioId).orElse(null) : null;
 
-            for (Map.Entry<Produto, BigDecimal> entry : pecasAgrupadas.entrySet()) {
-                Produto produtoRef = entry.getKey();
-                BigDecimal qtdDevolvida = entry.getValue();
+            for (Object[] peca : pecasAgrupadas) {
+                Long produtoId = (Long) peca[0];
+                BigDecimal qtdDevolvida = (BigDecimal) peca[1];
 
-                Produto produto = produtoRepository.findByIdWithLock(produtoRef.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Produto vinculado à OS não encontrado. ID: " + produtoRef.getId()));
+                Produto produto = produtoRepository.findByIdWithLock(produtoId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Produto vinculado à OS não encontrado. ID: " + produtoId));
 
                 BigDecimal saldoAnterior = produto.getEstoqueAtual() != null ? produto.getEstoqueAtual() : BigDecimal.ZERO;
                 BigDecimal saldoPosterior = saldoAnterior.add(qtdDevolvida);
@@ -296,7 +288,7 @@ public class OrdemServicoService {
                         os,
                         TipoMovimentacaoEstoque.DEVOLUCAO,
                         qtdDevolvida,
-                        produtoRef.getPrecoVenda(),
+                        produto.getPrecoVenda(),
                         saldoAnterior,
                         saldoPosterior,
                         "Estorno por cancelamento da OS " + os.getNumeroOs()

@@ -134,7 +134,7 @@ class IntegracaoEstoqueOSTest {
         os.setValorTotal(new BigDecimal("150.00"));
 
         // 6. Adicionar 3 unidades à OS
-        when(ordemServicoRepository.findById(500L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(500L)).thenReturn(Optional.of(os));
         when(ordemServicoItemRepository.save(any(OrdemServicoItem.class))).thenAnswer(i -> {
             OrdemServicoItem item = i.getArgument(0);
             item.setId(50L);
@@ -178,7 +178,9 @@ class IntegracaoEstoqueOSTest {
         assertEquals(new BigDecimal("180.00"), itemPersistido.getValorTotal(), "Passo 10: Subtotal de peças na OS deve permanecer R$ 180,00");
 
         // 11. Cancelar OS (deve devolver peças, gerar DEVOLUCAO e atualizar estoque)
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(500L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(500L)).thenReturn(Optional.of(os));
+        when(ordemServicoItemRepository.somarQuantidadePecasPorProduto(500L))
+                .thenReturn(List.<Object[]>of(new Object[]{100L, new BigDecimal("3.000")}));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(i -> i.getArgument(0));
 
         OrdemServicoStatusDTO cancelamentoDTO = new OrdemServicoStatusDTO(

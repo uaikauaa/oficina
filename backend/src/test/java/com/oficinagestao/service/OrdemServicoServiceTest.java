@@ -414,7 +414,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.EM_DIAGNOSTICO);
         os.setProblemaRelatado("Sem corrente na saída");
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(5L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(5L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
@@ -448,7 +448,7 @@ class OrdemServicoServiceTest {
         os.setId(6L);
         os.setStatus(StatusOrdemServico.CONCLUIDA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(6L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(6L)).thenReturn(Optional.of(os));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
                 null, "Novo diagnóstico", null, null, null, null, null, null, null, null
@@ -467,7 +467,7 @@ class OrdemServicoServiceTest {
         os.setId(7L);
         os.setStatus(StatusOrdemServico.CANCELADA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(7L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(7L)).thenReturn(Optional.of(os));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
                 null, null, null, null, null, null, null, null, null, null
@@ -486,7 +486,7 @@ class OrdemServicoServiceTest {
         os.setId(8L);
         os.setStatus(StatusOrdemServico.ABERTA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(8L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(8L)).thenReturn(Optional.of(os));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
                 null, null, null, null, null, null,
@@ -512,7 +512,7 @@ class OrdemServicoServiceTest {
         os.setMaquina(maquinaClienteA);
         os.setStatus(StatusOrdemServico.ABERTA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(15L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(15L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
@@ -533,7 +533,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
         os.setTestesRealizados(null); // Sem testes
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(16L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(16L)).thenReturn(Optional.of(os));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
                 StatusOrdemServico.PRONTA, null, null
@@ -553,7 +553,7 @@ class OrdemServicoServiceTest {
         os.setId(16L);
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(16L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(16L)).thenReturn(Optional.of(os));
 
         OrdemServicoStatusDTO statusDTO1 = new OrdemServicoStatusDTO(
                 StatusOrdemServico.PRONTA, "ok", null
@@ -582,7 +582,7 @@ class OrdemServicoServiceTest {
         os.setMaquina(maquinaClienteA);
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(17L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(17L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
@@ -609,7 +609,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.PRONTA);
         os.setTestesRealizados("Teste OK");
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(18L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(18L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
@@ -633,7 +633,7 @@ class OrdemServicoServiceTest {
         os.setMaquina(maquinaClienteA);
         os.setStatus(StatusOrdemServico.AGUARDANDO_APROVACAO);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(19L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(19L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
@@ -653,7 +653,7 @@ class OrdemServicoServiceTest {
         os.setId(20L);
         os.setStatus(StatusOrdemServico.CONCLUIDA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(20L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(20L)).thenReturn(Optional.of(os));
 
         OrdemServicoStatusDTO statusDTO = new OrdemServicoStatusDTO(
                 StatusOrdemServico.EM_MANUTENCAO, null, null
@@ -682,21 +682,13 @@ class OrdemServicoServiceTest {
         produto.setPrecoVenda(BigDecimal.valueOf(50.00));
         produto.setEstoqueAtual(BigDecimal.valueOf(8.00));
 
-        OrdemServicoItem itemPeca = new OrdemServicoItem();
-        itemPeca.setId(501L);
-        itemPeca.setOrdemServico(os);
-        itemPeca.setProduto(produto);
-        itemPeca.setTipoItem(TipoItemOrdemServico.PECA);
-        itemPeca.setQuantidade(BigDecimal.valueOf(2.00));
-        itemPeca.setValorUnitario(BigDecimal.valueOf(50.00));
-        itemPeca.setValorTotal(BigDecimal.valueOf(100.00));
-
         Usuario usuario = new Usuario();
         usuario.setId(1L);
         usuario.setNome("Técnico Responsável");
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(50L)).thenReturn(Optional.of(os));
-        when(ordemServicoItemRepository.findByOrdemServicoIdComProduto(50L)).thenReturn(List.of(itemPeca));
+        when(ordemServicoRepository.findByIdWithLock(50L)).thenReturn(Optional.of(os));
+        when(ordemServicoItemRepository.somarQuantidadePecasPorProduto(50L))
+                .thenReturn(List.<Object[]>of(new Object[]{101L, BigDecimal.valueOf(2.00)}));
         when(produtoRepository.findByIdWithLock(101L)).thenReturn(Optional.of(produto));
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -731,7 +723,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
         os.setValorPecas(BigDecimal.valueOf(100.00));
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(60L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(60L)).thenReturn(Optional.of(os));
         when(ordemServicoItemRepository.existsByOrdemServicoIdAndTipoItem(60L, TipoItemOrdemServico.PECA)).thenReturn(true);
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
@@ -758,7 +750,7 @@ class OrdemServicoServiceTest {
         os.setValorMaoObra(BigDecimal.valueOf(50.00));
         os.setValorPecas(BigDecimal.valueOf(50.00));
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(70L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(70L)).thenReturn(Optional.of(os));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
                 null, null, null, null, null, null,
@@ -782,7 +774,7 @@ class OrdemServicoServiceTest {
         os.setMaquina(maquinaClienteA);
         os.setStatus(StatusOrdemServico.ABERTA);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(80L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(80L)).thenReturn(Optional.of(os));
 
         OrdemServicoUpdateDTO updateDTO = new OrdemServicoUpdateDTO(
                 null, null, null, null, null, "-15.5",
@@ -822,7 +814,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
         os.setTestesRealizados(null);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(90L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(90L)).thenReturn(Optional.of(os));
 
         OrdemServicoStatusDTO dto = new OrdemServicoStatusDTO(StatusOrdemServico.PRONTA, null, null);
 
@@ -840,7 +832,7 @@ class OrdemServicoServiceTest {
         os.setStatus(StatusOrdemServico.EM_MANUTENCAO);
         os.setTestesRealizados(null);
 
-        when(ordemServicoRepository.findByIdWithClienteAndMaquina(91L)).thenReturn(Optional.of(os));
+        when(ordemServicoRepository.findByIdWithLock(91L)).thenReturn(Optional.of(os));
         when(ordemServicoRepository.save(any(OrdemServico.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         String laudo = "Arco elétrico estável a 180A por 15 minutos.";

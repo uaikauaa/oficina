@@ -3,9 +3,11 @@ package com.oficinagestao.repository;
 import com.oficinagestao.entity.OrdemServico;
 import com.oficinagestao.entity.StatusOrdemServico;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,6 +19,14 @@ import java.util.Optional;
 
 @Repository
 public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long> {
+
+    /**
+     * Serializa mutações concorrentes da mesma OS antes da validação de status.
+     * Consultas de leitura continuam usando os métodos sem lock.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT os FROM OrdemServico os WHERE os.id = :id")
+    Optional<OrdemServico> findByIdWithLock(@Param("id") Long id);
 
     @Query("SELECT os FROM OrdemServico os " +
            "JOIN FETCH os.cliente c " +
