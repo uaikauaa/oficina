@@ -59,12 +59,40 @@ public class ProductionSecurityValidator {
                 throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: security.cookie.secure deve ser true para cookies de autenticação.");
             }
 
-            log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte, CORS estrito e cookies Secure validados.");
+            // SMTP transporta o segundo fator de autenticacao. Em producao, os
+            // valores efetivos do Environment devem impedir credenciais vazias e
+            // transporte sem autenticacao ou STARTTLS.
+            requireNonBlank("MAIL_HOST", "spring.mail.host");
+            requireNonBlank("MAIL_USERNAME", "spring.mail.username");
+            requireNonBlank("MAIL_PASSWORD", "spring.mail.password");
+            requireNonBlank("MAIL_FROM", "app.mail.from");
+            requireTrue("MAIL_SMTP_AUTH", "spring.mail.properties.mail.smtp.auth");
+            requireTrue("MAIL_SMTP_STARTTLS", "spring.mail.properties.mail.smtp.starttls.enable");
+
+            log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte, CORS estrito, cookies Secure e SMTP seguro validados.");
         } else {
             // Em desenvolvimento / testes
             if (jwtSecret != null && DEFAULT_DEV_JWT_SECRET.equals(jwtSecret.trim())) {
                 log.info("Ambiente de desenvolvimento/testes: utilizando chave JWT padrão de desenvolvimento.");
             }
+        }
+    }
+
+    private void requireNonBlank(String environmentName, String propertyName) {
+        String value = environment.getProperty(propertyName);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "FALHA DE CONFIGURACAO EM PRODUCAO: " + environmentName + " e obrigatoria e nao pode estar vazia."
+            );
+        }
+    }
+
+    private void requireTrue(String environmentName, String propertyName) {
+        String value = environment.getProperty(propertyName);
+        if (!"true".equalsIgnoreCase(value != null ? value.trim() : "")) {
+            throw new IllegalStateException(
+                    "FALHA DE SEGURANCA EM PRODUCAO: " + environmentName + " deve ser true."
+            );
         }
     }
 }

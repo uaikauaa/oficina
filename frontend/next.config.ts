@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { getSecurityHeaders } from "./src/lib/securityHeaders.ts";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   async headers() {
     return [
       {

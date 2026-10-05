@@ -2,120 +2,113 @@ package com.oficinagestao.config;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
-import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.core.env.Environment;
-import org.springframework.util.PlaceholderResolutionException;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Testes forenses obrigatórios para MED-02:
- * Remoção de defaults permissivos de autenticação SMTP e STARTTLS em produção.
- */
 class ProductionSmtpConfigurationTest {
 
-    private ApplicationContextRunner createRunner(String profile) {
+    private static final String STRONG_SECRET =
+            "chave-secreta-de-producao-com-mais-de-32-caracteres-para-hmac-sha256";
+
+    private ApplicationContextRunner productionRunner(Map<String, String> overrides) {
+        Map<String, String> properties = new LinkedHashMap<>();
+        properties.put("security.jwt.secret", STRONG_SECRET);
+        properties.put("cors.allowed-origins", "https://app.example.invalid");
+        properties.put("security.cookie.secure", "true");
+        properties.put("spring.mail.host", "smtp.example.invalid");
+        properties.put("spring.mail.username", "mailer@example.invalid");
+        properties.put("spring.mail.password", "synthetic-password");
+        properties.put("app.mail.from", "mailer@example.invalid");
+        properties.put("spring.mail.properties.mail.smtp.auth", "true");
+        properties.put("spring.mail.properties.mail.smtp.starttls.enable", "true");
+        properties.putAll(overrides);
+
+        String[] values = properties.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .toArray(String[]::new);
+
         return new ApplicationContextRunner()
-                .withInitializer(new ConfigDataApplicationContextInitializer())
-                .withPropertyValues("spring.profiles.active=" + profile);
-    }
-
-    private ApplicationContextRunner createRunnerWithMailSender(String profile) {
-        return createRunner(profile)
-                .withConfiguration(AutoConfigurations.of(MailSenderAutoConfiguration.class));
+                .withInitializer(context -> context.getEnvironment().setActiveProfiles("prod"))
+                .withBean(ProductionSecurityValidator.class)
+                .withPropertyValues(values);
     }
 
     @Test
-    @DisplayName("1. Produção com MAIL_SMTP_AUTH=true e MAIL_SMTP_STARTTLS=true -> aceita e reflete true")
-    void shouldAcceptProductionWithExplicitTrue() {
-        createRunnerWithMailSender("prod")
+    @DisplayName("Produção com SMTP seguro inicializa")
+    void shouldAcceptSecureProductionSmtp() {
+        productionRunner(Map.of()).run(context -> assertThat(context).hasNotFailed());
+    }
+
+    @Test
+    @DisplayName("Produção com SMTP auth=false aborta o startup")
+    void shouldRejectDisabledAuthentication() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.auth", "false"), "MAIL_SMTP_AUTH");
+    }
+
+    @Test
+    @DisplayName("Produção com SMTP STARTTLS=false aborta o startup")
+    void shouldRejectDisabledStartTls() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.starttls.enable", "false"), "MAIL_SMTP_STARTTLS");
+    }
+
+    @Test
+    @DisplayName("Produção com senha SMTP vazia aborta o startup")
+    void shouldRejectBlankPassword() {
+        assertStartupFailure(Map.of("spring.mail.password", ""), "MAIL_PASSWORD");
+    }
+
+    @Test
+    @DisplayName("Produção com usuário SMTP vazio aborta o startup")
+    void shouldRejectBlankUsername() {
+        assertStartupFailure(Map.of("spring.mail.username", ""), "MAIL_USERNAME");
+    }
+
+    @Test
+    @DisplayName("Produção com host SMTP vazio aborta o startup")
+    void shouldRejectBlankHost() {
+        assertStartupFailure(Map.of("spring.mail.host", ""), "MAIL_HOST");
+    }
+
+    @Test
+    @DisplayName("Produção com remetente SMTP vazio aborta o startup")
+    void shouldRejectBlankFrom() {
+        assertStartupFailure(Map.of("app.mail.from", ""), "MAIL_FROM");
+    }
+
+    @Test
+    @DisplayName("Dev preserva configuração SMTP sintética permissiva")
+    void shouldPreserveDevelopmentBehavior() {
+        new ApplicationContextRunner()
+                .withInitializer(context -> context.getEnvironment().setActiveProfiles("dev"))
+                .withBean(ProductionSecurityValidator.class)
                 .withPropertyValues(
-                        "MAIL_HOST=smtp.gmail.com",
-                        "MAIL_USERNAME=teste@gmail.com",
-                        "MAIL_PASSWORD=senha-app",
-                        "MAIL_SMTP_AUTH=true",
-                        "MAIL_SMTP_STARTTLS=true"
+                        "security.jwt.secret=" + ProductionSecurityValidator.DEFAULT_DEV_JWT_SECRET,
+                        "cors.allowed-origins=http://localhost:3000",
+                        "security.cookie.secure=false",
+                        "spring.mail.host=",
+                        "spring.mail.username=",
+                        "spring.mail.password=",
+                        "app.mail.from=",
+                        "spring.mail.properties.mail.smtp.auth=false",
+                        "spring.mail.properties.mail.smtp.starttls.enable=false"
                 )
-                .run(context -> {
-                    assertThat(context).hasNotFailed();
-                    Environment env = context.getEnvironment();
-                    assertEquals("true", env.getProperty("spring.mail.properties.mail.smtp.auth"));
-                    assertEquals("true", env.getProperty("spring.mail.properties.mail.smtp.starttls.enable"));
-                });
+                .run(context -> assertThat(context).hasNotFailed());
     }
 
-    @Test
-    @DisplayName("2. Produção sem MAIL_SMTP_AUTH -> falha na resolução da propriedade e NÃO assume true")
-    void shouldFailInProductionWhenMailSmtpAuthMissing() {
-        createRunner("prod")
-                .withPropertyValues(
-                        "MAIL_HOST=smtp.gmail.com",
-                        "MAIL_USERNAME=teste@gmail.com",
-                        "MAIL_PASSWORD=senha-app",
-                        "MAIL_SMTP_STARTTLS=true"
-                )
-                .run(context -> {
-                    // Em produção, a ausência de MAIL_SMTP_AUTH NÃO assume true silenciosamente;
-                    // Deve disparar falha explícita de resolução de placeholder.
-                    assertThrows(PlaceholderResolutionException.class, () ->
-                            context.getEnvironment().getProperty("spring.mail.properties.mail.smtp.auth")
-                    );
-                });
+    private void assertStartupFailure(Map<String, String> overrides, String expectedProperty) {
+        productionRunner(overrides).run(context -> {
+            assertThat(context).hasFailed();
+            Throwable rootCause = context.getStartupFailure();
+            while (rootCause != null && rootCause.getCause() != null) {
+                rootCause = rootCause.getCause();
+            }
+            assertTrue(rootCause != null && rootCause.getMessage().contains(expectedProperty));
+            assertTrue(rootCause == null || !rootCause.getMessage().contains("synthetic-password"));
+        });
     }
-
-    @Test
-    @DisplayName("3. Produção sem MAIL_SMTP_STARTTLS -> falha na resolução da propriedade e NÃO assume true")
-    void shouldFailInProductionWhenMailSmtpStarttlsMissing() {
-        createRunner("prod")
-                .withPropertyValues(
-                        "MAIL_HOST=smtp.gmail.com",
-                        "MAIL_USERNAME=teste@gmail.com",
-                        "MAIL_PASSWORD=senha-app",
-                        "MAIL_SMTP_AUTH=true"
-                )
-                .run(context -> {
-                    // Em produção, a ausência de MAIL_SMTP_STARTTLS NÃO assume true silenciosamente;
-                    // Deve disparar falha explícita de resolução de placeholder.
-                    assertThrows(PlaceholderResolutionException.class, () ->
-                            context.getEnvironment().getProperty("spring.mail.properties.mail.smtp.starttls.enable")
-                    );
-                });
-    }
-
-    @Test
-    @DisplayName("4. Produção com MAIL_SMTP_AUTH=false e MAIL_SMTP_STARTTLS=false -> reflete explicitamente false")
-    void shouldHonorExplicitFalseInProduction() {
-        createRunnerWithMailSender("prod")
-                .withPropertyValues(
-                        "MAIL_HOST=smtp.custom.com",
-                        "MAIL_USERNAME=custom@oficina.com",
-                        "MAIL_PASSWORD=senha",
-                        "MAIL_SMTP_AUTH=false",
-                        "MAIL_SMTP_STARTTLS=false"
-                )
-                .run(context -> {
-                    assertThat(context).hasNotFailed();
-                    Environment env = context.getEnvironment();
-                    assertEquals("false", env.getProperty("spring.mail.properties.mail.smtp.auth"));
-                    assertEquals("false", env.getProperty("spring.mail.properties.mail.smtp.starttls.enable"));
-                });
-    }
-
-    @Test
-    @DisplayName("5. Ambiente dev continua funcionando com defaults convenientes quando variáveis não fornecidas")
-    void shouldMaintainConvenientDefaultsInDevelopment() {
-        createRunner("dev")
-                .run(context -> {
-                    assertThat(context).hasNotFailed();
-                    Environment env = context.getEnvironment();
-                    assertEquals("true", env.getProperty("spring.mail.properties.mail.smtp.auth"));
-                    assertEquals("true", env.getProperty("spring.mail.properties.mail.smtp.starttls.enable"));
-                });
-    }
-
-
 }

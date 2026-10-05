@@ -9,9 +9,9 @@ public class FlywayConfig {
 
     @Bean
     public FlywayMigrationStrategy flywayMigrationStrategy() {
-        return flyway -> {
-            flyway.repair();
-            flyway.migrate();
-        };
+        // Spring Boot executa esta estrategia uma unica vez durante o startup.
+        // Repair altera o historico de migrations e deve permanecer uma operacao
+        // administrativa explicita, nunca automatica na inicializacao.
+        return flyway -> flyway.migrate();
     }
 }

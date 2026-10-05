@@ -26,6 +26,15 @@ class ProductionSecurityValidatorTest {
     private static final String STRONG_SECRET = "chave-secreta-de-producao-com-mais-de-32-caracteres-para-hmac-sha256";
     private static final String VALID_PROD_CORS = "https://app.oficinagestao.com.br";
 
+    private void stubSecureSmtp() {
+        when(environment.getProperty("spring.mail.host")).thenReturn("smtp.example.invalid");
+        when(environment.getProperty("spring.mail.username")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.password")).thenReturn("synthetic-password");
+        when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+    }
+
     @Test
     @DisplayName("PROD001-01: Profile prod com secret ausente deve falhar de forma segura")
     void shouldFailInProductionWhenSecretIsMissing() {
@@ -98,6 +107,7 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
         when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
         when(environment.getProperty("security.cookie.secure")).thenReturn("true");
+        stubSecureSmtp();
 
         ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
 
@@ -162,6 +172,7 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
         when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
         when(environment.getProperty("security.cookie.secure")).thenReturn(null);
+        stubSecureSmtp();
 
         ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
 
@@ -190,7 +201,13 @@ class ProductionSecurityValidatorTest {
             effectiveEnvironment.getPropertySources().addLast(new MapPropertySource("secureProdDefaults", Map.of(
                     "security.jwt.secret", STRONG_SECRET,
                     "cors.allowed-origins", VALID_PROD_CORS,
-                    "security.cookie.secure", "true"
+                    "security.cookie.secure", "true",
+                    "spring.mail.host", "smtp.example.invalid",
+                    "spring.mail.username", "mailer@example.invalid",
+                    "spring.mail.password", "synthetic-password",
+                    "app.mail.from", "mailer@example.invalid",
+                    "spring.mail.properties.mail.smtp.auth", "true",
+                    "spring.mail.properties.mail.smtp.starttls.enable", "true"
             )));
             effectiveEnvironment.getPropertySources().addFirst(new MapPropertySource(sourceName + "-hard01", Map.of(
                     "security.cookie.secure", "false"
