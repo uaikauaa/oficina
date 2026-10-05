@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -19,6 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class DatabaseConnectionTest {
 
     @Autowired(required = false)

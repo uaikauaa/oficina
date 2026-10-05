@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
@@ -49,6 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *    remember-me, 2FA, lock pessimista e tokenVersion continuam 100% íntegras.
  */
 @SpringBootTest
+@ActiveProfiles("test")
 class RefreshTokenHashSecurityTest {
 
     @Autowired

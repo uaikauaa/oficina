@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.oficinagestao.security.TokenHashUtil;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * sob execução simultânea no PostgreSQL com armazenamento seguro por hash SHA-256.
  */
 @SpringBootTest
+@ActiveProfiles("test")
 class RefreshTokenConcurrencyIntegrationTest {
 
     @Autowired

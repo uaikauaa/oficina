@@ -21,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class TwoFactorConcurrencyIntegrationTest {
 
     @Autowired

@@ -78,7 +78,22 @@ oficina/
    INITIAL_ADMIN_EMAIL=seu_email@exemplo.com
    INITIAL_ADMIN_PASSWORD=sua_senha_segura_123
    ```
-   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` não forem fornecidos, o sistema emite um alerta e nenhuma conta com credencial padrão é criada.
+   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. `INITIAL_ADMIN_PASSWORD` é somente o seed do primeiro provisionamento; alterar essa variável não redefine a senha de uma conta existente.
+
+### Banco exclusivo para testes
+
+Os testes de integração usam PostgreSQL real e exigem um banco local exclusivo cujo nome termine em `_test`. Eles nunca reutilizam `DB_URL`, `DB_USERNAME` ou `DB_PASSWORD`.
+
+```powershell
+docker run --name oficina-postgres-test -e POSTGRES_DB=oficina_gestao_test -e POSTGRES_USER=oficina_test -e POSTGRES_PASSWORD=oficina_test -p 5432:5432 -d postgres:16-alpine
+$env:TEST_DB_URL='jdbc:postgresql://localhost:5432/oficina_gestao_test'
+$env:TEST_DB_USERNAME='oficina_test'
+$env:TEST_DB_PASSWORD='oficina_test'
+cd backend
+.\mvnw.cmd clean test
+```
+
+Se `TEST_DB_URL` estiver ausente, apontar para Neon/host remoto ou usar um banco sem o sufixo `_test`, a suíte aborta antes de inicializar o datasource.
 
 ---
 

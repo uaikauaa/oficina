@@ -15,7 +15,7 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB: oficinadb
+          POSTGRES_DB: oficina_gestao_test
           POSTGRES_USER: oficina
           POSTGRES_PASSWORD: oficinapassword
         ports:
@@ -39,10 +39,10 @@ jobs:
 
       - name: Executar Testes Automatizados do Backend
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/oficinadb
-          DB_USERNAME: oficina
-          DB_PASSWORD: oficinapassword
-          JWT_SECRET: default-secret-key-oficina-gestao-ci-test-environment-2026-secure
+          SPRING_PROFILES_ACTIVE: test
+          TEST_DB_URL: jdbc:postgresql://localhost:5432/oficina_gestao_test
+          TEST_DB_USERNAME: oficina
+          TEST_DB_PASSWORD: oficinapassword
         run: |
           cd backend
           chmod +x mvnw
