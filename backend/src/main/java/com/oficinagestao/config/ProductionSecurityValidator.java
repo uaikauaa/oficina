@@ -31,6 +31,7 @@ public class ProductionSecurityValidator {
 
         String jwtSecret = environment.getProperty("security.jwt.secret");
         String corsOrigins = environment.getProperty("cors.allowed-origins");
+        String cookieSecure = environment.getProperty("security.cookie.secure");
 
         if (isProduction) {
             log.info("Executando validação mandatória de segurança para o profile de Produção...");
@@ -51,7 +52,14 @@ public class ProductionSecurityValidator {
                 throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: CORS_ALLOWED_ORIGINS não pode conter wildcard '*' quando autenticação com cookies seguros está habilitada.");
             }
 
-            log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte e CORS estrito validados.");
+            // HARD-01: valida o valor efetivo do Environment, incluindo qualquer
+            // override de maior precedência (env, system property ou JSON).
+            // Ausência é permitida porque o profile prod possui default seguro=true.
+            if (cookieSecure != null && !"true".equalsIgnoreCase(cookieSecure.trim())) {
+                throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: security.cookie.secure deve ser true para cookies de autenticação.");
+            }
+
+            log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte, CORS estrito e cookies Secure validados.");
         } else {
             // Em desenvolvimento / testes
             if (jwtSecret != null && DEFAULT_DEV_JWT_SECRET.equals(jwtSecret.trim())) {

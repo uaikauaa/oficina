@@ -10,14 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -131,6 +135,29 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.user.id").value(1))
                 .andExpect(jsonPath("$.user.email").value("admin@oficina.com"))
                 .andExpect(jsonPath("$.user.nome").value("Proprietária"));
+    }
+
+    @Test
+    @DisplayName("HARD-01: Configuração de produção aplica Secure aos cookies access e refresh")
+    void shouldSetSecureAuthenticationCookiesWhenProductionConfigurationIsEnabled() {
+        CurrentUserResponse user = new CurrentUserResponse(1L, "Proprietária", "admin@oficina.com", Set.of("ROLE_ADMIN"));
+        LoginResult loginResult = new LoginResult("mock.jwt.token", "mock.refresh.token", 900L, 604800L, user, true);
+        when(authService.verificarTwoFactor(any(TwoFactorVerifyRequest.class), any())).thenReturn(loginResult);
+
+        AuthController productionController = new AuthController(authService, true);
+        ResponseEntity<LoginResponse> response = productionController.verifyTwoFactor(
+                new TwoFactorVerifyRequest("mock-challenge-token", "123456"),
+                new org.springframework.mock.web.MockHttpServletRequest()
+        );
+
+        List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
+        assertTrue(cookies != null && cookies.size() == 2);
+        assertTrue(cookies.stream().anyMatch(cookie -> cookie.startsWith("access_token=")
+                && cookie.contains("HttpOnly") && cookie.contains("Secure")
+                && cookie.contains("SameSite=Lax") && cookie.contains("Path=/")));
+        assertTrue(cookies.stream().anyMatch(cookie -> cookie.startsWith("refresh_token=")
+                && cookie.contains("HttpOnly") && cookie.contains("Secure")
+                && cookie.contains("SameSite=Strict") && cookie.contains("Path=/api/auth")));
     }
 
     @Test

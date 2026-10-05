@@ -187,10 +187,15 @@ describe('UX-009: Estabilização e Resiliência — Testes Automatizados', () =
   // =========================================================================
   describe('ISSUE-06: Prevenção de Open Redirect no Login', () => {
     it('12. Permite caminhos internos relativos seguros', () => {
+      assert.equal(sanitizarRedirect('/'), '/');
       assert.equal(sanitizarRedirect('/dashboard'), '/dashboard');
+      assert.equal(sanitizarRedirect('/clientes'), '/clientes');
+      assert.equal(sanitizarRedirect('/os/123'), '/os/123');
       assert.equal(sanitizarRedirect('/ordens-servico'), '/ordens-servico');
       assert.equal(sanitizarRedirect('/maquinas/5'), '/maquinas/5');
       assert.equal(sanitizarRedirect('/clientes?busca=silva'), '/clientes?busca=silva');
+      assert.equal(sanitizarRedirect('/path?x=1'), '/path?x=1');
+      assert.equal(sanitizarRedirect('/path#section'), '/path#section');
     });
 
     it('13. Bloqueia e faz fallback para URLs externas com protocolo absoluto (http/https)', () => {
@@ -207,9 +212,53 @@ describe('UX-009: Estabilização e Resiliência — Testes Automatizados', () =
     it('15. Bloqueia esquemas perigosos (javascript:, data:) e valores nulos ou vazios', () => {
       assert.equal(sanitizarRedirect('javascript:alert(1)'), '/dashboard');
       assert.equal(sanitizarRedirect('data:text/html,evil'), '/dashboard');
+      assert.equal(sanitizarRedirect('file:///etc/passwd'), '/dashboard');
+      assert.equal(sanitizarRedirect('blob:https://evil.example/id'), '/dashboard');
+      assert.equal(sanitizarRedirect('https://user@evil.example'), '/dashboard');
       assert.equal(sanitizarRedirect(''), '/dashboard');
       assert.equal(sanitizarRedirect('   '), '/dashboard');
       assert.equal(sanitizarRedirect(null), '/dashboard');
+    });
+
+    it('16. Bloqueia backslashes e separadores codificados antes da navegação', () => {
+      const maliciosos = [
+        '\\\\evil.example',
+        '/\\evil.example',
+        '/%5Cevil.example',
+        '/%5cevil.example',
+        '%2F%2Fevil.example',
+        '/%2F%2Fevil.example',
+        '/%255Cevil.example',
+        '///evil.example',
+        '/\\/evil.example',
+        'https:%2F%2Fevil.example',
+      ];
+
+      for (const candidate of maliciosos) {
+        assert.equal(sanitizarRedirect(candidate), '/dashboard', candidate);
+      }
+    });
+
+    it('17. Entrega ao mecanismo de navegação apenas destinos da origem interna', () => {
+      const trustedOrigin = 'https://oficina.invalid';
+      const candidatos = [
+        '/',
+        '/dashboard',
+        '/path?x=1',
+        '/path#section',
+        '/%5Cevil.example',
+        '//evil.example',
+        'https://evil.example',
+      ];
+
+      for (const candidate of candidatos) {
+        const finalNavigation = sanitizarRedirect(candidate);
+        assert.equal(new URL(finalNavigation, trustedOrigin).origin, trustedOrigin, candidate);
+      }
+
+      const recebidoPeloLogin = new URLSearchParams('redirect=%2F%255Cevil.example').get('redirect');
+      assert.equal(recebidoPeloLogin, '/%5Cevil.example');
+      assert.equal(sanitizarRedirect(recebidoPeloLogin), '/dashboard');
     });
   });
 

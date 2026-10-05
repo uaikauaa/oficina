@@ -63,14 +63,59 @@ export async function executeSilentRefresh(): Promise<boolean> {
   return activeRefreshPromise;
 }
 
-export function sanitizarRedirect(url: string | null): string {
-  if (!url) return '/dashboard';
-  const trimmed = url.trim();
-  // Deve ser caminho relativo interno iniciando com '/', não pode ser protocol-relative ('//') e não pode conter esquema ('://')
-  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.includes('://')) {
-    return trimmed;
+const REDIRECT_FALLBACK = '/dashboard';
+const REDIRECT_VALIDATION_ORIGIN = 'https://oficina.invalid';
+
+function decodeRedirectPath(candidate: string): string | null {
+  let path = candidate.split(/[?#]/, 1)[0];
+
+  // URLSearchParams já decodifica uma camada. Repetir até estabilizar também
+  // bloqueia separadores duplamente codificados antes que outra camada os interprete.
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(path);
+    } catch {
+      return null;
+    }
+    if (decoded === path) return path;
+    path = decoded;
   }
-  return '/dashboard';
+
+  return null;
+}
+
+export function sanitizarRedirect(url: string | null): string {
+  if (!url) return REDIRECT_FALLBACK;
+
+  const candidate = url.trim();
+  if (!candidate) return REDIRECT_FALLBACK;
+
+  const decodedPath = decodeRedirectPath(candidate);
+  if (
+    decodedPath === null ||
+    !decodedPath.startsWith('/') ||
+    decodedPath.startsWith('//') ||
+    decodedPath.includes('\\')
+  ) {
+    return REDIRECT_FALLBACK;
+  }
+
+  try {
+    const parsed = new URL(candidate, REDIRECT_VALIDATION_ORIGIN);
+    if (
+      parsed.origin !== REDIRECT_VALIDATION_ORIGIN ||
+      parsed.username !== '' ||
+      parsed.password !== ''
+    ) {
+      return REDIRECT_FALLBACK;
+    }
+
+    // Entrega ao router somente a forma interna já normalizada pelo parser WHATWG.
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return REDIRECT_FALLBACK;
+  }
 }
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {

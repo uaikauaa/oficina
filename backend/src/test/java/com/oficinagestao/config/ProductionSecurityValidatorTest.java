@@ -5,8 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.Profiles;
+import org.springframework.core.env.StandardEnvironment;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,6 +97,7 @@ class ProductionSecurityValidatorTest {
         when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
         when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
         when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn("true");
 
         ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
 
@@ -104,9 +110,95 @@ class ProductionSecurityValidatorTest {
         when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(false);
         when(environment.getProperty("security.jwt.secret")).thenReturn(ProductionSecurityValidator.DEFAULT_DEV_JWT_SECRET);
         when(environment.getProperty("cors.allowed-origins")).thenReturn("http://localhost:3000");
+        when(environment.getProperty("security.cookie.secure")).thenReturn("false");
 
         ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
 
         assertDoesNotThrow(validator::validate);
+    }
+
+    @Test
+    @DisplayName("HARD-01: Profile prod com cookie Secure=false deve abortar a inicialização")
+    void shouldFailInProductionWhenCookieSecureIsFalse() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn("false");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
+        assertTrue(ex.getMessage().contains("security.cookie.secure deve ser true"));
+        assertFalse(ex.getMessage().contains(STRONG_SECRET));
+    }
+
+    @Test
+    @DisplayName("HARD-01: Contexto Spring de produção aborta quando cookie Secure=false")
+    void shouldAbortProductionSpringContextWhenCookieSecureIsFalse() {
+        new ApplicationContextRunner()
+                .withInitializer(context -> context.getEnvironment().setActiveProfiles("prod"))
+                .withBean(ProductionSecurityValidator.class)
+                .withPropertyValues(
+                        "security.jwt.secret=" + STRONG_SECRET,
+                        "cors.allowed-origins=" + VALID_PROD_CORS,
+                        "security.cookie.secure=false"
+                )
+                .run(context -> {
+                    Throwable startupFailure = context.getStartupFailure();
+                    assertNotNull(startupFailure);
+                    Throwable rootCause = startupFailure;
+                    while (rootCause.getCause() != null) {
+                        rootCause = rootCause.getCause();
+                    }
+                    assertTrue(rootCause.getMessage().contains("security.cookie.secure deve ser true"));
+                    assertFalse(rootCause.getMessage().contains(STRONG_SECRET));
+                });
+    }
+
+    @Test
+    @DisplayName("HARD-01: Profile prod sem propriedade explícita usa o default seguro e inicializa")
+    void shouldSucceedInProductionWhenCookieSecurePropertyIsAbsent() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn(null);
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        assertDoesNotThrow(validator::validate);
+    }
+
+    @Test
+    @DisplayName("HARD-01: Dev/test continuam aceitando cookie Secure=false")
+    void shouldAllowCookieSecureFalseOutsideProduction() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(false);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(ProductionSecurityValidator.DEFAULT_DEV_JWT_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn("http://localhost:3000");
+        when(environment.getProperty("security.cookie.secure")).thenReturn("false");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        assertDoesNotThrow(validator::validate);
+    }
+
+    @Test
+    @DisplayName("HARD-01: Property sources de maior precedência não burlam o fail-fast")
+    void shouldRejectEffectiveFalseFromHigherPrecedencePropertySources() {
+        for (String sourceName : new String[]{"systemProperties", "systemEnvironment", "spring.application.json"}) {
+            StandardEnvironment effectiveEnvironment = new StandardEnvironment();
+            effectiveEnvironment.setActiveProfiles("prod");
+            effectiveEnvironment.getPropertySources().addLast(new MapPropertySource("secureProdDefaults", Map.of(
+                    "security.jwt.secret", STRONG_SECRET,
+                    "cors.allowed-origins", VALID_PROD_CORS,
+                    "security.cookie.secure", "true"
+            )));
+            effectiveEnvironment.getPropertySources().addFirst(new MapPropertySource(sourceName + "-hard01", Map.of(
+                    "security.cookie.secure", "false"
+            )));
+
+            ProductionSecurityValidator validator = new ProductionSecurityValidator(effectiveEnvironment);
+            IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate, sourceName);
+            assertTrue(ex.getMessage().contains("security.cookie.secure deve ser true"), sourceName);
+        }
     }
 }
