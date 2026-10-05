@@ -1,6 +1,7 @@
 package com.oficinagestao.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +53,7 @@ public class IpAddressResolver {
      *
      * @param trustedProxyList lista de IPs confiáveis injetada de {@code security.trusted-proxies}
      */
+    @Autowired
     public IpAddressResolver(
             @Value("${security.trusted-proxies:}") List<String> trustedProxyList
     ) {

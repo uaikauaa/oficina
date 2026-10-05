@@ -73,6 +73,19 @@ class IpAddressResolverTest {
     }
 
     @Test
+    @DisplayName("SEC-03 regressao: X-Forwarded-For nao substitui socket peer nao confiavel")
+    void regressaoForwardedHeaderFilterPreservaSocketPeer() {
+        HttpServletRequest request = req(
+                "198.51.100.10",
+                null,
+                null,
+                "203.0.113.77"
+        );
+
+        assertEquals("198.51.100.10", semProxy().extrairIp(request));
+    }
+
+    @Test
     @DisplayName("Loopback IPv6 deve ser normalizado para 127.0.0.1")
     void loopbackIpv6Normalizado() {
         HttpServletRequest request = req("0:0:0:0:0:0:0:1");

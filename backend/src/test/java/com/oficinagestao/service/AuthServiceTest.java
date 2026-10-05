@@ -750,6 +750,33 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("SEC-03: headers falsificados nao distribuem tentativas entre IPs artificiais")
+    void shouldRateLimitBySocketPeerDespiteSpoofedForwardedHeaders() {
+        when(usuarioRepository.findByEmail("admin_sec03@oficina.com")).thenReturn(Optional.empty());
+
+        LoginRequest request = new LoginRequest("admin_sec03@oficina.com", "SenhaErrada");
+        for (int i = 0; i < 5; i++) {
+            org.springframework.mock.web.MockHttpServletRequest spoofedRequest =
+                    new org.springframework.mock.web.MockHttpServletRequest();
+            spoofedRequest.setRemoteAddr("198.51.100.10");
+            spoofedRequest.addHeader("CF-Connecting-IP", "1.2.3." + i);
+            spoofedRequest.addHeader("X-Real-IP", "192.0.2." + i);
+            spoofedRequest.addHeader("X-Forwarded-For", "203.0.113." + i);
+            assertThrows(BadCredentialsException.class, () -> authService.login(request, spoofedRequest));
+        }
+
+        org.springframework.mock.web.MockHttpServletRequest finalRequest =
+                new org.springframework.mock.web.MockHttpServletRequest();
+        finalRequest.setRemoteAddr("198.51.100.10");
+        finalRequest.addHeader("X-Forwarded-For", "203.0.113.250");
+        BadCredentialsException blocked = assertThrows(
+                BadCredentialsException.class,
+                () -> authService.login(request, finalRequest)
+        );
+        assertTrue(blocked.getMessage().contains("Muitas tentativas incorretas"));
+    }
+
+    @Test
     @DisplayName("SEC-02: Atacante errando 5 vezes de um IP não deve provocar Account Lockout DoS para usuário legítimo em outro IP")
     void shouldPreventAccountLockoutDosForLegitimateUserFromDifferentIp() {
         Usuario usuario = new Usuario("Proprietária", "admin_vitima@oficina.com", "hash_real", true);
