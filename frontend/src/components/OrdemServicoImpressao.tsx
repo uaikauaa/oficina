@@ -1,15 +1,38 @@
 import React from 'react';
 import { OrdemServico, OrdemServicoItem } from '@/lib/types';
 import { formatarMoeda, formatarDataHora } from '@/lib/api';
-import { OFICINA } from '@/lib/oficina';
+
+export interface ConfiguracaoOficinaImpressao {
+  nomeFantasia: string;
+  nomeEmpresarial: string | null;
+  cnpj: string | null;
+  telefone: string | null;
+  email: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  bairro: string | null;
+  cep: string | null;
+  municipio: string | null;
+  uf: string | null;
+}
 
 interface OrdemServicoImpressaoProps {
   os: OrdemServico;
   itens: OrdemServicoItem[];
+  configuracao: ConfiguracaoOficinaImpressao;
 }
 
-export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpressaoProps) {
+export default function OrdemServicoImpressao({ os, itens, configuracao }: OrdemServicoImpressaoProps) {
   const isCancelada = os.status === 'CANCELADA';
+  const localidade = [configuracao.municipio, configuracao.uf].filter(Boolean).join('/');
+  const identificacao = [configuracao.cnpj && `CNPJ: ${configuracao.cnpj}`, localidade].filter(Boolean).join(' | ');
+  const contato = [configuracao.telefone && `Tel: ${configuracao.telefone}`, configuracao.email].filter(Boolean).join(' | ');
+  const endereco = [
+    [configuracao.logradouro, configuracao.numero].filter(Boolean).join(', '),
+    configuracao.bairro,
+    localidade,
+    configuracao.cep && `CEP ${configuracao.cep}`,
+  ].filter(Boolean).join(' — ');
 
   return (
     <div className="hidden print:block text-slate-900 bg-white font-sans p-6 max-w-4xl mx-auto text-xs leading-relaxed">
@@ -17,7 +40,7 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
       <div className="flex items-start justify-between border-b-2 border-slate-800 pb-3 mb-4">
         <div>
           <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">
-            {OFICINA.nomeFantasia}
+            {configuracao.nomeFantasia}
           </h1>
           <p className="text-xs font-bold text-slate-700 uppercase">
             Assistência Técnica Especializada
@@ -25,12 +48,10 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
           <p className="text-[11px] text-slate-600">
             Máquinas de Solda • Geradores de Energia • Manutenção Técnica
           </p>
-          <p className="text-[10px] text-slate-500 mt-0.5">
-            CNPJ: {OFICINA.cnpj} | {OFICINA.municipio}/{OFICINA.uf}
-          </p>
-          <p className="text-[10px] text-slate-500">
-            Tel: {OFICINA.telefone} | {OFICINA.email}
-          </p>
+          {configuracao.nomeEmpresarial && <p className="text-[10px] text-slate-500">{configuracao.nomeEmpresarial}</p>}
+          {identificacao && <p className="text-[10px] text-slate-500 mt-0.5">{identificacao}</p>}
+          {contato && <p className="text-[10px] text-slate-500">{contato}</p>}
+          {endereco && <p className="text-[10px] text-slate-500">{endereco}</p>}
         </div>
 
         <div className="text-right border border-slate-400 rounded p-2.5 bg-slate-50 min-w-[190px]">
@@ -249,9 +270,9 @@ export default function OrdemServicoImpressao({ os, itens }: OrdemServicoImpress
           </div>
           <div>
             <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
-              {os.tecnicoNome || OFICINA.nomeFantasia}
+              {os.tecnicoNome || configuracao.nomeFantasia}
             </div>
-            <span className="text-[9px] text-slate-500">Técnico Responsável / {OFICINA.nomeFantasia}</span>
+            <span className="text-[9px] text-slate-500">Técnico Responsável / {configuracao.nomeFantasia}</span>
           </div>
         </div>
       </div>

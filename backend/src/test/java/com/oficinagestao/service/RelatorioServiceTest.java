@@ -71,7 +71,7 @@ class RelatorioServiceTest {
         when(ordemServicoRepository.contarAbertasPorPeriodo(inicio, fim)).thenReturn(3L);
         when(ordemServicoRepository.contarPorPeriodoEStatus(inicio, fim, StatusOrdemServico.CANCELADA)).thenReturn(1L);
         when(ordemServicoRepository.somarValorConcluidasPorPeriodo(inicio, fim)).thenReturn(new BigDecimal("4500.00"));
-        when(ordemServicoRepository.somarValorAReceberPorPeriodo(inicio, fim)).thenReturn(new BigDecimal("1500.00"));
+        when(ordemServicoRepository.somarValorAReceberPorPeriodo(inicio, fim, null)).thenReturn(new BigDecimal("1500.00"));
 
         OrdemServico os = new OrdemServico();
         os.setId(1L);
@@ -237,6 +237,6 @@ class RelatorioServiceTest {
         assertNotNull(resultado.resumo());
         assertEquals(new BigDecimal("3000.00"), resultado.resumo().valorTotalConcluidas());
         assertEquals(BigDecimal.ZERO, resultado.resumo().valorTotalAReceber(), "Quando filtro é CONCLUIDA, a receber deve ser zero");
-        verify(ordemServicoRepository, never()).somarValorAReceberPorPeriodo(any(), any());
+        verify(ordemServicoRepository, never()).somarValorAReceberPorPeriodo(any(), any(), any());
     }
 }

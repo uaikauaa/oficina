@@ -103,7 +103,7 @@ public class RelatorioService {
                     ? ordemServicoRepository.somarValorConcluidasPorPeriodo(dataInicio, dataFim)
                     : BigDecimal.ZERO;
             BigDecimal valorTotalAReceber = (status == null || (status != StatusOrdemServico.CONCLUIDA && status != StatusOrdemServico.CANCELADA))
-                    ? ordemServicoRepository.somarValorAReceberPorPeriodo(dataInicio, dataFim)
+                    ? ordemServicoRepository.somarValorAReceberPorPeriodo(dataInicio, dataFim, status)
                     : BigDecimal.ZERO;
 
             resumo = new RelatorioOsResumoDTO(

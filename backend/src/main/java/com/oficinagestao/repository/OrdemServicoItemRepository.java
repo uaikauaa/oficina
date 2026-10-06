@@ -34,8 +34,9 @@ public interface OrdemServicoItemRepository extends JpaRepository<OrdemServicoIt
 
     @Query("SELECT new com.oficinagestao.dto.PecaMaisUtilizadaDTO(" +
            "p.id, p.codigo, p.nome, p.marca, SUM(i.quantidade), COUNT(DISTINCT i.ordemServico.id)) " +
-           "FROM OrdemServicoItem i JOIN i.produto p " +
+           "FROM OrdemServicoItem i JOIN i.produto p JOIN i.ordemServico os " +
            "WHERE i.tipoItem = com.oficinagestao.entity.TipoItemOrdemServico.PECA " +
+           "AND os.status <> com.oficinagestao.entity.StatusOrdemServico.CANCELADA " +
            "GROUP BY p.id, p.codigo, p.nome, p.marca " +
            "ORDER BY SUM(i.quantidade) DESC")
     Page<PecaMaisUtilizadaDTO> relatorioPecasMaisUtilizadas(Pageable pageable);

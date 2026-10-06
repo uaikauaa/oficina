@@ -156,9 +156,11 @@ public interface OrdemServicoRepository extends JpaRepository<OrdemServico, Long
     @Query("SELECT COALESCE(SUM(os.valorTotal), 0) FROM OrdemServico os " +
            "WHERE (CAST(:dataInicio AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada >= :dataInicio) " +
            "AND (CAST(:dataFim AS java.time.OffsetDateTime) IS NULL OR os.dataEntrada <= :dataFim) " +
+           "AND (:status IS NULL OR os.status = :status) " +
            "AND os.status NOT IN (com.oficinagestao.entity.StatusOrdemServico.CONCLUIDA, com.oficinagestao.entity.StatusOrdemServico.CANCELADA)")
     BigDecimal somarValorAReceberPorPeriodo(
             @Param("dataInicio") OffsetDateTime dataInicio,
-            @Param("dataFim") OffsetDateTime dataFim
+            @Param("dataFim") OffsetDateTime dataFim,
+            @Param("status") StatusOrdemServico status
     );
 }

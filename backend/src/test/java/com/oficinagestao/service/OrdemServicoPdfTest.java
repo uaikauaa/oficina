@@ -1,5 +1,7 @@
 package com.oficinagestao.service;
 
+import com.lowagie.text.pdf.PdfReader;
+import com.lowagie.text.pdf.parser.PdfTextExtractor;
 import com.oficinagestao.entity.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -30,11 +33,12 @@ class OrdemServicoPdfTest {
     private Cliente cliente;
     private Maquina maquina;
     private OrdemServico os;
+    private ConfiguracaoOficina configStub;
 
     @BeforeEach
     void setUp() {
         // Stub: retorna ConfiguracaoOficina com dados reais da Bruno Soldas
-        ConfiguracaoOficina configStub = new ConfiguracaoOficina();
+        configStub = new ConfiguracaoOficina();
         configStub.setNomeFantasia("Bruno Soldas");
         configStub.setNomeEmpresarial("45.076.507 BRUNO SOARES RODRIGUES");
         configStub.setCnpj("45.076.507/0001-67");
@@ -106,6 +110,34 @@ class OrdemServicoPdfTest {
         // Assinatura padrão de arquivo PDF: "%PDF-"
         String header = new String(pdf, 0, 5, StandardCharsets.US_ASCII);
         assertEquals("%PDF-", header, "O documento gerado deve ser um arquivo PDF válido");
+    }
+
+    @Test
+    void pdfRefleteConfiguracaoAtualESupressaoDeCamposOpcionais() throws IOException {
+        configStub.setNomeFantasia("Oficina QA A");
+        configStub.setCnpj("11.222.333/0001-81");
+        configStub.setTelefone("1111-1111");
+        configStub.setLogradouro("Rua A");
+        try (PdfReader reader = new PdfReader(pdfService.gerarOrdemServicoPdf(os, List.of()))) {
+            String texto = new PdfTextExtractor(reader).getTextFromPage(1);
+            assertTrue(texto.contains("OFICINA QA A"));
+            assertTrue(texto.contains("11.222.333/0001-81"));
+            assertTrue(texto.contains("1111-1111"));
+            assertTrue(texto.contains("Rua A"));
+        }
+
+        configStub.setNomeFantasia("Oficina QA B");
+        configStub.setCnpj(null);
+        configStub.setTelefone("2222-2222");
+        configStub.setLogradouro("Rua B");
+        try (PdfReader reader = new PdfReader(pdfService.gerarOrdemServicoPdf(os, List.of()))) {
+            String texto = new PdfTextExtractor(reader).getTextFromPage(1);
+            assertTrue(texto.contains("OFICINA QA B"));
+            assertTrue(texto.contains("2222-2222"));
+            assertTrue(texto.contains("Rua B"));
+            assertTrue(!texto.contains("OFICINA QA A"));
+            assertTrue(!texto.contains("11.222.333/0001-81"));
+        }
     }
 
     @Test

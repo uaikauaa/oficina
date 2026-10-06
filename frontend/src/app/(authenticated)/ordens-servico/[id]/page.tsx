@@ -33,7 +33,7 @@ import {
   Receipt,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
-import OrdemServicoImpressao from '@/components/OrdemServicoImpressao';
+import OrdemServicoImpressao, { type ConfiguracaoOficinaImpressao } from '@/components/OrdemServicoImpressao';
 import {
   gerarLinkWhatsappOS,
 } from '@/lib/whatsappHelper';
@@ -78,6 +78,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const [configuracaoOficina, setConfiguracaoOficina] = useState<ConfiguracaoOficinaImpressao | null>(null);
 
   // Aba ativa do Cockpit de Bancada
   const [activeTab, setActiveTab] = useState<TabType>('laudo');
@@ -197,6 +198,18 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }, 0);
     return () => clearTimeout(timer);
   }, [fetchOs, fetchItens]);
+
+  useEffect(() => {
+    let active = true;
+    apiFetchJson<ConfiguracaoOficinaImpressao>('/api/configuracao-oficina')
+      .then((data) => {
+        if (active && data.nomeFantasia?.trim()) setConfiguracaoOficina(data);
+      })
+      .catch(() => {
+        if (active) setConfiguracaoOficina(null);
+      });
+    return () => { active = false; };
+  }, []);
 
   // Lazy loading do histórico da máquina ao acessar a aba correspondente
   const carregarHistoricoMaquina = useCallback(async (maquinaId: number) => {
@@ -662,7 +675,13 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
+              onClick={() => {
+                if (!configuracaoOficina) {
+                  showToast('error', 'Dados da oficina indisponíveis. Recarregue a página antes de imprimir.');
+                  return;
+                }
+                window.print();
+              }}
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
               title="Imprimir layout da Ordem de Serviço"
             >
@@ -2055,7 +2074,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
       )}
 
       {/* Componente Exclusivo de Impressão (A4) */}
-      <OrdemServicoImpressao os={os} itens={itens} />
+      {configuracaoOficina && <OrdemServicoImpressao os={os} itens={itens} configuracao={configuracaoOficina} />}
     </>
   );
 }
