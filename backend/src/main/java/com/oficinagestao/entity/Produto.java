@@ -59,7 +59,7 @@ public class Produto {
     @Column(name = "preco_venda", nullable = false, precision = 12, scale = 2)
     private BigDecimal precoVenda = BigDecimal.ZERO;
 
-    @Column(name = "margem_lucro", precision = 5, scale = 2)
+    @Column(name = "margem_lucro", precision = 16, scale = 2)
     private BigDecimal margemLucro = BigDecimal.ZERO;
 
     @Column(name = "estoque_atual", nullable = false, precision = 12, scale = 3)

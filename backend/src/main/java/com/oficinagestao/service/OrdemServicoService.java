@@ -218,8 +218,6 @@ public class OrdemServicoService {
             throw new BusinessException("Ordem de Serviço cancelada não pode ser alterada.");
         }
 
-        validarValoresNaoNegativos(dto.valorMaoObra(), dto.valorPecas(), dto.valorDesconto());
-
         updateEntity(os, dto);
         OrdemServico salva = ordemServicoRepository.save(os);
 
@@ -436,6 +434,8 @@ public class OrdemServicoService {
         if (dto.previsaoConclusao() != null) {
             entity.setPrevisaoConclusao(dto.previsaoConclusao());
         }
+        // Em update parcial, o conjunto efetivo combina novos valores com os já persistidos.
+        validarValoresNaoNegativos(entity.getValorMaoObra(), entity.getValorPecas(), entity.getValorDesconto());
         entity.recalcularTotal();
     }
 

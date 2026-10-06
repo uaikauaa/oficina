@@ -1,5 +1,6 @@
 package com.oficinagestao.entity;
 
+import com.oficinagestao.exception.BusinessException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -155,9 +156,19 @@ public class OrdemServico {
         BigDecimal pecas = this.valorPecas != null ? this.valorPecas : BigDecimal.ZERO;
         BigDecimal desconto = this.valorDesconto != null ? this.valorDesconto : BigDecimal.ZERO;
 
+        validarCentavos(maoObra, "mão de obra");
+        validarCentavos(pecas, "peças");
+        validarCentavos(desconto, "desconto");
+
         BigDecimal subtotal = maoObra.add(pecas);
         BigDecimal totalCalculado = subtotal.subtract(desconto);
         this.valorTotal = totalCalculado.max(BigDecimal.ZERO);
+    }
+
+    private static void validarCentavos(BigDecimal valor, String campo) {
+        if (valor.stripTrailingZeros().scale() > 2) {
+            throw new BusinessException("O valor de " + campo + " deve ser informado em centavos (até duas casas decimais).");
+        }
     }
 
     // Getters and Setters
