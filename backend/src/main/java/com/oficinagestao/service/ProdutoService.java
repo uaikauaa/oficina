@@ -24,6 +24,7 @@ import com.oficinagestao.repository.ProdutoMaquinaRepository;
 import com.oficinagestao.repository.ProdutoRepository;
 import com.oficinagestao.repository.UsuarioRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class ProdutoService {
     private final UsuarioRepository usuarioRepository;
     private final AuditoriaService auditoriaService;
     private final NotificacaoService notificacaoService;
+    private final EntityManager entityManager;
 
     public ProdutoService(
             ProdutoRepository produtoRepository,
@@ -55,7 +57,8 @@ public class ProdutoService {
             EstoqueMovimentacaoRepository estoqueMovimentacaoRepository,
             UsuarioRepository usuarioRepository,
             AuditoriaService auditoriaService,
-            NotificacaoService notificacaoService
+            NotificacaoService notificacaoService,
+            EntityManager entityManager
     ) {
         this.produtoRepository = produtoRepository;
         this.categoriaRepository = categoriaRepository;
@@ -66,6 +69,7 @@ public class ProdutoService {
         this.usuarioRepository = usuarioRepository;
         this.auditoriaService = auditoriaService;
         this.notificacaoService = notificacaoService;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -135,6 +139,10 @@ public class ProdutoService {
 
         updateEntity(produto, dto, categoria, fornecedor);
         Produto salvo = produtoRepository.save(produto);
+        // A edição altera apenas colunas cadastrais. Recarregar após o flush evita
+        // responder/notificar com o saldo que foi lido antes de uma movimentação concorrente.
+        entityManager.flush();
+        entityManager.refresh(salvo);
         notificacaoService.verificarEstoqueProduto(salvo);
 
         auditoriaService.registrarComRequest(
@@ -177,6 +185,8 @@ public class ProdutoService {
 
         produto.setAtivo(ativo);
         Produto salvo = produtoRepository.save(produto);
+        entityManager.flush();
+        entityManager.refresh(salvo);
         notificacaoService.verificarEstoqueProduto(salvo);
 
         auditoriaService.registrarComRequest(

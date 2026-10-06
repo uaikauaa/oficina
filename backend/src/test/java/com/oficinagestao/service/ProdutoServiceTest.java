@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -58,6 +59,9 @@ class ProdutoServiceTest {
 
     @Mock
     private NotificacaoService notificacaoService;
+
+    @Mock
+    private EntityManager entityManager;
 
     @InjectMocks
     private ProdutoService produtoService;
