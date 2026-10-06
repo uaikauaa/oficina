@@ -43,6 +43,7 @@ export async function extrairMensagemErroLogin(response: Response): Promise<stri
 
 // Mutex / Promise compartilhada para evitar disparos concorrentes de refresh token (ISSUE-01)
 let activeRefreshPromise: Promise<boolean> | null = null;
+let refreshGeneration = 0;
 
 export async function executeSilentRefresh(): Promise<boolean> {
   if (!activeRefreshPromise) {
@@ -52,6 +53,7 @@ export async function executeSilentRefresh(): Promise<boolean> {
           method: 'POST',
           credentials: 'include',
         });
+        if (refreshRes.ok) refreshGeneration++;
         return refreshRes.ok;
       } catch {
         return false;
@@ -120,6 +122,7 @@ export function sanitizarRedirect(url: string | null): string {
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const url = `${API_URL}${endpoint}`;
+  const generationAtStart = refreshGeneration;
   const config: RequestInit = {
     ...options,
     credentials: 'include',
@@ -132,7 +135,12 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   let response = await fetch(url, config);
 
   // Se o access_token expirou (401), aguarda ou executa renovação silenciosa com refresh_token compartilhado
-  if (response.status === 401 && !endpoint.startsWith('/api/auth/')) {
+  if (response.status === 401 && (endpoint === '/api/auth/me' || !endpoint.startsWith('/api/auth/'))) {
+    // Outra requisição pode ter concluído o refresh enquanto esta aguardava seu 401.
+    // Nesse caso, usar o cookie novo sem girar o refresh token mais uma vez.
+    if (refreshGeneration !== generationAtStart) {
+      return fetch(url, config);
+    }
     const refreshSuccess = await executeSilentRefresh();
     if (refreshSuccess) {
       // Repete a requisição original com os novos cookies definidos no navegador

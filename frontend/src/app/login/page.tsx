@@ -37,7 +37,12 @@ type LoginFormData = z.infer<typeof loginSchema>;
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = sanitizarRedirect(searchParams.get('redirect'));
+  const requestedRedirect = sanitizarRedirect(searchParams.get('redirect'));
+  const redirectUrl = requestedRedirect.split(/[?#]/, 1)[0] === '/login'
+    ? '/dashboard'
+    : requestedRedirect;
+  const sessionAlreadyChecked = searchParams.get('sessionChecked') === '1';
+  const [checkingSession, setCheckingSession] = useState(!sessionAlreadyChecked);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -288,6 +293,31 @@ function LoginForm() {
       document.body.style.overflow = '';
     };
   }, [isModalOpen]);
+
+  useEffect(() => {
+    let ignore = false;
+    if (sessionAlreadyChecked) {
+      return () => { ignore = true; };
+    }
+    async function checkSession() {
+      try {
+        const response = await apiFetch('/api/auth/me');
+        if (response.ok) {
+          if (!ignore) router.replace(redirectUrl);
+          return;
+        }
+      } catch {
+        // Sem confirmação do backend, permanece no login.
+      }
+      if (!ignore) setCheckingSession(false);
+    }
+    checkSession();
+    return () => { ignore = true; };
+  }, [router, redirectUrl, sessionAlreadyChecked]);
+
+  if (checkingSession && !sessionAlreadyChecked) {
+    return <div className="min-h-screen bg-[#0b0f17]" aria-label="Verificando sessão" />;
+  }
 
   return (
     <>

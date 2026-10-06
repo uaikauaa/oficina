@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import { CurrentUser } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
@@ -24,6 +24,7 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export default function AuthenticatedLayout({
       try {
         const res = await apiFetch('/api/auth/me');
         if (!res.ok) {
-          router.push('/login');
+          if (!ignore) router.replace(`/login?redirect=${encodeURIComponent(pathname)}&sessionChecked=1`);
           return;
         }
         const data = await res.json();
@@ -40,14 +41,18 @@ export default function AuthenticatedLayout({
           setUser(data);
         }
       } catch {
-        router.push('/login');
+        if (!ignore) router.replace(`/login?redirect=${encodeURIComponent(pathname)}&sessionChecked=1`);
       }
     }
     loadUser();
     return () => {
       ignore = true;
     };
-  }, [router]);
+  }, [router, pathname]);
+
+  if (!user) {
+    return <div className="min-h-screen bg-slate-950" aria-label="Verificando sessão" />;
+  }
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
