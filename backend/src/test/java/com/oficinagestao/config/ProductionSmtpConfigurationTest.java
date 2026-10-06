@@ -26,6 +26,9 @@ class ProductionSmtpConfigurationTest {
         properties.put("app.mail.from", "mailer@example.invalid");
         properties.put("spring.mail.properties.mail.smtp.auth", "true");
         properties.put("spring.mail.properties.mail.smtp.starttls.enable", "true");
+        properties.put("spring.mail.properties.mail.smtp.connectiontimeout", "15000");
+        properties.put("spring.mail.properties.mail.smtp.timeout", "25000");
+        properties.put("spring.mail.properties.mail.smtp.writetimeout", "25000");
         properties.putAll(overrides);
 
         String[] values = properties.entrySet().stream()
@@ -98,6 +101,40 @@ class ProductionSmtpConfigurationTest {
                         "spring.mail.properties.mail.smtp.starttls.enable=false"
                 )
                 .run(context -> assertThat(context).hasNotFailed());
+    }
+
+    @Test
+    @DisplayName("Produção com timeout de conexão zero aborta o startup")
+    void shouldRejectZeroConnectionTimeout() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.connectiontimeout", "0"), "MAIL_CONNECTION_TIMEOUT");
+    }
+
+    @Test
+    @DisplayName("Produção com timeout de leitura negativo aborta o startup")
+    void shouldRejectNegativeReadTimeout() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.timeout", "-1000"), "MAIL_READ_TIMEOUT");
+    }
+
+    @Test
+    @DisplayName("Produção com timeout de escrita não numérico aborta o startup")
+    void shouldRejectNonNumericWriteTimeout() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.writetimeout", "invalid"), "MAIL_WRITE_TIMEOUT");
+    }
+
+    @Test
+    @DisplayName("Produção com timeout menor que 1000ms aborta o startup")
+    void shouldRejectTooLowTimeout() {
+        assertStartupFailure(Map.of("spring.mail.properties.mail.smtp.timeout", "500"), "MAIL_READ_TIMEOUT");
+    }
+
+    @Test
+    @DisplayName("Produção com timeouts customizados válidos inicializa")
+    void shouldAcceptCustomValidTimeouts() {
+        productionRunner(Map.of(
+                "spring.mail.properties.mail.smtp.connectiontimeout", "20000",
+                "spring.mail.properties.mail.smtp.timeout", "35000",
+                "spring.mail.properties.mail.smtp.writetimeout", "30000"
+        )).run(context -> assertThat(context).hasNotFailed());
     }
 
     private void assertStartupFailure(Map<String, String> overrides, String expectedProperty) {

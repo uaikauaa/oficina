@@ -68,6 +68,9 @@ public class ProductionSecurityValidator {
             requireNonBlank("MAIL_FROM", "app.mail.from");
             requireTrue("MAIL_SMTP_AUTH", "spring.mail.properties.mail.smtp.auth");
             requireTrue("MAIL_SMTP_STARTTLS", "spring.mail.properties.mail.smtp.starttls.enable");
+            requirePositiveTimeout("MAIL_CONNECTION_TIMEOUT", "spring.mail.properties.mail.smtp.connectiontimeout");
+            requirePositiveTimeout("MAIL_READ_TIMEOUT", "spring.mail.properties.mail.smtp.timeout");
+            requirePositiveTimeout("MAIL_WRITE_TIMEOUT", "spring.mail.properties.mail.smtp.writetimeout");
 
             log.info("Validação de segurança de produção aprovada com sucesso. JWT_SECRET forte, CORS estrito, cookies Secure e SMTP seguro validados.");
         } else {
@@ -92,6 +95,32 @@ public class ProductionSecurityValidator {
         if (!"true".equalsIgnoreCase(value != null ? value.trim() : "")) {
             throw new IllegalStateException(
                     "FALHA DE SEGURANCA EM PRODUCAO: " + environmentName + " deve ser true."
+            );
+        }
+    }
+
+    private void requirePositiveTimeout(String environmentName, String propertyName) {
+        String value = environment.getProperty(propertyName);
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(
+                    "FALHA DE CONFIGURACAO EM PRODUCAO: " + environmentName + " e obrigatoria e deve ser um inteiro positivo em milissegundos."
+            );
+        }
+        try {
+            int parsed = Integer.parseInt(value.trim());
+            if (parsed <= 0) {
+                throw new IllegalStateException(
+                        "FALHA DE CONFIGURACAO EM PRODUCAO: " + environmentName + " deve ser maior que zero (timeout infinito nao e permitido)."
+                );
+            }
+            if (parsed < 1000) {
+                throw new IllegalStateException(
+                        "FALHA DE CONFIGURACAO EM PRODUCAO: " + environmentName + " deve ser de pelo menos 1000ms."
+                );
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalStateException(
+                    "FALHA DE CONFIGURACAO EM PRODUCAO: " + environmentName + " deve ser um numero inteiro valido em milissegundos."
             );
         }
     }

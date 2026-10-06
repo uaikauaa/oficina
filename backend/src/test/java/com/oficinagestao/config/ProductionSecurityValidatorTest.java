@@ -33,6 +33,9 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
         when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("25000");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.writetimeout")).thenReturn("25000");
     }
 
     @Test
@@ -198,16 +201,19 @@ class ProductionSecurityValidatorTest {
         for (String sourceName : new String[]{"systemProperties", "systemEnvironment", "spring.application.json"}) {
             StandardEnvironment effectiveEnvironment = new StandardEnvironment();
             effectiveEnvironment.setActiveProfiles("prod");
-            effectiveEnvironment.getPropertySources().addLast(new MapPropertySource("secureProdDefaults", Map.of(
-                    "security.jwt.secret", STRONG_SECRET,
-                    "cors.allowed-origins", VALID_PROD_CORS,
-                    "security.cookie.secure", "true",
-                    "spring.mail.host", "smtp.example.invalid",
-                    "spring.mail.username", "mailer@example.invalid",
-                    "spring.mail.password", "synthetic-password",
-                    "app.mail.from", "mailer@example.invalid",
-                    "spring.mail.properties.mail.smtp.auth", "true",
-                    "spring.mail.properties.mail.smtp.starttls.enable", "true"
+            effectiveEnvironment.getPropertySources().addLast(new MapPropertySource("secureProdDefaults", Map.ofEntries(
+                    Map.entry("security.jwt.secret", STRONG_SECRET),
+                    Map.entry("cors.allowed-origins", VALID_PROD_CORS),
+                    Map.entry("security.cookie.secure", "true"),
+                    Map.entry("spring.mail.host", "smtp.example.invalid"),
+                    Map.entry("spring.mail.username", "mailer@example.invalid"),
+                    Map.entry("spring.mail.password", "synthetic-password"),
+                    Map.entry("app.mail.from", "mailer@example.invalid"),
+                    Map.entry("spring.mail.properties.mail.smtp.auth", "true"),
+                    Map.entry("spring.mail.properties.mail.smtp.starttls.enable", "true"),
+                    Map.entry("spring.mail.properties.mail.smtp.connectiontimeout", "15000"),
+                    Map.entry("spring.mail.properties.mail.smtp.timeout", "25000"),
+                    Map.entry("spring.mail.properties.mail.smtp.writetimeout", "25000")
             )));
             effectiveEnvironment.getPropertySources().addFirst(new MapPropertySource(sourceName + "-hard01", Map.of(
                     "security.cookie.secure", "false"
@@ -217,5 +223,74 @@ class ProductionSecurityValidatorTest {
             IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate, sourceName);
             assertTrue(ex.getMessage().contains("security.cookie.secure deve ser true"), sourceName);
         }
+    }
+
+    @Test
+    @DisplayName("ACH-01: Profile prod com timeout zero (infinito) deve ser rejeitado")
+    void shouldFailInProductionWhenTimeoutIsZero() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn("true");
+        when(environment.getProperty("spring.mail.host")).thenReturn("smtp.example.invalid");
+        when(environment.getProperty("spring.mail.username")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.password")).thenReturn("synthetic-password");
+        when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("0");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
+        assertTrue(ex.getMessage().contains("MAIL_CONNECTION_TIMEOUT"));
+        assertTrue(ex.getMessage().contains("maior que zero"));
+    }
+
+    @Test
+    @DisplayName("ACH-01: Profile prod com timeout menor que 1000ms deve ser rejeitado")
+    void shouldFailInProductionWhenTimeoutIsTooLow() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn("true");
+        when(environment.getProperty("spring.mail.host")).thenReturn("smtp.example.invalid");
+        when(environment.getProperty("spring.mail.username")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.password")).thenReturn("synthetic-password");
+        when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("500");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
+        assertTrue(ex.getMessage().contains("MAIL_READ_TIMEOUT"));
+        assertTrue(ex.getMessage().contains("pelo menos 1000ms"));
+    }
+
+    @Test
+    @DisplayName("ACH-01: Profile prod com timeout não numérico deve ser rejeitado")
+    void shouldFailInProductionWhenTimeoutIsNonNumeric() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn(VALID_PROD_CORS);
+        when(environment.getProperty("security.cookie.secure")).thenReturn("true");
+        when(environment.getProperty("spring.mail.host")).thenReturn("smtp.example.invalid");
+        when(environment.getProperty("spring.mail.username")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.password")).thenReturn("synthetic-password");
+        when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("25000");
+        when(environment.getProperty("spring.mail.properties.mail.smtp.writetimeout")).thenReturn("invalid-text");
+
+        ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
+        assertTrue(ex.getMessage().contains("MAIL_WRITE_TIMEOUT"));
+        assertTrue(ex.getMessage().contains("numero inteiro valido"));
     }
 }
