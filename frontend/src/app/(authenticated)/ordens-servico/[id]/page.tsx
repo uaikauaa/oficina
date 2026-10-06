@@ -313,9 +313,9 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     try {
       const payload: OrdemServicoUpdateData = {
         problemaRelatado: os.problemaRelatado,
-        diagnostico: laudoForm.diagnostico?.trim() || undefined,
-        solucaoAplicada: laudoForm.solucaoAplicada?.trim() || undefined,
-        testesRealizados: laudoForm.testesRealizados?.trim() || undefined,
+        diagnostico: laudoForm.diagnostico.trim(),
+        solucaoAplicada: laudoForm.solucaoAplicada.trim(),
+        testesRealizados: laudoForm.testesRealizados.trim(),
         observacoes: os.observacoes?.trim() || undefined,
         horimetroAtual: os.horimetroAtual != null ? String(os.horimetroAtual) : undefined,
         valorMaoObra: Number(laudoForm.valorMaoObra) || 0,

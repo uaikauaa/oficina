@@ -331,7 +331,9 @@ public class ClienteService {
         }
         cliente.setObservacoes(dto.observacoes());
 
-        if (dto.endereco() != null && dto.endereco().logradouro() != null && !dto.endereco().logradouro().isBlank()) {
+        if (Boolean.TRUE.equals(dto.removerEndereco())) {
+            cliente.limparEnderecos();
+        } else if (dto.endereco() != null && dto.endereco().logradouro() != null && !dto.endereco().logradouro().isBlank()) {
             if (!cliente.getEnderecos().isEmpty()) {
                 Endereco enderecoExistente = cliente.getEnderecos().get(0);
                 enderecoExistente.setCep(dto.endereco().cep());

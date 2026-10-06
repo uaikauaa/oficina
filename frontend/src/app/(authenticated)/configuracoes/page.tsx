@@ -99,11 +99,7 @@ export default function ConfiguracoesPage() {
       const res = await apiFetch('/api/configuracao-oficina', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...form,
-          nomeEmpresarial: form.nomeEmpresarial || null,
-          cnpj: form.cnpj || null,
-        }),
+        body: JSON.stringify(form),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

@@ -12,7 +12,7 @@ import {
   Search,
 } from 'lucide-react';
 import { Produto, Compatibilidade, Maquina } from '@/lib/types';
-import { apiFetch, apiFetchJson } from '@/lib/api';
+import { apiFetchJson } from '@/lib/api';
 
 interface CompatibilidadeModalProps {
   isOpen: boolean;
@@ -87,7 +87,7 @@ export default function CompatibilidadeModal({
     setSuccessMsg(null);
 
     try {
-      await apiFetch(`/api/produtos/${produto.id}/compatibilidades`, {
+      await apiFetchJson(`/api/produtos/${produto.id}/compatibilidades`, {
         method: 'POST',
         body: JSON.stringify({
           maquinaId: Number(maquinaSelecionadaId),
@@ -110,8 +110,10 @@ export default function CompatibilidadeModal({
 
   const handleRemover = async (maquinaId: number) => {
     if (!produto) return;
+    setError(null);
+    setSuccessMsg(null);
     try {
-      await apiFetch(`/api/produtos/${produto.id}/compatibilidades/${maquinaId}`, {
+      await apiFetchJson(`/api/produtos/${produto.id}/compatibilidades/${maquinaId}`, {
         method: 'DELETE',
       });
       setSuccessMsg('Vínculo removido!');

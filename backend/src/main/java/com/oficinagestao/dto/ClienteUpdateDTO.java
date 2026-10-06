@@ -40,6 +40,14 @@ public record ClienteUpdateDTO(
         String observacoes,
 
         @Valid
-        EnderecoDTO endereco
+        EnderecoDTO endereco,
+
+        Boolean removerEndereco
 ) {
+    public ClienteUpdateDTO(TipoPessoa tipoPessoa, String nomeRazaoSocial, String nomeFantasia,
+                            String cpfCnpj, String rgIe, String telefone, String celular,
+                            String email, Boolean ativo, String observacoes, EnderecoDTO endereco) {
+        this(tipoPessoa, nomeRazaoSocial, nomeFantasia, cpfCnpj, rgIe, telefone, celular,
+                email, ativo, observacoes, endereco, null);
+    }
 }

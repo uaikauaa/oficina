@@ -17,7 +17,7 @@ import {
   TipoMovimentacaoEstoque,
   MovimentacaoManualFormData,
 } from '@/lib/types';
-import { apiFetch } from '@/lib/api';
+import { apiFetchJson } from '@/lib/api';
 
 interface MovimentacaoEstoqueModalProps {
   isOpen: boolean;
@@ -167,7 +167,7 @@ export default function MovimentacaoEstoqueModal({
     setLoading(true);
 
     try {
-      await apiFetch('/api/estoque/movimentar', {
+      await apiFetchJson('/api/estoque/movimentar', {
         method: 'POST',
         body: JSON.stringify({
           produtoId: produto.id,

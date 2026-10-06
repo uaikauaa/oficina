@@ -87,6 +87,7 @@ export default function ClienteModal({
   const [etapa, setEtapa] = useState<1 | 2>(1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [clienteCriado, setClienteCriado] = useState<{ cliente: Cliente; payload: ClienteFormData } | null>(null);
 
   // Estados dos Dados do Equipamento (Etapa 2)
   const [maquinaData, setMaquinaData] = useState<{
@@ -160,6 +161,7 @@ export default function ClienteModal({
     const timer = setTimeout(() => {
       if (isOpen) {
         setEtapa(1);
+        setClienteCriado(null);
         setErrorMessage(null);
         setMaquinaFieldErrors({});
         reset({
@@ -202,6 +204,7 @@ export default function ClienteModal({
   const handleCloseModal = React.useCallback(() => {
     setErrorMessage(null);
     setEtapa(1);
+    setClienteCriado(null);
     onClose();
   }, [onClose]);
 
@@ -265,6 +268,7 @@ export default function ClienteModal({
       };
     }
 
+    const enderecoPersistido = Boolean(enderecoPadrao || clienteCriado?.cliente.enderecos?.length);
     return {
       tipoPessoa: values.tipoPessoa as TipoPessoa,
       nomeRazaoSocial: values.nomeRazaoSocial.trim(),
@@ -277,6 +281,7 @@ export default function ClienteModal({
       observacoes: values.observacoes?.trim() || undefined,
       ativo: values.ativo,
       endereco: enderecoPayload,
+      removerEndereco: enderecoPersistido && !enderecoPayload ? true : undefined,
     };
   };
 
@@ -363,23 +368,28 @@ export default function ClienteModal({
     setIsSubmitting(true);
 
     try {
-      // 1. Cadastra o Cliente
+      // 1. Reutiliza o cliente já persistido; alterações posteriores atualizam o mesmo ID.
       const clientePayload = prepararPayloadCliente(values);
-      const resCliente = await apiFetch('/api/clientes', {
-        method: 'POST',
-        body: JSON.stringify(clientePayload),
-      });
-
-      const dataCliente = await resCliente.json();
-
-      if (!resCliente.ok) {
-        setErrorMessage(dataCliente.message || 'Erro ao cadastrar cliente.');
-        setEtapa(1); // Volta para a etapa 1 para correção de eventuais duplicidades (ex: CPF)
-        setIsSubmitting(false);
-        return;
+      let clienteSalvo: Cliente;
+      if (clienteCriado && JSON.stringify(clientePayload) === JSON.stringify(clienteCriado.payload)) {
+        clienteSalvo = clienteCriado.cliente;
+      } else {
+        const resCliente = await apiFetch(
+          clienteCriado ? `/api/clientes/${clienteCriado.cliente.id}` : '/api/clientes',
+          { method: clienteCriado ? 'PUT' : 'POST', body: JSON.stringify(clientePayload) }
+        );
+        const dataCliente = await resCliente.json().catch(() => ({}));
+        if (!resCliente.ok) {
+          setErrorMessage(dataCliente.message || 'Erro ao salvar cliente.');
+          setEtapa(1);
+          return;
+        }
+        clienteSalvo = dataCliente as Cliente;
+        setClienteCriado({
+          cliente: clienteSalvo,
+          payload: clientePayload,
+        });
       }
-
-      const clienteSalvo: Cliente = dataCliente;
 
       // 2. Cadastra a Máquina vinculada ao Cliente recém-criado
       const maquinaPayload = {
@@ -423,6 +433,7 @@ export default function ClienteModal({
 
       reset();
       setEtapa(1);
+      setClienteCriado(null);
       onClose();
     } catch {
       setErrorMessage('Falha de comunicação com o servidor ao processar o cadastro.');

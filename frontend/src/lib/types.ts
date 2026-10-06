@@ -94,6 +94,7 @@ export interface ClienteFormData {
     estado: string;
     tipoEndereco?: TipoEndereco;
   };
+  removerEndereco?: boolean;
 }
 
 
