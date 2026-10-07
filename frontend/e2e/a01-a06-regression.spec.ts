@@ -18,6 +18,7 @@ const config = {
 
 async function baseMocks(page: Page) {
   await page.route('**/api/**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+  await page.route('**/api/categorias/ativas', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
   await page.route('**/api/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
   await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(config) }));
   await page.route('**/api/ordens-servico/77/itens', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
@@ -30,6 +31,48 @@ async function documentWidth(page: Page) {
     client: document.documentElement.clientWidth,
   }));
 }
+
+async function waitForResponsiveLayoutToSettle(page: Page) {
+  return page.evaluate(() => new Promise<{ scroll: number; client: number; inner: number; frames: number }>((resolve, reject) => {
+    let previousGeometry = '';
+    let stableFrames = 0;
+    let frames = 0;
+    const timeout = window.setTimeout(() => reject(new Error('Layout não estabilizou em 2 segundos')), 2000);
+
+    const check = () => {
+      const root = document.documentElement;
+      const scroll = root.scrollWidth;
+      const client = root.clientWidth;
+      const inner = window.innerWidth;
+      const actionRight = document.querySelector('#novo-produto-btn')?.getBoundingClientRect().right ?? null;
+      const geometry = `${scroll}:${client}:${inner}:${actionRight}`;
+      frames++;
+      stableFrames = geometry === previousGeometry ? stableFrames + 1 : 1;
+      previousGeometry = geometry;
+
+      if (stableFrames >= 3) {
+        window.clearTimeout(timeout);
+        resolve({ scroll, client, inner, frames });
+        return;
+      }
+
+      requestAnimationFrame(check);
+    };
+
+    requestAnimationFrame(check);
+  }));
+}
+
+test('A05/A06: produtos carrega diretamente em 320×568 sem overflow', async ({ page }) => {
+  await baseMocks(page);
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/produtos');
+  await expect(page.locator('#novo-produto-btn')).toBeVisible();
+  const { scroll, client, inner } = await waitForResponsiveLayoutToSettle(page);
+  expect(inner).toBe(320);
+  expect(client).toBe(320);
+  expect(scroll).toBe(320);
+});
 
 test('A05: header mantém menu e ações dentro da viewport', async ({ page }) => {
   await baseMocks(page);
@@ -92,9 +135,13 @@ test('A05/A06: matriz das telas autenticadas não tem overflow global', async ({
   for (const route of routes) {
     await page.goto(route);
     await expect(page.locator('header')).toBeVisible();
+    if (route === '/produtos') {
+      await expect(page.locator('#novo-produto-btn')).toBeVisible();
+    }
     for (const width of widths) {
       await page.setViewportSize({ width, height: 800 });
-      const { scroll, client } = await documentWidth(page);
+      const { scroll, client, inner } = await waitForResponsiveLayoutToSettle(page);
+      expect(inner, `${route} em ${width}px`).toBe(width);
       expect(scroll, `${route} em ${width}px`).toBeLessThanOrEqual(client);
     }
   }

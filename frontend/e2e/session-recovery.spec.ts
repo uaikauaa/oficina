@@ -6,7 +6,25 @@ async function mockSession(page: Page, meStatusBeforeRefresh: number, refreshSta
   let refreshed = false;
   let meCalls = 0;
   let refreshCalls = 0;
-  await page.route('**/api/**', (route) => route.fulfill({ status: 401, body: '{}' }));
+  await page.route('**/api/**', (route) => {
+    throw new Error(`API não mockada no cenário B03: ${route.request().url()}`);
+  });
+  await page.route('**/api/notificacoes', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ total: 0, naoLidas: 0, notificacoes: [] }),
+  }));
+  await page.route('**/api/ordens-servico/contadores-dashboard', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ prontas: 0, aguardandoAprovacao: 0, emManutencao: 0 }),
+  }));
+  await page.route('**/api/estoque/resumo', (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ totalProdutos: 0, itensSemEstoque: 0, itensEstoqueBaixo: 0, valorTotalEstoque: 0 }),
+  }));
+  await page.route(/\/api\/ordens-servico\?/, (route) => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ content: [], page: 0, size: 5, totalElements: 0, totalPages: 0, first: true, last: true }),
+  }));
   await page.route('**/api/auth/me', async (route) => {
     meCalls++;
     const status = refreshed ? 200 : meStatusBeforeRefresh;
