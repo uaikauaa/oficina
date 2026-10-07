@@ -2,19 +2,8 @@ import React from 'react';
 import { OrdemServico, OrdemServicoItem } from '@/lib/types';
 import { formatarMoeda, formatarDataHora } from '@/lib/api';
 
-export interface ConfiguracaoOficinaImpressao {
-  nomeFantasia: string;
-  nomeEmpresarial: string | null;
-  cnpj: string | null;
-  telefone: string | null;
-  email: string | null;
-  logradouro: string | null;
-  numero: string | null;
-  bairro: string | null;
-  cep: string | null;
-  municipio: string | null;
-  uf: string | null;
-}
+import type { ConfiguracaoOficinaImpressao } from '@/lib/ordemServicoImpressaoHelper';
+export type { ConfiguracaoOficinaImpressao };
 
 interface OrdemServicoImpressaoProps {
   os: OrdemServico;
@@ -22,17 +11,21 @@ interface OrdemServicoImpressaoProps {
   configuracao: ConfiguracaoOficinaImpressao;
 }
 
+import {
+  temValor,
+  extrairCamposCliente,
+  extrairCamposEquipamento,
+  extrairCamposTecnicos,
+  deveExibirSecaoPecas,
+  formatarDadosOficina,
+} from '@/lib/ordemServicoImpressaoHelper';
+
 export default function OrdemServicoImpressao({ os, itens, configuracao }: OrdemServicoImpressaoProps) {
-  const isCancelada = os.status === 'CANCELADA';
-  const localidade = [configuracao.municipio, configuracao.uf].filter(Boolean).join('/');
-  const identificacao = [configuracao.cnpj && `CNPJ: ${configuracao.cnpj}`, localidade].filter(Boolean).join(' | ');
-  const contato = [configuracao.telefone && `Tel: ${configuracao.telefone}`, configuracao.email].filter(Boolean).join(' | ');
-  const endereco = [
-    [configuracao.logradouro, configuracao.numero].filter(Boolean).join(', '),
-    configuracao.bairro,
-    localidade,
-    configuracao.cep && `CEP ${configuracao.cep}`,
-  ].filter(Boolean).join(' — ');
+  const { identificacao, contato, endereco, nomeEmpresarial } = formatarDadosOficina(configuracao);
+  const camposCliente = extrairCamposCliente(os);
+  const camposEquipamento = extrairCamposEquipamento(os);
+  const camposTecnicos = extrairCamposTecnicos(os);
+  const temItens = deveExibirSecaoPecas(itens);
 
   return (
     <div className="hidden print:block text-slate-900 bg-white font-sans p-6 max-w-4xl mx-auto text-xs leading-relaxed">
@@ -48,156 +41,111 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
           <p className="text-[11px] text-slate-600">
             Máquinas de Solda • Geradores de Energia • Manutenção Técnica
           </p>
-          {configuracao.nomeEmpresarial && <p className="text-[10px] text-slate-500">{configuracao.nomeEmpresarial}</p>}
+          {nomeEmpresarial && (
+            <p className="text-[10px] text-slate-500">{nomeEmpresarial}</p>
+          )}
           {identificacao && <p className="text-[10px] text-slate-500 mt-0.5">{identificacao}</p>}
           {contato && <p className="text-[10px] text-slate-500">{contato}</p>}
           {endereco && <p className="text-[10px] text-slate-500">{endereco}</p>}
         </div>
 
-        <div className="text-right border border-slate-400 rounded p-2.5 bg-slate-50 min-w-[190px]">
-          <p className="text-[10px] uppercase font-bold text-slate-500">Ordem de Serviço</p>
-          <p className="text-lg font-black font-mono text-slate-900 leading-tight">{os.numeroOs}</p>
-          <p
-            className={`text-xs font-black uppercase mt-1 px-1.5 py-0.5 rounded inline-block ${
-              isCancelada
-                ? 'bg-red-100 text-red-700 border border-red-300'
-                : os.status === 'CONCLUIDA'
-                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                : 'bg-slate-200 text-slate-800'
-            }`}
-          >
-            STATUS: {os.statusDescricao}
-          </p>
-          <p className="text-[10px] text-slate-600 mt-1">
-            Entrada: <strong>{formatarDataHora(os.dataEntrada)}</strong>
-          </p>
-          {os.dataConclusao && (
-            <p className="text-[10px] text-slate-600">
-              Conclusão: <strong>{formatarDataHora(os.dataConclusao)}</strong>
+        {/* Identificação Discreta do Recibo (sem selo, sem status destacado) */}
+        <div className="text-right text-[11px] text-slate-600 shrink-0">
+          <p className="text-sm font-bold text-slate-900 uppercase tracking-wide">Recibo de Serviço</p>
+          {temValor(os.numeroOs) && (
+            <p className="font-mono text-xs font-semibold text-slate-700 mt-0.5">
+              OS: {os.numeroOs.trim()}
+            </p>
+          )}
+          {temValor(os.dataEntrada) && (
+            <p className="text-[10px] text-slate-500 mt-0.5">
+              Entrada: {formatarDataHora(os.dataEntrada)}
+            </p>
+          )}
+          {temValor(os.dataConclusao) && (
+            <p className="text-[10px] text-slate-500">
+              Conclusão: {formatarDataHora(os.dataConclusao)}
             </p>
           )}
         </div>
       </div>
 
-      {/* 2. Dados do Cliente */}
-      <div className="mb-4">
-        <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
-          1. Identificação do Cliente
-        </h2>
-        <div className="border border-slate-300 p-2 rounded-xs grid grid-cols-12 gap-2 text-[11px]">
-          <div className="col-span-6">
-            <span className="font-bold text-slate-700">Nome / Razão Social: </span>
-            <span className="text-slate-900">{os.clienteNome}</span>
-          </div>
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">CPF/CNPJ: </span>
-            <span className="text-slate-900">{os.clienteCpfCnpj || 'Não informado'}</span>
-          </div>
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">Telefone: </span>
-            <span className="text-slate-900">{os.clienteTelefone || 'Não informado'}</span>
+      {/* 2. Dados do Cliente (Apenas campos com valor) */}
+      {camposCliente.length > 0 && (
+        <div className="mb-4 break-inside-avoid">
+          <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
+            Identificação do Cliente
+          </h2>
+          <div className="border border-slate-300 p-2.5 rounded-xs flex flex-wrap gap-x-6 gap-y-2 text-[11px]">
+            {camposCliente.map((c) => (
+              <div key={c.label} className="flex items-baseline gap-1.5 min-w-[180px] flex-1">
+                <span className="font-bold text-slate-700 whitespace-nowrap">{c.label}:</span>
+                <span className="text-slate-900">{c.valor}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* 3. Dados do Equipamento */}
-      <div className="mb-4">
-        <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
-          2. Dados do Equipamento
-        </h2>
-        <div className="border border-slate-300 p-2 rounded-xs grid grid-cols-12 gap-2 text-[11px]">
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">Tipo: </span>
-            <span className="text-slate-900">{os.maquinaTipoDescricao}</span>
+      {/* 3. Dados do Equipamento (Apenas campos com valor, grid dinâmico) */}
+      {camposEquipamento.length > 0 && (
+        <div className="mb-4 break-inside-avoid">
+          <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
+            Dados do Equipamento
+          </h2>
+          <div className="border border-slate-300 p-2.5 rounded-xs flex flex-wrap gap-x-6 gap-y-2 text-[11px]">
+            {camposEquipamento.map((c) => (
+              <div key={c.label} className="flex items-baseline gap-1.5 min-w-[140px] flex-1">
+                <span className="font-bold text-slate-700 whitespace-nowrap">{c.label}:</span>
+                <span className={`text-slate-900 ${c.mono ? 'font-mono' : ''}`}>{c.valor}</span>
+              </div>
+            ))}
           </div>
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">Marca/Modelo: </span>
-            <span className="text-slate-900">
-              {os.maquinaMarca} {os.maquinaModelo}
-            </span>
-          </div>
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">Nº de Série: </span>
-            <span className="font-mono text-slate-900">{os.maquinaNumeroSerie || 'Sem série'}</span>
-          </div>
-          <div className="col-span-3">
-            <span className="font-bold text-slate-700">Tensão/Potência: </span>
-            <span className="text-slate-900">
-              {os.maquinaTensao || '-'} {os.maquinaPotencia ? `• ${os.maquinaPotencia}` : ''}
-            </span>
-          </div>
-          {os.horimetroAtual != null && (
-            <div className="col-span-12 border-t border-slate-200 pt-1 mt-1 text-slate-700">
-              <span className="font-bold">Horímetro na Entrada: </span>
-              <span>{os.horimetroAtual} horas</span>
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* 4. Diagnóstico e Serviços */}
-      <div className="mb-4">
-        <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
-          3. Diagnóstico e Serviços Técnicos
-        </h2>
-        <div className="border border-slate-300 p-2 rounded-xs space-y-2 text-[11px]">
-          <div>
-            <span className="font-bold text-slate-700 block">Defeito / Problema Relatado:</span>
-            <p className="text-slate-900 whitespace-pre-wrap">{os.problemaRelatado}</p>
+      {/* 4. Diagnóstico e Serviços Técnicos (Omitido completamente se vazio) */}
+      {camposTecnicos.length > 0 && (
+        <div className="mb-4 break-inside-avoid">
+          <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
+            Diagnóstico e Serviços Técnicos
+          </h2>
+          <div className="border border-slate-300 p-2.5 rounded-xs space-y-2 text-[11px]">
+            {camposTecnicos.map((item, idx) => (
+              <div key={item.label} className={idx > 0 ? 'border-t border-slate-200 pt-1.5' : ''}>
+                <span className="font-bold text-slate-700 block">{item.label}:</span>
+                <p className="text-slate-900 whitespace-pre-wrap">{item.valor}</p>
+              </div>
+            ))}
           </div>
-          {os.diagnostico && (
-            <div className="border-t border-slate-200 pt-1.5">
-              <span className="font-bold text-slate-700 block">Laudo / Diagnóstico Técnico:</span>
-              <p className="text-slate-900 whitespace-pre-wrap">{os.diagnostico}</p>
-            </div>
-          )}
-          {os.solucaoAplicada && (
-            <div className="border-t border-slate-200 pt-1.5">
-              <span className="font-bold text-slate-700 block">Serviço / Solução Aplicada:</span>
-              <p className="text-slate-900 whitespace-pre-wrap">{os.solucaoAplicada}</p>
-            </div>
-          )}
-          {os.testesRealizados && (
-            <div className="border-t border-slate-200 pt-1.5">
-              <span className="font-bold text-slate-700 block">Testes Técnicos de Bancada:</span>
-              <p className="text-slate-900 whitespace-pre-wrap">{os.testesRealizados}</p>
-            </div>
-          )}
-          {os.observacoes && (
-            <div className="border-t border-slate-200 pt-1.5">
-              <span className="font-bold text-slate-700 block">Observações:</span>
-              <p className="text-slate-900 whitespace-pre-wrap">{os.observacoes}</p>
-            </div>
-          )}
         </div>
-      </div>
+      )}
 
-      {/* 5. Tabela de Peças e Componentes Aplicados */}
-      <div className="mb-4">
-        <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
-          4. Peças e Componentes Aplicados
-        </h2>
-        <table className="w-full border-collapse border border-slate-300 text-[10px]">
-          <thead>
-            <tr className="bg-slate-100 text-slate-800 font-bold">
-              <th className="border border-slate-300 px-2 py-1 text-left w-24">Código</th>
-              <th className="border border-slate-300 px-2 py-1 text-left">Peça / Componente</th>
-              <th className="border border-slate-300 px-2 py-1 text-right w-16">Qtd</th>
-              <th className="border border-slate-300 px-2 py-1 text-right w-24">Unit. (R$)</th>
-              <th className="border border-slate-300 px-2 py-1 text-right w-24">Desc. (R$)</th>
-              <th className="border border-slate-300 px-2 py-1 text-right w-28">Total (R$)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {itens && itens.length > 0 ? (
-              itens.map((item) => (
+      {/* 5. Peças e Componentes Aplicados (Omitido completamente se vazio) */}
+      {temItens && (
+        <div className="mb-4 break-inside-avoid">
+          <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
+            Peças e Componentes Aplicados
+          </h2>
+          <table className="w-full border-collapse border border-slate-300 text-[10px]">
+            <thead>
+              <tr className="bg-slate-100 text-slate-800 font-bold">
+                <th className="border border-slate-300 px-2 py-1 text-left w-24">Código</th>
+                <th className="border border-slate-300 px-2 py-1 text-left">Peça / Componente</th>
+                <th className="border border-slate-300 px-2 py-1 text-right w-16">Qtd</th>
+                <th className="border border-slate-300 px-2 py-1 text-right w-24">Unit. (R$)</th>
+                <th className="border border-slate-300 px-2 py-1 text-right w-24">Desc. (R$)</th>
+                <th className="border border-slate-300 px-2 py-1 text-right w-28">Total (R$)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {itens.map((item) => (
                 <tr key={item.id} className="border-b border-slate-200">
                   <td className="border border-slate-300 px-2 py-1 font-mono">{item.produtoCodigo}</td>
                   <td className="border border-slate-300 px-2 py-1 font-semibold text-slate-900">
                     {item.produtoNome}
                   </td>
                   <td className="border border-slate-300 px-2 py-1 text-right font-mono">{item.quantidade}</td>
-                  {/* PREÇO HISTÓRICO CONGELADO: */}
                   <td className="border border-slate-300 px-2 py-1 text-right font-mono">
                     {formatarMoeda(item.valorUnitario)}
                   </td>
@@ -208,53 +156,47 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
                     {formatarMoeda(item.valorTotal)}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="border border-slate-300 px-2 py-2 text-center text-slate-500 italic">
-                  Nenhuma peça foi aplicada nesta Ordem de Serviço.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* 6. Resumo Financeiro */}
-      <div className="mb-6">
+      {/* 6. Resumo Financeiro (Zeros preservados como valores válidos) */}
+      <div className="mb-6 break-inside-avoid">
         <h2 className="bg-slate-800 text-white font-bold text-[10px] uppercase px-2 py-0.5 tracking-wider mb-1.5 rounded-xs">
-          5. Resumo Financeiro
+          Resumo Financeiro
         </h2>
         <div className="grid grid-cols-4 gap-2 text-[11px]">
           <div className="border border-slate-300 p-2 rounded-xs bg-slate-50">
             <span className="text-[10px] uppercase font-bold text-slate-600 block">Mão de Obra</span>
             <span className="text-xs font-bold text-slate-900 font-mono">
-              {formatarMoeda(os.valorMaoObra || 0)}
+              {formatarMoeda(os.valorMaoObra ?? 0)}
             </span>
           </div>
           <div className="border border-slate-300 p-2 rounded-xs bg-slate-50">
             <span className="text-[10px] uppercase font-bold text-slate-600 block">Peças / Insumos</span>
             <span className="text-xs font-bold text-slate-900 font-mono">
-              {formatarMoeda(os.valorPecas || 0)}
+              {formatarMoeda(os.valorPecas ?? 0)}
             </span>
           </div>
           <div className="border border-slate-300 p-2 rounded-xs bg-slate-50">
             <span className="text-[10px] uppercase font-bold text-slate-600 block">Desconto</span>
             <span className="text-xs font-bold text-slate-900 font-mono">
-              {formatarMoeda(os.valorDesconto || 0)}
+              {formatarMoeda(os.valorDesconto ?? 0)}
             </span>
           </div>
           <div className="border-2 border-slate-800 p-2 rounded-xs bg-slate-100">
             <span className="text-[10px] uppercase font-black text-slate-900 block">Valor Total</span>
             <span className="text-sm font-black text-slate-950 font-mono">
-              {formatarMoeda(os.valorTotal || 0)}
+              {formatarMoeda(os.valorTotal ?? 0)}
             </span>
           </div>
         </div>
       </div>
 
       {/* 7. Termos Legais e Assinaturas */}
-      <div className="border-t border-slate-300 pt-3">
+      <div className="border-t border-slate-300 pt-3 break-inside-avoid">
         <p className="text-[9px] text-slate-600 leading-tight mb-8">
           Condições de garantia conforme política da oficina sobre os serviços executados e componentes substituídos, respeitadas as condições
           normais de operação do equipamento. A garantia não cobre danos por sobretensão de rede, quedas, uso
@@ -264,15 +206,23 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
         <div className="grid grid-cols-2 gap-12 text-center text-[10px] pt-4">
           <div>
             <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
-              {os.clienteNome}
+              {temValor(os.clienteNome) ? os.clienteNome.trim() : '\u00A0'}
             </div>
             <span className="text-[9px] text-slate-500">Assinatura do Cliente / Responsável</span>
           </div>
           <div>
             <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
-              {os.tecnicoNome || configuracao.nomeFantasia}
+              {temValor(os.tecnicoNome)
+                ? os.tecnicoNome!.trim()
+                : temValor(configuracao.nomeFantasia)
+                ? configuracao.nomeFantasia.trim()
+                : '\u00A0'}
             </div>
-            <span className="text-[9px] text-slate-500">Técnico Responsável / {configuracao.nomeFantasia}</span>
+            <span className="text-[9px] text-slate-500">
+              {temValor(configuracao.nomeFantasia)
+                ? `Técnico Responsável / ${configuracao.nomeFantasia.trim()}`
+                : 'Técnico Responsável'}
+            </span>
           </div>
         </div>
       </div>

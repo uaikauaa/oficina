@@ -10,7 +10,7 @@ const order = {
 
 test('B11: impressão acompanha configuração atual e limpa campos opcionais', async ({ page }) => {
   await page.addInitScript(() => {
-    const win = window as Window & { __printCalls: number };
+    const win = window as unknown as Window & { __printCalls: number };
     win.__printCalls = 0;
     win.print = () => { win.__printCalls++; };
   });
@@ -28,12 +28,20 @@ test('B11: impressão acompanha configuração atual e limpa campos opcionais', 
   await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(config) }));
 
   await page.goto('/ordens-servico/77');
+
+  // Validação dos botões: apenas "Imprimir recibo" existe
+  await expect(page.getByRole('button', { name: 'PDF OS' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Recibo', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Imprimir', exact: true })).toHaveCount(0);
+  const btnImprimirRecibo = page.getByRole('button', { name: 'Imprimir recibo' });
+  await expect(btnImprimirRecibo).toHaveCount(1);
+
   const printLayout = page.locator('[class*="print:block"]').first();
   await expect(printLayout).toContainText('Oficina QA A');
   await expect(printLayout).toContainText('11.222.333/0001-81');
   await expect(printLayout).toContainText('Rua A');
-  await page.getByRole('button', { name: 'Imprimir' }).click();
-  expect(await page.evaluate(() => (window as Window & { __printCalls: number }).__printCalls)).toBe(1);
+  await btnImprimirRecibo.click();
+  expect(await page.evaluate(() => (window as unknown as Window & { __printCalls: number }).__printCalls)).toBe(1);
 
   config = { ...config, nomeFantasia: 'Oficina QA B', nomeEmpresarial: '', cnpj: '',
     telefone: '2222-2222', email: '', logradouro: 'Rua B', numero: '20' };
@@ -45,13 +53,13 @@ test('B11: impressão acompanha configuração atual e limpa campos opcionais', 
   await expect(printLayout).not.toContainText('11.222.333/0001-81');
   await expect(printLayout).not.toContainText('Empresa QA A');
   await expect(printLayout).not.toContainText('a@qa.invalid');
-  await page.getByRole('button', { name: 'Imprimir' }).click();
-  expect(await page.evaluate(() => (window as Window & { __printCalls: number }).__printCalls)).toBe(1);
+  await page.getByRole('button', { name: 'Imprimir recibo' }).click();
+  expect(await page.evaluate(() => (window as unknown as Window & { __printCalls: number }).__printCalls)).toBe(1);
 });
 
 test('B11: falha ao carregar configuração impede impressão com erro claro', async ({ page }) => {
   await page.addInitScript(() => {
-    const win = window as Window & { __printCalls: number };
+    const win = window as unknown as Window & { __printCalls: number };
     win.__printCalls = 0;
     win.print = () => { win.__printCalls++; };
   });
@@ -61,8 +69,8 @@ test('B11: falha ao carregar configuração impede impressão com erro claro', a
   await page.route('**/api/ordens-servico/77', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(order) }));
   await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Falha simulada' }) }));
   await page.goto('/ordens-servico/77');
-  await page.getByRole('button', { name: 'Imprimir' }).click();
+  await page.getByRole('button', { name: 'Imprimir recibo' }).click();
   await expect(page.getByText('Dados da oficina indisponíveis. Recarregue a página antes de imprimir.')).toBeVisible();
-  expect(await page.evaluate(() => (window as Window & { __printCalls: number }).__printCalls)).toBe(0);
+  expect(await page.evaluate(() => (window as unknown as Window & { __printCalls: number }).__printCalls)).toBe(0);
   await expect(page.locator('[class*="print:block"]')).toHaveCount(0);
 });

@@ -19,7 +19,6 @@ import {
   Plus,
   Trash2,
   Loader2,
-  Download,
   Printer,
   MessageCircle,
   Save,
@@ -30,7 +29,6 @@ import {
   ExternalLink,
   ChevronRight,
   Info,
-  Receipt,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
 import OrdemServicoImpressao, { type ConfiguracaoOficinaImpressao } from '@/components/OrdemServicoImpressao';
@@ -128,9 +126,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
   const [statusObs, setStatusObs] = useState('');
   const [isSubmittingStatus, setIsSubmittingStatus] = useState(false);
 
-  // Download do PDF A4
-  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-  const [isDownloadingRecibo, setIsDownloadingRecibo] = useState(false);
 
   // Timer para debounce de busca
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -238,57 +233,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
     }
   };
 
-  // Gerar PDF A4
-  const handleGerarPdf = async () => {
-    if (!os) return;
-    setIsDownloadingPdf(true);
-    try {
-      const res = await apiFetch(`/api/ordens-servico/${os.id}/pdf`);
-      if (!res.ok) {
-        throw new Error('Falha ao gerar arquivo PDF da Ordem de Serviço.');
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `OS-${os.numeroOs || os.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      showToast('success', 'PDF gerado com sucesso!');
-    } catch (err: unknown) {
-      showToast('error', err instanceof Error ? err.message : 'Erro ao baixar PDF.');
-    } finally {
-      setIsDownloadingPdf(false);
-    }
-  };
-
-  // Gerar Recibo de Prestação de Serviços em PDF A4
-  const handleGerarRecibo = async () => {
-    if (!os) return;
-    setIsDownloadingRecibo(true);
-    try {
-      const res = await apiFetch(`/api/ordens-servico/${os.id}/recibo`);
-      if (!res.ok) {
-        throw new Error('Falha ao gerar Recibo da Ordem de Serviço.');
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `RECIBO-OS-${os.numeroOs || os.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      showToast('success', 'Recibo gerado com sucesso!');
-    } catch (err: unknown) {
-      showToast('error', err instanceof Error ? err.message : 'Erro ao baixar Recibo da Ordem de Serviço.');
-    } finally {
-      setIsDownloadingRecibo(false);
-    }
-  };
 
   // Notificação WhatsApp contextual
   const handleAbrirWhatsApp = () => {
@@ -647,34 +591,6 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={handleGerarPdf}
-              disabled={isDownloadingPdf}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              title="Baixar Ordem de Serviço em PDF A4"
-            >
-              {isDownloadingPdf ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-amber-400" />
-              ) : (
-                <Download className="w-3.5 h-3.5 text-amber-400" />
-              )}
-              <span>PDF OS</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleGerarRecibo}
-              disabled={isDownloadingRecibo}
-              className="px-3 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 font-semibold text-xs border border-emerald-700/60 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              title="Gerar recibo da Ordem de Serviço"
-            >
-              {isDownloadingRecibo ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
-              ) : (
-                <Receipt className="w-3.5 h-3.5 text-emerald-400" />
-              )}
-              <span>Recibo</span>
-            </button>
-            <button
-              type="button"
               onClick={() => {
                 if (!configuracaoOficina) {
                   showToast('error', 'Dados da oficina indisponíveis. Recarregue a página antes de imprimir.');
@@ -683,10 +599,10 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                 window.print();
               }}
               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Imprimir layout da Ordem de Serviço"
+              title="Imprimir recibo da Ordem de Serviço"
             >
               <Printer className="w-3.5 h-3.5 text-sky-400" />
-              <span>Imprimir</span>
+              <span>Imprimir recibo</span>
             </button>
           </div>
         </div>
