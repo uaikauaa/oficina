@@ -73,7 +73,7 @@ export function extrairCamposEquipamento(os: OrdemServico): CampoRecibo[] {
     campos.push({ label: 'Potência', valor: os.maquinaPotencia!.trim() });
   }
   if (os.horimetroAtual != null) {
-    campos.push({ label: 'Horímetro na Entrada', valor: `${os.horimetroAtual} horas` });
+    campos.push({ label: 'Horímetro', valor: `${os.horimetroAtual} horas` });
   }
   return campos;
 }

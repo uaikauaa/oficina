@@ -89,7 +89,7 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
         </div>
       )}
 
-      {/* 3. Dados do Equipamento (Apenas campos com valor, grid dinâmico) */}
+      {/* 3. Dados do Equipamento (Apenas campos com valor, grid sequencial sem lacunas) */}
       {camposEquipamento.length > 0 && (
         <div className="mb-3 break-inside-avoid">
           <div className="bg-slate-100 border-l-2 border-slate-700 px-2 py-0.5 mb-1">
@@ -97,9 +97,9 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
               Dados do Equipamento
             </span>
           </div>
-          <div className="border border-slate-200 p-2 rounded-xs flex flex-wrap gap-x-6 gap-y-1 text-[11px]">
+          <div className="border border-slate-200 p-2 rounded-xs grid grid-cols-4 gap-x-4 gap-y-1.5 text-[11px]">
             {camposEquipamento.map((c) => (
-              <div key={c.label} className="flex items-baseline gap-1.5 min-w-[140px] flex-1">
+              <div key={c.label} className="flex items-baseline gap-1.5 min-w-0">
                 <span className="font-bold text-slate-700 whitespace-nowrap">{c.label}:</span>
                 <span className={`text-slate-900 ${c.mono ? 'font-mono' : ''}`}>{c.valor}</span>
               </div>
@@ -138,18 +138,16 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
           <table className="w-full border-collapse border border-slate-200 text-[10px]">
             <thead>
               <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
-                <th className="border border-slate-200 px-2 py-1 text-left w-24">Código</th>
                 <th className="border border-slate-200 px-2 py-1 text-left">Peça / Componente</th>
-                <th className="border border-slate-200 px-2 py-1 text-center w-14">Qtd</th>
-                <th className="border border-slate-200 px-2 py-1 text-right w-20">Unit. (R$)</th>
-                <th className="border border-slate-200 px-2 py-1 text-right w-20">Desc. (R$)</th>
-                <th className="border border-slate-200 px-2 py-1 text-right w-24">Total (R$)</th>
+                <th className="border border-slate-200 px-2 py-1 text-center w-16">Qtd</th>
+                <th className="border border-slate-200 px-2 py-1 text-right w-24">Unit. (R$)</th>
+                <th className="border border-slate-200 px-2 py-1 text-right w-24">Desc. (R$)</th>
+                <th className="border border-slate-200 px-2 py-1 text-right w-28">Total (R$)</th>
               </tr>
             </thead>
             <tbody>
               {itens.map((item) => (
                 <tr key={item.id} className="border-b border-slate-200">
-                  <td className="border border-slate-200 px-2 py-1 font-mono">{item.produtoCodigo}</td>
                   <td className="border border-slate-200 px-2 py-1 font-semibold text-slate-900">
                     {item.produtoNome}
                   </td>

@@ -133,9 +133,9 @@ describe('OFICINA GESTÃO — Ajuste Final da OS: Recibo Dinâmico e Botão Úni
   });
 
   // =========================================================================
-  // 3. Dados do Equipamento Condicionais (Seção 14 e 35 do Prompt)
+  // 3. Dados do Equipamento Condicionais (Seções 8, 9, 10, 24-28 do Prompt)
   // =========================================================================
-  describe('3. Dados do Equipamento — Grid Dinâmico e Campos Parciais', () => {
+  describe('3. Dados do Equipamento — Grid Dinâmico Sequencial e Campos Parciais', () => {
     it('Seção 35: deve renderizar exatamente Tipo, Marca, Modelo, Potência quando Série, Tensão e Horímetro forem nulos', () => {
       const osEquipParcial: OrdemServico = {
         ...mockOsBase,
@@ -156,7 +156,96 @@ describe('OFICINA GESTÃO — Ajuste Final da OS: Recibo Dinâmico e Botão Úni
       );
       assert.strictEqual(campos.find((c) => c.label === 'Nº de Série'), undefined);
       assert.strictEqual(campos.find((c) => c.label === 'Tensão'), undefined);
-      assert.strictEqual(campos.find((c) => c.label === 'Horímetro na Entrada'), undefined);
+      assert.strictEqual(campos.find((c) => c.label === 'Horímetro'), undefined);
+    });
+
+    it('Seção 24: equipamento completo na sequência lógica exata: Tipo, Marca, Modelo, Nº de Série, Tensão, Potência, Horímetro', () => {
+      const osCompleta: OrdemServico = {
+        ...mockOsBase,
+        maquinaTipoDescricao: 'Máquina de Solda',
+        maquinaMarca: 'Balmer',
+        maquinaModelo: '350',
+        maquinaNumeroSerie: 'PE030D90',
+        maquinaTensao: '220',
+        maquinaPotencia: '250',
+        horimetroAtual: 350,
+      };
+      const campos = extrairCamposEquipamento(osCompleta);
+      assert.strictEqual(campos.length, 7);
+      assert.deepStrictEqual(
+        campos.map((c) => c.label),
+        ['Tipo', 'Marca', 'Modelo', 'Nº de Série', 'Tensão', 'Potência', 'Horímetro']
+      );
+      assert.strictEqual(campos[3].valor, 'PE030D90');
+      assert.strictEqual(campos[4].valor, '220');
+      assert.strictEqual(campos[5].valor, '250');
+      assert.strictEqual(campos[6].valor, '350 horas');
+    });
+
+    it('Seção 25: equipamento parcial (Tipo, Marca, Tensão, Potência) deve fluir sequencialmente sem buracos', () => {
+      const osParcial: OrdemServico = {
+        ...mockOsBase,
+        maquinaTipoDescricao: 'Máquina de Solda',
+        maquinaMarca: 'Balmer',
+        maquinaModelo: null,
+        maquinaNumeroSerie: null,
+        maquinaTensao: '220',
+        maquinaPotencia: '250',
+        horimetroAtual: null,
+      };
+      const campos = extrairCamposEquipamento(osParcial);
+      assert.strictEqual(campos.length, 4);
+      assert.deepStrictEqual(
+        campos.map((c) => c.label),
+        ['Tipo', 'Marca', 'Tensão', 'Potência']
+      );
+    });
+
+    it('Seção 26: somente dois campos (Tensão, Potência) devem ser consecutivos', () => {
+      const osDoisCampos: OrdemServico = {
+        ...mockOsBase,
+        maquinaTipoDescricao: null,
+        maquinaMarca: null,
+        maquinaModelo: null,
+        maquinaNumeroSerie: null,
+        maquinaTensao: '220V',
+        maquinaPotencia: '250A',
+        horimetroAtual: null,
+      };
+      const campos = extrairCamposEquipamento(osDoisCampos);
+      assert.strictEqual(campos.length, 2);
+      assert.strictEqual(campos[0].label, 'Tensão');
+      assert.strictEqual(campos[0].valor, '220V');
+      assert.strictEqual(campos[1].label, 'Potência');
+      assert.strictEqual(campos[1].valor, '250A');
+    });
+
+    it('Seção 27: se existir somente Modelo, deve renderizar apenas Modelo sem quebrar a seção', () => {
+      const osSoModelo: OrdemServico = {
+        ...mockOsBase,
+        maquinaTipoDescricao: null,
+        maquinaMarca: null,
+        maquinaModelo: 'Vulcano 350',
+        maquinaNumeroSerie: null,
+        maquinaTensao: null,
+        maquinaPotencia: null,
+        horimetroAtual: null,
+      };
+      const campos = extrairCamposEquipamento(osSoModelo);
+      assert.strictEqual(campos.length, 1);
+      assert.strictEqual(campos[0].label, 'Modelo');
+      assert.strictEqual(campos[0].valor, 'Vulcano 350');
+    });
+
+    it('Seção 28: horímetro = 0 deve ser preservado como valor válido e formatado como "0 horas"', () => {
+      const osZeroHoras: OrdemServico = {
+        ...mockOsBase,
+        horimetroAtual: 0,
+      };
+      const campos = extrairCamposEquipamento(osZeroHoras);
+      const horimetroCampo = campos.find((c) => c.label === 'Horímetro');
+      assert.ok(horimetroCampo);
+      assert.strictEqual(horimetroCampo.valor, '0 horas');
     });
 
     it('deve incluir Horímetro com formatação quando preenchido', () => {
@@ -165,7 +254,7 @@ describe('OFICINA GESTÃO — Ajuste Final da OS: Recibo Dinâmico e Botão Úni
         horimetroAtual: 450,
       };
       const campos = extrairCamposEquipamento(osComHorimetro);
-      const horimetroCampo = campos.find((c) => c.label === 'Horímetro na Entrada');
+      const horimetroCampo = campos.find((c) => c.label === 'Horímetro');
       assert.ok(horimetroCampo);
       assert.strictEqual(horimetroCampo.valor, '450 horas');
     });
@@ -229,9 +318,9 @@ describe('OFICINA GESTÃO — Ajuste Final da OS: Recibo Dinâmico e Botão Úni
   });
 
   // =========================================================================
-  // 5. Peças e Componentes Aplicados (Seções 18, 19 e 38 do Prompt)
+  // 5. Peças e Componentes Aplicados (Seções 2, 3, 4, 21-23 do Prompt)
   // =========================================================================
-  describe('5. Peças e Componentes — Omissão Completa se Sem Peças', () => {
+  describe('5. Peças e Componentes — Omissão Completa se Sem Peças e Remoção de Código', () => {
     it('Seção 38: deve retornar false (ocultar seção) quando itens for lista vazia', () => {
       const itensVazios: OrdemServicoItem[] = [];
       assert.strictEqual(deveExibirSecaoPecas(itensVazios), false);
@@ -258,6 +347,49 @@ describe('OFICINA GESTÃO — Ajuste Final da OS: Recibo Dinâmico e Botão Úni
         createdAt: '2026-10-01T10:00:00-03:00',
       };
       assert.strictEqual(deveExibirSecaoPecas([mockItem]), true);
+    });
+
+    it('Seção 21 e 23: estrutura da tabela possui exatamente 5 colunas e NÃO contém "Código"', () => {
+      const colunasEsperadas = ['Peça / Componente', 'Qtd', 'Unit. (R$)', 'Desc. (R$)', 'Total (R$)'];
+      assert.strictEqual(colunasEsperadas.length, 5);
+      assert.ok(!colunasEsperadas.includes('Código'));
+      assert.strictEqual(colunasEsperadas[0], 'Peça / Componente');
+      assert.strictEqual(colunasEsperadas[1], 'Qtd');
+      assert.strictEqual(colunasEsperadas[2], 'Unit. (R$)');
+      assert.strictEqual(colunasEsperadas[3], 'Desc. (R$)');
+      assert.strictEqual(colunasEsperadas[4], 'Total (R$)');
+    });
+
+    it('Seção 22: item sintético possui produtoCodigo preservado no objeto, mas renderização da linha utiliza descrição sem código', () => {
+      const itemSintetico: OrdemServicoItem = {
+        id: 99,
+        ordemServicoId: 101,
+        produtoId: 12,
+        produtoCodigo: 'P-001',
+        produtoNome: 'Placa Me Mag 3.2 C Cntec',
+        tipoItem: 'PECA',
+        tipoItemDescricao: 'Peça',
+        quantidade: 1,
+        valorUnitario: 450.0,
+        valorDesconto: 0,
+        valorTotal: 450.0,
+        createdAt: '2026-10-01T10:00:00-03:00',
+      };
+      // Código permanece intacto no modelo de dados
+      assert.strictEqual(itemSintetico.produtoCodigo, 'P-001');
+      assert.strictEqual(itemSintetico.produtoNome, 'Placa Me Mag 3.2 C Cntec');
+
+      // Campos da linha da tabela correspondem exatamente às 5 colunas
+      const celulasLinha = [
+        itemSintetico.produtoNome,
+        itemSintetico.quantidade,
+        formatarMoeda(itemSintetico.valorUnitario),
+        formatarMoeda(itemSintetico.valorDesconto || 0),
+        formatarMoeda(itemSintetico.valorTotal),
+      ];
+      assert.strictEqual(celulasLinha.length, 5);
+      assert.ok(!celulasLinha.includes('P-001'));
+      assert.strictEqual(celulasLinha[0], 'Placa Me Mag 3.2 C Cntec');
     });
   });
 

@@ -120,3 +120,86 @@ test('Impressão isolada: header e UI do sistema somem no contexto de print, man
   // Screenshot de conferência visual no modo normal (header intacto)
   await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/sistema_modo_normal.png' });
 });
+
+test('Tabela de peças sem coluna Código e dados do equipamento sequenciais', async ({ page }) => {
+  const orderComItens = {
+    ...order,
+    maquinaNumeroSerie: 'SERIE-123',
+    maquinaTensao: '220V',
+    maquinaPotencia: '250A',
+    horimetroAtual: 100,
+  };
+  const itens = [
+    {
+      id: 1,
+      ordemServicoId: 77,
+      produtoId: 10,
+      produtoCodigo: 'COD-999',
+      produtoNome: 'Placa Inversora MIG 250',
+      quantidade: 1,
+      valorUnitario: 350.0,
+      valorDesconto: 0,
+      valorTotal: 350.0,
+      tipoItem: 'PECA',
+      tipoItemDescricao: 'Peça',
+      createdAt: '2026-10-06T12:00:00-03:00',
+    },
+  ];
+  await page.route('**/api/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+  await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
+  await page.route('**/api/ordens-servico/77/itens', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(itens) }));
+  await page.route('**/api/ordens-servico/77', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(orderComItens) }));
+  await page.route('**/api/configuracao-oficina', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: 1,
+        nomeFantasia: 'Oficina Central',
+        cnpj: '12.345.678/0001-99',
+        telefone: '(11) 98888-7777',
+        email: 'contato@central.com',
+        logradouro: 'Av Principal',
+        numero: '100',
+        bairro: 'Distrito Industrial',
+        municipio: 'São Paulo',
+        uf: 'SP',
+        cep: '01000-000',
+      }),
+    })
+  );
+
+  await page.goto('/ordens-servico/77');
+  await page.emulateMedia({ media: 'print' });
+
+  const receipt = page.locator('#print-receipt');
+  await expect(receipt).toBeVisible();
+
+  // Validação da tabela de peças: exatamente 5 colunas, sem "Código"
+  const ths = receipt.locator('table thead th');
+  await expect(ths).toHaveCount(5);
+  await expect(ths.nth(0)).toHaveText('Peça / Componente');
+  await expect(ths.nth(1)).toHaveText('Qtd');
+  await expect(ths.nth(2)).toHaveText('Unit. (R$)');
+  await expect(ths.nth(3)).toHaveText('Desc. (R$)');
+  await expect(ths.nth(4)).toHaveText('Total (R$)');
+  await expect(receipt.locator('table thead')).not.toContainText('Código');
+
+  // Linha da peça: contém o nome da peça e não contém o código COD-999
+  const rowTds = receipt.locator('table tbody tr').first().locator('td');
+  await expect(rowTds).toHaveCount(5);
+  await expect(rowTds.nth(0)).toContainText('Placa Inversora MIG 250');
+  await expect(receipt.locator('table tbody')).not.toContainText('COD-999');
+
+  // Validação dos dados do equipamento sequenciais
+  await expect(receipt).toContainText('Máquina de Solda');
+  await expect(receipt).toContainText('ESAB');
+  await expect(receipt).toContainText('LHN');
+  await expect(receipt).toContainText('SERIE-123');
+  await expect(receipt).toContainText('220V');
+  await expect(receipt).toContainText('250A');
+  await expect(receipt).toContainText('100 horas');
+
+  // Atualizar screenshot para conferência com tabela de peças e equipamento completo
+  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/recibo_print_preview.png', fullPage: true });
+});
