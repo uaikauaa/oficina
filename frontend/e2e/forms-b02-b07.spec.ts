@@ -4,6 +4,8 @@ const user = { id: 1, nome: 'Teste', email: 'teste@oficina.invalid', roles: ['RO
 
 async function baseMocks(page: Page) {
   await page.route('**/api/**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+  // Contrato do backend: GET /api/categorias/ativas -> List<CategoriaResponseDTO> (array JSON).
+  await page.route('**/api/categorias/ativas', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
   await page.route('**/api/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
 }
 

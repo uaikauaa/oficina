@@ -164,4 +164,61 @@ test.describe('Modal de Produto: Tipos de Registro e Categorias Técnicas', () =
     expect(putChamado).toBe(true);
     expect(putBody.precoVenda).toBe(175);
   });
+
+  for (const tipo of ['PRODUTO', 'SERVICO'] as const) {
+    for (const [categoriaId, categoriaNome] of [[1, 'Eletrônica'], [4, 'Elétrica'], [5, 'Mecânica']] as const) {
+      test(`A03: ${tipo} + ${categoriaNome} preserva dados históricos na edição`, async ({ page }) => {
+        await baseMocks(page);
+        const produto = {
+          id: 42, codigo: 'P-042', nome: 'Produto histórico', tipo,
+          categoriaId, categoriaNome, precoCusto: 80, precoVenda: 150,
+          estoqueAtual: 5, estoqueMinimo: 2, ativo: true,
+          estoqueBaixo: false, semEstoque: false,
+        };
+        await page.route('**/api/categorias/ativas', route => route.fulfill({
+          status: 200, contentType: 'application/json',
+          body: JSON.stringify([
+            { id: 1, nome: 'Eletrônica', ativo: true },
+            { id: 4, nome: 'Elétrica', ativo: true },
+            { id: 5, nome: 'Mecânica', ativo: true },
+            { id: 6, nome: 'Consumíveis', ativo: true },
+          ]),
+        }));
+        await page.route(/\/api\/produtos\?/, route => route.fulfill({
+          status: 200, contentType: 'application/json',
+          body: JSON.stringify({ content: [produto], totalPages: 1, totalElements: 1 }),
+        }));
+        const payloads: Array<{ tipo: string; categoriaId: number; precoVenda: number }> = [];
+        await page.route('**/api/produtos/42', route => {
+          const payload = JSON.parse(route.request().postData() || '{}');
+          payloads.push(payload);
+          return route.fulfill({ status: 200, contentType: 'application/json',
+            body: JSON.stringify({ ...produto, ...payload }) });
+        });
+        await page.goto('/produtos');
+        await page.getByTitle('Editar Peça').first().click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByTestId('tipo-historico')).toContainText(
+          tipo === 'PRODUTO' ? 'Produto Acabado (histórico)' : 'Serviço Técnico (histórico)'
+        );
+        const select = dialog.locator('select[name="categoriaId"]');
+        await expect(select).toHaveValue(String(categoriaId));
+        await expect(select.locator('option:checked')).toHaveText(`${categoriaNome} (histórica)`);
+        await expect(select.locator('option', { hasText: '(histórica)' })).toHaveCount(1);
+        await expect(dialog.getByRole('button', { name: /Peça \/ Componente/i })).not.toHaveClass(/border-amber-500/);
+        await expect(dialog.getByRole('button', { name: /Consumível de Manutenção/i })).not.toHaveClass(/border-amber-500/);
+        await dialog.getByRole('button', { name: /Salvar Alterações/i }).click();
+        await expect(dialog.getByText(/atualizado com sucesso/i)).toBeVisible();
+        expect(payloads[0]).toMatchObject({ tipo, categoriaId });
+        await expect(dialog).toBeHidden();
+        await page.reload();
+        await page.getByTitle('Editar Peça').first().click();
+        await expect(dialog.locator('input[name="precoVenda"]')).toHaveValue('150');
+        await dialog.locator('input[name="precoVenda"]').fill('175');
+        await dialog.getByRole('button', { name: /Salvar Alterações/i }).click();
+        await expect.poll(() => payloads.length).toBe(2);
+        expect(payloads[1]).toMatchObject({ tipo, categoriaId, precoVenda: 175 });
+      });
+    }
+  }
 });

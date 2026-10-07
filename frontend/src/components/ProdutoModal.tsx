@@ -37,6 +37,15 @@ interface ProdutoModalProps {
 export const TIPO_OPTIONS = TIPOS_PRODUTO_FORMULARIO;
 export const CATEGORIAS_PERMITIDAS = CATEGORIAS_TECNICAS_PERMITIDAS;
 
+/**
+ * Tipos legados que não são mais oferecidos em novos cadastros, mas podem existir
+ * em registros históricos. Usados apenas para representação informativa em EDIÇÃO.
+ */
+const TIPOS_LEGADOS_LABELS: Partial<Record<Produto['tipo'], string>> = {
+  PRODUTO: 'Produto Acabado (histórico)',
+  SERVICO: 'Serviço Técnico (histórico)',
+};
+
 
 
 const UNIDADES: { value: string; label: string }[] = [
@@ -74,6 +83,22 @@ export default function ProdutoModal({
       (permitida) => permitida.toLowerCase() === c.nome.trim().toLowerCase()
     )
   );
+  // Somente em EDIÇÃO: a categoria efetivamente vinculada ao produto, quando não
+  // pertence às categorias homologadas, é exibida como única opção histórica.
+  const categoriaHistorica: { id: number; nome: string } | null =
+    isEditing &&
+    produto?.categoriaId != null &&
+    !categoriasValidas.some((c) => c.id === produto.categoriaId)
+      ? {
+          id: produto.categoriaId,
+          nome:
+            categorias.find((c) => c.id === produto.categoriaId)?.nome ||
+            produto.categoriaNome ||
+            `Categoria #${produto.categoriaId}`,
+        }
+      : null;
+  const tipoLegadoOriginal =
+    isEditing && produto ? TIPOS_LEGADOS_LABELS[produto.tipo] ?? null : null;
   const [formData, setFormData] = useState<Partial<ProdutoFormData>>({
     codigo: '',
     linkCompra: '',
@@ -312,6 +337,31 @@ export default function ProdutoModal({
           {/* Tipo de Item */}
           <div>
             <label className={LABEL_CLASS}>Tipo do Registro *</label>
+            {tipoLegadoOriginal && produto && (
+              <div
+                data-testid="tipo-historico"
+                className="mb-2 p-2.5 rounded-xl bg-slate-950 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2 text-xs"
+              >
+                {formData.tipo === produto.tipo ? (
+                  <span className="text-slate-300">
+                    Tipo atual: <strong className="text-amber-300">{tipoLegadoOriginal}</strong>
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-slate-400">
+                      Tipo original: <strong className="text-slate-300">{tipoLegadoOriginal}</strong> — será alterado ao salvar.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, tipo: produto.tipo }))}
+                      className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 hover:underline cursor-pointer"
+                    >
+                      Manter tipo original
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {TIPO_OPTIONS.map((opt) => (
                 <button
@@ -410,6 +460,11 @@ export default function ProdutoModal({
                   onChange={handleChange}
                   className={`${INPUT_CLASS} pr-14`}
                 >
+                  {categoriaHistorica && (
+                    <option value={categoriaHistorica.id}>
+                      {categoriaHistorica.nome} (histórica)
+                    </option>
+                  )}
                   <option value="">Nenhuma categoria vinculada</option>
                   {categoriasValidas.map((c) => (
                     <option key={c.id} value={c.id}>

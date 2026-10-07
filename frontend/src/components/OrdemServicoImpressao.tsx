@@ -30,8 +30,8 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
   return (
     <div id="print-receipt" className="hidden print:block text-slate-900 bg-white font-sans text-xs leading-relaxed max-w-4xl mx-auto">
       {/* 1. Cabeçalho Oficial */}
-      <div className="flex items-start justify-between border-b-2 border-slate-800 pb-3 mb-3">
-        <div className="space-y-0.5">
+      <div className="flex items-start justify-between gap-3 border-b-2 border-slate-800 pb-3 mb-3">
+        <div className="space-y-0.5 min-w-0 flex-1 break-words wrap-anywhere">
           <h1 className="text-xl font-black tracking-tight text-slate-900 uppercase">
             {configuracao.nomeFantasia}
           </h1>
@@ -82,7 +82,7 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
             {camposCliente.map((c) => (
               <div key={c.label} className="flex items-baseline gap-1.5 min-w-[180px] flex-1">
                 <span className="font-bold text-slate-700 whitespace-nowrap">{c.label}:</span>
-                <span className="text-slate-900">{c.valor}</span>
+                <span className="text-slate-900 min-w-0 break-words wrap-anywhere">{c.valor}</span>
               </div>
             ))}
           </div>
@@ -101,7 +101,7 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
             {camposEquipamento.map((c) => (
               <div key={c.label} className="flex items-baseline gap-1.5 min-w-0">
                 <span className="font-bold text-slate-700 whitespace-nowrap">{c.label}:</span>
-                <span className={`text-slate-900 ${c.mono ? 'font-mono' : ''}`}>{c.valor}</span>
+                <span className={`text-slate-900 min-w-0 break-words wrap-anywhere ${c.mono ? 'font-mono' : ''}`}>{c.valor}</span>
               </div>
             ))}
           </div>
@@ -120,7 +120,7 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
             {camposTecnicos.map((item, idx) => (
               <div key={item.label} className={idx > 0 ? 'border-t border-slate-200 pt-1.5' : ''}>
                 <span className="font-bold text-slate-700 block text-[10px] uppercase tracking-wide">{item.label}</span>
-                <p className="text-slate-900 whitespace-pre-wrap mt-0.5 leading-relaxed">{item.valor}</p>
+                <p className="text-slate-900 whitespace-pre-wrap break-words wrap-anywhere mt-0.5 leading-relaxed">{item.valor}</p>
               </div>
             ))}
           </div>
@@ -135,11 +135,11 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
               Peças e Componentes Aplicados
             </span>
           </div>
-          <table className="w-full border-collapse border border-slate-200 text-[10px]">
+          <table className="w-full table-fixed border-collapse border border-slate-200 text-[10px]">
             <thead>
               <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
                 <th className="border border-slate-200 px-2 py-1 text-left">Peça / Componente</th>
-                <th className="border border-slate-200 px-2 py-1 text-center w-16">Qtd</th>
+                <th className="border border-slate-200 px-2 py-1 text-center w-12">Qtd</th>
                 <th className="border border-slate-200 px-2 py-1 text-right w-24">Unit. (R$)</th>
                 <th className="border border-slate-200 px-2 py-1 text-right w-24">Desc. (R$)</th>
                 <th className="border border-slate-200 px-2 py-1 text-right w-28">Total (R$)</th>
@@ -148,7 +148,7 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
             <tbody>
               {itens.map((item) => (
                 <tr key={item.id} className="border-b border-slate-200">
-                  <td className="border border-slate-200 px-2 py-1 font-semibold text-slate-900">
+                  <td className="border border-slate-200 px-2 py-1 font-semibold text-slate-900 break-words wrap-anywhere">
                     {item.produtoNome}
                   </td>
                   <td className="border border-slate-200 px-2 py-1 text-center font-mono">{item.quantidade}</td>
@@ -212,21 +212,21 @@ export default function OrdemServicoImpressao({ os, itens, configuracao }: Ordem
         </p>
 
         <div className="grid grid-cols-2 gap-12 text-center text-[10px]">
-          <div>
-            <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
+          <div className="min-w-0">
+            <div className="border-t border-slate-800 pt-1 font-bold text-slate-900 break-words wrap-anywhere">
               {temValor(os.clienteNome) ? os.clienteNome.trim() : '\u00A0'}
             </div>
             <span className="text-[9px] text-slate-500">Assinatura do Cliente / Responsável</span>
           </div>
-          <div>
-            <div className="border-t border-slate-800 pt-1 font-bold text-slate-900">
+          <div className="min-w-0">
+            <div className="border-t border-slate-800 pt-1 font-bold text-slate-900 break-words wrap-anywhere">
               {temValor(os.tecnicoNome)
                 ? os.tecnicoNome!.trim()
                 : temValor(configuracao.nomeFantasia)
                 ? configuracao.nomeFantasia.trim()
                 : '\u00A0'}
             </div>
-            <span className="text-[9px] text-slate-500">
+            <span className="text-[9px] text-slate-500 break-words wrap-anywhere">
               {temValor(configuracao.nomeFantasia)
                 ? `Técnico Responsável / ${configuracao.nomeFantasia.trim()}`
                 : 'Técnico Responsável'}

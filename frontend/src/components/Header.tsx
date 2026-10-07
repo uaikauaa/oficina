@@ -255,7 +255,7 @@ export default function Header({ user }: HeaderProps) {
             <div className="flex items-center justify-start shrink-0 min-w-0">
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 sm:gap-2.5 group transition-all"
+                className="flex items-center gap-2 sm:gap-2.5 min-w-0 group transition-all"
                 title={`${OFICINA.nomeFantasia} - Painel`}
               >
                 <div className="relative w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 group-hover:border-amber-500/40 flex items-center justify-center p-1 transition-all shadow-sm shadow-amber-500/5 shrink-0">
@@ -268,7 +268,7 @@ export default function Header({ user }: HeaderProps) {
                     className="w-full h-full object-contain drop-shadow-[0_1px_4px_rgba(245,158,11,0.3)]"
                   />
                 </div>
-                <div className="flex flex-col min-w-0">
+                <div className="hidden sm:flex flex-col min-w-0">
                   <span className="text-xs sm:text-sm font-black text-white tracking-wide group-hover:text-amber-400 transition-colors leading-none whitespace-nowrap">
                     {OFICINA.nomeFantasia.toUpperCase()}
                   </span>

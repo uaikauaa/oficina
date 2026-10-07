@@ -1624,23 +1624,28 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
       {/* MODAL: ADICIONAR PEÇA COM BUSCA CONTEXTUAL E DEBOUNCE (400ms) */}
       {/* ========================================================================= */}
       {isItemModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Package className="w-4 h-4 text-amber-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div
+            data-testid="adicionar-peca-modal"
+            className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] flex flex-col min-w-0 overflow-hidden shadow-2xl animate-in fade-in zoom-in-95"
+          >
+            <div className="p-3 sm:p-4 border-b border-slate-800 flex items-center justify-between gap-2 shrink-0">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2 min-w-0">
+                <Package className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>Adicionar Peça / Componente à OS</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsItemModalOpen(false)}
-                className="text-slate-400 hover:text-white text-xs font-semibold cursor-pointer p-1"
+                aria-label="Fechar modal de adicionar peça"
+                className="text-slate-400 hover:text-white text-xs font-semibold cursor-pointer p-1 shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleAdicionarItem} className="p-5 space-y-4">
+            <form onSubmit={handleAdicionarItem} className="flex flex-col flex-1 min-h-0">
+              <div data-testid="adicionar-peca-modal-body" className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-3 sm:p-5 space-y-4">
               {itemModalError && (
                 <div className="flex items-start gap-2 p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -1701,7 +1706,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                             : 'hover:bg-slate-800 text-slate-300'
                         }`}
                       >
-                        <div>
+                        <div className="min-w-0 flex-1 break-words wrap-anywhere">
                           <span className="font-mono font-bold text-amber-400 mr-2">[{p.codigo}]</span>
                           <span className="font-medium text-white">{p.nome}</span>
                         </div>
@@ -1720,14 +1725,14 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
               {/* CARD DA PEÇA SELECIONADA */}
               {pecaSelecionada && (
                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[10px] uppercase font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20 break-words wrap-anywhere">
                         {pecaSelecionada.codigo}
                       </span>
-                      <strong className="text-white block mt-0.5">{pecaSelecionada.nome}</strong>
+                      <strong className="text-white block mt-0.5 break-words wrap-anywhere">{pecaSelecionada.nome}</strong>
                     </div>
-                    <span className="font-bold text-emerald-400 text-sm">
+                    <span className="font-bold text-emerald-400 text-sm shrink-0">
                       {formatarMoeda(pecaSelecionada.precoVenda)}
                     </span>
                   </div>
@@ -1823,9 +1828,10 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                   className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white focus:outline-none focus:border-amber-500/50"
                 />
               </div>
+              </div>
 
-              {/* BOTÕES */}
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              {/* BOTÕES (rodapé fixo, sempre visível) */}
+              <div className="flex items-center justify-end gap-2 p-3 sm:px-5 sm:py-4 border-t border-slate-800 shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsItemModalOpen(false)}

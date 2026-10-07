@@ -172,12 +172,12 @@ export default function ConfiguracoesPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
       {/* Cabeçalho */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
             <Settings className="w-5 h-5 text-amber-400" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-lg font-bold text-white">Configurações da Oficina</h1>
             <p className="text-sm text-slate-400 mt-0.5">
               Dados comerciais de referência — usados nos documentos da oficina
@@ -185,7 +185,7 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 self-start">
           <button
             onClick={loadConfig}
             className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 transition-all"
@@ -370,7 +370,7 @@ export default function ConfiguracoesPage() {
 
       {/* Botões de ação */}
       {editMode && (
-        <div className="flex items-center justify-end gap-3 pt-2">
+        <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
           <button
             onClick={handleCancel}
             disabled={isSaving}
