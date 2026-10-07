@@ -74,3 +74,49 @@ test('B11: falha ao carregar configuração impede impressão com erro claro', a
   expect(await page.evaluate(() => (window as unknown as Window & { __printCalls: number }).__printCalls)).toBe(0);
   await expect(page.locator('[class*="print:block"]')).toHaveCount(0);
 });
+
+test('Impressão isolada: header e UI do sistema somem no contexto de print, mantendo recibo visível', async ({ page }) => {
+  await page.route('**/api/**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+  await page.route('**/api/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
+  await page.route('**/api/ordens-servico/77/itens', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  await page.route('**/api/ordens-servico/77', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(order) }));
+  await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
+    id: 1, nomeFantasia: 'Oficina Central', cnpj: '12.345.678/0001-99',
+    telefone: '(11) 98888-7777', email: 'contato@central.com',
+    logradouro: 'Av Principal', numero: '100', bairro: 'Distrito Industrial',
+    municipio: 'São Paulo', uf: 'SP', cep: '01000-000',
+  }) }));
+
+  await page.goto('/ordens-servico/77');
+
+  // Modo tela normal: header e busca estão visíveis
+  await expect(page.locator('header')).toBeVisible();
+  await expect(page.locator('#busca-rapida-trigger')).toBeVisible();
+  await expect(page.locator('#print-receipt')).toBeHidden();
+
+  // Emula modo de impressão
+  await page.emulateMedia({ media: 'print' });
+
+  // Header, navegação, busca, botões da aplicação devem sumir completamente
+  await expect(page.locator('header')).toBeHidden();
+  await expect(page.locator('#busca-rapida-trigger')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Imprimir recibo' })).toBeHidden();
+
+  // Recibo deve estar visível e no topo
+  const receipt = page.locator('#print-receipt');
+  await expect(receipt).toBeVisible();
+  await expect(receipt).toContainText('Oficina Central');
+  await expect(receipt).toContainText('Recibo de Serviço');
+  await expect(receipt).toContainText('OS-B11-77');
+
+  // Screenshot de conferência visual no modo de impressão
+  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/recibo_print_preview.png', fullPage: true });
+
+  // Retorna para tela normal e confirma restauração
+  await page.emulateMedia({ media: 'screen' });
+  await expect(page.locator('header')).toBeVisible();
+  await expect(receipt).toBeHidden();
+
+  // Screenshot de conferência visual no modo normal (header intacto)
+  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/sistema_modo_normal.png' });
+});

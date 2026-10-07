@@ -246,7 +246,7 @@ export default function Header({ user }: HeaderProps) {
 
   return (
     <>
-      <header className="border-b border-slate-800 bg-[#070a10]/95 backdrop-blur-md sticky top-0 z-30">
+      <header className="border-b border-slate-800 bg-[#070a10]/95 backdrop-blur-md sticky top-0 z-30 print:hidden">
         {/* Barra Principal */}
         <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 py-2.5">
           <div className="flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 min-w-0">

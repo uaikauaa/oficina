@@ -56,7 +56,7 @@ export default function AuthenticatedLayout({
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col print:bg-white print:min-h-0">
         <Header user={user} />
         <div className="flex-1 flex flex-col">{children}</div>
       </div>
