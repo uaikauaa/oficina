@@ -325,6 +325,18 @@ export const TIPO_PRODUTO_LABELS: Record<TipoProduto, string> = {
   CONSUMIVEL: 'Consumível',
 };
 
+export const TIPOS_PRODUTO_FORMULARIO: { value: TipoProduto; label: string; icon: string }[] = [
+  { value: 'PECA', label: 'Peça / Componente', icon: '🔌' },
+  { value: 'CONSUMIVEL', label: 'Consumível de Manutenção', icon: '⚡' },
+];
+
+export const CATEGORIAS_TECNICAS_PERMITIDAS = [
+  'Consumíveis',
+  'Gerador',
+  'Máquina de Solda',
+] as const;
+
+
 export interface Produto {
   id: number;
   codigo: string;

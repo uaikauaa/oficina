@@ -15,7 +15,14 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { Produto, ProdutoFormData, TipoProduto, Fornecedor, Categoria } from '@/lib/types';
+import {
+  Produto,
+  ProdutoFormData,
+  Fornecedor,
+  Categoria,
+  TIPOS_PRODUTO_FORMULARIO,
+  CATEGORIAS_TECNICAS_PERMITIDAS,
+} from '@/lib/types';
 import { apiFetchJson } from '@/lib/api';
 
 interface ProdutoModalProps {
@@ -27,12 +34,10 @@ interface ProdutoModalProps {
   onSuccess: (produto: Produto) => void;
 }
 
-const TIPO_OPTIONS: { value: TipoProduto; label: string; icon: string }[] = [
-  { value: 'PECA', label: 'Peça / Componente', icon: '🔌' },
-  { value: 'PRODUTO', label: 'Produto Acabado', icon: '📦' },
-  { value: 'CONSUMIVEL', label: 'Consumível de Manutenção', icon: '⚡' },
-  { value: 'SERVICO', label: 'Serviço Técnico', icon: '🛠️' },
-];
+export const TIPO_OPTIONS = TIPOS_PRODUTO_FORMULARIO;
+export const CATEGORIAS_PERMITIDAS = CATEGORIAS_TECNICAS_PERMITIDAS;
+
+
 
 const UNIDADES: { value: string; label: string }[] = [
   { value: 'UN', label: 'Unidade' },
@@ -64,6 +69,11 @@ export default function ProdutoModal({
 
   const [categoriasLocais, setCategoriasLocais] = useState<Categoria[]>([]);
   const categorias = categoriasProp && categoriasProp.length > 0 ? categoriasProp : categoriasLocais;
+  const categoriasValidas = categorias.filter((c) =>
+    CATEGORIAS_PERMITIDAS.some(
+      (permitida) => permitida.toLowerCase() === c.nome.trim().toLowerCase()
+    )
+  );
   const [formData, setFormData] = useState<Partial<ProdutoFormData>>({
     codigo: '',
     linkCompra: '',
@@ -302,7 +312,7 @@ export default function ProdutoModal({
           {/* Tipo de Item */}
           <div>
             <label className={LABEL_CLASS}>Tipo do Registro *</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {TIPO_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
@@ -401,7 +411,7 @@ export default function ProdutoModal({
                   className={`${INPUT_CLASS} pr-14`}
                 >
                   <option value="">Nenhuma categoria vinculada</option>
-                  {categorias.map((c) => (
+                  {categoriasValidas.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.nome}
                     </option>

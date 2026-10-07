@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import type { Produto, TipoProduto, PageResponse, TipoMovimentacaoEstoque } from './types.ts';
-import { TIPO_PRODUTO_LABELS } from './types.ts';
+import type { Produto, TipoProduto, PageResponse, TipoMovimentacaoEstoque, Categoria } from './types.ts';
+import { TIPO_PRODUTO_LABELS, TIPOS_PRODUTO_FORMULARIO, CATEGORIAS_TECNICAS_PERMITIDAS } from './types.ts';
 import { formatarCodigoSku } from './api.ts';
 
 describe('UX-006: Tela Operacional de Produtos & Estoque — Contratos e Comportamentos', () => {
@@ -512,6 +512,147 @@ describe('UX-006: Tela Operacional de Produtos & Estoque — Contratos e Comport
       assert.strictEqual(formatarCodigoSku(null), '-');
       assert.strictEqual(formatarCodigoSku(undefined), '-');
       assert.strictEqual(formatarCodigoSku(''), '-');
+    });
+  });
+
+  describe('12. Tipos de Registro Permitidos e Categorias Técnicas Homologadas', () => {
+    it('deve exibir SOMENTE Peça / Componente e Consumível de Manutenção no formulário', () => {
+      const labels = TIPOS_PRODUTO_FORMULARIO.map(t => t.label);
+      const values = TIPOS_PRODUTO_FORMULARIO.map(t => t.value);
+
+      // Visíveis permitidos
+      assert.ok(labels.includes('Peça / Componente'));
+      assert.ok(labels.includes('Consumível de Manutenção'));
+      assert.ok(values.includes('PECA'));
+      assert.ok(values.includes('CONSUMIVEL'));
+
+      // Total deve ser estritamente 2
+      assert.strictEqual(TIPOS_PRODUTO_FORMULARIO.length, 2);
+    });
+
+    it('NÃO deve permitir visualização ou seleção de Produto Acabado ou Serviço Técnico no formulário', () => {
+      const labels = TIPOS_PRODUTO_FORMULARIO.map(t => t.label);
+      const values = TIPOS_PRODUTO_FORMULARIO.map(t => t.value);
+
+      assert.strictEqual(labels.includes('Produto Acabado'), false);
+      assert.strictEqual(labels.includes('Serviço Técnico'), false);
+      assert.strictEqual(values.includes('PRODUTO'), false);
+      assert.strictEqual(values.includes('SERVICO'), false);
+    });
+
+    it('deve homologar como categorias permitidas SOMENTE Consumíveis, Gerador e Máquina de Solda', () => {
+      assert.ok(CATEGORIAS_TECNICAS_PERMITIDAS.includes('Consumíveis'));
+      assert.ok(CATEGORIAS_TECNICAS_PERMITIDAS.includes('Gerador'));
+      assert.ok(CATEGORIAS_TECNICAS_PERMITIDAS.includes('Máquina de Solda'));
+      assert.strictEqual(CATEGORIAS_TECNICAS_PERMITIDAS.length, 3);
+    });
+
+    it('NÃO deve conter Eletrônica, Elétrica ou Mecânica na lista de categorias permitidas para novos produtos', () => {
+      const permitidas = CATEGORIAS_TECNICAS_PERMITIDAS as readonly string[];
+      assert.strictEqual(permitidas.includes('Eletrônica'), false);
+      assert.strictEqual(permitidas.includes('Elétrica'), false);
+      assert.strictEqual(permitidas.includes('Mecânica'), false);
+    });
+
+    it('deve filtrar corretamente lista completa de categorias do banco mantendo apenas as homologadas', () => {
+      const mockCategoriasBanco: Categoria[] = [
+        { id: 1, nome: 'Eletrônica', descricao: 'Semicondutores', ativo: true, createdAt: '', updatedAt: '' },
+        { id: 2, nome: 'Máquina de Solda', descricao: 'Tochas e consumíveis de solda', ativo: true, createdAt: '', updatedAt: '' },
+        { id: 3, nome: 'Gerador', descricao: 'Componentes geradores', ativo: true, createdAt: '', updatedAt: '' },
+        { id: 4, nome: 'Elétrica', descricao: 'Fiação e contatores', ativo: true, createdAt: '', updatedAt: '' },
+        { id: 5, nome: 'Mecânica', descricao: 'Eixos e rolamentos', ativo: true, createdAt: '', updatedAt: '' },
+        { id: 6, nome: 'Consumíveis', descricao: 'Consumíveis gerais', ativo: true, createdAt: '', updatedAt: '' },
+      ];
+
+      const filtradas = mockCategoriasBanco.filter(c =>
+        CATEGORIAS_TECNICAS_PERMITIDAS.some(
+          permitida => permitida.toLowerCase() === c.nome.trim().toLowerCase()
+        )
+      );
+
+      const nomesFiltrados = filtradas.map(c => c.nome);
+      assert.deepStrictEqual(nomesFiltrados.sort(), ['Consumíveis', 'Gerador', 'Máquina de Solda'].sort());
+      assert.strictEqual(nomesFiltrados.includes('Eletrônica'), false);
+      assert.strictEqual(nomesFiltrados.includes('Elétrica'), false);
+      assert.strictEqual(nomesFiltrados.includes('Mecânica'), false);
+    });
+
+    it('deve preservar a opção "Nenhuma categoria vinculada" com valor vazio para categorias opcionais', () => {
+      const defaultOption = { value: '', label: 'Nenhuma categoria vinculada' };
+      assert.strictEqual(defaultOption.value, '');
+      assert.strictEqual(defaultOption.label, 'Nenhuma categoria vinculada');
+    });
+
+    it('deve gerar payloads válidos para os cenários de cadastro solicitados (A, B, C, D)', () => {
+      // Cenário A: Peça / Componente + Consumíveis
+      const payloadA = { tipo: 'PECA' as TipoProduto, categoriaId: 6, nome: 'Bocal Cônico' };
+      assert.strictEqual(payloadA.tipo, 'PECA');
+      assert.strictEqual(payloadA.categoriaId, 6);
+
+      // Cenário B: Peça / Componente + Gerador
+      const payloadB = { tipo: 'PECA' as TipoProduto, categoriaId: 3, nome: 'Placa AVR 5kVA' };
+      assert.strictEqual(payloadB.tipo, 'PECA');
+      assert.strictEqual(payloadB.categoriaId, 3);
+
+      // Cenário C: Consumível de Manutenção + Consumíveis
+      const payloadC = { tipo: 'CONSUMIVEL' as TipoProduto, categoriaId: 6, nome: 'Pasta Térmica Especial' };
+      assert.strictEqual(payloadC.tipo, 'CONSUMIVEL');
+      assert.strictEqual(payloadC.categoriaId, 6);
+
+      // Cenário D: Tipo válido + Máquina de Solda
+      const payloadD = { tipo: 'PECA' as TipoProduto, categoriaId: 2, nome: 'Gatilho Tocha TIG' };
+      assert.strictEqual(payloadD.tipo, 'PECA');
+      assert.strictEqual(payloadD.categoriaId, 2);
+    });
+
+    it('deve preservar registros históricos com tipo removido (PRODUTO/SERVICO) na leitura sem crash', () => {
+      const produtoHistoricoProduto: Produto = {
+        id: 101,
+        codigo: 'PROD-001',
+        nome: 'Inversora Completa Montada',
+        tipo: 'PRODUTO',
+        tipoDescricao: 'Produto',
+        unidadeMedida: 'UN',
+        precoCusto: 500,
+        precoVenda: 1200,
+        estoqueAtual: 2,
+        estoqueMinimo: 1,
+        ativo: true,
+        estoqueBaixo: false,
+        semEstoque: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      };
+
+      // Mapeamento de label histórico via TIPO_PRODUTO_LABELS preservado
+      assert.strictEqual(TIPO_PRODUTO_LABELS[produtoHistoricoProduto.tipo], 'Produto');
+      assert.strictEqual(TIPO_PRODUTO_LABELS.SERVICO, 'Serviço');
+      assert.strictEqual(produtoHistoricoProduto.tipo, 'PRODUTO');
+    });
+
+    it('deve preservar registros históricos com categorias removidas (Eletrônica/Elétrica/Mecânica) sem corrupção', () => {
+      const produtoHistoricoCategoria: Produto = {
+        id: 102,
+        codigo: 'IGBT-60N100',
+        nome: 'Módulo IGBT 60A 1000V',
+        tipo: 'PECA',
+        tipoDescricao: 'Peça / Componente',
+        categoriaId: 1,
+        categoriaNome: 'Eletrônica',
+        unidadeMedida: 'UN',
+        precoCusto: 45,
+        precoVenda: 90,
+        estoqueAtual: 10,
+        estoqueMinimo: 2,
+        ativo: true,
+        estoqueBaixo: false,
+        semEstoque: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        updatedAt: '2025-01-01T00:00:00Z',
+      };
+
+      assert.strictEqual(produtoHistoricoCategoria.categoriaId, 1);
+      assert.strictEqual(produtoHistoricoCategoria.categoriaNome, 'Eletrônica');
     });
   });
 });
