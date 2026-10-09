@@ -1,0 +1,3 @@
+# Test-only: install the connection barrier before registry/factory postprocessors.
+org.springframework.context.ApplicationContextInitializer=\
+  com.oficinagestao.testsupport.TestDatabaseSafetyAutoConfiguration$Initializer

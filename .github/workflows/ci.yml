@@ -41,6 +41,7 @@ jobs:
         env:
           SPRING_PROFILES_ACTIVE: test
           TEST_DB_URL: jdbc:postgresql://localhost:5432/oficina_gestao_test
+          TEST_DB_EXPECTED_PORT: "5432"
           TEST_DB_USERNAME: oficina
           TEST_DB_PASSWORD: oficinapassword
         run: |
