@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.MethodMetadata;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -172,11 +173,24 @@ public class TestDatabaseSafetyAutoConfiguration {
         @Override public Object postProcessBeforeInstantiation(Class<?> type, String name) {
             boolean connection = connectionType(type);
             if (FactoryBean.class.isAssignableFrom(type)) {
-                Class<?> product = factory.getType(name, false);
+                boolean registered = factory.containsBeanDefinition(name);
+                Class<?> product;
+                if (registered) {
+                    product = factory.getType(name, false);
+                } else {
+                    // Inner beans have no independently addressable definition. Inspect the
+                    // concrete class contract without constructing the factory or its product.
+                    var contract = ResolvableType.forClass(type).as(FactoryBean.class);
+                    product = contract.hasUnresolvableGenerics() ? null : contract.getGeneric(0).resolve();
+                }
                 if (product == null || product == Object.class) {
                     throw rejected(INDETERMINATE_FACTORY, "an indeterminate FactoryBean product may supply a connection");
                 }
                 connection |= connectionType(product);
+                if (!registered && connection) {
+                    // Definition enumeration cannot establish Boot provenance for an inner factory.
+                    throw rejected(CONNECTION_BEAN, "inner connection factories are forbidden");
+                }
             }
             if (connection) {
                 TestDatabaseSafetyGuard.validate(environment);

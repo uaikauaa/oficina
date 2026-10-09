@@ -5,12 +5,16 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -32,6 +36,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -46,12 +51,23 @@ import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockServletContext;
 
 import javax.sql.DataSource;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.servlet.Filter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,6 +77,283 @@ import static com.oficinagestao.testsupport.TestDatabaseSafetyGuard.Reason.*;
 
 /** Minimal contexts only: no application scanning, real migrations, scheduler or database connections. */
 class TestDatabaseSafetyAutoConfigurationTest {
+
+    @Test
+    void permitsInnerStringFactoryWithoutLookingUpItsSyntheticName() {
+        var tracking = new InnerFactoryTracking();
+        AtomicInteger products = new AtomicInteger();
+        innerRunner(tracking)
+                .withInitializer(context -> {
+                    var inner = new RootBeanDefinition(StringFactory.class);
+                    inner.getConstructorArgumentValues().addIndexedArgumentValue(0, products);
+                    var holder = new RootBeanDefinition(ProductHolder.class);
+                    holder.getConstructorArgumentValues().addIndexedArgumentValue(0, inner);
+                    ((BeanDefinitionRegistry) context.getBeanFactory()).registerBeanDefinition("holder", holder);
+                })
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context.getBean(ProductHolder.class).product).isEqualTo("ordinary product");
+                    assertEquals(1, products.get());
+                    assertThat(tracking.types).containsExactly(StringFactory.class);
+                    assertEquals(0, tracking.invalidLookups.get());
+                });
+    }
+
+    @Test
+    void permitsInnerFilterFactoryWithoutConstructingItForInspection() {
+        var tracking = new InnerFactoryTracking();
+        var probe = new FactoryProbe();
+        innerRunner(tracking).withInitializer(context -> registerInnerFactory(
+                        context.getBeanFactory(), FilterFactory.class, probe, "ordinary-looking-inner"))
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    Filter filter = (Filter) context.getBean(ProductHolder.class).product;
+                    AtomicInteger calls = new AtomicInteger();
+                    filter.doFilter(new MockHttpServletRequest(), new MockHttpServletResponse(),
+                            (request, response) -> calls.incrementAndGet());
+                    assertEquals(1, calls.get());
+                    assertEquals(1, probe.factories.get());
+                    assertEquals(1, probe.products.get());
+                    assertEquals(0, probe.typeQueries.get());
+                    assertThat(tracking.types).containsExactly(FilterFactory.class);
+                    assertEquals(0, tracking.invalidLookups.get());
+                });
+    }
+
+    @ParameterizedTest
+    @MethodSource("unsafeInnerFactories")
+    void rejectsUnsafeInnerFactoriesBeforeConstruction(Class<?> type, TestDatabaseSafetyGuard.Reason reason,
+                                                       String innerName) {
+        var tracking = new InnerFactoryTracking();
+        var probe = new FactoryProbe();
+        innerRunner(tracking).withInitializer(context -> registerInnerFactory(
+                        context.getBeanFactory(), type, probe, innerName))
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertReason(context.getStartupFailure(), reason);
+                    assertThat(tracking.types).containsExactly(type);
+                    assertEquals(0, tracking.invalidLookups.get());
+                    probe.assertUntouched();
+                });
+    }
+
+    static Stream<Arguments> unsafeInnerFactories() {
+        return Stream.of("(inner bean)#untrusted", "ordinary-looking-inner").flatMap(name -> Stream.of(
+                Arguments.of(InnerDataSourceFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerJdbcDetailsFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerFlywayDetailsFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerFlywayFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerEntityManagerFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerPersistenceUnitManagerFactory.class, CONNECTION_BEAN, name),
+                Arguments.of(InnerObjectFactory.class, INDETERMINATE_FACTORY, name),
+                Arguments.of(InnerRawFactory.class, INDETERMINATE_FACTORY, name),
+                Arguments.of(UnknownProductFactory.class, INDETERMINATE_FACTORY, name),
+                Arguments.of(BoundedUnknownFilterFactory.class, INDETERMINATE_FACTORY, name)));
+    }
+
+    @Test
+    void rejectsNamedDataSourceFactoryBeforeConstruction() {
+        var probe = new FactoryProbe();
+        runner().withConfiguration(AutoConfigurations.of(TestDatabaseSafetyAutoConfiguration.class))
+                .withBean("namedFactory", InnerDataSourceFactory.class, () -> new InnerDataSourceFactory(probe))
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertReason(context.getStartupFailure(), CONNECTION_BEAN);
+                    probe.assertUntouched();
+                });
+    }
+
+    @Test
+    void rejectsAncestorDataSourceFactoryBeforeConstruction() {
+        var probe = new FactoryProbe();
+        try (var parent = new AnnotationConfigApplicationContext()) {
+            parent.registerBean("parentFactory", InnerDataSourceFactory.class,
+                    () -> new InnerDataSourceFactory(probe), definition -> definition.setLazyInit(true));
+            parent.refresh();
+            runner().withParent(parent)
+                    .withConfiguration(AutoConfigurations.of(TestDatabaseSafetyAutoConfiguration.class))
+                    .run(context -> {
+                        assertThat(context).hasFailed();
+                        assertReason(context.getStartupFailure(), ANCESTOR_CONNECTION);
+                        probe.assertUntouched();
+                    });
+        }
+    }
+
+    @Test
+    void permitsRealSpringSecurityInnerFilterAndEnforcesSecurityWithoutDatabase() {
+        var tracking = new InnerFactoryTracking();
+        AtomicInteger connectionConsumers = new AtomicInteger();
+        new WebApplicationContextRunner(() -> {
+                    var context = new GenericWebApplicationContext(tracking.factory());
+                    context.setServletContext(new MockServletContext());
+                    return context;
+                })
+                .withInitializer(context -> {
+                    context.setEnvironment(TestDatabaseSafetyGuardTest.validEnvironment());
+                    context.getBeanFactory().addBeanPostProcessor(tracking.observer(context.getBeanFactory()));
+                    context.getBeanFactory().addBeanPostProcessor(tripwire(connectionConsumers));
+                })
+                .withInitializer(new TestDatabaseSafetyAutoConfiguration.Initializer())
+                .withConfiguration(AutoConfigurations.of(TestDatabaseSafetyAutoConfiguration.class))
+                .withUserConfiguration(SecurityOnlyConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(tracking.types).extracting(Class::getName).containsExactly(
+                            "org.springframework.security.config.annotation.web.configuration."
+                                    + "WebMvcSecurityConfiguration$HandlerMappingIntrospectorCacheFilterFactoryBean");
+                    assertEquals(0, tracking.invalidLookups.get());
+                    assertEquals(0, connectionConsumers.get());
+                    assertThat(context).doesNotHaveBean(DataSource.class).doesNotHaveBean(Flyway.class)
+                            .doesNotHaveBean(EntityManagerFactory.class);
+                    var filter = context.getBean("springSecurityFilterChain", FilterChainProxy.class);
+                    assertThat(filter.getFilterChains()).hasSize(1);
+                    assertSecurityResponse(filter, "GET", "/public", 204, 1);
+                    assertSecurityResponse(filter, "GET", "/private", 403, 0);
+                    assertSecurityResponse(filter, "POST", "/public", 403, 0); // CSRF still enforced.
+                });
+    }
+
+    private static void assertSecurityResponse(Filter filter, String method, String path, int status,
+                                               int expectedTerminalCalls) throws Exception {
+        var request = new MockHttpServletRequest(method, path);
+        request.setServletPath(path);
+        var response = new MockHttpServletResponse();
+        AtomicInteger terminalCalls = new AtomicInteger();
+        filter.doFilter(request, response, (req, res) -> {
+            terminalCalls.incrementAndGet();
+            response.setStatus(204);
+        });
+        assertEquals(status, response.getStatus());
+        assertEquals(expectedTerminalCalls, terminalCalls.get());
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    @EnableWebMvc
+    @EnableWebSecurity
+    static class SecurityOnlyConfiguration {
+        @Bean SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            return http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers("/public").permitAll().anyRequest().denyAll()).build();
+        }
+    }
+
+    private static void registerInnerFactory(ConfigurableListableBeanFactory factory, Class<?> type,
+                                             FactoryProbe probe, String name) {
+        var inner = new RootBeanDefinition(type);
+        inner.getConstructorArgumentValues().addIndexedArgumentValue(0, probe);
+        var holder = new RootBeanDefinition(ProductHolder.class);
+        holder.getConstructorArgumentValues().addIndexedArgumentValue(0, new BeanDefinitionHolder(inner, name));
+        ((BeanDefinitionRegistry) factory).registerBeanDefinition("holder", holder);
+    }
+
+    static class FactoryProbe {
+        final AtomicInteger factories = new AtomicInteger();
+        final AtomicInteger products = new AtomicInteger();
+        final AtomicInteger typeQueries = new AtomicInteger();
+        void assertUntouched() {
+            assertEquals(0, factories.get(), "Factory must not be constructed");
+            assertEquals(0, products.get(), "Product must not be constructed");
+            assertEquals(0, typeQueries.get(), "Inspection must use metadata only");
+        }
+    }
+
+    static class FilterFactory implements FactoryBean<Filter> {
+        private final FactoryProbe probe;
+        FilterFactory(FactoryProbe probe) { this.probe = probe; probe.factories.incrementAndGet(); }
+        @Override public Filter getObject() {
+            probe.products.incrementAndGet();
+            return (request, response, chain) -> chain.doFilter(request, response);
+        }
+        @Override public Class<?> getObjectType() {
+            probe.typeQueries.incrementAndGet();
+            throw new AssertionError("Inspection must not invoke getObjectType");
+        }
+    }
+
+    // No network/migration implementation exists in these sentinels, even if the guard regresses.
+    static class UnknownProductFactory<T> implements FactoryBean<T> {
+        private final FactoryProbe probe;
+        UnknownProductFactory(FactoryProbe probe) { this.probe = probe; probe.factories.incrementAndGet(); }
+        @Override public T getObject() {
+            probe.products.incrementAndGet();
+            throw new AssertionError("SENTINEL_INNER_PRODUCT");
+        }
+        @Override public Class<?> getObjectType() {
+            probe.typeQueries.incrementAndGet();
+            throw new AssertionError("SENTINEL_INNER_TYPE_QUERY");
+        }
+    }
+    static class InnerDataSourceFactory extends UnknownProductFactory<DataSource> {
+        InnerDataSourceFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerJdbcDetailsFactory extends UnknownProductFactory<JdbcConnectionDetails> {
+        InnerJdbcDetailsFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerFlywayDetailsFactory extends UnknownProductFactory<FlywayConnectionDetails> {
+        InnerFlywayDetailsFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerFlywayFactory extends UnknownProductFactory<Flyway> {
+        InnerFlywayFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerEntityManagerFactory extends UnknownProductFactory<EntityManagerFactory> {
+        InnerEntityManagerFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerPersistenceUnitManagerFactory extends UnknownProductFactory<PersistenceUnitManager> {
+        InnerPersistenceUnitManagerFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class InnerObjectFactory extends UnknownProductFactory<Object> {
+        InnerObjectFactory(FactoryProbe probe) { super(probe); }
+    }
+    @SuppressWarnings("rawtypes")
+    static class InnerRawFactory extends UnknownProductFactory {
+        InnerRawFactory(FactoryProbe probe) { super(probe); }
+    }
+    static class BoundedUnknownFilterFactory<T extends Filter> extends UnknownProductFactory<T> {
+        BoundedUnknownFilterFactory(FactoryProbe probe) { super(probe); }
+    }
+
+    private ApplicationContextRunner innerRunner(InnerFactoryTracking tracking) {
+        return new ApplicationContextRunner(() -> new AnnotationConfigApplicationContext(tracking.factory()))
+                .withInitializer(context -> {
+                    context.setEnvironment(TestDatabaseSafetyGuardTest.validEnvironment());
+                    context.getBeanFactory().addBeanPostProcessor(tracking.observer(context.getBeanFactory()));
+                })
+                .withInitializer(new TestDatabaseSafetyAutoConfiguration.Initializer())
+                .withConfiguration(AutoConfigurations.of(TestDatabaseSafetyAutoConfiguration.class));
+    }
+
+    static class ProductHolder {
+        final Object product;
+        ProductHolder(Object product) { this.product = product; }
+    }
+
+    private static final class InnerFactoryTracking {
+        final java.util.List<Class<?>> types = new java.util.ArrayList<>();
+        final java.util.Set<String> names = new java.util.HashSet<>();
+        final AtomicInteger invalidLookups = new AtomicInteger();
+
+        DefaultListableBeanFactory factory() {
+            return new DefaultListableBeanFactory() {
+                @Override public Class<?> getType(String name, boolean allowFactoryBeanInit) {
+                    if (names.contains(name) && !containsBeanDefinition(name)) invalidLookups.incrementAndGet();
+                    return super.getType(name, allowFactoryBeanInit);
+                }
+            };
+        }
+
+        InstantiationAwareBeanPostProcessor observer(ConfigurableListableBeanFactory factory) {
+            return new InstantiationAwareBeanPostProcessor() {
+                @Override public Object postProcessBeforeInstantiation(Class<?> type, String name) {
+                    if (FactoryBean.class.isAssignableFrom(type) && !factory.containsBeanDefinition(name)) {
+                        types.add(type);
+                        names.add(name);
+                    }
+                    return null;
+                }
+            };
+        }
+    }
 
     @Test
     void rejectsPersistenceUnitManagerBeforeItsFactoryRuns() {
