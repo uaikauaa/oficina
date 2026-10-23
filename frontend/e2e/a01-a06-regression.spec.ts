@@ -191,7 +191,8 @@ for (const nome of ['Peça normal', 'P'.repeat(194)]) {
     const body = modal.getByTestId('adicionar-peca-modal-body');
     expect(await body.evaluate(el => el.scrollHeight > el.clientHeight)).toBe(true);
     await adicionar.click();
-    expect(posted).toBe(true);
+    // O POST aguarda obtenção assíncrona do CSRF antes de finalizar.
+    await expect.poll(() => posted, { message: 'Adicionar Peça deve enviar POST da OS' }).toBe(true);
     await expect(modal).toBeHidden();
     if (nome.length < 194) {
       for (const width of [360, 390, 768, 1280]) {
