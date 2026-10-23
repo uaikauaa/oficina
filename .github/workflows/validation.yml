@@ -1,0 +1,104 @@
+name: Validacao Complementar - Flyway Real e E2E
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  flyway-real:
+    name: Flyway real em PostgreSQL descartavel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: oficina_migrations_ci
+          POSTGRES_USER: ci_isolado
+          POSTGRES_PASSWORD: senha-sintetica-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_isolado -d oficina_migrations_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout sem credenciais persistentes
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Aplicar as migrations REAIS do projeto
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d backend/src/main/resources/db/migration
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE/backend/src/main/resources/db/migration:/flyway/sql:ro" \
+            flyway/flyway:11 \
+            -url=jdbc:postgresql://127.0.0.1:5432/oficina_migrations_ci \
+            -user=ci_isolado -password=senha-sintetica-ci \
+            -connectRetries=15 -locations=filesystem:/flyway/sql migrate
+      - name: Validar historico Flyway no banco descartavel
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=$(find backend/src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' | wc -l)
+          test "$expected" -gt 0
+          actual=$(docker run --rm --network host -e PGPASSWORD=senha-sintetica-ci postgres:16-alpine \
+            psql -h 127.0.0.1 -U ci_isolado -d oficina_migrations_ci -Atc \
+            "SELECT count(*) FROM flyway_schema_history WHERE success = true AND version IS NOT NULL;")
+          echo "Migrations versionadas: $expected; aplicadas: $actual"
+          test "$actual" -eq "$expected"
+          docker run --rm --network host \
+            -v "$GITHUB_WORKSPACE/backend/src/main/resources/db/migration:/flyway/sql:ro" \
+            flyway/flyway:11 \
+            -url=jdbc:postgresql://127.0.0.1:5432/oficina_migrations_ci \
+            -user=ci_isolado -password=senha-sintetica-ci \
+            -locations=filesystem:/flyway/sql validate
+
+  playwright:
+    name: Playwright - fluxos com API mockada
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout sem credenciais persistentes
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Instalar Chromium e dependencias
+        run: npx playwright install --with-deps chromium
+      - name: Build Next.js isolado
+        env:
+          INTERNAL_BACKEND_URL: http://127.0.0.1:8080
+        run: npm run build
+      - name: E2E mockados sem servidor backend produtivo
+        env:
+          CI: 'true'
+        run: npx playwright test --project=chromium --grep-invert 'Autenticação e Login E2E'
+      - name: Guardar evidencias em caso de falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-evidencias
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
