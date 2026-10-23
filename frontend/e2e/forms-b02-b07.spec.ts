@@ -181,10 +181,19 @@ for (const status of [200, 201, 400, 409, 500]) {
     await page.getByTitle('Registrar entrada, saída ou ajuste de estoque (sem sair da tela)').click();
     const dialog = page.getByRole('dialog');
     await dialog.locator('textarea').fill('Teste de movimentação');
+    // Aguarda a resposta real da rota mockada; a mensagem do modal só dura 500 ms.
+    const responsePromise = page.waitForResponse(response =>
+      new URL(response.url()).pathname === '/api/estoque/movimentar'
+      && response.request().method() === 'POST'
+    );
     await dialog.getByRole('button', { name: 'Confirmar Movimentação' }).click();
+    const response = await responsePromise;
+    expect(response.status()).toBe(status);
     if (status < 300) {
-      await expect(dialog.getByText('Movimentação registrada com sucesso!')).toBeVisible();
-      await expect(dialog).toBeHidden(); // onSuccess somente após resposta aceita.
+      // Confirma conclusão pela UI persistente após o callback, sem depender do
+      // aviso transitório do modal (fechamento programado em 500 ms).
+      await expect(dialog).toBeHidden();
+      await expect(page.getByText('Movimentação de estoque registrada com sucesso!')).toBeVisible();
     } else {
       await expect(dialog.getByText(`Falha ${status}`)).toBeVisible();
       await expect(dialog.getByText('Movimentação registrada com sucesso!')).toHaveCount(0);
