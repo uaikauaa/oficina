@@ -31,6 +31,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.oficinagestao.testsupport.CsrfMockMvc.withCsrf;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -55,7 +56,7 @@ class AuthControllerTest {
 
         LoginRequest request = new LoginRequest("admin@oficina.com", "SenhaForte123", true);
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/login"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -81,7 +82,7 @@ class AuthControllerTest {
 
         String jsonSemRememberMe = "{\"email\":\"admin@oficina.com\",\"senha\":\"SenhaForte123\"}";
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/login"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonSemRememberMe))
                 .andExpect(status().isOk())
@@ -98,7 +99,7 @@ class AuthControllerTest {
 
         LoginRequest request = new LoginRequest("admin@oficina.com", "SenhaErrada", false);
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/login"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -117,7 +118,7 @@ class AuthControllerTest {
 
         TwoFactorVerifyRequest request = new TwoFactorVerifyRequest("mock-challenge-token", "123456");
 
-        mockMvc.perform(post("/api/auth/2fa/verify")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/verify"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -170,7 +171,7 @@ class AuthControllerTest {
 
         TwoFactorVerifyRequest request = new TwoFactorVerifyRequest("mock-challenge-token", "654321");
 
-        mockMvc.perform(post("/api/auth/2fa/verify")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/verify"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -187,7 +188,7 @@ class AuthControllerTest {
 
         TwoFactorVerifyRequest request = new TwoFactorVerifyRequest("mock-challenge-token", "000000");
 
-        mockMvc.perform(post("/api/auth/2fa/verify")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/verify"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -204,7 +205,7 @@ class AuthControllerTest {
 
         TwoFactorResendRequest request = new TwoFactorResendRequest("mock-challenge-token");
 
-        mockMvc.perform(post("/api/auth/2fa/resend")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/resend"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -221,7 +222,7 @@ class AuthControllerTest {
 
         TwoFactorResendRequest request = new TwoFactorResendRequest("mock-challenge-token");
 
-        mockMvc.perform(post("/api/auth/2fa/resend")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/resend"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -237,7 +238,7 @@ class AuthControllerTest {
 
         TwoFactorResendRequest request = new TwoFactorResendRequest("revoked-or-expired-token");
 
-        mockMvc.perform(post("/api/auth/2fa/resend")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/resend"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -253,7 +254,7 @@ class AuthControllerTest {
 
         when(authService.refresh(eq("valid-persistent-token"), any())).thenReturn(refreshResult);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh"))
                         .cookie(new Cookie("refresh_token", "valid-persistent-token")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
@@ -271,7 +272,7 @@ class AuthControllerTest {
 
         when(authService.refresh(eq("valid-temp-token"), any())).thenReturn(refreshResult);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh"))
                         .cookie(new Cookie("refresh_token", "valid-temp-token")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
@@ -289,7 +290,7 @@ class AuthControllerTest {
 
         when(authService.refresh(eq("valid-refresh-token"), any())).thenReturn(refreshResult);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh"))
                         .cookie(new Cookie("refresh_token", "valid-refresh-token")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
@@ -306,7 +307,7 @@ class AuthControllerTest {
         when(authService.refresh(eq("invalid-token"), any()))
                 .thenThrow(new BadCredentialsException("Refresh token não encontrado."));
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh"))
                         .cookie(new Cookie("refresh_token", "invalid-token")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
@@ -318,7 +319,7 @@ class AuthControllerTest {
         when(authService.refresh(isNull(), any()))
                 .thenThrow(new BadCredentialsException("Refresh token ausente ou inválido."));
 
-        mockMvc.perform(post("/api/auth/refresh"))
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh")))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
     }
@@ -347,7 +348,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("POST /api/auth/logout deve retornar 200 e expirar ambos os cookies")
     void shouldReturn200AndClearBothCookiesOnLogout() throws Exception {
-        mockMvc.perform(post("/api/auth/logout")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/logout"))
                         .cookie(new Cookie("refresh_token", "active-refresh-token")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Set-Cookie"))
@@ -362,7 +363,7 @@ class AuthControllerTest {
     void shouldReturn401WhenNotAuthenticatedOnAlterarSenha() throws Exception {
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenha@1234", "NovaSenha@1234");
 
-        mockMvc.perform(put("/api/auth/alterar-senha")
+        mockMvc.perform(withCsrf(mockMvc, put("/api/auth/alterar-senha"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -374,7 +375,7 @@ class AuthControllerTest {
     void shouldReturn200OnSuccessfulAlterarSenha() throws Exception {
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenha@1234", "NovaSenha@1234");
 
-        mockMvc.perform(put("/api/auth/alterar-senha")
+        mockMvc.perform(withCsrf(mockMvc, put("/api/auth/alterar-senha"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -392,7 +393,7 @@ class AuthControllerTest {
 
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaErrada@123", "NovaSenha@1234", "NovaSenha@1234");
 
-        mockMvc.perform(put("/api/auth/alterar-senha")
+        mockMvc.perform(withCsrf(mockMvc, put("/api/auth/alterar-senha"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

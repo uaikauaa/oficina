@@ -918,8 +918,25 @@ class AuthServiceTest {
 
         when(refreshTokenRepository.findByTokenHash(TokenHashUtil.hashStatic("revoked-token"))).thenReturn(Optional.of(revokedToken));
 
-        assertThrows(BadCredentialsException.class, () -> authService.refresh("revoked-token", httpRequest));
+        var failure = assertThrows(BadCredentialsException.class, () -> authService.refresh("revoked-token", httpRequest));
+        assertEquals("Refresh token revogado.", failure.getMessage());
         verify(refreshTokenRepository, times(1)).revokeAllByUsuarioId(1L);
+        verify(refreshTokenRepository, never()).save(any());
+        verifyNoInteractions(jwtService);
+
+        // Checks transaction policy only, not a real database commit.
+        try {
+            var policy = new org.springframework.transaction.annotation.AnnotationTransactionAttributeSource()
+                    .getTransactionAttribute(AuthService.class.getMethod("refresh", String.class,
+                            HttpServletRequest.class), AuthService.class);
+            assertNotNull(policy);
+            assertFalse(policy.rollbackOn(failure));
+            assertTrue(policy.rollbackOn(new BadCredentialsException("other rejection")));
+            assertTrue(policy.rollbackOn(new org.springframework.dao.DataAccessResourceFailureException("synthetic")));
+            assertTrue(policy.rollbackOn(new IllegalStateException("synthetic")));
+        } catch (NoSuchMethodException exception) {
+            throw new AssertionError(exception);
+        }
     }
 
     @Test
@@ -982,14 +999,35 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("ISSUE-08: Deve expurgar refresh tokens expirados ou revogados com sucesso")
+    @DisplayName("Retenção: encaminha agora menos sete dias e retorna a contagem removida")
     void shouldPurgeExpiredOrRevokedRefreshTokens() {
-        when(refreshTokenRepository.deleteExpiredOrRevoked(any(OffsetDateTime.class))).thenReturn(42);
+        OffsetDateTime now = OffsetDateTime.parse("2026-10-21T12:00:00Z");
+        OffsetDateTime cutoff = now.minusDays(7);
+        when(refreshTokenRepository.deleteExpiredOrRevoked(cutoff)).thenReturn(42);
+        try (var clock = mockStatic(OffsetDateTime.class, CALLS_REAL_METHODS)) {
+            clock.when(OffsetDateTime::now).thenReturn(now);
+            assertEquals(42, authService.purgarTokensExpiradosOuRevogados());
+        }
+        verify(refreshTokenRepository).deleteExpiredOrRevoked(cutoff);
+        verifyNoMoreInteractions(refreshTokenRepository);
+        verifyNoInteractions(jwtService);
+    }
 
-        int deletados = authService.purgarTokensExpiradosOuRevogados();
+    @Test
+    void purgeQueryUsesOnlyStrictExpirationCutoff() throws Exception {
+        // Contract check only: real deletion/retention is covered by the prepared JPA test.
+        var method = RefreshTokenRepository.class.getMethod("deleteExpiredOrRevoked", OffsetDateTime.class);
+        assertEquals("DELETE FROM RefreshToken r WHERE r.dataExpiracao < :limite",
+                method.getAnnotation(org.springframework.data.jpa.repository.Query.class).value());
+        assertNotNull(method.getAnnotation(org.springframework.data.jpa.repository.Modifying.class));
+    }
 
-        assertEquals(42, deletados);
-        verify(refreshTokenRepository, times(1)).deleteExpiredOrRevoked(any(OffsetDateTime.class));
+    @Test
+    void purgeReturnsZeroWhenRepositoryDeletesNothing() {
+        when(refreshTokenRepository.deleteExpiredOrRevoked(any(OffsetDateTime.class))).thenReturn(0);
+        assertEquals(0, authService.purgarTokensExpiradosOuRevogados());
+        verify(refreshTokenRepository).deleteExpiredOrRevoked(any(OffsetDateTime.class));
+        verifyNoMoreInteractions(refreshTokenRepository);
     }
 
     @Test

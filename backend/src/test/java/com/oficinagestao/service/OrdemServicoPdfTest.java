@@ -37,19 +37,19 @@ class OrdemServicoPdfTest {
 
     @BeforeEach
     void setUp() {
-        // Stub: retorna ConfiguracaoOficina com dados reais da Bruno Soldas
+        // Stub: retorna ConfiguracaoOficina com dados sinteticos de laboratorio
         configStub = new ConfiguracaoOficina();
-        configStub.setNomeFantasia("Bruno Soldas");
-        configStub.setNomeEmpresarial("45.076.507 BRUNO SOARES RODRIGUES");
-        configStub.setCnpj("45.076.507/0001-67");
-        configStub.setTelefone("(14) 9886-7223");
-        configStub.setEmail("INDUTECSERVICE@HOTMAIL.COM");
-        configStub.setLogradouro("Avenida Jacinto Ferreira de Sá - de 1272/1273 ao fim");
-        configStub.setNumero("1538");
-        configStub.setBairro("Vila Sandano");
-        configStub.setCep("19.914-080");
-        configStub.setMunicipio("Ourinhos");
-        configStub.setUf("SP");
+        configStub.setNomeFantasia("OFICINA LAB SINTETICA 02GA");
+        configStub.setNomeEmpresarial("ENTIDADE FICTICIA DE TESTE 02GA");
+        configStub.setCnpj("CNPJ-SINTETICO");
+        configStub.setTelefone("SEM-TELEFONE");
+        configStub.setEmail("oficina@example.invalid");
+        configStub.setLogradouro("VIA SINTETICA");
+        configStub.setNumero("S/N");
+        configStub.setBairro("BAIRRO SINTETICO");
+        configStub.setCep("CEP-TESTE");
+        configStub.setMunicipio("MUNICIPIO SINTETICO");
+        configStub.setUf("ZZ");
         when(configuracaoOficinaService.obterEntidade()).thenReturn(configStub);
 
         cliente = new Cliente();
@@ -453,7 +453,7 @@ class OrdemServicoPdfTest {
     }
 
     // =========================================================================
-    // FASE 6.4.1 — TESTES ESPECÍFICOS DO RECIBO PERSONALIZADO DA BRUNO SOLDAS
+    // FASE 6.4.1 — TESTES ESPECÍFICOS DO RECIBO PERSONALIZADO DA OFICINA LAB SINTETICA 02GA
     // =========================================================================
 
     @Test

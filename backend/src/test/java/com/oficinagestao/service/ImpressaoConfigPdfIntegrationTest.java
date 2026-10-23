@@ -42,7 +42,7 @@ class ImpressaoConfigPdfIntegrationTest {
     private ConfiguracaoOficinaUpdateDTO config(String nome, String nomeEmpresarial, String cnpj,
                                                  String telefone, String logradouro) {
         return new ConfiguracaoOficinaUpdateDTO(nome, nomeEmpresarial, cnpj, null, telefone,
-                null, logradouro, "10", null, null, "Ourinhos", "SP");
+                null, logradouro, "10", null, null, "MUNICIPIO SINTETICO", "ZZ");
     }
 
     private String textoPdf(OrdemServico os) throws IOException {

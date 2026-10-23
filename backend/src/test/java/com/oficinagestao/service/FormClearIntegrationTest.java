@@ -48,7 +48,7 @@ class FormClearIntegrationTest {
     }
 
     private EnderecoDTO endereco(String rua) {
-        return new EnderecoDTO(null, "19914080", rua, "10", null, "Centro", "Ourinhos", "SP", TipoEndereco.PRINCIPAL);
+        return new EnderecoDTO(null, "19914080", rua, "10", null, "Centro", "MUNICIPIO SINTETICO", "ZZ", TipoEndereco.PRINCIPAL);
     }
 
     private ClienteUpdateDTO clienteUpdate(String nome, EnderecoDTO endereco, Boolean removerEndereco) {

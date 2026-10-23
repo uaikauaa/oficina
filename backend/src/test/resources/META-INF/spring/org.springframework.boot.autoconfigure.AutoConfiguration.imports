@@ -1,1 +1,2 @@
 com.oficinagestao.testsupport.TestDatabaseSafetyAutoConfiguration
+com.oficinagestao.testsupport.SyntheticMigrations$Configuration

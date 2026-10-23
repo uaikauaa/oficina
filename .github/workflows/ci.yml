@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   backend:
     name: Backend — Testes & Validação
     runs-on: ubuntu-24.04
+    env:
+      TEST_FLYWAY_LOCATION: filesystem:${{ github.workspace }}/backend/src/test/resources/db/synthetic-migration
 
     services:
       postgres:
@@ -29,6 +34,8 @@ jobs:
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Configurar JDK 21 (Temurin)
         uses: actions/setup-java@v6
@@ -36,6 +43,30 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
+      - name: Conferir migrations sintéticas antes de iniciar Spring
+        shell: bash
+        run: |
+          set -euo pipefail
+          migration_dir="$GITHUB_WORKSPACE/backend/src/test/resources/db/synthetic-migration"
+          manifest="$GITHUB_WORKSPACE/backend/src/test/resources/synthetic-migrations.sha256"
+          test "$TEST_FLYWAY_LOCATION" = "filesystem:$migration_dir"
+          test -d "$migration_dir" && test ! -L "$migration_dir"
+          mapfile -t entries < "$manifest"
+          test "${#entries[@]}" -eq 22
+          names=()
+          for index in "${!entries[@]}"; do
+            version=$((index + 1))
+            pattern="^[A-F0-9]{64}  (V${version}__[a-z0-9_]+[.]sql)$"
+            [[ "${entries[$index]}" =~ $pattern ]]
+            name="${BASH_REMATCH[1]}"
+            test -f "$migration_dir/$name" && test ! -L "$migration_dir/$name"
+            names+=("$name")
+          done
+          diff -u <(printf '%s\n' "${names[@]}" | sort) \
+            <(find "$migration_dir" -mindepth 1 -maxdepth 1 -printf '%f\n' | sort)
+          cd "$migration_dir"
+          sha256sum --strict --check "$manifest"
 
       - name: Executar Testes Automatizados do Backend
         env:
@@ -47,7 +78,7 @@ jobs:
         run: |
           cd backend
           chmod +x mvnw
-          ./mvnw clean test
+          ./mvnw -B -ntp clean verify -Djunit.jupiter.execution.parallel.enabled=false
 
   frontend:
     name: Frontend — Lint & Build
@@ -56,6 +87,8 @@ jobs:
     steps:
       - name: Checkout do Repositório
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Configurar Node.js 22.x (LTS)
         uses: actions/setup-node@v7

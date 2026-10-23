@@ -1,8 +1,7 @@
 package com.oficinagestao.config;
 
-import com.oficinagestao.entity.ConfiguracaoOficina;
+import com.oficinagestao.exception.ConfiguracaoOficinaIndisponivelException;
 import com.oficinagestao.repository.ConfiguracaoOficinaRepository;
-import com.oficinagestao.service.ConfiguracaoOficinaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -12,10 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Bootstrap da configuração da oficina.
- *
- * Garante que a oficina Bruno Soldas esteja inicializada no banco de dados na inicialização
- * da aplicação, evitando qualquer possibilidade de retorno 404 em /api/configuracao-oficina.
+ * Valida a configuração criada pelas migrations, sem inserir ou reparar dados.
+ * Inconsistências permitem o startup degradado; os consumidores falham de forma controlada.
  */
 @Component
 @Order(10)
@@ -30,15 +27,17 @@ public class ConfiguracaoOficinaBootstrap implements ApplicationRunner {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public void run(ApplicationArguments args) {
-        if (repository.count() == 0) {
-            ConfiguracaoOficina config = ConfiguracaoOficinaService.criarConfiguracaoPadrao();
-            repository.save(config);
-            log.info("Inicialização: Configuração inicial da oficina criada com sucesso para: [{}] (CNPJ: {}).",
-                    config.getNomeFantasia(), config.getCnpj());
+        long quantidade = repository.count();
+        if (quantidade == 0) {
+            log.error("{}: configuração da oficina ausente; necessária recuperação administrativa controlada. Operação degradada.",
+                    ConfiguracaoOficinaIndisponivelException.MISSING_CODE);
+        } else if (quantidade != 1) {
+            log.error("{}: anomalia de integridade na configuração da oficina; necessária investigação administrativa. Operação degradada.",
+                    ConfiguracaoOficinaIndisponivelException.INTEGRITY_CODE);
         } else {
-            log.info("Inicialização: Configuração da oficina já presente no banco de dados.");
+            log.info("Validação da configuração da oficina concluída com sucesso.");
         }
     }
 }

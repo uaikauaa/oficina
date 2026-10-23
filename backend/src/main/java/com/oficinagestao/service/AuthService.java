@@ -341,7 +341,9 @@ public class AuthService {
         return new LoginChallengeResponse(true, newChallengeToken, "Novo código de verificação enviado para o seu e-mail.");
     }
 
-    @Transactional
+    // Only detected reuse commits its defensive revocation despite returning 401.
+    // Persistence errors and every other failure retain the default rollback policy.
+    @Transactional(noRollbackFor = RevokedRefreshReuseException.class)
     public LoginResult refresh(String refreshTokenValue, HttpServletRequest httpRequest) {
         if (refreshTokenValue == null || refreshTokenValue.isBlank()) {
             throw new BadCredentialsException("Refresh token ausente ou inválido.");
@@ -355,7 +357,7 @@ public class AuthService {
             if (oldToken.getUsuario() != null) {
                 refreshTokenRepository.revokeAllByUsuarioId(oldToken.getUsuario().getId());
             }
-            throw new BadCredentialsException("Refresh token revogado.");
+            throw new RevokedRefreshReuseException();
         }
 
         if (oldToken.isExpired()) {
@@ -401,6 +403,12 @@ public class AuthService {
                 userResponse,
                 rememberMe
         );
+    }
+
+    private static final class RevokedRefreshReuseException extends BadCredentialsException {
+        private RevokedRefreshReuseException() {
+            super("Refresh token revogado.");
+        }
     }
 
     @Transactional(readOnly = true)
@@ -499,11 +507,12 @@ public class AuthService {
         log.info("Senha alterada com sucesso para o usuário ID: [{}]", usuario.getId());
     }
 
+    /** Retém todos os tokens até sete dias após a expiração, inclusive os revogados. */
     @Transactional
     public int purgarTokensExpiradosOuRevogados() {
         OffsetDateTime limite = OffsetDateTime.now().minusDays(7);
         int deletados = refreshTokenRepository.deleteExpiredOrRevoked(limite);
-        log.info("Purga de refresh tokens concluída: {} tokens removidos.", deletados);
+        log.info("Purga de refresh tokens fora da retenção de sete dias após expiração: {} tokens removidos.", deletados);
         return deletados;
     }
 

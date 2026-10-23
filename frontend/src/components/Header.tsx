@@ -37,15 +37,42 @@ interface HeaderProps {
 export default function Header({ user }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const logoutInFlight = useRef(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
 
   const handleLogout = async () => {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setIsLoggingOut(true);
+    setLogoutError(null);
+    let confirmed = false;
     try {
-      await apiFetch('/api/auth/logout', { method: 'POST' });
-    } catch {
-      // Silencioso em caso de falha de rede
-    } finally {
-      router.push('/login');
+      const response = await apiFetch('/api/auth/logout', { method: 'POST' });
+      if (response.ok !== true) {
+        let message = 'Não foi possível confirmar sua saída. Tente novamente.';
+        if (response.status === 403) {
+          const body = await response.json().catch(() => null);
+          if (body?.error === 'CSRF_INVALID') {
+            message = 'Não foi possível confirmar sua saída por uma falha de segurança da sessão. Tente novamente.';
+          }
+        }
+        console.warn('LOGOUT_NOT_CONFIRMED', { status: response.status });
+        setLogoutError(message);
+        return;
+      }
+      router.replace('/login');
       router.refresh();
+      confirmed = true;
+    } catch {
+      console.warn('LOGOUT_NOT_CONFIRMED: falha de comunicação.');
+      setLogoutError('Não foi possível confirmar sua saída. Tente novamente.');
+    } finally {
+      // Após sucesso, mantém o bloqueio até a navegação desmontar o Header.
+      if (!confirmed) {
+        logoutInFlight.current = false;
+        setIsLoggingOut(false);
+      }
     }
   };
 
@@ -525,14 +552,16 @@ export default function Header({ user }: HeaderProps) {
                       id="header-logout-btn"
                       type="button"
                       role="menuitem"
+                      disabled={isLoggingOut}
+                      aria-busy={isLoggingOut}
                       onClick={() => {
                         setIsUserMenuOpen(false);
                         handleLogout();
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                     >
                       <LogOut className="w-3.5 h-3.5" />
-                      <span>Sair do Sistema</span>
+                      <span>{isLoggingOut ? 'Saindo...' : 'Sair do Sistema'}</span>
                     </button>
                   </div>
                 )}
@@ -657,12 +686,15 @@ export default function Header({ user }: HeaderProps) {
                     <span>Configurações</span>
                   </Link>
                   <button
+                    id="header-mobile-logout-btn"
                     type="button"
+                    disabled={isLoggingOut}
+                    aria-busy={isLoggingOut}
                     onClick={handleLogout}
-                    className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-1 border border-red-500/20 transition-all cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-1 border border-red-500/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Sair</span>
+                    <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
                   </button>
                 </div>
               </div>
@@ -670,6 +702,24 @@ export default function Header({ user }: HeaderProps) {
           </div>
         )}
       </header>
+      {isLoggingOut && (
+        <div role="status" className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-slate-700 bg-slate-900 p-3 text-sm text-slate-200 shadow-lg z-50 print:hidden">
+          Confirmando saída...
+        </div>
+      )}
+      {logoutError && (
+        <div className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-red-500/30 bg-slate-900 p-3 text-sm text-red-200 shadow-lg z-50 print:hidden">
+          <p role="alert" aria-atomic="true">{logoutError}</p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="mt-2 rounded-lg px-2 py-1 font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300 disabled:opacity-60"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )}
       <BuscaRapidaModal isOpen={isBuscaOpen} onClose={() => setIsBuscaOpen(false)} />
     </>
   );

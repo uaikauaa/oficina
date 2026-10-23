@@ -151,8 +151,8 @@ class RefreshTokenConcurrencyIntegrationTest {
         // 2. Validação da exceção da requisição rejeitada
         Throwable rejected = exceptions.get(0);
         assertTrue(rejected instanceof BadCredentialsException, "A requisição rejeitada deve lançar BadCredentialsException.");
-        assertTrue(rejected.getMessage().contains("Refresh token revogado") || rejected.getMessage().contains("Refresh token"),
-                "A mensagem deve indicar que o refresh token foi revogado.");
+        assertEquals("Refresh token revogado.", rejected.getMessage(),
+                "A chamada concorrente rejeitada deve detectar a reutilizacao.");
 
         // 3. Validação do estado no banco de dados
         RefreshToken updatedInitialToken = refreshTokenRepository.findById(initialTokenId).orElseThrow();
@@ -164,10 +164,18 @@ class RefreshTokenConcurrencyIntegrationTest {
         assertNotNull(winningSession.refreshToken(), "Deve conter um novo refresh token emitido.");
         assertNotEquals(tokenValue, winningSession.refreshToken(), "O novo refresh token deve ser diferente do original.");
 
-        // 5. Validação de unicidade no banco: o novo token deve existir e estar válido
+        // 5. A2: apos a segunda chamada detectar reuso, a familia emitida fica revogada.
+        // Rotacao sem reuso continua coberta por shouldHandleSequentialRotationsSuccessfully.
         RefreshToken newTokenInDb = buscarToken(winningSession.refreshToken());
         assertNotNull(newTokenInDb, "O novo refresh token deve existir no banco de dados.");
-        assertFalse(newTokenInDb.getRevogado(), "O novo token emitido deve estar ativo.");
+        assertTrue(newTokenInDb.getRevogado(), "A rejeicao por reuso deve persistir a revogacao da familia.");
+        assertEquals(1, results.size(), "Somente uma sessao pode ter sido emitida.");
+        assertThrows(BadCredentialsException.class,
+                () -> authService.refresh(winningSession.refreshToken(), new MockHttpServletRequest()));
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM refresh_tokens WHERE usuario_id = ?", Integer.class, testUser.getId()));
+        assertEquals(2, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM refresh_tokens WHERE usuario_id = ? AND revogado = true", Integer.class, testUser.getId()));
     }
 
     private RefreshToken buscarToken(String rawToken) {
