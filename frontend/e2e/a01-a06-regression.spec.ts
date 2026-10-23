@@ -18,6 +18,10 @@ const config = {
 
 async function baseMocks(page: Page) {
   await page.route('**/api/**', route => route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }));
+  // Autenticação usa CSRF em toda mutação, inclusive refresh de sessão.
+  await page.route('**/api/auth/csrf', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'synthetic-e2e-csrf' }),
+  }));
   await page.route('**/api/categorias/ativas', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
   await page.route('**/api/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
   await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(config) }));
