@@ -248,16 +248,25 @@ class RefreshTokenHashSecurityTest {
         String rawToken2 = result2.refreshToken();
         assertNotNull(rawToken2);
         assertNotEquals(rawToken1, rawToken2);
+        assertFalse(buscarTokenPorHash(tokenHashUtil.hash(rawToken2)).getRevogado());
 
-        // Tentativa de reutilizar R1: deve ser rejeitada
-        assertThrows(BadCredentialsException.class, () ->
-                authService.refresh(rawToken1, request)
-        );
-
-        // R2 continua válido e utilizável para nova rotação: R2 -> R3
+        // Sem reutilizacao, R2 permanece utilizavel para a rotacao legitima R2 -> R3.
         LoginResult result3 = authService.refresh(rawToken2, request);
         assertNotNull(result3.refreshToken());
         assertNotEquals(rawToken2, result3.refreshToken());
+        assertFalse(buscarTokenPorHash(tokenHashUtil.hash(result3.refreshToken())).getRevogado());
+
+        // A2: reutilizar R1 rejeita a chamada e revoga tambem seus descendentes.
+        BadCredentialsException reuse = assertThrows(BadCredentialsException.class, () ->
+                authService.refresh(rawToken1, request)
+        );
+        assertEquals("Refresh token revogado.", reuse.getMessage());
+        for (String raw : List.of(rawToken1, rawToken2, result3.refreshToken())) {
+            assertTrue(buscarTokenPorHash(tokenHashUtil.hash(raw)).getRevogado());
+        }
+        assertThrows(BadCredentialsException.class, () -> authService.refresh(result3.refreshToken(), request));
+        assertEquals(3, jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM refresh_tokens WHERE usuario_id = ?", Integer.class, testUser.getId()));
     }
 
     @Test
