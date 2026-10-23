@@ -125,7 +125,10 @@ test('A06: configuração em 320px permite editar, salvar e cancelar', async ({ 
   await expect(editar).toBeVisible();
   await editar.click();
   await page.getByRole('button', { name: 'Salvar Configuração' }).click();
-  expect(saved).toBe(true);
+  // O cliente HTTP obtém primeiro o token CSRF; aguarde o PUT assíncrono,
+  // sem enfraquecer a verificação de persistência da configuração.
+  await expect.poll(() => saved, { message: 'Salvar deve enviar PUT /api/configuracao-oficina' }).toBe(true);
+  await expect(editar).toBeVisible();
 });
 
 test('A05/A06: matriz das telas autenticadas não tem overflow global', async ({ page }) => {
