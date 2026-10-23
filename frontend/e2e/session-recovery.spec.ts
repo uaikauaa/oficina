@@ -7,6 +7,10 @@ async function mockSession(page: Page, meStatusBeforeRefresh: number, refreshSta
   let meCalls = 0;
   let refreshCalls = 0;
   await page.route('**/api/**', (route) => {
+  // Autenticação usa CSRF em toda mutação, inclusive refresh de sessão.
+  await page.route('**/api/auth/csrf', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'synthetic-e2e-csrf' }),
+  }));
     throw new Error(`API não mockada no cenário B03: ${route.request().url()}`);
   });
   await page.route('**/api/notificacoes', (route) => route.fulfill({
