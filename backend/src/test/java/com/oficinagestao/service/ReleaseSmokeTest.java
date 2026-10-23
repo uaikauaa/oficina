@@ -195,12 +195,12 @@ class ReleaseSmokeTest {
 
         // 8. Gerar PDF da OS e verificar integridade
         ConfiguracaoOficina configStub = new ConfiguracaoOficina();
-        configStub.setNomeFantasia("Bruno Soldas");
-        configStub.setCnpj("45.076.507/0001-67");
-        configStub.setTelefone("(14) 9886-7223");
-        configStub.setEmail("INDUTECSERVICE@HOTMAIL.COM");
-        configStub.setMunicipio("Ourinhos");
-        configStub.setUf("SP");
+        configStub.setNomeFantasia("OFICINA LAB SINTETICA 02GA");
+        configStub.setCnpj("CNPJ-SINTETICO");
+        configStub.setTelefone("SEM-TELEFONE");
+        configStub.setEmail("oficina@example.invalid");
+        configStub.setMunicipio("MUNICIPIO SINTETICO");
+        configStub.setUf("ZZ");
         when(configuracaoOficinaService.obterEntidade()).thenReturn(configStub);
 
         PdfService pdfService = new PdfService();

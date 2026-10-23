@@ -12,12 +12,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.InvalidCsrfTokenException;
+import org.springframework.security.web.csrf.MissingCsrfTokenException;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,17 +35,20 @@ public class SecurityConfig {
     private final ObjectMapper objectMapper;
     private final String allowedOrigins;
     private final boolean swaggerEnabled;
+    private final boolean cookieSecure;
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
             ObjectMapper objectMapper,
             @Value("${cors.allowed-origins:http://localhost:3000,http://127.0.0.1:3000}") String allowedOrigins,
-            @Value("${springdoc.swagger-ui.enabled:true}") boolean swaggerEnabled
+            @Value("${springdoc.swagger-ui.enabled:true}") boolean swaggerEnabled,
+            @Value("${security.cookie.secure:false}") boolean cookieSecure
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.objectMapper = objectMapper;
         this.allowedOrigins = allowedOrigins;
         this.swaggerEnabled = swaggerEnabled;
+        this.cookieSecure = cookieSecure;
     }
 
     @Bean
@@ -59,13 +64,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Justificativa CSRF:
-                // 1. Arquitetura SPA/WebApp stateless com Spring Boot REST API
-                // 2. Access token transportado via cookie HttpOnly com SameSite=Lax (bloqueia requisições cross-site mutantes)
-                // 3. Refresh token (7 dias) transportado via cookie HttpOnly com SameSite=Strict e path restrito (/api/auth)
-                // 4. CORS configurado com lista explícita de origens e allowCredentials(true)
-                // 5. A ausência de tokens válidos resulta em 401 Unauthorized
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(csrfTokenRepository())
+                        .csrfTokenRequestHandler(new HeaderOnlyCsrfTokenRequestHandler())
+                        .requireCsrfProtectionMatcher(new CookieAuthenticationCsrfMatcher()))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
@@ -80,6 +82,7 @@ public class SecurityConfig {
 
                     // Endpoints de autenticação abertos
                     auth.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/auth/csrf").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/2fa/**").permitAll()
@@ -102,10 +105,12 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            boolean csrfFailure = accessDeniedException instanceof MissingCsrfTokenException
+                                    || accessDeniedException instanceof InvalidCsrfTokenException;
                             ApiErrorResponse error = ApiErrorResponse.of(
                                     HttpServletResponse.SC_FORBIDDEN,
-                                    "FORBIDDEN",
-                                    "Acesso negado. Permissão insuficiente.",
+                                    csrfFailure ? "CSRF_INVALID" : "FORBIDDEN",
+                                    csrfFailure ? "Sessão de segurança expirada. Tente novamente." : "Acesso negado. Permissão insuficiente.",
                                     request.getRequestURI()
                             );
                             response.getOutputStream().write(objectMapper.writeValueAsBytes(error));
@@ -125,7 +130,7 @@ public class SecurityConfig {
                 .toList();
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-XSRF-TOKEN"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
@@ -133,4 +138,11 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+    private CookieCsrfTokenRepository csrfTokenRepository() {
+        CookieCsrfTokenRepository repository = new CookieCsrfTokenRepository();
+        repository.setCookieCustomizer(cookie -> cookie.httpOnly(true).secure(cookieSecure).sameSite("Strict").path("/"));
+        return repository;
+    }
+
 }

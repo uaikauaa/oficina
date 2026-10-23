@@ -30,25 +30,25 @@ class ConfiguracaoOficinaControllerTest {
         return new ConfiguracaoOficinaResponseDTO(
                 1L,
                 "Oficina Gestão",
-                "Bruno Soldas",
-                "45.076.507 BRUNO SOARES RODRIGUES",
-                "45.076.507/0001-67",
-                "Geisa",
-                "(14) 9886-7223",
-                "INDUTECSERVICE@HOTMAIL.COM",
-                "Avenida Jacinto Ferreira de Sá - de 1272/1273 ao fim",
+                "OFICINA LAB SINTETICA 02GA",
+                "ENTIDADE FICTICIA DE TESTE 02GA",
+                "CNPJ-SINTETICO",
+                "RESPONSAVEL SINTETICO",
+                "SEM-TELEFONE",
+                "oficina@example.invalid",
+                "VIA SINTETICA",
                 "1538",
-                "Vila Sandano",
-                "19.914-080",
-                "Ourinhos",
-                "SP",
+                "BAIRRO SINTETICO",
+                "CEP-TESTE",
+                "MUNICIPIO SINTETICO",
+                "ZZ",
                 OffsetDateTime.now(),
                 OffsetDateTime.now()
         );
     }
 
     @Test
-    @DisplayName("Deve retornar 200 OK com os dados da Bruno Soldas")
+    @DisplayName("Deve retornar 200 OK com os dados da OFICINA LAB SINTETICA 02GA")
     void deveRetornarDadosDaOficinaComSucesso() {
         ConfiguracaoOficinaResponseDTO dto = criarDtoExemplo();
         when(configuracaoOficinaService.obter()).thenReturn(dto);
@@ -57,29 +57,29 @@ class ConfiguracaoOficinaControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Bruno Soldas", response.getBody().nomeFantasia());
-        assertEquals("Geisa", response.getBody().responsavel());
-        assertEquals("45.076.507/0001-67", response.getBody().cnpj());
-        assertEquals("Ourinhos", response.getBody().municipio());
-        assertEquals("SP", response.getBody().uf());
+        assertEquals("OFICINA LAB SINTETICA 02GA", response.getBody().nomeFantasia());
+        assertEquals("RESPONSAVEL SINTETICO", response.getBody().responsavel());
+        assertEquals("CNPJ-SINTETICO", response.getBody().cnpj());
+        assertEquals("MUNICIPIO SINTETICO", response.getBody().municipio());
+        assertEquals("ZZ", response.getBody().uf());
     }
 
     @Test
     @DisplayName("Deve atualizar os dados da oficina com sucesso")
     void deveAtualizarDadosDaOficina() {
         ConfiguracaoOficinaUpdateDTO updateDto = new ConfiguracaoOficinaUpdateDTO(
-                "Bruno Soldas",
-                "45.076.507 BRUNO SOARES RODRIGUES",
-                "45.076.507/0001-67",
-                "Geisa",
-                "(14) 9886-7223",
-                "INDUTECSERVICE@HOTMAIL.COM",
-                "Avenida Jacinto Ferreira de Sá - de 1272/1273 ao fim",
+                "OFICINA LAB SINTETICA 02GA",
+                "ENTIDADE FICTICIA DE TESTE 02GA",
+                "CNPJ-SINTETICO",
+                "RESPONSAVEL SINTETICO",
+                "SEM-TELEFONE",
+                "oficina@example.invalid",
+                "VIA SINTETICA",
                 "1538",
-                "Vila Sandano",
-                "19.914-080",
-                "Ourinhos",
-                "SP"
+                "BAIRRO SINTETICO",
+                "CEP-TESTE",
+                "MUNICIPIO SINTETICO",
+                "ZZ"
         );
 
         ConfiguracaoOficinaResponseDTO responseDto = criarDtoExemplo();
@@ -89,7 +89,7 @@ class ConfiguracaoOficinaControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals("Bruno Soldas", response.getBody().nomeFantasia());
+        assertEquals("OFICINA LAB SINTETICA 02GA", response.getBody().nomeFantasia());
         verify(configuracaoOficinaService, times(1)).atualizar(updateDto);
     }
 }

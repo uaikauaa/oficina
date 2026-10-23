@@ -22,7 +22,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     @Query("UPDATE RefreshToken r SET r.revogado = true WHERE r.usuario.id = :usuarioId AND r.revogado = false")
     void revokeAllByUsuarioId(@Param("usuarioId") Long usuarioId);
 
+    // Inclusive retention boundary: even revoked tokens remain when expiration equals limite.
+    // Historical method name retained for compatibility; revocation alone never permits deletion.
     @Modifying
-    @Query("DELETE FROM RefreshToken r WHERE r.dataExpiracao < :limite OR r.revogado = true")
+    @Query("DELETE FROM RefreshToken r WHERE r.dataExpiracao < :limite")
     int deleteExpiredOrRevoked(@Param("limite") java.time.OffsetDateTime limite);
 }

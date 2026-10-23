@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.oficinagestao.testsupport.CsrfMockMvc.withCsrf;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -72,7 +73,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar 400 com detalhes de validação ao enviar corpo inválido no login")
     void shouldReturn400ValidationDetails() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/login"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"email\":\"email-invalido\",\"senha\":\"\"}"))
                 .andExpect(status().isBadRequest())
@@ -87,7 +88,7 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar 400 BAD_REQUEST ao enviar JSON malformado")
     void shouldReturn400OnMalformedJson() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/login"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{malformed-json"))
                 .andExpect(status().isBadRequest())

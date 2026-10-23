@@ -84,7 +84,7 @@ class JwtServiceTest {
     @DisplayName("Caso 5: Secret válido deve gerar JWT e validar o mesmo JWT com sucesso")
     void caso5_secretValido_gerarEValidarMesmoJwt_deveSerValido() {
         JwtService service = new JwtService("chave-secreta-de-testes-unificados-2026-com-tamanho-seguro", 900000L);
-        com.oficinagestao.entity.Usuario usuario = new com.oficinagestao.entity.Usuario("Geisa", "geisa@oficina.com", "hash", true);
+        com.oficinagestao.entity.Usuario usuario = new com.oficinagestao.entity.Usuario("RESPONSAVEL SINTETICO", "jwt-user@example.invalid", "hash", true);
         org.springframework.test.util.ReflectionTestUtils.setField(usuario, "id", 101L);
         usuario.addRole(new com.oficinagestao.entity.Role("ROLE_ADMIN", "Admin"));
 
@@ -92,7 +92,7 @@ class JwtServiceTest {
 
         assertNotNull(token);
         assertTrue(service.validateToken(token));
-        assertEquals("geisa@oficina.com", service.extractEmail(token));
+        assertEquals("jwt-user@example.invalid", service.extractEmail(token));
         assertEquals(101L, service.extractUserId(token));
         assertTrue(service.extractRoles(token).contains("ROLE_ADMIN"));
         assertFalse(service.isTokenExpired(token));

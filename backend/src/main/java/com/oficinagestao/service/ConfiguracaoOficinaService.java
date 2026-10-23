@@ -3,7 +3,10 @@ package com.oficinagestao.service;
 import com.oficinagestao.dto.ConfiguracaoOficinaResponseDTO;
 import com.oficinagestao.dto.ConfiguracaoOficinaUpdateDTO;
 import com.oficinagestao.entity.ConfiguracaoOficina;
+import com.oficinagestao.exception.ConfiguracaoOficinaIndisponivelException;
 import com.oficinagestao.repository.ConfiguracaoOficinaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +31,8 @@ public class ConfiguracaoOficinaService {
     }
 
     /**
-     * Retorna a configuração atual da oficina.
-     * Garante que os dados da Bruno Soldas estejam presentes.
+     * Retorna somente a configuração persistida da oficina.
      */
-    @Transactional
     public ConfiguracaoOficinaResponseDTO obter() {
         ConfiguracaoOficina config = obterEntidade();
         return toResponseDTO(config);
@@ -39,31 +40,20 @@ public class ConfiguracaoOficinaService {
 
     /**
      * Retorna a entidade de configuração para uso interno (ex: PdfService).
-     * Se ainda não existir no banco, cria e persiste a configuração padrão
-     * oficial da Bruno Soldas (auto-seeding / auto-healing), eliminando qualquer risco de 404.
+     * O cadastro inicial pertence às migrations. Ausência ou duplicidade exige
+     * investigação e recuperação administrativa, sem recriação automática.
      */
-    @Transactional
     public ConfiguracaoOficina obterEntidade() {
-        return repository.findFirstByOrderByIdAsc()
-                .orElseGet(() -> repository.save(criarConfiguracaoPadrao()));
-    }
-
-    public static ConfiguracaoOficina criarConfiguracaoPadrao() {
-        return new ConfiguracaoOficina(
-                "Oficina Gestão",
-                "Bruno Soldas",
-                "45.076.507 BRUNO SOARES RODRIGUES",
-                "45.076.507/0001-67",
-                "Geisa",
-                "(14) 9886-7223",
-                "INDUTECSERVICE@HOTMAIL.COM",
-                "Avenida Jacinto Ferreira de Sá - de 1272/1273 ao fim",
-                "1538",
-                "Vila Sandano",
-                "19.914-080",
-                "Ourinhos",
-                "SP"
-        );
+        // Até duas linhas bastam para verificar o singleton sem escolher uma
+        // configuração arbitrária caso a restrição de integridade seja violada.
+        var configuracoes = repository.findAll(PageRequest.of(0, 2, Sort.by("id"))).getContent();
+        if (configuracoes.isEmpty()) {
+            throw new ConfiguracaoOficinaIndisponivelException();
+        }
+        if (configuracoes.size() != 1) {
+            throw ConfiguracaoOficinaIndisponivelException.cadastroDuplicado();
+        }
+        return configuracoes.getFirst();
     }
 
     /**

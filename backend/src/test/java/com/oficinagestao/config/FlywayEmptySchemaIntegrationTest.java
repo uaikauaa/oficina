@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ActiveProfiles;
+import com.oficinagestao.testsupport.SyntheticMigrations;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -40,7 +41,7 @@ class FlywayEmptySchemaIntegrationTest {
                     .dataSource(dataSource)
                     .schemas(schema)
                     .defaultSchema(schema)
-                    .locations("classpath:db/migration")
+                    .locations(SyntheticMigrations.location(environment))
                     .baselineOnMigrate(false)
                     .validateOnMigrate(true)
                     .load();
@@ -81,12 +82,12 @@ class FlywayEmptySchemaIntegrationTest {
 
         try {
             Flyway v21 = Flyway.configure().dataSource(dataSource).schemas(schema).defaultSchema(schema)
-                    .locations("classpath:db/migration").target("21").baselineOnMigrate(false).load();
+                    .locations(SyntheticMigrations.location(environment)).target("21").baselineOnMigrate(false).load();
             v21.migrate();
             assertEquals("21", v21.info().current().getVersion().getVersion());
 
             Flyway v22 = Flyway.configure().dataSource(dataSource).schemas(schema).defaultSchema(schema)
-                    .locations("classpath:db/migration").baselineOnMigrate(false).validateOnMigrate(true).load();
+                    .locations(SyntheticMigrations.location(environment)).baselineOnMigrate(false).validateOnMigrate(true).load();
             v22.migrate();
             v22.validate();
             assertEquals("22", v22.info().current().getVersion().getVersion());

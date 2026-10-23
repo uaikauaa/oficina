@@ -28,6 +28,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.oficinagestao.testsupport.CsrfMockMvc.withCsrf;
 
 /**
  * Testes forenses para validação da proteção contra CSRF, configuração de CORS
@@ -188,7 +189,7 @@ class CsrfAndCorsSecurityTest {
 
         TwoFactorVerifyRequest verifyRequest = new TwoFactorVerifyRequest("challenge-token-csrf-test", rawCode);
 
-        MvcResult result = mockMvc.perform(post("/api/auth/2fa/verify")
+        MvcResult result = mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/verify"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyRequest)))
                 .andExpect(status().isOk())
@@ -220,7 +221,7 @@ class CsrfAndCorsSecurityTest {
     @Test
     @DisplayName("Cookies: Logout deve limpar ambos os cookies preservando HttpOnly, SameSite e Paths corretos")
     void shouldClearCookiesOnLogoutWithPreservedSecurityAttributes() throws Exception {
-        MvcResult result = mockMvc.perform(post("/api/auth/logout"))
+        MvcResult result = mockMvc.perform(withCsrf(mockMvc, post("/api/auth/logout")))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
                 .andReturn();

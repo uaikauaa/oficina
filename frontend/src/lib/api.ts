@@ -35,6 +35,10 @@ export async function extrairMensagemErroLogin(response: Response): Promise<stri
   }
 
   if (response.status === 403) {
+    const errorData = await response.json().catch(() => ({}));
+    if (errorData?.error === 'CSRF_INVALID') {
+      return errorData?.message || 'Sessão de segurança expirada. Tente novamente.';
+    }
     return 'Conta desativada. Entre em contato com o suporte.';
   }
 
@@ -44,6 +48,35 @@ export async function extrairMensagemErroLogin(response: Response): Promise<stri
 // Mutex / Promise compartilhada para evitar disparos concorrentes de refresh token (ISSUE-01)
 let activeRefreshPromise: Promise<boolean> | null = null;
 let refreshGeneration = 0;
+let csrfTokenPromise: Promise<string> | null = null;
+
+function isMutating(method?: string): boolean {
+  return !['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes((method || 'GET').toUpperCase());
+}
+
+async function getCsrfToken(): Promise<string> {
+  if (!csrfTokenPromise) {
+    csrfTokenPromise = fetch(`${API_URL}/api/auth/csrf`, {
+      credentials: 'include',
+      cache: 'no-store',
+    }).then(async response => {
+      if (!response.ok) throw new Error('Não foi possível obter o token CSRF.');
+      const body: { token?: string } = await response.json();
+      if (!body.token) throw new Error('Resposta CSRF inválida.');
+      return body.token;
+    }).catch(error => {
+      csrfTokenPromise = null;
+      throw error;
+    });
+  }
+  return csrfTokenPromise;
+}
+
+async function withCsrfHeader(headers?: HeadersInit): Promise<Headers> {
+  const result = new Headers(headers);
+  if (typeof window !== 'undefined') result.set('X-XSRF-TOKEN', await getCsrfToken());
+  return result;
+}
 
 export async function executeSilentRefresh(): Promise<boolean> {
   if (!activeRefreshPromise) {
@@ -52,7 +85,9 @@ export async function executeSilentRefresh(): Promise<boolean> {
         const refreshRes = await fetch(`${API_URL}/api/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
+          headers: await withCsrfHeader(),
         });
+        if (refreshRes.status === 403) csrfTokenPromise = null;
         if (refreshRes.ok) refreshGeneration++;
         return refreshRes.ok;
       } catch {
@@ -123,16 +158,20 @@ export function sanitizarRedirect(url: string | null): string {
 export async function apiFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const url = `${API_URL}${endpoint}`;
   const generationAtStart = refreshGeneration;
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  if (isMutating(options.method)) {
+    const csrfHeaders = await withCsrfHeader(headers);
+    csrfHeaders.forEach((value, key) => headers.set(key, value));
+  }
   const config: RequestInit = {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   };
 
   let response = await fetch(url, config);
+  if (response.status === 403 && isMutating(options.method)) csrfTokenPromise = null;
 
   // Se o access_token expirou (401), aguarda ou executa renovação silenciosa com refresh_token compartilhado
   if (response.status === 401 && (endpoint === '/api/auth/me' || !endpoint.startsWith('/api/auth/'))) {

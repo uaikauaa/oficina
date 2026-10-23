@@ -35,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.oficinagestao.testsupport.CsrfMockMvc.withCsrf;
 
 /**
  * Testes forenses obrigatórios para SEC-07:
@@ -55,6 +56,9 @@ class TokenVersionSecurityTest {
 
     @Autowired
     private JwtService jwtService;
+
+    @org.springframework.beans.factory.annotation.Value("${security.jwt.secret}")
+    private String testJwtSecret;
 
     @Autowired
     private AuthService authService;
@@ -186,8 +190,16 @@ class TokenVersionSecurityTest {
         Usuario usuario = criarUsuarioTeste("usuario_expirado@oficina.com", "SenhaForte#2026");
 
         // Cria serviço JWT com expiração negativa (já expirado)
-        JwtService expiredJwtService = new JwtService("chave-secreta-de-testes-unificados-2026-com-tamanho-seguro", -1000L);
+        JwtService expiredJwtService = new JwtService(testJwtSecret, -60_000L);
         String expiredToken = expiredJwtService.generateToken(usuario, 0);
+
+        // The application's verifier must accept the signature and fail specifically on expiry.
+        var expired = assertThrows(io.jsonwebtoken.ExpiredJwtException.class,
+                () -> jwtService.extractClaims(expiredToken));
+        assertEquals(usuario.getEmail(), expired.getClaims().getSubject());
+        assertEquals(0, expired.getClaims().get("tokenVersion", Integer.class));
+        assertTrue(expired.getClaims().getExpiration().before(new java.util.Date()));
+        assertTrue(jwtService.validateToken(jwtService.generateToken(usuario, 0)));
 
         mockMvc.perform(get("/api/produtos")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredToken))
@@ -222,17 +234,23 @@ class TokenVersionSecurityTest {
         Usuario usuario = criarUsuarioTeste("usuario_refresh_revogado@oficina.com", "SenhaForte#2026");
 
         String tokenValue = UUID.randomUUID().toString();
-        RefreshToken refreshToken = new RefreshToken(usuario, tokenValue, OffsetDateTime.now().plusDays(1), false);
+        RefreshToken refreshToken = new RefreshToken(usuario, TokenHashUtil.hashStatic(tokenValue), OffsetDateTime.now().plusDays(1), false);
         refreshToken.revoke();
         refreshTokenRepository.save(refreshToken);
+
+        assertEquals(refreshToken.getId(), refreshTokenRepository
+                .findByTokenHash(TokenHashUtil.hashStatic(tokenValue)).orElseThrow().getId());
 
         Cookie refreshCookie = new Cookie("refresh_token", tokenValue);
         refreshCookie.setPath("/api/auth");
         refreshCookie.setHttpOnly(true);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/refresh"))
                         .cookie(refreshCookie))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Refresh token revogado."))
+                .andExpect(cookie().doesNotExist("access_token"))
+                .andExpect(cookie().doesNotExist("refresh_token"));
     }
 
     // =========================================================================
@@ -255,7 +273,7 @@ class TokenVersionSecurityTest {
         Cookie accessCookie = new Cookie("access_token", tokenAntesDoLogout);
         accessCookie.setPath("/");
 
-        mockMvc.perform(post("/api/auth/logout")
+        mockMvc.perform(withCsrf(mockMvc, post("/api/auth/logout"))
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenAntesDoLogout)
                         .cookie(accessCookie))
                 .andExpect(status().isOk());
@@ -293,7 +311,7 @@ class TokenVersionSecurityTest {
 
         TwoFactorVerifyRequest verifyRequest = new TwoFactorVerifyRequest("challenge-token-sec07-test", rawCode);
 
-        MvcResult result = mockMvc.perform(post("/api/auth/2fa/verify")
+        MvcResult result = mockMvc.perform(withCsrf(mockMvc, post("/api/auth/2fa/verify"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(verifyRequest)))
                 .andExpect(status().isOk())

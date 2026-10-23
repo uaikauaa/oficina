@@ -112,7 +112,7 @@ class AdminAccountBootstrapTest {
         ReflectionTestUtils.setField(bootstrap, "adminEmail", "novo@oficina.com");
         ReflectionTestUtils.setField(bootstrap, "adminPassword", "SenhaSegura@123");
 
-        Usuario adminExistente = new Usuario("Geisa", "admin@oficina.com", "hash_antigo", true);
+        Usuario adminExistente = new Usuario("RESPONSAVEL SINTETICO", "admin@oficina.com", "hash_antigo", true);
         adminExistente.setId(1L);
 
         when(usuarioRepository.findByEmail("novo@oficina.com")).thenReturn(Optional.empty());
