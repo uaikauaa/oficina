@@ -110,7 +110,7 @@ test('Impressão isolada: header e UI do sistema somem no contexto de print, man
   await expect(receipt).toContainText('OS-B11-77');
 
   // Screenshot de conferência visual no modo de impressão
-  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/recibo_print_preview.png', fullPage: true });
+  await page.screenshot({ path: 'recibo_print_preview.png', fullPage: true });
 
   // Retorna para tela normal e confirma restauração
   await page.emulateMedia({ media: 'screen' });
@@ -118,7 +118,7 @@ test('Impressão isolada: header e UI do sistema somem no contexto de print, man
   await expect(receipt).toBeHidden();
 
   // Screenshot de conferência visual no modo normal (header intacto)
-  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/sistema_modo_normal.png' });
+  await page.screenshot({ path: 'sistema_modo_normal.png' });
 });
 
 test('Tabela de peças sem coluna Código e dados do equipamento sequenciais', async ({ page }) => {
@@ -201,5 +201,5 @@ test('Tabela de peças sem coluna Código e dados do equipamento sequenciais', a
   await expect(receipt).toContainText('100 horas');
 
   // Atualizar screenshot para conferência com tabela de peças e equipamento completo
-  await page.screenshot({ path: 'C:/Users/Kauag/.gemini/antigravity-ide/brain/2277adcb-42c3-4d3a-8f77-4c38ae308dcb/recibo_print_preview.png', fullPage: true });
+  await page.screenshot({ path: 'recibo_print_preview.png', fullPage: true });
 });
