@@ -66,9 +66,8 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   const me = await context.request.get('/api/auth/me');
   expect(me.status(), 'The browser must have a real authenticated cookie session').toBe(200);
 
-  const headers = await csrfHeader(context);
   const clientResponse = await context.request.post('/api/clientes', {
-    headers,
+    headers: await csrfHeader(context),
     data: { tipoPessoa: 'FISICA', nomeRazaoSocial: 'Cliente integração CI',
       telefone: '14999990000', email: 'cliente.integration@oficina.invalid' },
   });
@@ -77,7 +76,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(client.id).toBeGreaterThan(0);
 
   const machineResponse = await context.request.post('/api/maquinas', {
-    headers,
+    headers: await csrfHeader(context),
     data: { clienteId: client.id, tipoEquipamento: 'MAQUINA_SOLDA',
       marca: 'ESAB CI', modelo: 'LHN Teste', numeroSerie: 'CI-SYNTH-001' },
   });
@@ -86,7 +85,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(machine.id).toBeGreaterThan(0);
 
   const productResponse = await context.request.post('/api/produtos', {
-    headers,
+    headers: await csrfHeader(context),
     data: { nome: 'Placa inversora CI', tipo: 'PECA',
       precoCusto: 20, precoVenda: 30, estoqueMinimo: 1, estoqueInicial: 3 },
   });
@@ -95,7 +94,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(Number(product.estoqueAtual)).toBe(3);
 
   const incoming = await context.request.post('/api/estoque/movimentar', {
-    headers,
+    headers: await csrfHeader(context),
     data: { produtoId: product.id, tipoMovimentacao: 'ENTRADA', quantidade: 2,
       valorUnitario: 20, motivo: 'Entrada sintética de integração CI' },
   });
@@ -103,7 +102,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(Number((await incoming.json()).quantidadePosterior)).toBe(5);
 
   const orderResponse = await context.request.post('/api/ordens-servico', {
-    headers,
+    headers: await csrfHeader(context),
     data: { clienteId: client.id, maquinaId: machine.id,
       problemaRelatado: 'Não liga (fluxo de integração CI)' },
   });
@@ -113,7 +112,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(order.numeroOs).toMatch(/^OS-/);
 
   const itemResponse = await context.request.post('/api/ordens-servico/' + order.id + '/itens', {
-    headers,
+    headers: await csrfHeader(context),
     data: { produtoId: product.id, quantidade: 2, valorDesconto: 0 },
   });
   expect(itemResponse.status(), await itemResponse.text()).toBe(201);
@@ -125,14 +124,14 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
 
   // Insufficient balance must not change the persisted stock.
   const insufficient = await context.request.post('/api/ordens-servico/' + order.id + '/itens', {
-    headers,
+    headers: await csrfHeader(context),
     data: { produtoId: product.id, quantidade: 999, valorDesconto: 0 },
   });
   expect(insufficient.status(), 'Overselling must be rejected').toBe(400);
   balance = await context.request.get('/api/produtos/' + product.id);
   expect(Number((await balance.json()).estoqueAtual)).toBe(3);
 
-  const remove = await context.request.delete('/api/ordens-servico/' + order.id + '/itens/' + item.id, { headers });
+  const remove = await context.request.delete('/api/ordens-servico/' + order.id + '/itens/' + item.id, { headers: await csrfHeader(context) });
   expect(remove.status(), await remove.text()).toBe(204);
   balance = await context.request.get('/api/produtos/' + product.id);
   expect(Number((await balance.json()).estoqueAtual), 'Removing item must restore the reserved stock').toBe(5);
@@ -142,7 +141,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   const history = await movementHistory.json() as { content: Array<{ tipoMovimentacao: string }> };
   expect(history.content.some(x => x.tipoMovimentacao === 'DEVOLUCAO')).toBeTruthy();
 
-  const logout = await context.request.post('/api/auth/logout', { headers });
+  const logout = await context.request.post('/api/auth/logout', { headers: await csrfHeader(context) });
   expect(logout.status(), await logout.text()).toBe(200);
   const afterLogout = await context.request.get('/api/auth/me');
   expect(afterLogout.status(), 'Logout must invalidate the authenticated session').toBe(401);
