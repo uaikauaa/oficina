@@ -20,15 +20,15 @@ async function prepare(page: Page, context: BrowserContext, responses: LogoutRes
   const csrfHeaders: string[] = [];
   page.on('console', message => warnings.push(message.text()));
   await context.addCookies([
-    { name: 'access_token', value: PRIVATE_MARKER, domain: '127.0.0.1', path: '/', httpOnly: true, sameSite: 'Lax' },
-    { name: 'refresh_token', value: PRIVATE_MARKER, domain: '127.0.0.1', path: '/api/auth', httpOnly: true, sameSite: 'Strict' },
+    { name: 'access_token', value: PRIVATE_MARKER, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' },
+    { name: 'refresh_token', value: PRIVATE_MARKER, domain: 'localhost', path: '/api/auth', httpOnly: true, sameSite: 'Strict' },
   ]);
 
   // Fail closed: every API response is synthetic; external requests are blocked.
   await context.route('**/*', async route => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.origin !== 'http://127.0.0.1:3117') {
+    if (url.origin !== 'http://localhost:3000') {
       unexpected.push('external request');
       await route.abort();
       return;

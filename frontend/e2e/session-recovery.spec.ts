@@ -9,6 +9,10 @@ async function mockSession(page: Page, meStatusBeforeRefresh: number, refreshSta
   await page.route('**/api/**', (route) => {
     throw new Error(`API não mockada no cenário B03: ${route.request().url()}`);
   });
+  // O cliente HTTP requisita o token CSRF antes de operações mutáveis, inclusive refresh.
+  await page.route('**/api/auth/csrf', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'synthetic-e2e-csrf' }),
+  }));
   await page.route('**/api/notificacoes', (route) => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ total: 0, naoLidas: 0, notificacoes: [] }),
