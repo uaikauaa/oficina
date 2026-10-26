@@ -55,6 +55,10 @@ function isMutating(method?: string): boolean {
 }
 
 async function getCsrfToken(): Promise<string> {
+  // O cookie HttpOnly é a fonte de verdade. Não manter o valor do token em memória
+  // entre mutações: ele pode mudar em outro request, aba, refresh ou login/2FA.
+  // Compartilhar apenas a obtenção em andamento evita gerar tokens concorrentes
+  // quando ainda não existe cookie no navegador.
   if (!csrfTokenPromise) {
     csrfTokenPromise = fetch(`${API_URL}/api/auth/csrf`, {
       credentials: 'include',
@@ -64,12 +68,14 @@ async function getCsrfToken(): Promise<string> {
       const body: { token?: string } = await response.json();
       if (!body.token) throw new Error('Resposta CSRF inválida.');
       return body.token;
-    }).catch(error => {
-      csrfTokenPromise = null;
-      throw error;
     });
   }
-  return csrfTokenPromise;
+  const pending = csrfTokenPromise;
+  try {
+    return await pending;
+  } finally {
+    if (csrfTokenPromise === pending) csrfTokenPromise = null;
+  }
 }
 
 async function withCsrfHeader(headers?: HeadersInit): Promise<Headers> {
@@ -87,7 +93,6 @@ export async function executeSilentRefresh(): Promise<boolean> {
           credentials: 'include',
           headers: await withCsrfHeader(),
         });
-        if (refreshRes.status === 403) csrfTokenPromise = null;
         if (refreshRes.ok) refreshGeneration++;
         return refreshRes.ok;
       } catch {
@@ -171,19 +176,25 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}): Pro
   };
 
   let response = await fetch(url, config);
-  if (response.status === 403 && isMutating(options.method)) csrfTokenPromise = null;
+
+  // Se a sessão for renovada, recalcule o header CSRF antes de reenviar uma
+  // mutação que recebeu 401. Nunca repetir automaticamente uma mutação com 403.
+  const retryAfterRefresh = async (): Promise<Response> => {
+    if (!isMutating(options.method)) return fetch(url, config);
+    return fetch(url, { ...config, headers: await withCsrfHeader(headers) });
+  };
 
   // Se o access_token expirou (401), aguarda ou executa renovação silenciosa com refresh_token compartilhado
   if (response.status === 401 && (endpoint === '/api/auth/me' || !endpoint.startsWith('/api/auth/'))) {
     // Outra requisição pode ter concluído o refresh enquanto esta aguardava seu 401.
     // Nesse caso, usar o cookie novo sem girar o refresh token mais uma vez.
     if (refreshGeneration !== generationAtStart) {
-      return fetch(url, config);
+      return retryAfterRefresh();
     }
     const refreshSuccess = await executeSilentRefresh();
     if (refreshSuccess) {
       // Repete a requisição original com os novos cookies definidos no navegador
-      response = await fetch(url, config);
+      response = await retryAfterRefresh();
     }
   }
 
