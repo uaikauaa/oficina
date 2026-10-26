@@ -53,3 +53,89 @@ test('CSRF: navegador obtém um token compartilhado e protege mutações sem rep
     else Reflect.deleteProperty(globalThis, 'window');
   }
 });
+
+
+test('CSRF: operações sequenciais não reutilizam token após troca do cookie', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} });
+  let currentCookieToken = 'csrf-1';
+  let csrfRequests = 0;
+  let writes = 0;
+  let refreshes = 0;
+  const headersReceived: string[] = [];
+  globalThis.fetch = async (input, options) => {
+    const url = String(input);
+    if (url.endsWith('/api/auth/csrf')) {
+      csrfRequests++;
+      return Response.json({ token: currentCookieToken });
+    }
+    if (url.endsWith('/api/auth/refresh')) {
+      refreshes++;
+      return new Response(null, { status: 401 });
+    }
+    if (url.endsWith('/api/save') || url.endsWith('/api/auth/logout')) {
+      writes++;
+      const csrfHeader = new Headers(options?.headers).get('X-XSRF-TOKEN') ?? '';
+      headersReceived.push(csrfHeader);
+      if (csrfHeader !== currentCookieToken) {
+        return Response.json({ error: 'CSRF_INVALID' }, { status: 403 });
+      }
+      // Simula troca de cookie no backend por outra operação ou aba.
+      currentCookieToken = `csrf-${writes + 1}`;
+      return new Response(null, { status: 204 });
+    }
+    return new Response(null, { status: 404 });
+  };
+  try {
+    assert.equal((await apiFetch('/api/save', { method: 'POST' })).status, 204);
+    assert.equal((await apiFetch('/api/save', { method: 'PUT' })).status, 204);
+    assert.equal((await apiFetch('/api/auth/logout', { method: 'POST' })).status, 204);
+    assert.deepEqual(headersReceived, ['csrf-1', 'csrf-2', 'csrf-3']);
+    assert.equal(csrfRequests, 3);
+    assert.equal(writes, 3, 'Não deve repetir nenhuma operação por falha de CSRF');
+    assert.equal(refreshes, 0, 'Não deve acionar refresh de JWT desnecessariamente');
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
+    else Reflect.deleteProperty(globalThis, 'window');
+  }
+});
+
+test('CSRF: refresh após 401 exige novo token na repetição autenticada', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: {} });
+  let cookieToken = 'csrf-inicial';
+  let protectedCalls = 0;
+  let refreshCalls = 0;
+  const protectedTokens: string[] = [];
+  globalThis.fetch = async (input, options) => {
+    const url = String(input);
+    if (url.endsWith('/api/auth/csrf')) return Response.json({ token: cookieToken });
+    if (url.endsWith('/api/auth/refresh')) {
+      refreshCalls++;
+      assert.equal(new Headers(options?.headers).get('X-XSRF-TOKEN'), 'csrf-inicial');
+      cookieToken = 'csrf-renovado';
+      return new Response(null, { status: 200 });
+    }
+    if (url.endsWith('/api/protected')) {
+      protectedCalls++;
+      const header = new Headers(options?.headers).get('X-XSRF-TOKEN') ?? '';
+      protectedTokens.push(header);
+      if (protectedCalls === 1) return new Response(null, { status: 401 });
+      return new Response(null, { status: header === cookieToken ? 200 : 403 });
+    }
+    return new Response(null, { status: 404 });
+  };
+  try {
+    assert.equal((await apiFetch('/api/protected', { method: 'PATCH' })).status, 200);
+    assert.deepEqual(protectedTokens, ['csrf-inicial', 'csrf-renovado']);
+    assert.equal(protectedCalls, 2);
+    assert.equal(refreshCalls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
+    else Reflect.deleteProperty(globalThis, 'window');
+  }
+});

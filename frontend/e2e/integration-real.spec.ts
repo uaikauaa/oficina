@@ -141,8 +141,12 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   const history = await movementHistory.json() as { content: Array<{ tipoMovimentacao: string }> };
   expect(history.content.some(x => x.tipoMovimentacao === 'DEVOLUCAO')).toBeTruthy();
 
-  const logout = await context.request.post('/api/auth/logout', { headers: await csrfHeader(context) });
-  expect(logout.status(), await logout.text()).toBe(200);
+  // Logout pelo botão REAL do navegador: confirma que a camada apiFetch não
+  // usa token CSRF obsoleto nem exige uma segunda tentativa manual.
+  await page.getByRole('button', { name: 'Menu do usuário autenticado', exact: true }).click();
+  await page.locator('#header-logout-btn').click();
+  await expect(page).toHaveURL(/\/login(?:\?|$)/, { timeout: 15000 });
+  await expect(page.locator('#header-logout-btn')).toHaveCount(0);
   const afterLogout = await context.request.get('/api/auth/me');
   expect(afterLogout.status(), 'Logout must invalidate the authenticated session').toBe(401);
 });
