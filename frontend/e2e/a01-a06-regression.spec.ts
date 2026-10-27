@@ -22,6 +22,22 @@ async function baseMocks(page: Page) {
   await page.route('**/api/auth/csrf', route => route.fulfill({
     status: 200, contentType: 'application/json', body: JSON.stringify({ token: 'synthetic-e2e-csrf' }),
   }));
+  // /relatorios espera { resumo, itens: PageResponse }; um mock genérico {}
+  // faz a própria página quebrar durante o teste de responsividade.
+  await page.route('**/api/relatorios/ordens-servico?*', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      resumo: {
+        totalOs: 0, concluidas: 0, abertas: 0, canceladas: 0,
+        valorTotalConcluidas: 0, valorTotalAReceber: 0,
+      },
+      itens: {
+        content: [], page: 0, size: 15,
+        totalElements: 0, totalPages: 0, first: true, last: true,
+      },
+    }),
+  }));
   await page.route('**/api/categorias/ativas', route => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
   await page.route('**/api/auth/me', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(user) }));
   await page.route('**/api/configuracao-oficina', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(config) }));
@@ -142,6 +158,11 @@ test('A05/A06: matriz das telas autenticadas não tem overflow global', async ({
   for (const route of routes) {
     await page.goto(route);
     await expect(page.locator('header')).toBeVisible();
+    if (route === '/relatorios') {
+      // A rota nao pode cair no boundary de erro com mocks inconsistentes.
+      await expect(page.getByText('Nenhuma Ordem de Serviço registrada no sistema.')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'This page couldn’t load' })).toHaveCount(0);
+    }
     if (route === '/produtos') {
       await expect(page.locator('#novo-produto-btn')).toBeVisible();
     }
