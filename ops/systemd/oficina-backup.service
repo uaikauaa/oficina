@@ -1,0 +1,17 @@
+[Unit]
+Description=Backup criptografado off-site do Neon - Oficina Gestao
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=oficina-backup
+Group=oficina-backup
+ExecStart=/opt/oficina/scripts/backup-neon-offsite.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/tmp /var/tmp
+UMask=0077
+TimeoutStartSec=1200
