@@ -67,8 +67,12 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     restart: unless-stopped
+    # Somente HTTPS publico. HTTP 8080 permanece disponivel apenas no container
+    # para o healthcheck interno; nunca exponha HTTP ou portas de API/frontend.
     ports:
-      - "${HTTP_PORT:-80}:8080"
+      - "443:8443"
+    volumes:
+      - ./secrets/nginx:/etc/nginx/tls:ro
     depends_on:
       backend:
         condition: service_healthy
