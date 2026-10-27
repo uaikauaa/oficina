@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Download, X } from 'lucide-react';
 import { usePwaInstall } from '@/components/PwaInstallProvider';
 
@@ -39,7 +40,7 @@ export default function InstallAppButton() {
         <Download className="w-4 h-4 shrink-0" aria-hidden="true" />
         <span className="hidden xl:inline whitespace-nowrap">Instalar App</span>
       </button>
-      {showHelp && (
+      {showHelp && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 p-4 print:hidden"
           onMouseDown={event => {
@@ -82,7 +83,8 @@ export default function InstallAppButton() {
               Entendi
             </button>
           </section>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
