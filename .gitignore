@@ -102,3 +102,7 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Materiais locais de TLS, backups e segredos do deploy
+/secrets/
+/backups/
