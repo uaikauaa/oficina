@@ -29,6 +29,7 @@ import { CurrentUser, Notificacao, NotificacoesResumo } from '@/lib/types';
 import { apiFetch } from '@/lib/api';
 import { OFICINA } from '@/lib/oficina';
 import BuscaRapidaModal from '@/components/BuscaRapidaModal';
+import InstallAppButton from '@/components/InstallAppButton';
 
 interface HeaderProps {
   user: CurrentUser | null;
@@ -340,6 +341,8 @@ export default function Header({ user }: HeaderProps) {
 
             {/* 3. DIREITA: Busca Global + Notificações + Usuário + Menu Hambúrguer (Mobile) */}
             <div className="flex items-center justify-end gap-1.5 sm:gap-2.5 shrink-0">
+              {/* Instalação PWA no desktop/mobile, sem interferir nas ações protegidas. */}
+              <InstallAppButton />
               {/* Botão de Busca Rápida (Pill com Ctrl+K) */}
               <button
                 id="busca-rapida-trigger"
