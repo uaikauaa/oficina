@@ -61,4 +61,3 @@ Depois:
 ## Reproduzir
 
 Na pasta `frontend`, execute `npx playwright test e2e/visual-review.spec.ts e2e/visual-interactions.spec.ts`. O servidor de teste usa o build de produção quando não há servidor local ativo. Para uma nova referência anterior, use `VISUAL_PHASE=before` no checkout de origem; não sobrescreva o baseline com código novo.
-
