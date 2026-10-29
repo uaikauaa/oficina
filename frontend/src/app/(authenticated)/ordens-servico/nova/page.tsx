@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import ClienteModal from '@/components/ClienteModal';
 import MaquinaModal from '@/components/MaquinaModal';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import {
   Cliente,
   Maquina,
@@ -236,19 +237,7 @@ function NovaOrdemServicoContent() {
         {/* Notificação de Sucesso */}
         <h1 className="ui-page-title">Nova Ordem de Serviço</h1>
         {toastSucesso && (
-          <div className="p-4 rounded-xl bg-surface/5 border border-line text-ink text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in">
-            <div className="flex items-center gap-2.5">
-              <CheckCircle2 aria-hidden="true" className="w-5 h-5 text-ink shrink-0" />
-              <span className="font-semibold">{toastSucesso}</span>
-            </div>
-            <button
-              onClick={() => setToastSucesso(null)}
-              aria-label="Fechar notificação"
-              className="text-ink hover:text-ink font-bold ml-4 cursor-pointer text-base"
-            >
-              ×
-            </button>
-          </div>
+          <FeedbackNotice message={toastSucesso} variant="success" onDismiss={() => setToastSucesso(null)} />
         )}
 
         {/* Mensagem de Erro Geral */}

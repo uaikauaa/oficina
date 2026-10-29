@@ -2,6 +2,8 @@ import { test, expect, type Page, type Locator } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import { visualMocks } from './visual-fixtures';
 
+const evidenceDir = `${process.env.VISUAL_OUTPUT_DIR || '../docs/visual'}/after`;
+
 const cases: Array<{ name: string; path: string; trigger: (page: Page) => Locator; prepare?: (page: Page) => Promise<void> }> = [
   { name: 'cliente-modal', path: '/clientes', trigger: p => p.getByRole('button', { name: 'Novo Cliente' }) },
   { name: 'maquina-modal', path: '/maquinas', trigger: p => p.getByRole('button', { name: 'Novo Equipamento' }) },
@@ -32,7 +34,7 @@ for (const scenario of cases) {
     for (const control of await dialog.locator('input:visible, select:visible, textarea:visible, button:visible').all()) {
       await expect(control).toHaveAccessibleName(/.+/);
     }
-    await mkdir('../docs/visual/after', { recursive: true });
+    await mkdir(evidenceDir, { recursive: true });
     for (const width of [360, 390, 768, 1024, 1366, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       const panels = dialog.locator('.ui-dialog');
@@ -44,7 +46,7 @@ for (const scenario of cases) {
       expect(rect!.y).toBeGreaterThanOrEqual(0);
       expect(rect!.y + rect!.height).toBeLessThanOrEqual(900);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
-      if (width === 1366 || width === 390) await page.screenshot({ path: `../docs/visual/after/${scenario.name}-${width}.png`, fullPage: true, animations: 'disabled' });
+      if (width === 1366 || width === 390) await page.screenshot({ path: `${evidenceDir}/${scenario.name}-${width}.png`, fullPage: true, animations: 'disabled' });
     }
     const focusable = dialog.locator('button:visible:not(:disabled), input:visible:not(:disabled), select:visible:not(:disabled), textarea:visible:not(:disabled), a[href]:visible, [tabindex="0"]:visible');
     await focusable.last().focus();

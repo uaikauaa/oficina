@@ -13,7 +13,7 @@ for (const [name, path] of visualRoutes) {
     if (name !== 'login') await expect(page).not.toHaveURL(/\/login/);
     await expect(page.getByText('This page couldn’t load')).toHaveCount(0);
     const widths = phase === 'before' ? [1366, 390] : [360, 390, 768, 1024, 1366, 1920];
-    const dir = `../docs/visual/${phase}`;
+    const dir = `${process.env.VISUAL_OUTPUT_DIR || '../docs/visual'}/${phase}`;
     await mkdir(dir, { recursive: true });
     for (const width of widths) {
       await page.setViewportSize({ width, height: 900 });

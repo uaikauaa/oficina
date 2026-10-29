@@ -17,7 +17,6 @@ import {
   X,
   SlidersHorizontal,
   RotateCcw,
-  CheckCircle2,
   Loader2,
   AlertCircle,
   MapPin,
@@ -25,6 +24,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import ProdutoModal from '@/components/ProdutoModal';
 import CompatibilidadeModal from '@/components/CompatibilidadeModal';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
@@ -339,27 +339,7 @@ export default function ProdutosPage() {
 
         {/* Toast Notificação de Feedback */}
         {statusToast && (
-          <div
-            className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-200 ${statusToast.tipo === 'sucesso'
-                ? 'bg-ink/5 border-line text-ink'
-                : 'bg-danger/10 border-danger/30 text-danger'
-              }`}
-          >
-            <div className="flex items-center gap-2">
-              {statusToast.tipo === 'sucesso' ? (
-                <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
-              ) : (
-                <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
-              )}
-              <span>{statusToast.mensagem}</span>
-            </div>
-            <button
-              onClick={() => setStatusToast(null)}
-              className="p-1 hover:opacity-70 text-muted"
-            >
-              <X aria-hidden="true" className="w-4 h-4" />
-            </button>
-          </div>
+          <FeedbackNotice message={statusToast.mensagem} variant={statusToast.tipo === 'sucesso' ? 'success' : 'error'} onDismiss={() => setStatusToast(null)} />
         )}
 
         {/* =================================================================== */}

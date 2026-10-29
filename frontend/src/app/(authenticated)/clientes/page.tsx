@@ -12,8 +12,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  CheckCircle2,
-  AlertCircle,
   Phone,
   Mail,
   X,
@@ -25,6 +23,7 @@ import {
 } from 'lucide-react';
 import ClienteModal from '@/components/ClienteModal';
 import ConfirmModal from '@/components/ConfirmModal';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import {
   Cliente,
   ClienteContadoresStatus,
@@ -294,33 +293,11 @@ function ClientesContent() {
 
         {/* Notificações e Feedback */}
         {toastSuccess && (
-          <div className="p-3.5 rounded-xl bg-ink/5 border border-line text-ink text-xs flex items-center justify-between animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
-              <span>{toastSuccess}</span>
-            </div>
-            <button
-              onClick={() => setToastSuccess(null)}
-              className="text-ink hover:text-ink font-bold ml-4 cursor-pointer"
-            >
-              ×
-            </button>
-          </div>
+          <FeedbackNotice message={toastSuccess} variant="success" onDismiss={() => setToastSuccess(null)} />
         )}
 
         {toastError && (
-          <div className="p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-center justify-between animate-in fade-in">
-            <div className="flex items-center gap-2">
-              <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
-              <span>{toastError}</span>
-            </div>
-            <button
-              onClick={() => setToastError(null)}
-              className="text-danger hover:text-danger font-bold ml-4 cursor-pointer"
-            >
-              ×
-            </button>
-          </div>
+          <FeedbackNotice message={toastError} variant="error" onDismiss={() => setToastError(null)} />
         )}
 
         {/* ========================================================================= */}

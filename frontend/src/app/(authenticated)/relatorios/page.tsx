@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import {
   BarChart3,
   FileText,
@@ -22,8 +23,6 @@ import {
   AlertTriangle,
   Download,
   X,
-  Check,
-  Info,
 } from 'lucide-react';
 import {
   StatusOrdemServico,
@@ -654,30 +653,7 @@ export default function RelatoriosPage() {
 
       {/* Toast Notification (UX008-01 - feedback visual não-bloqueante) */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <div
-            className={`p-3.5 rounded-xl shadow-2xl border flex items-center gap-3 text-xs max-w-md ${
-              toast.tipo === 'sucesso'
-                ? 'bg-surface/5 border-line text-ink'
-                : toast.tipo === 'erro'
-                ? 'bg-danger/10 border-danger/40 text-danger'
-                : 'bg-accent/90 border-accent/40 text-accent'
-            }`}
-          >
-            {toast.tipo === 'sucesso' && <Check aria-hidden="true" className="w-4 h-4 text-ink shrink-0" />}
-            {toast.tipo === 'erro' && <AlertTriangle aria-hidden="true" className="w-4 h-4 text-danger shrink-0" />}
-            {toast.tipo === 'aviso' && <Info aria-hidden="true" className="w-4 h-4 text-accent shrink-0" />}
-            <span className="flex-1 font-medium">{toast.mensagem}</span>
-            <button
-              type="button"
-              onClick={() => setToast(null)}
-              aria-label="Fechar notificação"
-              className="p-1 rounded hover:bg-ink/10 text-muted hover:text-ink cursor-pointer"
-            >
-              <X aria-hidden="true" className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <FeedbackNotice message={toast.mensagem} variant={toast.tipo === 'sucesso' ? 'success' : toast.tipo === 'erro' ? 'error' : 'warning'} placement="bottom" onDismiss={() => setToast(null)} />
       )}
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-5 space-y-4">

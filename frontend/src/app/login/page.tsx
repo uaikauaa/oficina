@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 
 import { sanitizarRedirect, apiFetch, extrairMensagemErroLogin } from '@/lib/api';
+import DialogFocus from '@/components/ui/DialogFocus';
 
 const loginSchema = z.object({
   email: z.string().min(1, 'O email é obrigatório').email('Formato de email inválido'),
@@ -322,8 +323,7 @@ function LoginForm() {
   return (
     <>
       {/* ========================================================================= */}
-      {/* VERSÃO DESKTOP (>= 1024px) — ABSOLUTAMENTE INALTERADA                    */}
-      {/* Layout Split Aprovado, Proporções, Tipografia e Painéis 100% Preservados   */}
+      {/* VERSÃO DESKTOP (>= 1024px) — fotografia e formulário em painéis         */}
       {/* ========================================================================= */}
       <div className="hidden lg:flex min-h-screen w-full flex-row bg-canvas text-ink overflow-x-hidden selection:bg-accent/30 selection:text-accent">
         {/* 1. PAINEL ESQUERDO: APRESENTAÇÃO COM FOTOGRAFIA DA OFICINA */}
@@ -335,12 +335,12 @@ function LoginForm() {
               alt="Bancada de ferramentas e máquinas de solda da oficina"
               fill
               priority
-              className="grayscale object-cover object-right"
+              className="saturate-[.75] object-cover object-right"
               sizes="66vw"
             />
-            {/* Overlay escuro de alto contraste garantindo legibilidade idêntica ao protótipo */}
-            <div className="absolute inset-0 bg-gradient-to-r from-canvas/95 via-canvas/75 to-canvas/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas/40" />
+            {/* A fotografia mantém cor; o contraste se concentra atrás do texto. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-canvas/90 via-canvas/70 to-canvas/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-canvas/90 via-transparent to-canvas/20" />
           </div>
 
           {/* Topo Esquerdo: Logo & Slogan */}
@@ -374,12 +374,12 @@ function LoginForm() {
 
           {/* Meio Esquerdo: Título Heroico, Descrição e 3 Recursos */}
           <div className="relative z-10 my-auto py-10 lg:py-8 max-w-xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold text-ink tracking-tight leading-[1.12]">
+            <h2 className="text-3xl sm:text-4xl lg:text-[38px] xl:text-[44px] font-semibold text-ink tracking-tight leading-[1.18]">
               Gestão completa da sua <br />
               oficina <span className="text-accent">em um só lugar.</span>
             </h2>
 
-            <p className="mt-5 text-sm sm:text-base text-ink leading-relaxed font-normal max-w-lg">
+            <p className="mt-5 text-sm sm:text-base text-muted leading-relaxed font-normal max-w-lg">
               Controle seus clientes, ordens de serviço, estoque de peças e o histórico de cada máquina
               com praticidade e segurança.
             </p>
@@ -388,11 +388,11 @@ function LoginForm() {
             <div className="mt-9 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 lg:gap-5">
               {/* Bloco Clientes */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                <div className="w-6 h-6 flex items-center text-accent">
                   <User aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-ink tracking-wide">Clientes</h3>
+                  <h3 className="text-sm font-medium text-ink">Clientes</h3>
                   <p className="text-xs text-muted leading-snug mt-0.5">
                     Cadastros e histórico completo
                   </p>
@@ -401,11 +401,11 @@ function LoginForm() {
 
               {/* Bloco Ordens de Serviço */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                <div className="w-6 h-6 flex items-center text-accent">
                   <FileText aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h3>
+                  <h3 className="text-sm font-medium text-ink">Ordens de Serviço</h3>
                   <p className="text-xs text-muted leading-snug mt-0.5">
                     Do diagnóstico à finalização
                   </p>
@@ -414,11 +414,11 @@ function LoginForm() {
 
               {/* Bloco Estoque */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                <div className="w-6 h-6 flex items-center text-accent">
                   <Package aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-ink tracking-wide">Estoque</h3>
+                  <h3 className="text-sm font-medium text-ink">Estoque</h3>
                   <p className="text-xs text-muted leading-snug mt-0.5">
                     Controle de peças e movimentações
                   </p>
@@ -427,29 +427,15 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Rodapé do Painel Esquerdo */}
-          <div className="relative z-10 pt-6 flex items-center justify-between text-xs text-muted">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-muted">
-                <ShieldCheck aria-hidden="true" className="w-4 h-4 text-ink" />
-                <span className="font-medium text-xs tracking-wide text-ink">
-                  Sistema interno • Oficina Gestão
-                </span>
-              </div>
-              <div className="w-32 xl:w-44 h-px bg-hover/50" />
-            </div>
-          </div>
-
         </div>
 
         {/* 2. PAINEL DIREITO: ÁREA ESTRUTURAL DE AUTENTICAÇÃO */}
-        <div className="relative w-[38%] xl:w-[36%] 2xl:w-[34%] bg-surface border-l border-line flex flex-col justify-center p-10 xl:p-14 min-h-screen">
+        <div className="relative w-[38%] xl:w-[36%] 2xl:w-[34%] bg-surface border-l border-line flex flex-col justify-center p-8 xl:p-12 min-h-screen">
           <div className="w-full max-w-[380px] mx-auto py-8">
-            {/* Saudação com Barra Vertical Âmbar */}
-            <div className="flex items-start gap-3.5 mb-7">
-              <div className="w-1.5 h-12 bg-accent rounded-full shrink-0 mt-1" />
+            {/* Saudação do formulário */}
+            <div className="flex items-start gap-3.5 mb-8">
               <div>
-                <h2 className="text-2xl sm:text-[26px] font-bold tracking-tight text-ink leading-tight">
+                <h2 className="text-2xl sm:text-[26px] font-semibold tracking-tight text-ink leading-tight">
                   {twoFactorStep ? 'Código de Verificação' : 'Bem-vindo de volta!'}
                 </h2>
                 <p className="text-xs sm:text-sm text-muted mt-1 font-normal">
@@ -466,7 +452,8 @@ function LoginForm() {
                 id="login-error-alert"
                 role="alert"
                 aria-live="assertive"
-                className="mb-5 p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs sm:text-sm flex items-start gap-2.5 shadow-lg shadow-none"
+                className="ui-notice mb-5 text-sm"
+                data-variant="error"
               >
                 <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-danger" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
@@ -477,7 +464,8 @@ function LoginForm() {
             {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
               <div
                 role="alert"
-                className="mb-5 p-3.5 rounded-xl bg-accent/40 border border-accent/30 text-accent text-xs sm:text-sm flex items-start gap-2.5 shadow-lg"
+                className="ui-notice mb-5 text-sm"
+                data-variant="warning"
               >
                 <Clock aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-accent" />
                 <div className="flex-1 font-medium leading-relaxed">
@@ -666,7 +654,7 @@ function LoginForm() {
                 </div>
 
                 {/* Linha de Manter Conectado & Esqueceu Senha */}
-                <div className="flex items-center justify-between pt-1 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-1 text-xs">
                   <label htmlFor="field-src-app-login-page-tsx-1" className="flex items-center gap-2 cursor-pointer select-none text-ink hover:text-ink transition-colors">
                     <input id="field-src-app-login-page-tsx-1"
                       type="checkbox"
@@ -717,7 +705,7 @@ function LoginForm() {
       {/* EXPERIÊNCIA MOBILE / TABLET (< 1024px)                                    */}
       {/* Fundo Fullscreen, Introdução Imersiva, Botão "Entrar" e Modal Central     */}
       {/* ========================================================================= */}
-      <div className="flex lg:hidden relative min-h-screen w-full flex-col justify-between p-5 sm:p-8 md:p-10 bg-canvas text-ink overflow-x-hidden selection:bg-accent/30 selection:text-accent">
+      <div className="flex lg:hidden relative min-h-dvh w-full flex-col p-5 sm:p-8 md:p-10 bg-canvas text-ink overflow-x-hidden selection:bg-accent/30 selection:text-accent">
         {/* Imagem de Fundo Real Fullscreen */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -725,13 +713,10 @@ function LoginForm() {
             alt="Bancada de ferramentas e máquinas de solda da oficina"
             fill
             priority
-            className="grayscale object-cover object-center"
+            className="saturate-[.75] object-cover object-center"
             sizes="100vw"
           />
-          {/* Camadas de Overlay Escuro para Contraste e Legibilidade Perfeita */}
-          <div className="absolute inset-0 bg-canvas/80" />
-          <div className="absolute inset-0 bg-gradient-to-b from-canvas/95 via-canvas/75 to-canvas/95" />
-          <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-canvas/90 via-canvas/75 to-canvas/95" />
         </div>
 
         {/* 1. Header Superior Mobile/Tablet */}
@@ -770,12 +755,12 @@ function LoginForm() {
         {/* 2. Conteúdo Principal da Introdução */}
         <main className="relative z-10 my-auto py-8 sm:py-12 max-w-2xl w-full mx-auto">
           <div className="space-y-4 sm:space-y-5">
-            <h1 className="ui-page-title">
+            <h1 className="text-[1.875rem] sm:text-4xl font-semibold tracking-tight leading-[1.2] text-ink">
               Gestão completa da sua <br />
               oficina <span className="text-accent">em um só lugar.</span>
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base text-ink leading-relaxed font-normal max-w-xl">
+            <p className="text-sm md:text-base text-muted leading-relaxed font-normal max-w-xl">
               Controle seus clientes, ordens de serviço, estoque de peças e o histórico de cada máquina
               com praticidade e segurança.
             </p>
@@ -784,12 +769,12 @@ function LoginForm() {
           {/* 3 Blocos de Recursos Adaptados para Telas Menores */}
           <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Bloco Clientes */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <div className="py-4 border-t border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-6 h-6 flex items-center justify-center text-accent shrink-0">
                 <User aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-ink tracking-wide">Clientes</h2>
+                <h2 className="text-sm font-medium text-ink">Clientes</h2>
                 <p className="text-xs text-muted leading-tight mt-0.5">
                   Cadastros e histórico completo
                 </p>
@@ -797,12 +782,12 @@ function LoginForm() {
             </div>
 
             {/* Bloco Ordens de Serviço */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <div className="py-4 border-t border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-6 h-6 flex items-center justify-center text-accent shrink-0">
                 <FileText aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h2>
+                <h2 className="text-sm font-medium text-ink">Ordens de Serviço</h2>
                 <p className="text-xs text-muted leading-tight mt-0.5">
                   Do diagnóstico à finalização
                 </p>
@@ -810,12 +795,12 @@ function LoginForm() {
             </div>
 
             {/* Bloco Estoque */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+            <div className="py-4 border-t border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-6 h-6 flex items-center justify-center text-accent shrink-0">
                 <Package aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-ink tracking-wide">Estoque</h2>
+                <h2 className="text-sm font-medium text-ink">Estoque</h2>
                 <p className="text-xs text-muted leading-tight mt-0.5">
                   Controle de peças e movimentações
                 </p>
@@ -824,25 +809,15 @@ function LoginForm() {
           </div>
         </main>
 
-        {/* 3. Rodapé Mobile/Tablet */}
-        <footer className="relative z-10 pt-4 flex items-center justify-between text-xs text-muted">
-          <div className="flex items-center gap-2">
-            <ShieldCheck aria-hidden="true" className="w-4 h-4 text-muted" />
-            <span className="font-medium text-xs tracking-wide text-muted">
-              Sistema interno • Oficina Gestão
-            </span>
-          </div>
-        </footer>
-
       </div>
 
       {/* ========================================================================= */}
       {/* 4. MODAL CENTRAL DE LOGIN PARA MOBILE / TABLET (< 1024px)                 */}
-      {/* Backdrop com Blur Profundo, Animação de Entrada e Acessibilidade Completa  */}
+      {/* Formulário com superfície sólida e rolagem em telas menores             */}
       {/* ========================================================================= */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/75 transition-opacity duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/85 transition-opacity duration-200"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               fecharModal();
@@ -854,9 +829,10 @@ function LoginForm() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-login-title"
-            className="ui-dialog relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto border p-6 sm:p-7 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+            className="ui-dialog relative w-full max-w-[420px] max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain border p-5 sm:p-7 animate-in fade-in duration-150 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
+            <DialogFocus />
             {/* Botão de Fechar X no Cabeçalho */}
             <button
               type="button"
@@ -867,13 +843,12 @@ function LoginForm() {
               <X aria-hidden="true" className="w-5 h-5" />
             </button>
 
-            {/* Cabeçalho do Modal com Barra Âmbar */}
+            {/* Cabeçalho do formulário */}
             <div className="flex items-start gap-3.5 mb-6 pr-8">
-              <div className="w-1.5 h-11 bg-accent rounded-full shrink-0 mt-0.5" />
               <div>
                 <h2
                   id="modal-login-title"
-                  className="text-xl sm:text-2xl font-bold tracking-tight text-ink leading-tight"
+                  className="text-xl sm:text-2xl font-semibold tracking-tight text-ink leading-tight"
                 >
                   {twoFactorStep ? 'Código de Verificação' : 'Entrar no Sistema'}
                 </h2>
@@ -890,7 +865,8 @@ function LoginForm() {
               <div
                 role="alert"
                 aria-live="assertive"
-                className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-start gap-2.5 shadow-md shadow-none"
+                className="ui-notice mb-4 text-sm"
+                data-variant="error"
               >
                 <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-danger" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
@@ -901,7 +877,8 @@ function LoginForm() {
             {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
               <div
                 role="alert"
-                className="mb-4 p-3 rounded-xl bg-accent/40 border border-accent/30 text-accent text-xs flex items-start gap-2.5 shadow-md"
+                className="ui-notice mb-4 text-sm"
+                data-variant="warning"
               >
                 <Clock aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-accent" />
                 <div className="flex-1 font-medium leading-relaxed">
@@ -1088,7 +1065,7 @@ function LoginForm() {
                 </div>
 
                 {/* Linha de Manter Conectado & Esqueceu Senha */}
-                <div className="flex items-center justify-between pt-1 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-1 text-xs">
                   <label htmlFor="field-src-app-login-page-tsx-2" className="flex items-center gap-2 cursor-pointer select-none text-ink hover:text-ink transition-colors">
                     <input id="field-src-app-login-page-tsx-2"
                       type="checkbox"

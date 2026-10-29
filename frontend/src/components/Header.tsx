@@ -268,13 +268,13 @@ export default function Header({ user }: HeaderProps) {
   const navLinkClass = (active: boolean) =>
     `whitespace-nowrap px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 xl:gap-1.5 transition-all shrink-0 cursor-pointer ${
       active
-        ? 'bg-accent/15 text-accent border border-accent/50 shadow-sm shadow-none'
-        : 'text-ink hover:text-ink hover:bg-elevated/60 border border-transparent'
+        ? 'bg-elevated text-accent border border-line'
+        : 'text-muted hover:text-ink hover:bg-elevated border border-transparent'
     }`;
 
   return (
     <>
-      <header className="border-b border-line bg-canvas/95 sticky top-0 z-30 print:hidden">
+      <header className="border-b border-line bg-canvas sticky top-0 z-30 print:hidden">
         {/* Barra Principal */}
         <div className="max-w-[90rem] mx-auto px-3 sm:px-6 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
@@ -286,7 +286,7 @@ export default function Header({ user }: HeaderProps) {
                 className="flex items-center gap-2 sm:gap-2.5 min-w-0 group transition-all"
                 title={`${OFICINA.nomeFantasia} - Painel`}
               >
-                <div className="relative w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 group-hover:border-accent/40 flex items-center justify-center p-1 transition-all shadow-sm shadow-none shrink-0">
+                <div className="relative w-8 h-8 rounded-lg bg-surface border border-line group-hover:border-control flex items-center justify-center p-1 transition-colors shrink-0">
                   <Image
                     src="/logo-icone.png"
                     alt={OFICINA.nomeFantasia}
@@ -347,7 +347,7 @@ export default function Header({ user }: HeaderProps) {
               <button
                 id="busca-rapida-trigger"
                 onClick={() => setIsBuscaOpen(true)}
-                className="ui-icon-btn flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-surface border border-line hover:border-accent/40 text-muted hover:text-ink text-xs transition-all cursor-pointer shadow-sm"
+                className="ui-icon-btn min-h-10 flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-surface border border-line hover:border-control text-muted hover:text-ink text-xs transition-colors cursor-pointer"
                 title="Busca Global (Ctrl+K)"
                 aria-label="Abrir busca rápida"
               >
@@ -363,10 +363,10 @@ export default function Header({ user }: HeaderProps) {
                 <button
                   type="button"
                   onClick={() => setIsNotificacoesOpen((prev) => !prev)}
-                  className={`relative p-2 rounded-xl bg-surface border transition-all cursor-pointer ${
+                  className={`ui-icon-btn relative min-w-10 min-h-10 p-2 rounded-lg border transition-colors cursor-pointer ${
                     isNotificacoesOpen
-                      ? 'border-accent/50 text-accent bg-accent/10'
-                      : 'border-line text-ink hover:text-ink hover:border-control'
+                      ? 'border-control text-accent bg-elevated'
+                      : 'border-line bg-surface text-muted hover:text-ink hover:border-control'
                   }`}
                   aria-label={naoLidas > 0 ? `Notificações da oficina (${naoLidas} não lidas)` : 'Notificações da oficina'}
                   aria-haspopup="dialog"
@@ -388,16 +388,16 @@ export default function Header({ user }: HeaderProps) {
                   <div
                     role="dialog"
                     aria-label="Painel de Notificações"
-                    className="ui-dialog fixed sm:absolute top-14 sm:top-auto left-3 right-3 sm:left-auto sm:right-0 sm:mt-2 w-auto sm:w-96 border p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+                    className="ui-dialog fixed sm:absolute top-[4.5rem] sm:top-auto left-3 right-3 sm:left-auto sm:right-0 sm:mt-2 w-auto sm:w-96 max-h-[calc(100dvh-6rem)] flex flex-col overflow-hidden border p-4 z-50 animate-in fade-in duration-150 motion-reduce:animate-none"
                   >
-                    <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-line px-1">
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 pb-3 mb-3 border-b border-line shrink-0">
                       <div className="flex items-center gap-2">
                         <Bell aria-hidden="true" className="w-4 h-4 text-accent" />
-                        <span className="text-xs font-bold text-ink">
+                        <span className="text-sm font-semibold text-ink">
                           Notificações
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {naoLidas > 0 && (
                           <button
                             type="button"
@@ -411,10 +411,13 @@ export default function Header({ user }: HeaderProps) {
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-elevated text-ink border border-control">
                           {naoLidas > 0 ? `${naoLidas} não lida${naoLidas > 1 ? 's' : ''}` : 'Tudo lido'}
                         </span>
+                        <button type="button" onClick={() => setIsNotificacoesOpen(false)} aria-label="Fechar painel de notificações" className="ui-icon-btn text-muted hover:text-ink hover:bg-elevated cursor-pointer">
+                          <X aria-hidden="true" className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
+                    <div className="space-y-2 min-h-0 max-h-80 overflow-y-auto overscroll-contain pr-0.5">
                       {isLoadingNotificacoes ? (
                         <div className="py-6 px-3 text-center text-xs text-muted flex flex-col items-center justify-center gap-2">
                           <RefreshCw aria-hidden="true" className="w-4 h-4 animate-spin text-accent" />
@@ -454,10 +457,10 @@ export default function Header({ user }: HeaderProps) {
                               key={item.id}
                               type="button"
                               onClick={() => handleNotificacaoClick(item)}
-                              className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-start gap-2.5 group cursor-pointer ${
+                              className={`w-full text-left p-3 rounded-lg border transition-colors flex items-start gap-3 group cursor-pointer ${
                                 !item.lida
-                                  ? 'bg-surface/90 border-control hover:border-accent/40 shadow-sm'
-                                  : 'bg-canvas/40 border-line opacity-80 hover:opacity-100 hover:border-control'
+                                  ? 'bg-elevated border-line hover:border-control'
+                                  : 'bg-surface border-line hover:bg-elevated'
                               }`}
                             >
                               <div
@@ -472,19 +475,19 @@ export default function Header({ user }: HeaderProps) {
                                   <p
                                     className={`text-xs transition-colors ${
                                       !item.lida
-                                        ? 'font-bold text-ink group-hover:text-accent'
+                                        ? 'font-semibold text-ink group-hover:text-accent'
                                         : 'font-medium text-ink group-hover:text-ink'
                                     }`}
                                   >
                                     {item.titulo}
                                   </p>
                                   {!item.lida && (
-                                    <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-accent/20 text-accent border border-accent/30">
+                                    <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-surface text-accent border border-line">
                                       Nova
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-xs text-muted leading-tight mt-0.5">
+                                <p className="text-xs text-muted leading-relaxed mt-1 break-words">
                                   {item.mensagem}
                                 </p>
                               </div>
@@ -574,7 +577,7 @@ export default function Header({ user }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                className="ui-icon-btn lg:hidden p-2 rounded-xl bg-surface border border-line text-ink hover:text-ink hover:bg-elevated transition-all cursor-pointer"
+                className="ui-icon-btn lg:hidden min-w-10 min-h-10 p-2 rounded-lg bg-surface border border-line text-muted hover:text-ink hover:bg-elevated transition-colors cursor-pointer"
                 aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu de navegação'}
               >
                 {isMobileMenuOpen ? <X aria-hidden="true" className="w-4 h-4" /> : <Menu aria-hidden="true" className="w-4 h-4" />}
@@ -585,7 +588,7 @@ export default function Header({ user }: HeaderProps) {
 
         {/* Menu Mobile Dropdown (quando hambúrguer aberto em telas < lg) */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-line bg-canvas/98">
+          <div className="lg:hidden border-t border-line bg-canvas">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
               <nav className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <Link

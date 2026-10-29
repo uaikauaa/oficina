@@ -28,9 +28,9 @@ import {
   AlertTriangle,
   ExternalLink,
   ChevronRight,
-  Info,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import DialogFocus from '@/components/ui/DialogFocus';
 import OrdemServicoImpressao, { type ConfiguracaoOficinaImpressao } from '@/components/OrdemServicoImpressao';
 import {
@@ -535,30 +535,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
       {/* TOAST FLUTUANTE DE FEEDBACK (Sem alert() nativo) */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-w-md print:hidden">
-          <div
-            className={`px-4 py-3 rounded-xl border shadow-xl flex items-start gap-3 ${
-              toast.type === 'success'
-                ? 'bg-surface/5 border-line text-ink'
-                : toast.type === 'error'
-                ? 'bg-danger/10 border-danger/40 text-danger'
-                : 'bg-surface/5 border-line text-ink'
-            }`}
-          >
-            {toast.type === 'success' && <CheckCircle2 aria-hidden="true" className="w-5 h-5 shrink-0 text-ink mt-0.5" />}
-            {toast.type === 'error' && <AlertTriangle aria-hidden="true" className="w-5 h-5 shrink-0 text-danger mt-0.5" />}
-            {toast.type === 'info' && <Info aria-hidden="true" className="w-5 h-5 shrink-0 text-ink mt-0.5" />}
-            <div className="flex-1 text-xs font-medium leading-relaxed">{toast.message}</div>
-            <button
-              type="button"
-              onClick={() => setToast(null)}
-              className="ui-icon-btn text-muted hover:text-ink p-0.5"
-              aria-label="Fechar notificação"
-            >
-              <X aria-hidden="true" className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <FeedbackNotice message={toast.message} variant={toast.type} placement="top" onDismiss={() => setToast(null)} />
       )}
 
       <main className="flex-1 max-w-[1440px] w-full mx-auto p-3 sm:p-5 space-y-4 print:hidden">
