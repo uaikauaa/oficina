@@ -85,14 +85,14 @@ export default function MovimentacoesEstoquePage() {
   const getTipoIcon = (tipoMov: TipoMovimentacaoEstoque) => {
     switch (tipoMov) {
       case 'ENTRADA':
-        return <ArrowUpRight className="w-3.5 h-3.5" />;
+        return <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />;
       case 'SAIDA':
-        return <ArrowDownRight className="w-3.5 h-3.5" />;
+        return <ArrowDownRight aria-hidden="true" className="w-3.5 h-3.5" />;
       case 'AJUSTE_POSITIVO':
       case 'AJUSTE_NEGATIVO':
-        return <SlidersHorizontal className="w-3.5 h-3.5" />;
+        return <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />;
       case 'DEVOLUCAO':
-        return <RotateCcw className="w-3.5 h-3.5" />;
+        return <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />;
       default:
         return null;
     }
@@ -104,21 +104,21 @@ export default function MovimentacoesEstoquePage() {
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-              <Link href="/estoque" className="hover:text-amber-400 transition-colors flex items-center gap-1">
-                <ArrowLeft className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-2 text-xs text-muted mb-2">
+              <Link href="/estoque" className="hover:text-accent transition-colors flex items-center gap-1">
+                <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Voltar ao Estoque</span>
               </Link>
             </div>
             <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm">
+              <div className="p-2.5 rounded-2xl bg-ink/5 text-ink border border-line shadow-sm">
                 <History className="w-6 h-6" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              <h1 className="ui-page-title">
                 Histórico & Auditoria de Movimentações
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400">
+            <p className="text-xs sm:text-sm text-muted">
               Rastreamento de entradas por fornecedor, baixas automáticas em OS, ajustes físicos e devoluções
             </p>
           </div>
@@ -126,20 +126,20 @@ export default function MovimentacoesEstoquePage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/produtos"
-              className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-all shadow-sm"
+              className="px-4 py-2.5 rounded-xl border border-control bg-surface/80 hover:bg-elevated text-xs font-semibold text-ink hover:text-ink flex items-center gap-2 transition-all shadow-sm"
             >
-              <Package className="w-4 h-4 text-amber-400" />
+              <Package aria-hidden="true" className="w-4 h-4 text-accent" />
               <span>Catálogo de Peças</span>
             </Link>
           </div>
         </div>
 
         {/* Toolbar de Filtros */}
-        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md space-y-3">
+        <div className="p-4 rounded-2xl bg-surface/60 border border-line space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             {/* Filtro por Produto ou Usuário */}
             <div className="relative">
-              <input
+              <input aria-label="Peça (cód/nome) ou usuário..."
                 type="text"
                 value={termo}
                 onChange={(e) => {
@@ -147,20 +147,20 @@ export default function MovimentacoesEstoquePage() {
                   setPage(0);
                 }}
                 placeholder="Peça (cód/nome) ou usuário..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border pl-9 pr-3 placeholder-subtle focus:outline-none focus:border-accent/50"
               />
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+              <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute left-3 top-2.5 pointer-events-none" />
             </div>
 
             {/* Filtro por Tipo */}
             <div>
-              <select
+              <select aria-label="Todas as Movimentações"
                 value={tipo}
                 onChange={(e) => {
                   setTipo(e.target.value);
                   setPage(0);
                 }}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               >
                 <option value="">Todas as Movimentações</option>
                 <option value="ENTRADA">Entradas (Compras / Reposições)</option>
@@ -173,7 +173,7 @@ export default function MovimentacoesEstoquePage() {
 
             {/* Filtro por Número de OS */}
             <div className="relative">
-              <input
+              <input aria-label="Filtrar por Nº de OS..."
                 type="text"
                 value={numeroOs}
                 onChange={(e) => {
@@ -181,9 +181,9 @@ export default function MovimentacoesEstoquePage() {
                   setPage(0);
                 }}
                 placeholder="Filtrar por Nº de OS..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border pl-9 pr-3 placeholder-subtle focus:outline-none focus:border-accent/50"
               />
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+              <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute left-3 top-2.5 pointer-events-none" />
             </div>
 
             {/* Data Início */}
@@ -196,7 +196,7 @@ export default function MovimentacoesEstoquePage() {
                   setPage(0);
                 }}
                 title="Data Inicial"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               />
             </div>
 
@@ -210,12 +210,12 @@ export default function MovimentacoesEstoquePage() {
                   setPage(0);
                 }}
                 title="Data Final"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800/60">
+          <div className="flex items-center justify-between text-xs text-muted pt-1 border-t border-line">
             <div className="flex items-center gap-3">
               <span>Filtro de auditoria operacional de estoque</span>
               {(termo || tipo || numeroOs || dataInicio || dataFim) && (
@@ -228,31 +228,31 @@ export default function MovimentacoesEstoquePage() {
                     setDataFim('');
                     setPage(0);
                   }}
-                  className="text-amber-400 hover:underline font-semibold cursor-pointer"
+                  className="text-accent hover:underline font-semibold cursor-pointer"
                 >
                   Limpar Filtros
                 </button>
               )}
             </div>
             <span>
-              Total de <strong className="text-white">{totalElements}</strong> operações registradas
+              Total de <strong className="text-ink">{totalElements}</strong> operações registradas
             </span>
           </div>
         </div>
 
         {/* Mensagem de Erro */}
         {error && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+          <div className="p-4 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
             {error}
           </div>
         )}
 
         {/* Tabela de Movimentações */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-md overflow-hidden shadow-xl">
+        <div className="rounded-2xl border border-line bg-surface/60 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="ui-table">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
+                <tr className="border-b border-line bg-canvas/60 text-muted uppercase text-xs tracking-wider font-bold">
                   <th className="py-3.5 px-4">Data / Hora</th>
                   <th className="py-3.5 px-4">Peça / Componente</th>
                   <th className="py-3.5 px-4">Tipo</th>
@@ -262,29 +262,29 @@ export default function MovimentacoesEstoquePage() {
                   <th className="py-3.5 px-4">Usuário</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-line/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-muted">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                         <span>Carregando histórico de movimentações...</span>
                       </div>
                     </td>
                   </tr>
                 ) : movimentacoes.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
-                      <History className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <td colSpan={7} className="py-12 text-center text-subtle">
+                      <History className="w-8 h-8 text-subtle mx-auto mb-2" />
                       <p>Nenhuma movimentação de estoque encontrada.</p>
                     </td>
                   </tr>
                 ) : (
                   movimentacoes.map((m) => {
                     const badge = TIPO_MOVIMENTACAO_ESTOQUE_BADGES[m.tipoMovimentacao] || {
-                      bg: 'bg-slate-800',
-                      text: 'text-slate-300',
-                      border: 'border-slate-700',
+                      bg: 'bg-elevated',
+                      text: 'text-ink',
+                      border: 'border-control',
                     };
                     const isPositivo =
                       m.tipoMovimentacao === 'ENTRADA' ||
@@ -294,20 +294,20 @@ export default function MovimentacoesEstoquePage() {
                     return (
                       <tr
                         key={m.id}
-                        className="hover:bg-slate-800/40 transition-colors"
+                        className="hover:bg-elevated/40 transition-colors"
                       >
                         {/* Data/Hora */}
-                        <td className="py-3.5 px-4 whitespace-nowrap text-slate-300 font-mono text-[11px]">
+                        <td className="py-3.5 px-4 whitespace-nowrap text-ink font-mono text-xs">
                           {formatarDataHora(m.dataMovimentacao)}
                         </td>
 
                         {/* Peça */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px]">
+                            <span className="font-bold text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded text-xs">
                               {m.produtoCodigo}
                             </span>
-                            <span className="font-semibold text-white">
+                            <span className="font-semibold text-ink">
                               {m.produtoNome}
                             </span>
                           </div>
@@ -316,7 +316,7 @@ export default function MovimentacoesEstoquePage() {
                         {/* Tipo de Movimentação */}
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${badge.bg} ${badge.text} ${badge.border}`}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${badge.bg} ${badge.text} ${badge.border}`}
                           >
                             {getTipoIcon(m.tipoMovimentacao)}
                             <span>{m.tipoDescricao || TIPO_MOVIMENTACAO_ESTOQUE_LABELS[m.tipoMovimentacao]}</span>
@@ -327,7 +327,7 @@ export default function MovimentacoesEstoquePage() {
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
                           <span
                             className={`font-mono font-bold text-xs ${
-                              isPositivo ? 'text-emerald-400' : 'text-rose-400'
+                              isPositivo ? 'text-ink' : 'text-danger'
                             }`}
                           >
                             {isPositivo ? `+${m.quantidade}` : `-${m.quantidade}`}
@@ -336,10 +336,10 @@ export default function MovimentacoesEstoquePage() {
 
                         {/* Evolução de Saldo */}
                         <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                          <div className="inline-flex items-center gap-1.5 font-mono text-xs bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                            <span className="text-slate-400">{m.quantidadeAnterior}</span>
-                            <span className="text-slate-600">➔</span>
-                            <span className="font-bold text-white">{m.quantidadePosterior}</span>
+                          <div className="inline-flex items-center gap-1.5 font-mono text-xs bg-canvas px-2.5 py-1 rounded-lg border border-line">
+                            <span className="text-muted">{m.quantidadeAnterior}</span>
+                            <span className="text-subtle">➔</span>
+                            <span className="font-bold text-ink">{m.quantidadePosterior}</span>
                           </div>
                         </td>
 
@@ -349,20 +349,20 @@ export default function MovimentacoesEstoquePage() {
                             {m.ordemServicoId && (
                               <Link
                                 href={`/ordens-servico/${m.ordemServicoId}`}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors"
                               >
-                                <FileText className="w-3 h-3" />
+                                <FileText aria-hidden="true" className="w-3 h-3" />
                                 <span>{m.ordemServicoNumero || `OS #${m.ordemServicoId}`}</span>
                               </Link>
                             )}
-                            <span className="text-slate-300 text-xs">{m.motivo}</span>
+                            <span className="text-ink text-xs">{m.motivo}</span>
                           </div>
                         </td>
 
                         {/* Usuário */}
-                        <td className="py-3.5 px-4 whitespace-nowrap text-slate-400">
-                          <div className="flex items-center gap-1.5 text-[11px]">
-                            <User className="w-3.5 h-3.5 text-slate-500" />
+                        <td className="py-3.5 px-4 whitespace-nowrap text-muted">
+                          <div className="flex items-center gap-1.5 text-xs">
+                            <User aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
                             <span>{m.usuarioNome || 'Sistema'}</span>
                           </div>
                         </td>
@@ -376,28 +376,28 @@ export default function MovimentacoesEstoquePage() {
 
           {/* Paginação */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-950/40 text-xs">
-              <span className="text-slate-400">
-                Página <strong className="text-white">{page + 1}</strong> de{' '}
-                <strong className="text-white">{totalPages}</strong>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-line bg-canvas/40 text-xs">
+              <span className="text-muted">
+                Página <strong className="text-ink">{page + 1}</strong> de{' '}
+                <strong className="text-ink">{totalPages}</strong>
               </span>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
-                  className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-control text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors"
                   aria-label="Página anterior"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page >= totalPages - 1}
-                  className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-control text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors"
                   aria-label="Próxima página"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             </div>

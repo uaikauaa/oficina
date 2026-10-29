@@ -226,23 +226,25 @@ function NovaOrdemServicoContent() {
         <div className="flex items-center justify-between">
           <Link
             href="/ordens-servico"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-ink transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft aria-hidden="true" className="w-4 h-4" />
             <span>Voltar para Lista de Ordens de Serviço</span>
           </Link>
         </div>
 
         {/* Notificação de Sucesso */}
+        <h1 className="ui-page-title">Nova Ordem de Serviço</h1>
         {toastSucesso && (
-          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in">
+          <div className="p-4 rounded-xl bg-surface/5 border border-line text-ink text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in">
             <div className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+              <CheckCircle2 aria-hidden="true" className="w-5 h-5 text-ink shrink-0" />
               <span className="font-semibold">{toastSucesso}</span>
             </div>
             <button
               onClick={() => setToastSucesso(null)}
-              className="text-emerald-400 hover:text-emerald-200 font-bold ml-4 cursor-pointer text-base"
+              aria-label="Fechar notificação"
+              className="text-ink hover:text-ink font-bold ml-4 cursor-pointer text-base"
             >
               ×
             </button>
@@ -251,10 +253,10 @@ function NovaOrdemServicoContent() {
 
         {/* Mensagem de Erro Geral */}
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs sm:text-sm flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-danger/10 border border-danger/40 text-danger text-xs sm:text-sm flex items-start gap-3">
+            <AlertCircle aria-hidden="true" className="w-5 h-5 text-danger shrink-0 mt-0.5" />
             <div className="flex-1">
-              <strong className="font-semibold text-white">Não foi possível abrir a OS:</strong>
+              <strong className="font-semibold text-ink">Não foi possível abrir a OS:</strong>
               <p className="mt-0.5">{errorMessage}</p>
             </div>
           </div>
@@ -263,13 +265,13 @@ function NovaOrdemServicoContent() {
         {/* Formulário Principal */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* ETAPA 1: LOCALIZAR CLIENTE */}
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="p-6 rounded-2xl bg-surface/80 border border-line space-y-4">
+            <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs flex items-center justify-center border border-amber-500/30">
+                <div className="w-6 h-6 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center border border-accent/30">
                   1
                 </div>
-                <h2 className="text-base font-bold text-white">Cliente Proprietário</h2>
+                <h2 className="text-base font-bold text-ink">Cliente Proprietário</h2>
               </div>
               {clienteSelecionado && (
                 <button
@@ -280,7 +282,7 @@ function NovaOrdemServicoContent() {
                     setMaquinasCliente([]);
                     setMaquinaSelecionadaId('');
                   }}
-                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer underline"
+                  className="text-xs text-accent hover:text-accent font-semibold cursor-pointer underline"
                 >
                   Alterar Cliente
                 </button>
@@ -290,47 +292,47 @@ function NovaOrdemServicoContent() {
             {!clienteSelecionado ? (
               <div className="space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <label className="block text-xs font-semibold text-slate-300">
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-1" className="block text-xs font-semibold text-ink">
                     Pesquise o cliente por Nome, Razão Social, CPF ou CNPJ:
                   </label>
                   <button
                     type="button"
                     onClick={() => setIsNovoClienteModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer py-1 px-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all self-start sm:self-auto"
+                    className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent font-semibold cursor-pointer py-1 px-2.5 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-all self-start sm:self-auto"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>Cadastrar novo cliente</span>
                   </button>
                 </div>
 
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input
+                  <Search aria-hidden="true" className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-subtle" />
+                  <input id="field-src-app-authenticated-ordens-servico-nova-page-tsx-1"
                     type="text"
                     value={termoCliente}
                     onChange={(e) => setTermoCliente(e.target.value)}
                     placeholder="Digite pelo menos 2 caracteres para buscar..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 transition-all"
+                    className="ui-field w-full pl-10 pr-4 border placeholder-subtle focus:outline-none focus:border-accent/50 transition-all"
                   />
                   {buscandoClientes && (
                     <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                      <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
 
                 {/* Lista de Resultados de Clientes */}
                 {clientesEncontrados.length > 0 && (
-                  <div className="border border-slate-800 rounded-xl bg-slate-950 divide-y divide-slate-800/60 overflow-hidden max-h-56 overflow-y-auto">
+                  <div className="border border-line rounded-xl bg-canvas divide-y divide-line/60 overflow-hidden max-h-56 overflow-y-auto">
                     {clientesEncontrados.map((cli) => (
                       <div
                         key={cli.id}
                         onClick={() => setClienteSelecionado(cli)}
-                        className="p-3 hover:bg-slate-900/80 cursor-pointer flex items-center justify-between transition-colors"
+                        className="p-3 hover:bg-surface/80 cursor-pointer flex items-center justify-between transition-colors"
                       >
                         <div>
-                          <p className="font-semibold text-sm text-white">{cli.nomeRazaoSocial}</p>
-                          <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                          <p className="font-semibold text-sm text-ink">{cli.nomeRazaoSocial}</p>
+                          <div className="flex items-center gap-2 text-xs text-muted mt-0.5">
                             {cli.cpfCnpj && <span>{formatarDocumento(cli.cpfCnpj)}</span>}
                             {cli.celular && (
                               <>
@@ -340,7 +342,7 @@ function NovaOrdemServicoContent() {
                             )}
                           </div>
                         </div>
-                        <span className="text-xs text-amber-400 font-semibold px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+                        <span className="text-xs text-accent font-semibold px-2.5 py-1 rounded bg-accent/10 border border-accent/20">
                           Selecionar
                         </span>
                       </div>
@@ -349,14 +351,14 @@ function NovaOrdemServicoContent() {
                 )}
 
                 {termoCliente.trim().length >= 2 && !buscandoClientes && clientesEncontrados.length === 0 && (
-                  <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
+                  <div className="p-4 rounded-xl bg-canvas/60 border border-line text-center text-xs text-muted space-y-2">
                     <p>Cliente não encontrado com o termo digitado.</p>
                     <button
                       type="button"
                       onClick={() => setIsNovoClienteModalOpen(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all cursor-pointer shadow-md"
+                      className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                       <span>Cadastrar novo cliente</span>
                     </button>
                   </div>
@@ -364,14 +366,14 @@ function NovaOrdemServicoContent() {
               </div>
             ) : (
               /* Card do Cliente Selecionado */
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-4 rounded-xl bg-canvas border border-line flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                    <User className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                    <User aria-hidden="true" className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">{clienteSelecionado.nomeRazaoSocial}</h3>
-                    <p className="text-xs text-slate-400">
+                    <h3 className="text-sm font-bold text-ink">{clienteSelecionado.nomeRazaoSocial}</h3>
+                    <p className="text-xs text-muted">
                       {clienteSelecionado.cpfCnpj
                         ? formatarDocumento(clienteSelecionado.cpfCnpj)
                         : 'Documento não informado'}{' '}
@@ -384,8 +386,8 @@ function NovaOrdemServicoContent() {
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20 font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 text-xs text-ink bg-ink/5 px-2.5 py-1 rounded border border-line font-semibold">
+                  <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
                   Cliente Vinculado
                 </span>
               </div>
@@ -394,44 +396,44 @@ function NovaOrdemServicoContent() {
 
           {/* ETAPA 2: SELECIONAR EQUIPAMENTO DO CLIENTE */}
           {clienteSelecionado && (
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="p-6 rounded-2xl bg-surface/80 border border-line space-y-4">
+              <div className="flex items-center justify-between border-b border-line pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs flex items-center justify-center border border-amber-500/30">
+                  <div className="w-6 h-6 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center border border-accent/30">
                     2
                   </div>
-                  <h2 className="text-base font-bold text-white">Equipamento da Oficina</h2>
+                  <h2 className="text-base font-bold text-ink">Equipamento da Oficina</h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsNovaMaquinaModalOpen(true)}
-                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-accent hover:text-accent font-semibold flex items-center gap-1 cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                   <span>Cadastrar Máquina para este Cliente</span>
                 </button>
               </div>
 
               {carregandoMaquinas ? (
-                <div className="p-6 flex items-center justify-center gap-2 text-xs text-slate-400">
-                  <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                <div className="p-6 flex items-center justify-center gap-2 text-xs text-muted">
+                  <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                   <span>Carregando máquinas do cliente...</span>
                 </div>
               ) : maquinasCliente.length === 0 ? (
-                <div className="p-6 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-2">
-                  <Wrench className="w-8 h-8 mx-auto text-slate-600" />
-                  <p className="text-sm font-semibold text-white">
+                <div className="p-6 rounded-xl bg-canvas border border-line text-center space-y-2">
+                  <Wrench className="w-8 h-8 mx-auto text-subtle" />
+                  <p className="text-sm font-semibold text-ink">
                     Este cliente ainda não possui máquinas cadastradas
                   </p>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  <p className="text-xs text-muted max-w-md mx-auto">
                     Para abrir uma Ordem de Serviço, o equipamento técnico deve estar cadastrado na ficha do cliente.
                   </p>
                   <button
                     type="button"
                     onClick={() => setIsNovaMaquinaModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition-all mt-2 cursor-pointer shadow-md"
+                    className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all mt-2 cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>Cadastrar Equipamento Agora</span>
                   </button>
                 </div>
@@ -446,26 +448,26 @@ function NovaOrdemServicoContent() {
                         onClick={() => setMaquinaSelecionadaId(m.id.toString())}
                         className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? 'bg-amber-500/10 border-amber-500 shadow-md shadow-amber-500/10 ring-1 ring-amber-500'
-                            : 'bg-slate-950 border-slate-800 hover:border-slate-700'
+                            ? 'bg-accent/10 border-accent shadow-md shadow-none ring-1 ring-accent'
+                            : 'bg-canvas border-line hover:border-control'
                         }`}
                       >
                         <div>
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                            <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
                               {TIPO_EQUIPAMENTO_LABELS[m.tipoEquipamento] || m.tipoEquipamento}
                             </span>
                             {isSelected && (
-                              <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                              <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-accent" />
                             )}
                           </div>
-                          <h4 className="text-sm font-bold text-white mt-2">
+                          <h4 className="text-sm font-bold text-ink mt-2">
                             {m.marca} {m.modelo}
                           </h4>
-                          <div className="text-xs text-slate-400 mt-1 space-y-0.5">
+                          <div className="text-xs text-muted mt-1 space-y-0.5">
                             {m.numeroSerie && (
                               <p className="font-mono">
-                                Série: <strong className="text-slate-200">{m.numeroSerie}</strong>
+                                Série: <strong className="text-ink">{m.numeroSerie}</strong>
                               </p>
                             )}
                             {m.potencia && <p>Potência: {m.potencia}</p>}
@@ -474,7 +476,7 @@ function NovaOrdemServicoContent() {
                         </div>
 
                         {m.horimetro != null && (
-                          <div className="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400">
+                          <div className="mt-3 pt-2 border-t border-line text-xs text-muted">
                             Último horímetro: <strong>{m.horimetro} h</strong>
                           </div>
                         )}
@@ -488,82 +490,82 @@ function NovaOrdemServicoContent() {
 
           {/* ETAPA 3: DADOS DO ATENDIMENTO */}
           {clienteSelecionado && maquinaSelecionadaId && (
-            <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4">
-              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
-                <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs flex items-center justify-center border border-amber-500/30">
+            <div className="p-6 rounded-2xl bg-surface/80 border border-line space-y-4">
+              <div className="flex items-center gap-2.5 border-b border-line pb-3">
+                <div className="w-6 h-6 rounded-full bg-accent/20 text-accent font-bold text-xs flex items-center justify-center border border-accent/30">
                   3
                 </div>
-                <h2 className="text-base font-bold text-white">Dados do Atendimento e Defeito</h2>
+                <h2 className="text-base font-bold text-ink">Dados do Atendimento e Defeito</h2>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Data e Hora de Entrada */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-2" className="block text-xs font-semibold text-ink mb-1">
                     Data e Hora de Entrada:
                   </label>
-                  <input
+                  <input id="field-src-app-authenticated-ordens-servico-nova-page-tsx-2"
                     type="datetime-local"
                     value={formData.dataEntrada}
                     onChange={(e) => setFormData({ ...formData, dataEntrada: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-amber-500/50"
+                    className="ui-field w-full border focus:outline-none focus:border-accent/50"
                   />
                 </div>
 
                 {/* Horímetro Atual */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-3" className="block text-xs font-semibold text-ink mb-1">
                     Horímetro Atual (Horas de Uso):
                   </label>
-                  <input
+                  <input id="field-src-app-authenticated-ordens-servico-nova-page-tsx-3"
                     type="text"
                     value={formData.horimetroAtual}
                     onChange={(e) => setFormData({ ...formData, horimetroAtual: e.target.value })}
                     placeholder="Ex: 1250.5 (para geradores ou máquinas com marcador)"
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                    className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50"
                   />
                 </div>
 
                 {/* Número da OS (Opcional) */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-4" className="block text-xs font-semibold text-ink mb-1">
                     Número da OS (Opcional):
                   </label>
-                  <input
+                  <input id="field-src-app-authenticated-ordens-servico-nova-page-tsx-4"
                     type="text"
                     value={formData.numeroOs}
                     onChange={(e) => setFormData({ ...formData, numeroOs: e.target.value })}
                     placeholder="Deixe em branco para gerar automaticamente (Ex: OS-2026-0001)"
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                    className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50"
                   />
                 </div>
 
                 {/* Problema Relatado */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
-                    Problema Relatado pelo Cliente <strong className="text-amber-400">*</strong>:
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-5" className="block text-xs font-semibold text-ink mb-1">
+                    Problema Relatado pelo Cliente <strong className="text-accent">*</strong>:
                   </label>
-                  <textarea
+                  <textarea id="field-src-app-authenticated-ordens-servico-nova-page-tsx-5"
                     rows={3}
                     required
                     value={formData.problemaRelatado}
                     onChange={(e) => setFormData({ ...formData, problemaRelatado: e.target.value })}
                     placeholder="Descreva detalhadamente o sintoma informado pelo cliente (ex: não estabiliza arco, desarmando disjuntor em 180A, sem tensão nas tomadas 220V do gerador)..."
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-y"
+                    className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50 resize-y"
                   />
                 </div>
 
                 {/* Observações de Recepção */}
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  <label htmlFor="field-src-app-authenticated-ordens-servico-nova-page-tsx-6" className="block text-xs font-semibold text-ink mb-1">
                     Observações de Recepção e Acessórios Deixados:
                   </label>
-                  <textarea
+                  <textarea id="field-src-app-authenticated-ordens-servico-nova-page-tsx-6"
                     rows={2}
                     value={formData.observacoes}
                     onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
                     placeholder="Ex: Acompanha cabos de solda 25mm², grampo terra e tocha TIG. Carcaça com marcas de impacto na lateral direita."
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 resize-y"
+                    className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50 resize-y"
                   />
                 </div>
               </div>
@@ -575,7 +577,7 @@ function NovaOrdemServicoContent() {
             <div className="flex items-center justify-end gap-3 pt-2">
               <Link
                 href="/ordens-servico"
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold transition-all"
+                className="px-4 py-2.5 rounded-xl bg-elevated hover:bg-hover text-ink text-xs sm:text-sm font-semibold transition-all"
               >
                 Cancelar
               </Link>
@@ -583,16 +585,16 @@ function NovaOrdemServicoContent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer flex items-center gap-2"
+                className="ui-btn ui-btn-primary disabled:opacity-50 sm:text-sm transition-all cursor-pointer flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                     <span>Abrindo OS...</span>
                   </>
                 ) : (
                   <>
-                    <FileText className="w-4 h-4" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     <span>Abrir Ordem de Serviço</span>
                   </>
                 )}
@@ -646,8 +648,8 @@ export default function NovaOrdemServicoPage() {
   return (
     <Suspense
       fallback={
-        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center text-slate-400">
-          <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+        <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex items-center justify-center text-muted">
+          <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </main>
       }
     >

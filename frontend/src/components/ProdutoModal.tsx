@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import DialogFocus from '@/components/ui/DialogFocus';
+import DomainIcon from '@/components/ui/DomainIcon';
 import {
   X,
   Package,
@@ -58,13 +60,11 @@ const UNIDADES: { value: string; label: string }[] = [
   { value: 'L', label: 'Litro' },
 ];
 
-const INPUT_CLASS =
-  'w-full min-w-0 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors';
+const INPUT_CLASS = 'ui-field';
 
-const INPUT_WITH_ICON_CLASS =
-  'w-full min-w-0 bg-slate-950 border border-slate-700 rounded-xl pl-3 pr-10 py-2.5 text-sm text-white placeholder-slate-500 placeholder:truncate focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-colors';
+const INPUT_WITH_ICON_CLASS = 'ui-field pr-10 placeholder:truncate';
 
-const LABEL_CLASS = 'block text-xs font-semibold text-slate-400 mb-1.5';
+const LABEL_CLASS = 'ui-label';
 
 export default function ProdutoModal({
   isOpen,
@@ -289,20 +289,21 @@ export default function ProdutoModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="produto-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-canvas/80 animate-in fade-in duration-200 overflow-y-auto"
     >
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+      <DialogFocus />
+      <div className="ui-dialog border w-full max-w-2xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] flex flex-col overflow-hidden my-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-800 shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-line shrink-0">
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-              <Package className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-accent/10 text-accent border border-accent/20 shrink-0">
+              <Package aria-hidden="true" className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h2 id="produto-modal-title" className="text-sm sm:text-base font-bold text-white truncate">
+              <h2 id="produto-modal-title" className="text-sm sm:text-base font-bold text-ink truncate">
                 {isEditing ? 'Editar Peça / Componente' : 'Cadastrar Nova Peça / Componente'}
               </h2>
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-xs text-muted truncate">
                 {isEditing
                   ? `Atualizando ${produto?.codigo} - ${produto?.nome}`
                   : 'Componentes para máquinas de solda, geradores e manutenção'}
@@ -311,25 +312,25 @@ export default function ProdutoModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
+            className="ui-icon-btn p-1.5 text-muted hover:text-ink rounded-lg hover:bg-elevated transition-colors shrink-0 cursor-pointer"
             aria-label="Fechar modal"
           >
-            <X className="w-5 h-5" />
+            <X aria-hidden="true" className="w-5 h-5" />
           </button>
         </div>
 
         {/* Formulário */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-4 sm:space-y-5">
           {error && (
-            <div className="flex items-start gap-2.5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs">
+              <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2.5 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2.5 p-3.5 bg-ink/5 border border-line rounded-xl text-ink text-xs">
+              <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -340,21 +341,21 @@ export default function ProdutoModal({
             {tipoLegadoOriginal && produto && (
               <div
                 data-testid="tipo-historico"
-                className="mb-2 p-2.5 rounded-xl bg-slate-950 border border-amber-500/30 flex flex-wrap items-center justify-between gap-2 text-xs"
+                className="mb-2 p-2.5 rounded-xl bg-canvas border border-accent/30 flex flex-wrap items-center justify-between gap-2 text-xs"
               >
                 {formData.tipo === produto.tipo ? (
-                  <span className="text-slate-300">
-                    Tipo atual: <strong className="text-amber-300">{tipoLegadoOriginal}</strong>
+                  <span className="text-ink">
+                    Tipo atual: <strong className="text-accent">{tipoLegadoOriginal}</strong>
                   </span>
                 ) : (
                   <>
-                    <span className="text-slate-400">
-                      Tipo original: <strong className="text-slate-300">{tipoLegadoOriginal}</strong> — será alterado ao salvar.
+                    <span className="text-muted">
+                      Tipo original: <strong className="text-ink">{tipoLegadoOriginal}</strong> — será alterado ao salvar.
                     </span>
                     <button
                       type="button"
                       onClick={() => setFormData((prev) => ({ ...prev, tipo: produto.tipo }))}
-                      className="text-[11px] font-semibold text-amber-400 hover:text-amber-300 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-accent hover:text-accent hover:underline cursor-pointer"
                     >
                       Manter tipo original
                     </button>
@@ -370,11 +371,11 @@ export default function ProdutoModal({
                   onClick={() => setFormData((prev) => ({ ...prev, tipo: opt.value }))}
                   className={`p-3 min-h-[46px] rounded-xl border text-xs font-semibold flex items-center justify-start sm:justify-center gap-2.5 transition-all cursor-pointer ${
                     formData.tipo === opt.value
-                      ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 shadow-sm'
-                      : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                      ? 'bg-accent/20 border-accent/40 text-accent shadow-sm'
+                      : 'bg-canvas border-line text-muted hover:border-control hover:text-ink'
                   }`}
                 >
-                  <span className="shrink-0 text-base">{opt.icon}</span>
+                  <DomainIcon type={opt.value} />
                   <span className="leading-snug break-words whitespace-normal text-left sm:text-center">
                     {opt.label}
                   </span>
@@ -387,25 +388,25 @@ export default function ProdutoModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="min-w-0">
               <div className="flex items-center justify-between mb-1.5">
-                <label className={LABEL_CLASS}>Código da Peça</label>
-                <span className="text-[11px] text-slate-500 font-medium">
+                <label htmlFor="field-src-components-ProdutoModal-tsx-1" className={LABEL_CLASS}>Código da Peça</label>
+                <span className="text-xs text-subtle font-medium">
                   {isEditing ? 'Identificador fixo' : 'Gerado pelo servidor'}
                 </span>
               </div>
-              <input
+              <input id="field-src-components-ProdutoModal-tsx-1"
                 type="text"
                 name="codigo"
                 value={isEditing ? (formData.codigo || '') : 'P-### (Gerado ao salvar)'}
                 disabled
                 readOnly
-                className={`${INPUT_CLASS} bg-slate-950/70 text-amber-400 font-mono font-bold cursor-not-allowed border-dashed border-slate-700`}
+                className={`${INPUT_CLASS} bg-canvas/70 text-accent font-mono font-bold cursor-not-allowed border-dashed border-control`}
               />
             </div>
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Link de Compra</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-2" className={LABEL_CLASS}>Link de Compra</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-2"
                   type="url"
                   name="linkCompra"
                   value={formData.linkCompra || ''}
@@ -413,7 +414,7 @@ export default function ProdutoModal({
                   placeholder="Ex: https://www.fornecedor.com.br/produto/..."
                   className={INPUT_WITH_ICON_CLASS}
                 />
-                <Link2 className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <Link2 aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
@@ -421,8 +422,8 @@ export default function ProdutoModal({
           {/* Nome e Marca */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="min-w-0 md:col-span-2">
-              <label className={LABEL_CLASS}>Nome / Descrição Resumida *</label>
-              <input
+              <label htmlFor="field-src-components-ProdutoModal-tsx-3" className={LABEL_CLASS}>Nome / Descrição Resumida *</label>
+              <input id="field-src-components-ProdutoModal-tsx-3"
                 type="text"
                 name="nome"
                 value={formData.nome || ''}
@@ -434,9 +435,9 @@ export default function ProdutoModal({
             </div>
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Marca / Fabricante</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-4" className={LABEL_CLASS}>Marca / Fabricante</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-4"
                   type="text"
                   name="marca"
                   value={formData.marca || ''}
@@ -444,7 +445,7 @@ export default function ProdutoModal({
                   placeholder="Ex: Toshiba, ESAB, Stamford"
                   className={INPUT_WITH_ICON_CLASS}
                 />
-                <Award className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <Award aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
@@ -452,9 +453,9 @@ export default function ProdutoModal({
           {/* Categoria e Fornecedor */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Categoria Técnica</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-5" className={LABEL_CLASS}>Categoria Técnica</label>
               <div className="relative">
-                <select
+                <select id="field-src-components-ProdutoModal-tsx-5"
                   name="categoriaId"
                   value={formData.categoriaId || ''}
                   onChange={handleChange}
@@ -472,14 +473,14 @@ export default function ProdutoModal({
                     </option>
                   ))}
                 </select>
-                <Tag className="w-4 h-4 text-slate-500 absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <Tag aria-hidden="true" className="w-4 h-4 text-subtle absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Fornecedor Preferencial</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-6" className={LABEL_CLASS}>Fornecedor Preferencial</label>
               <div className="relative">
-                <select
+                <select id="field-src-components-ProdutoModal-tsx-6"
                   name="fornecedorId"
                   value={formData.fornecedorId || ''}
                   onChange={handleChange}
@@ -492,7 +493,7 @@ export default function ProdutoModal({
                     </option>
                   ))}
                 </select>
-                <Building2 className="w-4 h-4 text-slate-500 absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <Building2 aria-hidden="true" className="w-4 h-4 text-subtle absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
@@ -500,9 +501,9 @@ export default function ProdutoModal({
           {/* Preços e Unidade */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Preço de Custo (R$)</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-7" className={LABEL_CLASS}>Preço de Custo (R$)</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-7"
                   type="number"
                   step="0.01"
                   min="0"
@@ -511,14 +512,14 @@ export default function ProdutoModal({
                   onChange={handleChange}
                   className={INPUT_WITH_ICON_CLASS}
                 />
-                <DollarSign className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <DollarSign aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Preço de Venda (R$) *</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-8" className={LABEL_CLASS}>Preço de Venda (R$) *</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-8"
                   type="number"
                   step="0.01"
                   min="0"
@@ -528,20 +529,20 @@ export default function ProdutoModal({
                   className={INPUT_WITH_ICON_CLASS}
                   required
                 />
-                <DollarSign className="w-4 h-4 text-amber-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <DollarSign aria-hidden="true" className="w-4 h-4 text-accent absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Unidade de Medida</label>
-              <select
+              <label htmlFor="field-src-components-ProdutoModal-tsx-9" className={LABEL_CLASS}>Unidade de Medida</label>
+              <select id="field-src-components-ProdutoModal-tsx-9"
                 name="unidadeMedida"
                 value={formData.unidadeMedida || 'UN'}
                 onChange={handleChange}
                 className={INPUT_CLASS}
               >
                 {UNIDADES.map((u) => (
-                  <option key={u.value} value={u.value} className="bg-slate-900 text-white">
+                  <option key={u.value} value={u.value} className="bg-surface text-ink">
                     {u.label}
                   </option>
                 ))}
@@ -553,9 +554,9 @@ export default function ProdutoModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {!isEditing && (
               <div className="min-w-0">
-                <label className={LABEL_CLASS}>Estoque Inicial</label>
+                <label htmlFor="field-src-components-ProdutoModal-tsx-10" className={LABEL_CLASS}>Estoque Inicial</label>
                 <div className="relative">
-                  <input
+                  <input id="field-src-components-ProdutoModal-tsx-10"
                     type="number"
                     step="1"
                     min="0"
@@ -564,15 +565,15 @@ export default function ProdutoModal({
                     onChange={handleChange}
                     className={INPUT_WITH_ICON_CLASS}
                   />
-                  <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                  <Boxes aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
                 </div>
               </div>
             )}
 
             <div className="min-w-0">
-              <label className={LABEL_CLASS}>Estoque Mínimo (Alerta)</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-11" className={LABEL_CLASS}>Estoque Mínimo (Alerta)</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-11"
                   type="number"
                   step="1"
                   min="0"
@@ -581,14 +582,14 @@ export default function ProdutoModal({
                   onChange={handleChange}
                   className={INPUT_WITH_ICON_CLASS}
                 />
-                <Boxes className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <Boxes aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
 
             <div className={`min-w-0 ${isEditing ? 'sm:col-span-2 md:col-span-2' : 'sm:col-span-2 md:col-span-1'}`}>
-              <label className={LABEL_CLASS}>Localização Física</label>
+              <label htmlFor="field-src-components-ProdutoModal-tsx-12" className={LABEL_CLASS}>Localização Física</label>
               <div className="relative">
-                <input
+                <input id="field-src-components-ProdutoModal-tsx-12"
                   type="text"
                   name="localizacao"
                   value={formData.localizacao || ''}
@@ -596,15 +597,15 @@ export default function ProdutoModal({
                   placeholder="Ex: Prateleira B3, Gaveta 2"
                   className={INPUT_WITH_ICON_CLASS}
                 />
-                <MapPin className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
+                <MapPin aria-hidden="true" className="w-4 h-4 text-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
               </div>
             </div>
           </div>
 
           {/* Detalhes Técnicos e Aplicação */}
           <div className="min-w-0">
-            <label className={LABEL_CLASS}>Observações Técnicas / Aplicação</label>
-            <textarea
+            <label htmlFor="field-src-components-ProdutoModal-tsx-13" className={LABEL_CLASS}>Observações Técnicas / Aplicação</label>
+            <textarea id="field-src-components-ProdutoModal-tsx-13"
               name="descricao"
               value={formData.descricao || ''}
               onChange={handleChange}
@@ -615,22 +616,22 @@ export default function ProdutoModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-3 sm:pt-4 border-t border-slate-800 shrink-0">
+          <div className="flex items-center justify-end gap-3 pt-3 sm:pt-4 border-t border-line shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 text-xs font-semibold text-muted hover:text-ink rounded-xl hover:bg-elevated transition-colors"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2.5 text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="ui-btn ui-btn-primary transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                   <span>Salvando...</span>
                 </>
               ) : (

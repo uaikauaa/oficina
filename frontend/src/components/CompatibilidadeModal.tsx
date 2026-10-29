@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import DialogFocus from '@/components/ui/DialogFocus';
 import {
   X,
   Wrench,
@@ -157,43 +158,44 @@ export default function CompatibilidadeModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="compatibilidade-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/70 animate-fade-in"
     >
-      <div className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <DialogFocus />
+      <div className="ui-dialog relative w-full max-w-2xl max-h-[90vh] border flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-surface/80">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Wrench className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-accent/10 text-accent border border-accent/20">
+              <Wrench aria-hidden="true" className="w-5 h-5" />
             </div>
             <div>
-              <h2 id="compatibilidade-modal-title" className="text-base font-bold text-white">Compatibilidade Técnica de Equipamentos</h2>
-              <p className="text-xs text-slate-400">
-                Peça: <span className="text-amber-400 font-semibold">{produto.codigo}</span> - {produto.nome}
+              <h2 id="compatibilidade-modal-title" className="text-base font-bold text-ink">Compatibilidade Técnica de Equipamentos</h2>
+              <p className="text-xs text-muted">
+                Peça: <span className="text-accent font-semibold">{produto.codigo}</span> - {produto.nome}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="ui-icon-btn p-1.5 text-muted hover:text-ink rounded-lg hover:bg-elevated transition-colors"
             aria-label="Fechar modal"
           >
-            <X className="w-5 h-5" />
+            <X aria-hidden="true" className="w-5 h-5" />
           </button>
         </div>
 
         {/* Corpo */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {error && (
-            <div className="flex items-start gap-2.5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3.5 bg-danger/10 border border-danger/30 rounded-xl text-danger text-xs">
+              <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2.5 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <div className="flex items-center gap-2.5 p-3.5 bg-ink/5 border border-line rounded-xl text-ink text-xs">
+              <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -201,38 +203,38 @@ export default function CompatibilidadeModal({
           {/* Formulário para adicionar nova compatibilidade */}
           <form
             onSubmit={handleAdicionar}
-            className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3"
+            className="p-4 rounded-xl bg-canvas/60 border border-line space-y-3"
           >
-            <h3 className="text-xs font-bold text-white flex items-center gap-2">
-              <Plus className="w-3.5 h-3.5 text-amber-400" />
+            <h3 className="text-xs font-bold text-ink flex items-center gap-2">
+              <Plus aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
               <span>Vincular Novo Equipamento Compatível</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                <label htmlFor="field-src-components-CompatibilidadeModal-tsx-1" className="block text-xs font-semibold text-muted mb-1">
                   Filtrar Equipamento
                 </label>
                 <div className="relative">
-                  <input
+                  <input id="field-src-components-CompatibilidadeModal-tsx-1"
                     type="text"
                     value={buscaMaquina}
                     onChange={(e) => setBuscaMaquina(e.target.value)}
                     placeholder="Buscar marca ou modelo..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                    className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50"
                   />
-                  <Search className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-2 pointer-events-none" />
+                  <Search aria-hidden="true" className="w-3.5 h-3.5 text-subtle absolute right-2.5 top-2 pointer-events-none" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                <label htmlFor="field-src-components-CompatibilidadeModal-tsx-2" className="block text-xs font-semibold text-muted mb-1">
                   Selecionar Equipamento *
                 </label>
-                <select
+                <select id="field-src-components-CompatibilidadeModal-tsx-2"
                   value={maquinaSelecionadaId}
                   onChange={(e) => setMaquinaSelecionadaId(e.target.value ? Number(e.target.value) : '')}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  className="ui-field w-full border focus:outline-none focus:border-accent/50"
                   required
                 >
                   <option value="">Selecione o equipamento...</option>
@@ -247,15 +249,15 @@ export default function CompatibilidadeModal({
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              <label htmlFor="field-src-components-CompatibilidadeModal-tsx-3" className="block text-xs font-semibold text-muted mb-1">
                 Observações Técnicas / Aplicação
               </label>
-              <input
+              <input id="field-src-components-CompatibilidadeModal-tsx-3"
                 type="text"
                 value={observacao}
                 onChange={(e) => setObservacao(e.target.value)}
                 placeholder="Ex: Utilizar com pasta térmica de alta condutividade; placa de potência rev 2.1"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50"
               />
             </div>
 
@@ -263,16 +265,16 @@ export default function CompatibilidadeModal({
               <button
                 type="submit"
                 disabled={adding || !maquinaSelecionadaId}
-                className="px-3.5 py-1.5 text-xs font-semibold text-slate-950 bg-amber-500 hover:bg-amber-400 rounded-lg transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                className="ui-btn ui-btn-primary transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 {adding ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
                     <span>Vinculando...</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>Adicionar Vínculo</span>
                   </>
                 )}
@@ -282,21 +284,21 @@ export default function CompatibilidadeModal({
 
           {/* Lista de equipamentos compatíveis */}
           <div>
-            <h3 className="text-xs font-bold text-slate-300 mb-3">
+            <h3 className="text-xs font-bold text-ink mb-3">
               Equipamentos Compatíveis Cadastrados ({compatibilidades.length})
             </h3>
 
             {loading ? (
-              <div className="py-8 flex justify-center text-slate-400">
-                <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+              <div className="py-8 flex justify-center text-muted">
+                <Loader2 className="w-6 h-6 animate-spin text-accent" />
               </div>
             ) : compatibilidades.length === 0 ? (
-              <div className="p-6 rounded-xl bg-slate-950/40 border border-dashed border-slate-800 text-center">
-                <Wrench className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                <p className="text-xs text-slate-400">
+              <div className="p-6 rounded-xl bg-canvas/40 border border-dashed border-line text-center">
+                <Wrench className="w-8 h-8 text-subtle mx-auto mb-2" />
+                <p className="text-xs text-muted">
                   Nenhum equipamento vinculado a esta peça ainda.
                 </p>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-xs text-subtle mt-1">
                   Vincule máquinas de solda ou geradores para facilitar a seleção de peças nas Ordens de Serviço.
                 </p>
               </div>
@@ -305,24 +307,24 @@ export default function CompatibilidadeModal({
                 {compatibilidades.map((c) => (
                   <div
                     key={c.id}
-                    className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 hover:border-slate-700 transition-colors"
+                    className="p-3 rounded-xl bg-canvas/80 border border-line flex items-center justify-between gap-3 hover:border-control transition-colors"
                   >
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">
+                        <span className="text-xs font-bold text-ink">
                           {c.maquinaMarca} {c.maquinaModelo}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                        <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-elevated text-ink">
                           {c.maquinaTipoEquipamento}
                         </span>
                         {c.maquinaNumeroSerie && (
-                          <span className="text-[11px] text-slate-500">
+                          <span className="text-xs text-subtle">
                             S/N: {c.maquinaNumeroSerie}
                           </span>
                         )}
                       </div>
                       {c.observacaoCompatibilidade && (
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-muted mt-1">
                           Nota: {c.observacaoCompatibilidade}
                         </p>
                       )}
@@ -330,11 +332,11 @@ export default function CompatibilidadeModal({
 
                     <button
                       onClick={() => handleRemover(c.maquinaId)}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-rose-500/10 transition-colors"
+                      className="ui-icon-btn p-1.5 text-subtle hover:text-danger rounded-lg hover:bg-danger/10 transition-colors"
                       title="Remover vínculo"
                       aria-label="Remover vínculo"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
@@ -344,11 +346,11 @@ export default function CompatibilidadeModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-4 border-t border-slate-800 bg-slate-900/80">
+        <div className="flex items-center justify-end px-6 py-4 border-t border-line bg-surface/80">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-xl bg-slate-800 hover:bg-slate-700 transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-semibold text-ink hover:text-ink rounded-xl bg-elevated hover:bg-hover transition-colors cursor-pointer"
           >
             Fechar
           </button>

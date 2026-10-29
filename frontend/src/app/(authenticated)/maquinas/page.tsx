@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import DomainIcon from '@/components/ui/DomainIcon';
 import Link from 'next/link';
 import {
+  CheckCircle2,
   Wrench,
   Search,
   ChevronLeft,
@@ -91,17 +93,17 @@ export default function MaquinasPage() {
         {/* Cabeçalho */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-              <Wrench className="w-5 h-5" />
+            <div className="h-10 w-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+              <Wrench aria-hidden="true" className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-xl sm:text-2xl font-bold text-white">Equipamentos</h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300">
+                <h1 className="ui-page-title">Equipamentos</h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-surface border border-line text-xs font-semibold text-ink">
                   {totalElements} {totalElements === 1 ? 'máquina' : 'máquinas'}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+              <p className="text-xs sm:text-sm text-muted mt-0.5">
                 Consulta técnica e gestão de máquinas de solda e geradores de energia vinculados a clientes
               </p>
             </div>
@@ -109,19 +111,19 @@ export default function MaquinasPage() {
 
           <button
             onClick={() => setIsNovoModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
+            className="ui-btn ui-btn-primary sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus aria-hidden="true" className="w-4 h-4" />
             <span>Novo Equipamento</span>
           </button>
         </div>
 
         {/* Painel Operacional de Busca e Filtros Rápidos */}
-        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3.5 shadow-sm">
+        <div className="p-4 rounded-2xl bg-surface/60 border border-line space-y-3.5 shadow-sm">
           {/* Busca por Texto (Marca, Modelo, Nº Série, Cliente) */}
           <div className="relative w-full">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
+            <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input aria-label="Buscar por marca, modelo, número de série ou cliente..."
               type="text"
               placeholder="Buscar por marca, modelo, número de série ou cliente..."
               value={termoBusca}
@@ -129,7 +131,7 @@ export default function MaquinasPage() {
                 setTermoBusca(e.target.value);
                 setPage(0);
               }}
-              className="w-full pl-10 pr-10 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+              className="ui-field w-full pl-10 pr-10 border sm:text-sm placeholder-subtle focus:outline-none focus:border-accent/50"
             />
             {termoBusca && (
               <button
@@ -138,19 +140,19 @@ export default function MaquinasPage() {
                   setTermoBusca('');
                   setPage(0);
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-subtle hover:text-ink transition-colors cursor-pointer"
                 title="Limpar pesquisa"
               >
-                <X className="w-4 h-4" />
+                <X aria-hidden="true" className="w-4 h-4" />
               </button>
             )}
           </div>
 
           {/* Pills de Filtro Rápido (1 Clique) */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-slate-800/60">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-line">
             {/* Tipo de Equipamento */}
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-xs text-slate-400 mr-1 font-medium hidden sm:inline">Tipo:</span>
+              <span className="text-xs text-muted mr-1 font-medium hidden sm:inline">Tipo:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -159,8 +161,8 @@ export default function MaquinasPage() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   tipoFiltro === ''
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-accent text-inverse shadow-sm'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
                 Todos os Tipos
@@ -173,11 +175,11 @@ export default function MaquinasPage() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   tipoFiltro === 'MAQUINA_SOLDA'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-accent text-inverse shadow-sm'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
-                <span>⚡</span>
+                <DomainIcon type="MAQUINA_SOLDA" />
                 <span>Soldas</span>
               </button>
               <button
@@ -188,11 +190,11 @@ export default function MaquinasPage() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   tipoFiltro === 'GERADOR_ENERGIA'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-accent text-inverse shadow-sm'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
-                <span>🔋</span>
+                <DomainIcon type="GERADOR_ENERGIA" />
                 <span>Geradores</span>
               </button>
               <button
@@ -203,18 +205,18 @@ export default function MaquinasPage() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
                   tipoFiltro === 'OUTRO_EQUIPAMENTO'
-                    ? 'bg-amber-500 text-slate-950 shadow-sm'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-accent text-inverse shadow-sm'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
-                <span>🔧</span>
+                <DomainIcon type="OUTRO_EQUIPAMENTO" />
                 <span>Outros</span>
               </button>
             </div>
 
             {/* Status */}
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-400 mr-1 font-medium hidden sm:inline">Status:</span>
+              <span className="text-xs text-muted mr-1 font-medium hidden sm:inline">Status:</span>
               <button
                 type="button"
                 onClick={() => {
@@ -223,8 +225,8 @@ export default function MaquinasPage() {
                 }}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   ativoFiltro === ''
-                    ? 'bg-slate-800 text-white border border-slate-700'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-elevated text-ink border border-control'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
                 Todos
@@ -237,11 +239,11 @@ export default function MaquinasPage() {
                 }}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                   ativoFiltro === 'true'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-ink/5 text-ink border border-line'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
-                <span>✓</span>
+                <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                 <span>Ativos</span>
               </button>
               <button
@@ -252,11 +254,11 @@ export default function MaquinasPage() {
                 }}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
                   ativoFiltro === 'false'
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/40'
-                    : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
+                    ? 'bg-danger/20 text-danger border border-danger/40'
+                    : 'bg-canvas text-muted hover:text-ink border border-line'
                 }`}
               >
-                <span>✕</span>
+                <X aria-hidden="true" className="w-4 h-4" />
                 <span>Inativos</span>
               </button>
             </div>
@@ -265,14 +267,14 @@ export default function MaquinasPage() {
 
         {/* Mensagem de Erro se houver */}
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
             <button
               onClick={() => carregarMaquinas()}
-              className="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold cursor-pointer"
+              className="px-3 py-1 rounded-lg bg-danger/20 hover:bg-danger/30 text-danger font-semibold cursor-pointer"
             >
               Tentar novamente
             </button>
@@ -280,18 +282,18 @@ export default function MaquinasPage() {
         )}
 
         {/* Tabela de Equipamentos */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-xl">
+        <div className="rounded-2xl border border-line bg-surface/60 overflow-hidden shadow-xl">
           {isLoading ? (
-            <div className="p-12 text-center text-slate-500 text-xs flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+            <div className="p-12 text-center text-subtle text-xs flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
               <span>Carregando equipamentos...</span>
             </div>
           ) : maquinas.length === 0 ? (
-            <div className="p-12 text-center text-slate-400 space-y-3">
-              <Wrench className="w-8 h-8 mx-auto text-slate-600" />
+            <div className="p-12 text-center text-muted space-y-3">
+              <Wrench className="w-8 h-8 mx-auto text-subtle" />
               <div>
-                <p className="text-sm font-semibold text-white">Nenhum equipamento localizado</p>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto mt-0.5">
+                <p className="text-sm font-semibold text-ink">Nenhum equipamento localizado</p>
+                <p className="text-xs text-subtle max-w-sm mx-auto mt-0.5">
                   {termoBusca || tipoFiltro || ativoFiltro
                     ? 'Nenhuma máquina corresponde aos filtros ou termos pesquisados.'
                     : 'A oficina ainda não possui máquinas de solda ou geradores cadastrados.'}
@@ -299,17 +301,17 @@ export default function MaquinasPage() {
               </div>
               <button
                 onClick={() => setIsNovoModalOpen(true)}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all cursor-pointer shadow-md"
+                className="ui-btn ui-btn-primary inline-flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Cadastrar Primeiro Equipamento</span>
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+              <table className="ui-table">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                  <tr className="border-b border-line bg-surface/80 text-muted font-semibold text-xs">
                     <th className="py-2.5 px-3.5">Equipamento</th>
                     <th className="py-2.5 px-3.5">Tipo</th>
                     <th className="py-2.5 px-3.5">Nº de Série</th>
@@ -318,16 +320,16 @@ export default function MaquinasPage() {
                     <th className="py-2.5 px-3.5 text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                <tbody className="divide-y divide-line/60 text-ink">
                   {maquinas.map((m) => (
-                    <tr key={m.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={m.id} className="hover:bg-elevated/40 transition-colors">
                       {/* Equipamento */}
                       <td className="py-2.5 px-3.5">
                         <Link href={`/maquinas/${m.id}`} className="block group">
-                          <div className="font-bold text-white text-xs sm:text-sm group-hover:text-amber-400 transition-colors">
+                          <div className="font-bold text-ink text-xs sm:text-sm group-hover:text-accent transition-colors">
                             {m.marca} {m.modelo}
                           </div>
-                          <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                          <div className="text-xs text-muted flex items-center gap-2 mt-0.5">
                             {m.potencia && <span>{m.potencia}</span>}
                             {m.tensao && <span>• {m.tensao}</span>}
                             {m.horimetro != null && <span>• {m.horimetro}h</span>}
@@ -337,26 +339,24 @@ export default function MaquinasPage() {
 
                       {/* Tipo */}
                       <td className="py-2.5 px-3.5">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          {m.tipoEquipamento === 'MAQUINA_SOLDA' && '⚡ '}
-                          {m.tipoEquipamento === 'GERADOR_ENERGIA' && '🔋 '}
-                          {m.tipoEquipamento === 'OUTRO_EQUIPAMENTO' && '🔧 '}
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-accent/10 text-accent border border-accent/20">
+                          <DomainIcon type={m.tipoEquipamento} className="inline-block w-4 h-4 mr-1.5 align-text-bottom" />
                           {TIPO_EQUIPAMENTO_LABELS[m.tipoEquipamento] || m.tipoEquipamento}
                         </span>
                       </td>
 
                       {/* Número de Série */}
-                      <td className="py-2.5 px-3.5 font-mono font-bold text-slate-300">
-                        {m.numeroSerie || <span className="text-slate-500 font-normal italic">S/N</span>}
+                      <td className="py-2.5 px-3.5 font-mono font-bold text-ink">
+                        {m.numeroSerie || <span className="text-subtle font-normal italic">S/N</span>}
                       </td>
 
                       {/* Cliente Vinculado */}
                       <td className="py-2.5 px-3.5">
                         <Link
                           href={`/clientes/${m.clienteId}`}
-                          className="font-medium text-slate-200 hover:text-amber-400 flex items-center gap-1.5 transition-colors group"
+                          className="font-medium text-ink hover:text-accent flex items-center gap-1.5 transition-colors group"
                         >
-                          <User className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-400 shrink-0" />
+                          <User aria-hidden="true" className="w-3.5 h-3.5 text-muted group-hover:text-accent shrink-0" />
                           <span className="truncate max-w-[200px]">{m.clienteNome}</span>
                         </Link>
                       </td>
@@ -364,10 +364,10 @@ export default function MaquinasPage() {
                       {/* Status */}
                       <td className="py-2.5 px-3.5">
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
                             m.ativo
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                              ? 'bg-ink/5 text-ink border border-line'
+                              : 'bg-danger/10 text-danger border border-danger/30'
                           }`}
                         >
                           {m.ativo ? 'Ativo' : 'Inativo'}
@@ -380,10 +380,10 @@ export default function MaquinasPage() {
                           {/* Botão Ver Detalhes / Histórico */}
                           <Link
                             href={`/maquinas/${m.id}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink text-xs font-semibold border border-control transition-colors cursor-pointer"
                             title="Ver detalhes e histórico do equipamento"
                           >
-                            <Eye className="w-3.5 h-3.5 text-slate-400" />
+                            <Eye aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
                             <span className="hidden sm:inline">Ver</span>
                           </Link>
 
@@ -391,20 +391,20 @@ export default function MaquinasPage() {
                           {m.ativo ? (
                             <Link
                               href={`/ordens-servico/nova?clienteId=${m.clienteId}&maquinaId=${m.id}`}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shadow-sm cursor-pointer"
+                              className="ui-btn ui-btn-primary inline-flex items-center gap-1 transition-all cursor-pointer"
                               title={`Abrir nova OS para ${m.marca} ${m.modelo}`}
                             >
-                              <Plus className="w-3.5 h-3.5" />
+                              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                               <span>OS</span>
                             </Link>
                           ) : (
                             <button
                               type="button"
                               disabled
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800/50 text-slate-500 text-xs font-semibold border border-slate-800/60 cursor-not-allowed opacity-50"
+                              className="ui-icon-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-elevated/50 text-subtle text-xs font-semibold border border-line cursor-not-allowed opacity-50"
                               title="Equipamento inativo. Reative o equipamento para abrir nova Ordem de Serviço."
                             >
-                              <Plus className="w-3.5 h-3.5" />
+                              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
                               <span>OS</span>
                             </button>
                           )}
@@ -418,7 +418,7 @@ export default function MaquinasPage() {
           )}
 
           {/* Paginação */}
-          <div className="p-3.5 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-400 bg-slate-900/40">
+          <div className="p-3.5 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-muted bg-surface/40">
             <span>
               {totalElements > 0 ? (
                 <>
@@ -432,23 +432,23 @@ export default function MaquinasPage() {
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0 || isLoading}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 text-slate-200 flex items-center gap-1 cursor-pointer hover:bg-slate-700 disabled:cursor-not-allowed transition-colors"
+                className="ui-icon-btn px-3 py-1.5 rounded-lg bg-elevated border border-control disabled:opacity-40 text-ink flex items-center gap-1 cursor-pointer hover:bg-hover disabled:cursor-not-allowed transition-colors"
                 aria-label="Página anterior"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Anterior</span>
               </button>
-              <span className="px-2 font-medium text-slate-300">
+              <span className="px-2 font-medium text-ink">
                 Página {totalPages > 0 ? page + 1 : 1} de {Math.max(1, totalPages)}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1 || totalPages <= 1 || isLoading}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 text-slate-200 flex items-center gap-1 cursor-pointer hover:bg-slate-700 disabled:cursor-not-allowed transition-colors"
+                className="ui-icon-btn px-3 py-1.5 rounded-lg bg-elevated border border-control disabled:opacity-40 text-ink flex items-center gap-1 cursor-pointer hover:bg-hover disabled:cursor-not-allowed transition-colors"
                 aria-label="Próxima página"
               >
                 <span>Próxima</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>

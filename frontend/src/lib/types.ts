@@ -163,44 +163,44 @@ export const STATUS_ORDEM_SERVICO_BADGES: Record<
   { bg: string; text: string; border: string }
 > = {
   ABERTA: {
-    bg: 'bg-amber-500/10',
-    text: 'text-amber-400',
-    border: 'border-amber-500/30',
+    bg: 'bg-accent/10',
+    text: 'text-accent',
+    border: 'border-accent/30',
   },
   EM_DIAGNOSTICO: {
-    bg: 'bg-cyan-500/10',
-    text: 'text-cyan-400',
-    border: 'border-cyan-500/30',
+    bg: 'bg-ink/5',
+    text: 'text-ink',
+    border: 'border-line',
   },
   AGUARDANDO_APROVACAO: {
-    bg: 'bg-purple-500/10',
-    text: 'text-purple-400',
-    border: 'border-purple-500/30',
+    bg: 'bg-ink/5',
+    text: 'text-ink',
+    border: 'border-line',
   },
   EM_MANUTENCAO: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-400',
-    border: 'border-blue-500/30',
+    bg: 'bg-ink/5',
+    text: 'text-ink',
+    border: 'border-line',
   },
   AGUARDANDO_PECA: {
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-400',
-    border: 'border-orange-500/30',
+    bg: 'bg-accent/10',
+    text: 'text-accent',
+    border: 'border-accent/30',
   },
   PRONTA: {
-    bg: 'bg-emerald-500/10',
-    text: 'text-emerald-400',
-    border: 'border-emerald-500/30',
+    bg: 'bg-ink/5',
+    text: 'text-ink',
+    border: 'border-line',
   },
   CONCLUIDA: {
-    bg: 'bg-green-500/10',
-    text: 'text-green-400',
-    border: 'border-green-500/30',
+    bg: 'bg-ink/5',
+    text: 'text-ink',
+    border: 'border-line',
   },
   CANCELADA: {
-    bg: 'bg-red-500/10',
-    text: 'text-red-400',
-    border: 'border-red-500/30',
+    bg: 'bg-danger/10',
+    text: 'text-danger',
+    border: 'border-danger/30',
   },
 };
 
@@ -326,8 +326,8 @@ export const TIPO_PRODUTO_LABELS: Record<TipoProduto, string> = {
 };
 
 export const TIPOS_PRODUTO_FORMULARIO: { value: TipoProduto; label: string; icon: string }[] = [
-  { value: 'PECA', label: 'Peça / Componente', icon: '🔌' },
-  { value: 'CONSUMIVEL', label: 'Consumível de Manutenção', icon: '⚡' },
+  { value: 'PECA', label: 'Peça / Componente', icon: 'plug' },
+  { value: 'CONSUMIVEL', label: 'Consumível de Manutenção', icon: 'zap' },
 ];
 
 export const CATEGORIAS_TECNICAS_PERMITIDAS = [
@@ -412,11 +412,11 @@ export const TIPO_MOVIMENTACAO_ESTOQUE_BADGES: Record<
   TipoMovimentacaoEstoque,
   { bg: string; text: string; border: string }
 > = {
-  ENTRADA: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
-  SAIDA: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/30' },
-  AJUSTE_POSITIVO: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
-  AJUSTE_NEGATIVO: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/30' },
-  DEVOLUCAO: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
+  ENTRADA: { bg: 'bg-ink/5', text: 'text-ink', border: 'border-line' },
+  SAIDA: { bg: 'bg-ink/5', text: 'text-ink', border: 'border-line' },
+  AJUSTE_POSITIVO: { bg: 'bg-ink/5', text: 'text-ink', border: 'border-line' },
+  AJUSTE_NEGATIVO: { bg: 'bg-ink/5', text: 'text-ink', border: 'border-line' },
+  DEVOLUCAO: { bg: 'bg-ink/5', text: 'text-ink', border: 'border-line' },
 };
 
 export interface EstoqueMovimentacao {

@@ -267,16 +267,16 @@ export default function Header({ user }: HeaderProps) {
   const navLinkClass = (active: boolean) =>
     `whitespace-nowrap px-2 xl:px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 xl:gap-1.5 transition-all shrink-0 cursor-pointer ${
       active
-        ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50 shadow-sm shadow-amber-500/10'
-        : 'text-slate-300 hover:text-white hover:bg-slate-800/60 border border-transparent'
+        ? 'bg-accent/15 text-accent border border-accent/50 shadow-sm shadow-none'
+        : 'text-ink hover:text-ink hover:bg-elevated/60 border border-transparent'
     }`;
 
   return (
     <>
-      <header className="border-b border-slate-800 bg-[#070a10]/95 backdrop-blur-md sticky top-0 z-30 print:hidden">
+      <header className="border-b border-line bg-canvas/95 sticky top-0 z-30 print:hidden">
         {/* Barra Principal */}
-        <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto px-3 sm:px-6 py-2.5">
-          <div className="flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-4 min-w-0">
+        <div className="max-w-[90rem] mx-auto px-3 sm:px-6 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
 
             {/* 1. ESQUERDA: Ícone e Nome da Empresa */}
             <div className="flex items-center justify-start shrink-0 min-w-0">
@@ -285,21 +285,21 @@ export default function Header({ user }: HeaderProps) {
                 className="flex items-center gap-2 sm:gap-2.5 min-w-0 group transition-all"
                 title={`${OFICINA.nomeFantasia} - Painel`}
               >
-                <div className="relative w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 group-hover:border-amber-500/40 flex items-center justify-center p-1 transition-all shadow-sm shadow-amber-500/5 shrink-0">
+                <div className="relative w-8 h-8 rounded-lg bg-accent/10 border border-accent/20 group-hover:border-accent/40 flex items-center justify-center p-1 transition-all shadow-sm shadow-none shrink-0">
                   <Image
                     src="/logo-icone.png"
                     alt={OFICINA.nomeFantasia}
                     width={26}
                     height={26}
                     priority
-                    className="w-full h-full object-contain drop-shadow-[0_1px_4px_rgba(245,158,11,0.3)]"
+                    className="w-full h-full object-contain"
                   />
                 </div>
                 <div className="hidden sm:flex flex-col min-w-0">
-                  <span className="text-xs sm:text-sm font-black text-white tracking-wide group-hover:text-amber-400 transition-colors leading-none whitespace-nowrap">
-                    {OFICINA.nomeFantasia.toUpperCase()}
+                  <span className="text-xs sm:text-sm font-semibold text-ink tracking-wide group-hover:text-accent transition-colors leading-none whitespace-nowrap">
+                    {OFICINA.nomeFantasia}
                   </span>
-                  <span className="text-[10px] text-amber-500/80 font-medium leading-none mt-1 hidden sm:inline">
+                  <span className="text-xs text-muted leading-none mt-1 hidden sm:inline">
                     Oficina Especializada
                   </span>
                 </div>
@@ -307,33 +307,33 @@ export default function Header({ user }: HeaderProps) {
             </div>
 
             {/* 2. CENTRO: Painel de Navegação Centralizado (Desktop lg+) */}
-            <nav className="hidden lg:flex items-center justify-center gap-1 xl:gap-1.5 min-w-0">
+            <nav aria-label="Navegação principal" className="hidden lg:flex order-3 basis-full items-center gap-1 min-w-0 pt-2 border-t border-line">
               <Link href="/dashboard" className={navLinkClass(isDashboardActive)}>
-                <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+                <LayoutDashboard aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Painel</span>
               </Link>
               <Link href="/clientes" className={navLinkClass(isClientesActive)}>
-                <Users className="w-3.5 h-3.5 shrink-0" />
+                <Users aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Clientes</span>
               </Link>
               <Link href="/maquinas" className={navLinkClass(isMaquinasActive)}>
-                <Wrench className="w-3.5 h-3.5 shrink-0" />
+                <Wrench aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Equipamentos</span>
               </Link>
               <Link href="/ordens-servico" className={navLinkClass(isOsActive)}>
-                <FileText className="w-3.5 h-3.5 shrink-0" />
+                <FileText aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Ordens de Serviço</span>
               </Link>
               <Link href="/produtos" className={navLinkClass(isProdutosActive)}>
-                <Package className="w-3.5 h-3.5 shrink-0" />
+                <Package aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Peças &amp; Produtos</span>
               </Link>
               <Link href="/estoque" className={navLinkClass(isEstoqueActive)}>
-                <Boxes className="w-3.5 h-3.5 shrink-0" />
+                <Boxes aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Estoque</span>
               </Link>
               <Link href="/relatorios" className={navLinkClass(isRelatoriosActive)}>
-                <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+                <BarChart3 aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 <span>Relatórios</span>
               </Link>
             </nav>
@@ -344,13 +344,13 @@ export default function Header({ user }: HeaderProps) {
               <button
                 id="busca-rapida-trigger"
                 onClick={() => setIsBuscaOpen(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#0c101a] border border-slate-800 hover:border-amber-500/40 text-slate-400 hover:text-slate-200 text-xs transition-all cursor-pointer shadow-sm"
+                className="ui-icon-btn flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-surface border border-line hover:border-accent/40 text-muted hover:text-ink text-xs transition-all cursor-pointer shadow-sm"
                 title="Busca Global (Ctrl+K)"
                 aria-label="Abrir busca rápida"
               >
-                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <Search aria-hidden="true" className="w-3.5 h-3.5 text-muted shrink-0" />
                 <span className="hidden sm:inline lg:hidden xl:inline whitespace-nowrap">Buscar...</span>
-                <kbd className="hidden 2xl:inline-flex px-1.5 py-0.5 bg-slate-900 text-slate-400 rounded text-[10px] font-mono border border-slate-700/80 whitespace-nowrap ml-1">
+                <kbd className="hidden 2xl:inline-flex px-1.5 py-0.5 bg-surface text-muted rounded text-xs font-mono border border-control whitespace-nowrap ml-1">
                   Ctrl + K
                 </kbd>
               </button>
@@ -360,20 +360,20 @@ export default function Header({ user }: HeaderProps) {
                 <button
                   type="button"
                   onClick={() => setIsNotificacoesOpen((prev) => !prev)}
-                  className={`relative p-2 rounded-xl bg-[#0c101a] border transition-all cursor-pointer ${
+                  className={`relative p-2 rounded-xl bg-surface border transition-all cursor-pointer ${
                     isNotificacoesOpen
-                      ? 'border-amber-500/50 text-amber-400 bg-amber-500/10'
-                      : 'border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+                      ? 'border-accent/50 text-accent bg-accent/10'
+                      : 'border-line text-ink hover:text-ink hover:border-control'
                   }`}
                   aria-label={naoLidas > 0 ? `Notificações da oficina (${naoLidas} não lidas)` : 'Notificações da oficina'}
                   aria-haspopup="dialog"
                   aria-expanded={isNotificacoesOpen}
                 >
-                  <Bell className="w-4 h-4" />
+                  <Bell aria-hidden="true" className="w-4 h-4" />
                   {naoLidas > 0 && (
                     <span
                       data-testid="notification-badge"
-                      className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-md animate-in zoom-in-75"
+                      className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-accent text-inverse text-xs font-semibold flex items-center justify-center shadow-md animate-in zoom-in-75"
                     >
                       {naoLidas > 99 ? '99+' : naoLidas}
                     </span>
@@ -385,12 +385,12 @@ export default function Header({ user }: HeaderProps) {
                   <div
                     role="dialog"
                     aria-label="Painel de Notificações"
-                    className="fixed sm:absolute top-14 sm:top-auto left-3 right-3 sm:left-auto sm:right-0 sm:mt-2 w-auto sm:w-96 rounded-2xl bg-[#0c101a] border border-slate-800 shadow-2xl p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+                    className="ui-dialog fixed sm:absolute top-14 sm:top-auto left-3 right-3 sm:left-auto sm:right-0 sm:mt-2 w-auto sm:w-96 border p-3.5 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
                   >
-                    <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-800/80 px-1">
+                    <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-line px-1">
                       <div className="flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        <Bell aria-hidden="true" className="w-4 h-4 text-accent" />
+                        <span className="text-xs font-bold text-ink">
                           Notificações
                         </span>
                       </div>
@@ -400,12 +400,12 @@ export default function Header({ user }: HeaderProps) {
                             type="button"
                             onClick={handleMarcarTodasComoLidas}
                             disabled={isMarkingAllRead}
-                            className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 hover:underline transition-colors cursor-pointer disabled:opacity-50"
+                            className="text-xs font-semibold text-accent hover:text-accent hover:underline transition-colors cursor-pointer disabled:opacity-50"
                           >
                             Marcar todas como lidas
                           </button>
                         )}
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-elevated text-ink border border-control">
                           {naoLidas > 0 ? `${naoLidas} não lida${naoLidas > 1 ? 's' : ''}` : 'Tudo lido'}
                         </span>
                       </div>
@@ -413,27 +413,27 @@ export default function Header({ user }: HeaderProps) {
 
                     <div className="space-y-1.5 max-h-80 overflow-y-auto pr-0.5">
                       {isLoadingNotificacoes ? (
-                        <div className="py-6 px-3 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-2">
-                          <RefreshCw className="w-4 h-4 animate-spin text-amber-400" />
+                        <div className="py-6 px-3 text-center text-xs text-muted flex flex-col items-center justify-center gap-2">
+                          <RefreshCw aria-hidden="true" className="w-4 h-4 animate-spin text-accent" />
                           <p>Carregando notificações...</p>
                         </div>
                       ) : notificacoesError ? (
-                        <div className="py-6 px-3 text-center text-xs text-rose-400 flex flex-col items-center justify-center gap-1.5">
-                          <AlertTriangle className="w-5 h-5 text-rose-400" />
+                        <div className="py-6 px-3 text-center text-xs text-danger flex flex-col items-center justify-center gap-1.5">
+                          <AlertTriangle aria-hidden="true" className="w-5 h-5 text-danger" />
                           <p>{notificacoesError}</p>
                           <button
                             type="button"
                             onClick={carregarNotificacoes}
-                            className="mt-1 text-[11px] font-bold text-amber-400 hover:underline cursor-pointer"
+                            className="mt-1 text-xs font-bold text-accent hover:underline cursor-pointer"
                           >
                             Tentar novamente
                           </button>
                         </div>
                       ) : notificacoes.length === 0 ? (
-                        <div className="py-6 px-3 text-center text-xs text-slate-400">
-                          <CheckSquare className="w-6 h-6 mx-auto mb-1 text-emerald-400/80" />
-                          <p className="font-semibold text-slate-300">Tudo em dia!</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
+                        <div className="py-6 px-3 text-center text-xs text-muted">
+                          <CheckSquare className="w-6 h-6 mx-auto mb-1 text-ink" />
+                          <p className="font-semibold text-ink">Tudo em dia!</p>
+                          <p className="text-xs text-subtle mt-0.5">
                             Nenhum alerta ou pendência crítica no momento.
                           </p>
                         </div>
@@ -441,10 +441,10 @@ export default function Header({ user }: HeaderProps) {
                         notificacoes.map((item) => {
                           const iconColor =
                             item.tipo === 'OS_PRONTA'
-                              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                              ? 'text-ink bg-ink/5 border-line'
                               : item.tipo === 'OS_AGUARDANDO_APROVACAO'
-                              ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                              : 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+                              ? 'text-accent bg-accent/10 border-accent/20'
+                              : 'text-danger bg-danger/10 border-danger/20';
 
                           return (
                             <button
@@ -453,40 +453,40 @@ export default function Header({ user }: HeaderProps) {
                               onClick={() => handleNotificacaoClick(item)}
                               className={`w-full text-left p-2.5 rounded-xl border transition-all flex items-start gap-2.5 group cursor-pointer ${
                                 !item.lida
-                                  ? 'bg-slate-900/90 border-slate-700/80 hover:border-amber-500/40 shadow-sm'
-                                  : 'bg-slate-950/40 border-slate-800/60 opacity-80 hover:opacity-100 hover:border-slate-700'
+                                  ? 'bg-surface/90 border-control hover:border-accent/40 shadow-sm'
+                                  : 'bg-canvas/40 border-line opacity-80 hover:opacity-100 hover:border-control'
                               }`}
                             >
                               <div
                                 className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${iconColor}`}
                               >
-                                {item.tipo === 'OS_PRONTA' && <CheckSquare className="w-3.5 h-3.5" />}
-                                {item.tipo === 'OS_AGUARDANDO_APROVACAO' && <Clock className="w-3.5 h-3.5" />}
-                                {item.tipo === 'ESTOQUE_BAIXO' && <AlertTriangle className="w-3.5 h-3.5" />}
+                                {item.tipo === 'OS_PRONTA' && <CheckSquare aria-hidden="true" className="w-3.5 h-3.5" />}
+                                {item.tipo === 'OS_AGUARDANDO_APROVACAO' && <Clock aria-hidden="true" className="w-3.5 h-3.5" />}
+                                {item.tipo === 'ESTOQUE_BAIXO' && <AlertTriangle aria-hidden="true" className="w-3.5 h-3.5" />}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <p
                                     className={`text-xs transition-colors ${
                                       !item.lida
-                                        ? 'font-bold text-white group-hover:text-amber-400'
-                                        : 'font-medium text-slate-300 group-hover:text-white'
+                                        ? 'font-bold text-ink group-hover:text-accent'
+                                        : 'font-medium text-ink group-hover:text-ink'
                                     }`}
                                   >
                                     {item.titulo}
                                   </p>
                                   {!item.lida && (
-                                    <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                    <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-accent/20 text-accent border border-accent/30">
                                       Nova
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                                <p className="text-xs text-muted leading-tight mt-0.5">
                                   {item.mensagem}
                                 </p>
                               </div>
                               {item.link && (
-                                <ArrowRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all mt-1 shrink-0" />
+                                <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-subtle group-hover:text-accent group-hover:translate-x-0.5 transition-all mt-1 shrink-0" />
                               )}
                             </button>
                           );
@@ -504,20 +504,20 @@ export default function Header({ user }: HeaderProps) {
                   onClick={() => setIsUserMenuOpen((prev) => !prev)}
                   className={`flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl transition-all cursor-pointer ${
                     isUserMenuOpen
-                      ? 'bg-slate-800/80 ring-1 ring-slate-700'
-                      : 'hover:bg-slate-800/50'
+                      ? 'bg-elevated/80 ring-1 ring-control'
+                      : 'hover:bg-elevated/50'
                   }`}
                   aria-label="Menu do usuário autenticado"
                   aria-haspopup="menu"
                   aria-expanded={isUserMenuOpen}
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#1b263b] border border-slate-700 flex items-center justify-center text-xs font-black text-white shadow-sm shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-elevated border border-control flex items-center justify-center text-xs font-semibold text-ink shadow-sm shrink-0">
                     {userInitials}
                   </div>
-                  <span className="text-xs font-semibold text-white whitespace-nowrap hidden sm:inline lg:hidden xl:inline">
+                  <span className="text-xs font-semibold text-ink whitespace-nowrap hidden sm:inline lg:hidden xl:inline">
                     {firstName}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <ChevronDown aria-hidden="true" className="w-3.5 h-3.5 text-muted shrink-0" />
                 </button>
 
                 {/* Dropdown do Usuário */}
@@ -525,11 +525,11 @@ export default function Header({ user }: HeaderProps) {
                   <div
                     role="menu"
                     aria-label="Opções do usuário"
-                    className="absolute right-0 mt-2 w-52 rounded-2xl bg-[#0c101a] border border-slate-800 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+                    className="ui-dialog absolute right-0 mt-2 w-52 border p-2 z-50 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
                   >
-                    <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                      <p className="text-xs font-bold text-white truncate">{userName}</p>
-                      <p className="text-[10px] text-slate-400 truncate">
+                    <div className="px-3 py-2 border-b border-line mb-1">
+                      <p className="text-xs font-bold text-ink truncate">{userName}</p>
+                      <p className="text-xs text-muted truncate">
                         {user?.email || 'admin@oficina.com'}
                       </p>
                     </div>
@@ -540,11 +540,11 @@ export default function Header({ user }: HeaderProps) {
                       onClick={() => setIsUserMenuOpen(false)}
                       className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-colors ${
                         isConfiguracaoActive
-                          ? 'bg-amber-500/15 text-amber-400 font-semibold'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                          ? 'bg-accent/15 text-accent font-semibold'
+                          : 'text-ink hover:text-ink hover:bg-elevated/60'
                       }`}
                     >
-                      <Settings className={`w-3.5 h-3.5 ${isConfiguracaoActive ? 'text-amber-400' : 'text-slate-400'}`} />
+                      <Settings className={`w-3.5 h-3.5 ${isConfiguracaoActive ? 'text-accent' : 'text-muted'}`} />
                       <span>Configurações</span>
                     </Link>
 
@@ -558,9 +558,9 @@ export default function Header({ user }: HeaderProps) {
                         setIsUserMenuOpen(false);
                         handleLogout();
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-danger hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                     >
-                      <LogOut className="w-3.5 h-3.5" />
+                      <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
                       <span>{isLoggingOut ? 'Saindo...' : 'Sair do Sistema'}</span>
                     </button>
                   </div>
@@ -571,10 +571,10 @@ export default function Header({ user }: HeaderProps) {
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-                className="lg:hidden p-2 rounded-xl bg-[#0c101a] border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+                className="ui-icon-btn lg:hidden p-2 rounded-xl bg-surface border border-line text-ink hover:text-ink hover:bg-elevated transition-all cursor-pointer"
                 aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu de navegação'}
               >
-                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {isMobileMenuOpen ? <X aria-hidden="true" className="w-4 h-4" /> : <Menu aria-hidden="true" className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -582,95 +582,95 @@ export default function Header({ user }: HeaderProps) {
 
         {/* Menu Mobile Dropdown (quando hambúrguer aberto em telas < lg) */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-800/80 bg-[#070a10]/98 backdrop-blur-xl">
+          <div className="lg:hidden border-t border-line bg-canvas/98">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
               <nav className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <Link
                   href="/dashboard"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isDashboardActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <LayoutDashboard className="w-4 h-4 shrink-0" />
+                  <LayoutDashboard aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Painel</span>
                 </Link>
                 <Link
                   href="/clientes"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isClientesActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <Users className="w-4 h-4 shrink-0" />
+                  <Users aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Clientes</span>
                 </Link>
                 <Link
                   href="/maquinas"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isMaquinasActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <Wrench className="w-4 h-4 shrink-0" />
+                  <Wrench aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Equipamentos</span>
                 </Link>
                 <Link
                   href="/ordens-servico"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isOsActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <FileText className="w-4 h-4 shrink-0" />
+                  <FileText aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Ordens de Serviço</span>
                 </Link>
                 <Link
                   href="/produtos"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isProdutosActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <Package className="w-4 h-4 shrink-0" />
+                  <Package aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Peças &amp; Produtos</span>
                 </Link>
                 <Link
                   href="/estoque"
                   className={`py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
                     isEstoqueActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <Boxes className="w-4 h-4 shrink-0" />
+                  <Boxes aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Estoque</span>
                 </Link>
                 <Link
                   href="/relatorios"
                   className={`col-span-2 sm:col-span-1 py-2.5 px-3 rounded-xl text-xs font-semibold flex items-center justify-center sm:justify-start gap-2 transition-all ${
                     isRelatoriosActive
-                      ? 'bg-[#533804] text-[#fbbf24] border border-[#f59e0b]/50'
-                      : 'text-slate-300 bg-slate-900/60 border border-slate-800 hover:bg-slate-800/60'
+                      ? 'bg-accent/15 text-accent border border-accent/50'
+                      : 'text-ink bg-surface/60 border border-line hover:bg-elevated/60'
                   }`}
                 >
-                  <BarChart3 className="w-4 h-4 shrink-0" />
+                  <BarChart3 aria-hidden="true" className="w-4 h-4 shrink-0" />
                   <span>Relatórios</span>
                 </Link>
               </nav>
 
               {/* Info do usuário no menu mobile */}
-              <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+              <div className="mt-3 pt-3 border-t border-line flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-full bg-[#1b263b] border border-slate-700 flex items-center justify-center text-[11px] font-black text-white shrink-0">
+                  <div className="w-7 h-7 rounded-full bg-elevated border border-control flex items-center justify-center text-xs font-semibold text-ink shrink-0">
                     {userInitials}
                   </div>
-                  <span className="text-xs text-slate-300 truncate font-semibold">{userName}</span>
+                  <span className="text-xs text-ink truncate font-semibold">{userName}</span>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
                   <Link
@@ -678,11 +678,11 @@ export default function Header({ user }: HeaderProps) {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                       isConfiguracaoActive
-                        ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                        : 'bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700'
+                        ? 'bg-accent/15 text-accent border border-accent/30'
+                        : 'bg-elevated hover:bg-hover text-ink hover:text-ink border border-control'
                     }`}
                   >
-                    <Settings className="w-3.5 h-3.5" />
+                    <Settings aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>Configurações</span>
                   </Link>
                   <button
@@ -691,9 +691,9 @@ export default function Header({ user }: HeaderProps) {
                     disabled={isLoggingOut}
                     aria-busy={isLoggingOut}
                     onClick={handleLogout}
-                    className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-semibold flex items-center gap-1 border border-red-500/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                    className="px-2.5 py-1 rounded-lg bg-danger/10 hover:bg-danger/20 text-danger text-xs font-semibold flex items-center gap-1 border border-danger/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
+                    <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
                     <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
                   </button>
                 </div>
@@ -703,18 +703,18 @@ export default function Header({ user }: HeaderProps) {
         )}
       </header>
       {isLoggingOut && (
-        <div role="status" className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-slate-700 bg-slate-900 p-3 text-sm text-slate-200 shadow-lg z-50 print:hidden">
+        <div role="status" className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-control bg-surface p-3 text-sm text-ink shadow-lg z-50 print:hidden">
           Confirmando saída...
         </div>
       )}
       {logoutError && (
-        <div className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-red-500/30 bg-slate-900 p-3 text-sm text-red-200 shadow-lg z-50 print:hidden">
+        <div className="fixed bottom-4 inset-x-4 mx-auto max-w-md rounded-xl border border-danger/30 bg-surface p-3 text-sm text-danger shadow-lg z-50 print:hidden">
           <p role="alert" aria-atomic="true">{logoutError}</p>
           <button
             type="button"
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="mt-2 rounded-lg px-2 py-1 font-semibold text-white hover:bg-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300 disabled:opacity-60"
+            className="mt-2 rounded-lg px-2 py-1 font-semibold text-ink hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger disabled:opacity-60"
           >
             Tentar novamente
           </button>

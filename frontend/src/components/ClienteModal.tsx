@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import DialogFocus from '@/components/ui/DialogFocus';
+import DomainIcon from '@/components/ui/DomainIcon';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -65,15 +67,14 @@ interface ClienteModalProps {
 }
 
 const TIPO_EQUIPAMENTO_OPTIONS: { value: TipoEquipamento; label: string; icon: string; desc: string }[] = [
-  { value: 'MAQUINA_SOLDA', label: 'Máquina de Solda', icon: '⚡', desc: 'MIG, TIG, Inversora, Eletrodo' },
-  { value: 'GERADOR_ENERGIA', label: 'Gerador de Energia', icon: '🔋', desc: 'Gasolina, Diesel, Portátil ou Estacionário' },
-  { value: 'OUTRO_EQUIPAMENTO', label: 'Outro Equipamento', icon: '🔧', desc: 'Transformador, Cortadora, Compressor' },
+  { value: 'MAQUINA_SOLDA', label: 'Máquina de Solda', icon: 'zap', desc: 'MIG, TIG, Inversora, Eletrodo' },
+  { value: 'GERADOR_ENERGIA', label: 'Gerador de Energia', icon: 'battery', desc: 'Gasolina, Diesel, Portátil ou Estacionário' },
+  { value: 'OUTRO_EQUIPAMENTO', label: 'Outro Equipamento', icon: 'wrench', desc: 'Transformador, Cortadora, Compressor' },
 ];
 
-const INPUT_CLASS =
-  'w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors';
+const INPUT_CLASS = 'ui-field';
 
-const LABEL_CLASS = 'block text-xs font-medium text-slate-300 mb-1';
+const LABEL_CLASS = 'ui-label';
 
 export default function ClienteModal({
   cliente,
@@ -449,33 +450,34 @@ export default function ClienteModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="cliente-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80 overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleCloseModal();
       }}
     >
-      <div className="relative w-full max-w-3xl my-4 sm:my-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <DialogFocus />
+      <div className="ui-dialog relative w-full max-w-3xl my-4 sm:my-8 border overflow-hidden flex flex-col max-h-[92vh]">
         {/* Cabeçalho do Modal */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-line bg-canvas/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="h-10 w-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
               {incluirEquipamento ? (
                 etapa === 1 ? (
-                  tipoPessoaAtual === 'JURIDICA' ? <Building2 className="w-5 h-5" /> : <User className="w-5 h-5" />
+                  tipoPessoaAtual === 'JURIDICA' ? <Building2 aria-hidden="true" className="w-5 h-5" /> : <User aria-hidden="true" className="w-5 h-5" />
                 ) : (
-                  <Wrench className="w-5 h-5" />
+                  <Wrench aria-hidden="true" className="w-5 h-5" />
                 )
               ) : isEditing ? (
-                <User className="w-5 h-5" />
+                <User aria-hidden="true" className="w-5 h-5" />
               ) : tipoPessoaAtual === 'JURIDICA' ? (
-                <Building2 className="w-5 h-5" />
+                <Building2 aria-hidden="true" className="w-5 h-5" />
               ) : (
-                <User className="w-5 h-5" />
+                <User aria-hidden="true" className="w-5 h-5" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 id="cliente-modal-title" className="text-base sm:text-lg font-bold text-white">
+                <h2 id="cliente-modal-title" className="text-base sm:text-lg font-bold text-ink">
                   {incluirEquipamento
                     ? 'Nova Ordem de Serviço — Cadastro'
                     : isEditing
@@ -483,12 +485,12 @@ export default function ClienteModal({
                     : 'Novo Cliente'}
                 </h2>
                 {incluirEquipamento && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <span className="px-2 py-0.5 rounded text-xs font-bold bg-accent/20 text-accent border border-accent/30">
                     Etapa {etapa} de 2
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted">
                 {incluirEquipamento
                   ? etapa === 1
                     ? 'Passo 1: Informe os dados cadastrais do cliente proprietário'
@@ -500,43 +502,43 @@ export default function ClienteModal({
 
           <button
             onClick={handleCloseModal}
-            className="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+            className="ui-icon-btn text-muted hover:text-ink p-2 rounded-xl hover:bg-elevated transition-colors cursor-pointer"
             aria-label="Fechar modal"
           >
-            <X className="w-5 h-5" />
+            <X aria-hidden="true" className="w-5 h-5" />
           </button>
         </div>
 
         {/* Stepper Visual (quando em modo com equipamento) */}
         {incluirEquipamento && (
-          <div className="px-6 py-2.5 bg-slate-950/40 border-b border-slate-800 flex items-center gap-3 shrink-0">
+          <div className="px-6 py-2.5 bg-canvas/40 border-b border-line flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setEtapa(1)}
               className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 etapa === 1
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+                  ? 'bg-accent/20 text-accent border border-accent/40'
+                  : 'text-muted hover:text-ink bg-surface border border-line'
               }`}
             >
-              <div className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center">
+              <div className="w-4 h-4 rounded-full bg-accent text-inverse text-xs font-semibold flex items-center justify-center">
                 1
               </div>
               <span>Dados do cliente</span>
             </button>
 
-            <span className="text-slate-600 text-xs">→</span>
+            <ArrowRight aria-hidden="true" className="w-4 h-4 text-muted" />
 
             <button
               type="button"
               onClick={handleAvancarParaEquipamento}
               className={`flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                 etapa === 2
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                  : 'text-slate-400 hover:text-white bg-slate-900 border border-slate-800'
+                  ? 'bg-accent/20 text-accent border border-accent/40'
+                  : 'text-muted hover:text-ink bg-surface border border-line'
               }`}
             >
-              <div className="w-4 h-4 rounded-full bg-slate-700 text-white text-[10px] font-black flex items-center justify-center">
+              <div className="w-4 h-4 rounded-full bg-hover text-ink text-xs font-semibold flex items-center justify-center">
                 2
               </div>
               <span>Dados do equipamento</span>
@@ -546,9 +548,9 @@ export default function ClienteModal({
 
         {/* Mensagem de Erro Geral */}
         {errorMessage && (
-          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
+              <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
             {(errorMessage.includes('Já existe') ||
@@ -557,7 +559,7 @@ export default function ClienteModal({
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-[11px] transition-colors self-start sm:self-auto cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-danger/20 hover:bg-danger/30 text-danger font-semibold text-xs transition-colors self-start sm:self-auto cursor-pointer"
               >
                 Voltar para pesquisar cliente existente
               </button>
@@ -583,7 +585,7 @@ export default function ClienteModal({
             <div className="p-6 space-y-6 overflow-y-auto flex-1">
               {/* Seletor Tipo de Pessoa */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-ink mb-2">
                   Tipo de Cliente *
                 </label>
                 <div className="grid grid-cols-2 gap-3">
@@ -592,11 +594,11 @@ export default function ClienteModal({
                     onClick={() => setValue('tipoPessoa', 'FISICA')}
                     className={`py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
                       tipoPessoaAtual === 'FISICA'
-                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                        ? 'bg-accent/15 border-accent/40 text-accent shadow-sm'
+                        : 'bg-canvas/60 border-line text-muted hover:text-ink'
                     }`}
                   >
-                    <User className="w-4 h-4" />
+                    <User aria-hidden="true" className="w-4 h-4" />
                     <span>Pessoa Física (PF)</span>
                   </button>
                   <button
@@ -604,11 +606,11 @@ export default function ClienteModal({
                     onClick={() => setValue('tipoPessoa', 'JURIDICA')}
                     className={`py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
                       tipoPessoaAtual === 'JURIDICA'
-                        ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                        ? 'bg-accent/15 border-accent/40 text-accent shadow-sm'
+                        : 'bg-canvas/60 border-line text-muted hover:text-ink'
                     }`}
                   >
-                    <Building2 className="w-4 h-4" />
+                    <Building2 aria-hidden="true" className="w-4 h-4" />
                     <span>Pessoa Jurídica (PJ)</span>
                   </button>
                 </div>
@@ -616,30 +618,30 @@ export default function ClienteModal({
 
               {/* Dados Principais */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-amber-400/90 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-bold text-accent flex items-center gap-2">
                   <span>Dados Cadastrais</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className={LABEL_CLASS}>
+                    <label htmlFor="field-src-components-ClienteModal-tsx-1" className={LABEL_CLASS}>
                       {tipoPessoaAtual === 'JURIDICA' ? 'Razão Social *' : 'Nome Completo *'}
                     </label>
-                    <input
+                    <input id="field-src-components-ClienteModal-tsx-1"
                       type="text"
                       {...register('nomeRazaoSocial')}
                       placeholder={tipoPessoaAtual === 'JURIDICA' ? 'Ex: Metalúrgica Aço Forte LTDA' : 'Ex: João da Silva'}
                       className={INPUT_CLASS}
                     />
                     {errors.nomeRazaoSocial && (
-                      <p className="text-[11px] text-red-400 mt-1">{errors.nomeRazaoSocial.message}</p>
+                      <p className="text-xs text-danger mt-1">{errors.nomeRazaoSocial.message}</p>
                     )}
                   </div>
 
                   {tipoPessoaAtual === 'JURIDICA' && (
                     <div>
-                      <label className={LABEL_CLASS}>Nome Fantasia</label>
-                      <input
+                      <label htmlFor="field-src-components-ClienteModal-tsx-2" className={LABEL_CLASS}>Nome Fantasia</label>
+                      <input id="field-src-components-ClienteModal-tsx-2"
                         type="text"
                         {...register('nomeFantasia')}
                         placeholder="Ex: Aço Forte Geradores"
@@ -649,10 +651,10 @@ export default function ClienteModal({
                   )}
 
                   <div>
-                    <label className={LABEL_CLASS}>
+                    <label htmlFor="field-src-components-ClienteModal-tsx-3" className={LABEL_CLASS}>
                       {tipoPessoaAtual === 'JURIDICA' ? 'CNPJ' : 'CPF'}
                     </label>
-                    <input
+                    <input id="field-src-components-ClienteModal-tsx-3"
                       type="text"
                       {...register('cpfCnpj')}
                       placeholder={tipoPessoaAtual === 'JURIDICA' ? '00.000.000/0000-00' : '000.000.000-00'}
@@ -661,10 +663,10 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>
+                    <label htmlFor="field-src-components-ClienteModal-tsx-4" className={LABEL_CLASS}>
                       {tipoPessoaAtual === 'JURIDICA' ? 'Inscrição Estadual' : 'RG'}
                     </label>
-                    <input
+                    <input id="field-src-components-ClienteModal-tsx-4"
                       type="text"
                       {...register('rgIe')}
                       placeholder={tipoPessoaAtual === 'JURIDICA' ? 'Inscrição Estadual' : 'Número do RG'}
@@ -676,14 +678,14 @@ export default function ClienteModal({
 
               {/* Contatos */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-amber-400/90 uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-accent">
                   Contatos & Comunicação
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className={LABEL_CLASS}>Telefone Fixo</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-5" className={LABEL_CLASS}>Telefone Fixo</label>
+                    <input id="field-src-components-ClienteModal-tsx-5"
                       type="text"
                       {...register('telefone')}
                       placeholder="(31) 3333-0000"
@@ -692,8 +694,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>Celular / WhatsApp</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-6" className={LABEL_CLASS}>Celular / WhatsApp</label>
+                    <input id="field-src-components-ClienteModal-tsx-6"
                       type="text"
                       {...register('celular')}
                       placeholder="(31) 99999-0000"
@@ -702,15 +704,15 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>E-mail</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-7" className={LABEL_CLASS}>E-mail</label>
+                    <input id="field-src-components-ClienteModal-tsx-7"
                       type="email"
                       {...register('email')}
                       placeholder="cliente@email.com"
                       className={INPUT_CLASS}
                     />
                     {errors.email && (
-                      <p className="text-[11px] text-red-400 mt-1">{errors.email.message}</p>
+                      <p className="text-xs text-danger mt-1">{errors.email.message}</p>
                     )}
                   </div>
                 </div>
@@ -718,15 +720,15 @@ export default function ClienteModal({
 
               {/* Endereço */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-amber-400/90 uppercase tracking-wider flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                <h3 className="text-xs font-bold text-accent flex items-center gap-2">
+                  <MapPin aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
                   <span>Endereço Principal</span>
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className={LABEL_CLASS}>CEP</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-8" className={LABEL_CLASS}>CEP</label>
+                    <input id="field-src-components-ClienteModal-tsx-8"
                       type="text"
                       {...register('endereco.cep')}
                       placeholder="30000-000"
@@ -735,8 +737,8 @@ export default function ClienteModal({
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className={LABEL_CLASS}>Logradouro (Rua / Av.)</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-9" className={LABEL_CLASS}>Logradouro (Rua / Av.)</label>
+                    <input id="field-src-components-ClienteModal-tsx-9"
                       type="text"
                       {...register('endereco.logradouro')}
                       placeholder="Ex: Av. Amazonas"
@@ -745,8 +747,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>Número</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-10" className={LABEL_CLASS}>Número</label>
+                    <input id="field-src-components-ClienteModal-tsx-10"
                       type="text"
                       {...register('endereco.numero')}
                       placeholder="100"
@@ -755,8 +757,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>Complemento</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-11" className={LABEL_CLASS}>Complemento</label>
+                    <input id="field-src-components-ClienteModal-tsx-11"
                       type="text"
                       {...register('endereco.complemento')}
                       placeholder="Galpão 2, Sala 10"
@@ -765,8 +767,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>Bairro</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-12" className={LABEL_CLASS}>Bairro</label>
+                    <input id="field-src-components-ClienteModal-tsx-12"
                       type="text"
                       {...register('endereco.bairro')}
                       placeholder="Centro"
@@ -775,8 +777,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>Cidade</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-13" className={LABEL_CLASS}>Cidade</label>
+                    <input id="field-src-components-ClienteModal-tsx-13"
                       type="text"
                       {...register('endereco.cidade')}
                       placeholder="Belo Horizonte"
@@ -785,8 +787,8 @@ export default function ClienteModal({
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>UF</label>
-                    <input
+                    <label htmlFor="field-src-components-ClienteModal-tsx-14" className={LABEL_CLASS}>UF</label>
+                    <input id="field-src-components-ClienteModal-tsx-14"
                       type="text"
                       maxLength={2}
                       {...register('endereco.estado')}
@@ -799,8 +801,8 @@ export default function ClienteModal({
 
               {/* Observações */}
               <div>
-                <label className={LABEL_CLASS}>Observações Técnicas / Comerciais</label>
-                <textarea
+                <label htmlFor="field-src-components-ClienteModal-tsx-15" className={LABEL_CLASS}>Observações Técnicas / Comerciais</label>
+                <textarea id="field-src-components-ClienteModal-tsx-15"
                   rows={2}
                   {...register('observacoes')}
                   placeholder="Informações sobre preferências do cliente ou observações gerais..."
@@ -810,11 +812,11 @@ export default function ClienteModal({
             </div>
 
             {/* Botões de Ação da Etapa 1 */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-end gap-3 shrink-0">
+            <div className="p-4 border-t border-line bg-canvas/40 flex items-center justify-end gap-3 shrink-0">
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-semibold transition-colors cursor-pointer"
               >
                 Cancelar
               </button>
@@ -823,18 +825,18 @@ export default function ClienteModal({
                 <button
                   type="button"
                   onClick={handleAvancarParaEquipamento}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer"
+                  className="ui-btn ui-btn-primary flex items-center gap-2 transition-all cursor-pointer"
                 >
                   <span>Avançar para dados do equipamento</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight aria-hidden="true" className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/10 transition-all cursor-pointer disabled:opacity-50"
+                  className="ui-btn ui-btn-primary flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save aria-hidden="true" className="w-4 h-4" />
                   <span>{isSubmitting ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar Cliente'}</span>
                 </button>
               )}
@@ -849,14 +851,14 @@ export default function ClienteModal({
           <form onSubmit={handleConcluirClienteEEquipamento} className="flex flex-col flex-1 overflow-hidden">
             <div className="p-6 space-y-6 overflow-y-auto flex-1">
               {/* Resumo do Cliente Selecionado nesta etapa */}
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl bg-canvas border border-line flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                    <User className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                    <User aria-hidden="true" className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-slate-400 uppercase font-semibold">Cliente em Cadastro</p>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs text-muted uppercase font-semibold">Cliente em Cadastro</p>
+                    <p className="text-xs font-bold text-ink">
                       {getValues('nomeRazaoSocial') || 'Cliente Proprietário'}
                     </p>
                   </div>
@@ -864,7 +866,7 @@ export default function ClienteModal({
                 <button
                   type="button"
                   onClick={() => setEtapa(1)}
-                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline cursor-pointer"
+                  className="text-xs text-accent hover:text-accent font-semibold underline cursor-pointer"
                 >
                   Editar dados do cliente
                 </button>
@@ -872,7 +874,7 @@ export default function ClienteModal({
 
               {/* Seletor do Tipo de Equipamento */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-ink mb-2">
                   Tipo de Equipamento da Oficina *
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -887,19 +889,19 @@ export default function ClienteModal({
                         }
                         className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? 'bg-amber-500/15 border-amber-500/60 shadow-md ring-1 ring-amber-500/30'
-                            : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                            ? 'bg-accent/15 border-accent/60 shadow-md ring-1 ring-accent/30'
+                            : 'bg-canvas/60 border-line hover:border-control'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-lg">{opt.icon}</span>
-                          {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                          <DomainIcon type={opt.value} />
+                          {isSelected && <CheckCircle2 aria-hidden="true" className="w-4 h-4 text-accent" />}
                         </div>
                         <div className="mt-2">
-                          <p className={`text-xs font-bold ${isSelected ? 'text-amber-400' : 'text-white'}`}>
+                          <p className={`text-xs font-bold ${isSelected ? 'text-accent' : 'text-ink'}`}>
                             {opt.label}
                           </p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{opt.desc}</p>
+                          <p className="text-xs text-muted mt-0.5">{opt.desc}</p>
                         </div>
                       </button>
                     );
@@ -909,16 +911,16 @@ export default function ClienteModal({
 
               {/* Marca e Modelo */}
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-amber-400/90 uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-accent">
                   Identificação do Equipamento
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={LABEL_CLASS}>
-                      Marca <span className="text-amber-400">*</span>
+                    <label htmlFor="field-src-components-ClienteModal-tsx-16" className={LABEL_CLASS}>
+                      Marca <span className="text-accent">*</span>
                     </label>
-                    <input
+                    <input id="field-src-components-ClienteModal-tsx-16"
                       type="text"
                       value={maquinaData.marca}
                       onChange={(e) => {
@@ -934,18 +936,18 @@ export default function ClienteModal({
                           ? 'Ex: Toyama, Branco, Buffalo, Cummins'
                           : 'Ex: Schulz, Makita, Bosch'
                       }
-                      className={`${INPUT_CLASS} ${maquinaFieldErrors.marca ? 'border-red-500/60' : ''}`}
+                      className={`${INPUT_CLASS} ${maquinaFieldErrors.marca ? 'border-danger/60' : ''}`}
                     />
                     {maquinaFieldErrors.marca && (
-                      <p className="mt-1 text-[11px] text-red-400">{maquinaFieldErrors.marca}</p>
+                      <p className="mt-1 text-xs text-danger">{maquinaFieldErrors.marca}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className={LABEL_CLASS}>
-                      Modelo <span className="text-amber-400">*</span>
+                    <label htmlFor="field-src-components-ClienteModal-tsx-17" className={LABEL_CLASS}>
+                      Modelo <span className="text-accent">*</span>
                     </label>
-                    <input
+                    <input id="field-src-components-ClienteModal-tsx-17"
                       type="text"
                       value={maquinaData.modelo}
                       onChange={(e) => {
@@ -961,10 +963,10 @@ export default function ClienteModal({
                           ? 'Ex: TG8000CXR, B4T-6500'
                           : 'Ex: Modelo do equipamento'
                       }
-                      className={`${INPUT_CLASS} ${maquinaFieldErrors.modelo ? 'border-red-500/60' : ''}`}
+                      className={`${INPUT_CLASS} ${maquinaFieldErrors.modelo ? 'border-danger/60' : ''}`}
                     />
                     {maquinaFieldErrors.modelo && (
-                      <p className="mt-1 text-[11px] text-red-400">{maquinaFieldErrors.modelo}</p>
+                      <p className="mt-1 text-xs text-danger">{maquinaFieldErrors.modelo}</p>
                     )}
                   </div>
                 </div>
@@ -973,11 +975,11 @@ export default function ClienteModal({
               {/* Série e Ano */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>
-                    <Hash className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-slate-500" />
+                  <label htmlFor="field-src-components-ClienteModal-tsx-18" className={LABEL_CLASS}>
+                    <Hash aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
                     Número de Série
                   </label>
-                  <input
+                  <input id="field-src-components-ClienteModal-tsx-18"
                     type="text"
                     value={maquinaData.numeroSerie}
                     onChange={(e) => setMaquinaData({ ...maquinaData, numeroSerie: e.target.value })}
@@ -987,11 +989,11 @@ export default function ClienteModal({
                 </div>
 
                 <div>
-                  <label className={LABEL_CLASS}>
-                    <Calendar className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-slate-500" />
+                  <label htmlFor="field-src-components-ClienteModal-tsx-19" className={LABEL_CLASS}>
+                    <Calendar aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
                     Ano de Fabricação
                   </label>
-                  <input
+                  <input id="field-src-components-ClienteModal-tsx-19"
                     type="number"
                     value={maquinaData.anoFabricacao}
                     onChange={(e) => {
@@ -1003,10 +1005,10 @@ export default function ClienteModal({
                     placeholder="Ex: 2022"
                     min={1900}
                     max={2100}
-                    className={`${INPUT_CLASS} ${maquinaFieldErrors.anoFabricacao ? 'border-red-500/60' : ''}`}
+                    className={`${INPUT_CLASS} ${maquinaFieldErrors.anoFabricacao ? 'border-danger/60' : ''}`}
                   />
                   {maquinaFieldErrors.anoFabricacao && (
-                    <p className="mt-1 text-[11px] text-red-400">{maquinaFieldErrors.anoFabricacao}</p>
+                    <p className="mt-1 text-xs text-danger">{maquinaFieldErrors.anoFabricacao}</p>
                   )}
                 </div>
               </div>
@@ -1014,11 +1016,11 @@ export default function ClienteModal({
               {/* Potência, Tensão e Horímetro */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className={LABEL_CLASS}>
-                    <Zap className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-slate-500" />
+                  <label htmlFor="field-src-components-ClienteModal-tsx-20" className={LABEL_CLASS}>
+                    <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
                     Potência
                   </label>
-                  <input
+                  <input id="field-src-components-ClienteModal-tsx-20"
                     type="text"
                     value={maquinaData.potencia}
                     onChange={(e) => setMaquinaData({ ...maquinaData, potencia: e.target.value })}
@@ -1034,11 +1036,11 @@ export default function ClienteModal({
                 </div>
 
                 <div>
-                  <label className={LABEL_CLASS}>
-                    <Zap className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-slate-500" />
+                  <label htmlFor="field-src-components-ClienteModal-tsx-21" className={LABEL_CLASS}>
+                    <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
                     Tensão
                   </label>
-                  <input
+                  <input id="field-src-components-ClienteModal-tsx-21"
                     type="text"
                     value={maquinaData.tensao}
                     onChange={(e) => setMaquinaData({ ...maquinaData, tensao: e.target.value })}
@@ -1052,11 +1054,11 @@ export default function ClienteModal({
                 </div>
 
                 <div>
-                  <label className={LABEL_CLASS}>
-                    <Gauge className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-slate-500" />
+                  <label htmlFor="field-src-components-ClienteModal-tsx-22" className={LABEL_CLASS}>
+                    <Gauge aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
                     Horímetro (Horas de Uso)
                   </label>
-                  <input
+                  <input id="field-src-components-ClienteModal-tsx-22"
                     type="text"
                     value={maquinaData.horimetro}
                     onChange={(e) => setMaquinaData({ ...maquinaData, horimetro: e.target.value })}
@@ -1072,10 +1074,10 @@ export default function ClienteModal({
 
               {/* Observações Técnicas e Especificações */}
               <div>
-                <label className={LABEL_CLASS}>
+                <label htmlFor="field-src-components-ClienteModal-tsx-23" className={LABEL_CLASS}>
                   Observações Técnicas & Especificações
                 </label>
-                <textarea
+                <textarea id="field-src-components-ClienteModal-tsx-23"
                   rows={2}
                   value={maquinaData.observacoes}
                   onChange={(e) => setMaquinaData({ ...maquinaData, observacoes: e.target.value })}
@@ -1092,14 +1094,14 @@ export default function ClienteModal({
             </div>
 
             {/* Botões de Ação da Etapa 2 */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between gap-3 shrink-0">
+            <div className="p-4 border-t border-line bg-canvas/40 flex items-center justify-between gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setEtapa(1)}
                 disabled={isSubmitting}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
                 <span>Voltar para Dados do Cliente</span>
               </button>
 
@@ -1108,7 +1110,7 @@ export default function ClienteModal({
                   type="button"
                   onClick={handleCloseModal}
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancelar
                 </button>
@@ -1116,16 +1118,16 @@ export default function ClienteModal({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer disabled:opacity-60"
+                  className="ui-btn ui-btn-primary flex items-center gap-2 transition-all cursor-pointer disabled:opacity-60"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                       <span>Salvando Cliente e Equipamento...</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
+                      <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                       <span>Continuar para Ordem de Serviço</span>
                     </>
                   )}

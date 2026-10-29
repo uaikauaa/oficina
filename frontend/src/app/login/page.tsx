@@ -316,7 +316,7 @@ function LoginForm() {
   }, [router, redirectUrl, sessionAlreadyChecked]);
 
   if (checkingSession && !sessionAlreadyChecked) {
-    return <div className="min-h-screen bg-[#0b0f17]" aria-label="Verificando sessão" />;
+    return <div className="min-h-screen bg-canvas" aria-label="Verificando sessão" />;
   }
 
   return (
@@ -325,7 +325,7 @@ function LoginForm() {
       {/* VERSÃO DESKTOP (>= 1024px) — ABSOLUTAMENTE INALTERADA                    */}
       {/* Layout Split Aprovado, Proporções, Tipografia e Painéis 100% Preservados   */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex min-h-screen w-full flex-row bg-[#0b0f17] text-slate-100 overflow-x-hidden selection:bg-[#f59e0b]/30 selection:text-[#fbbf24]">
+      <div className="hidden lg:flex min-h-screen w-full flex-row bg-canvas text-ink overflow-x-hidden selection:bg-accent/30 selection:text-accent">
         {/* 1. PAINEL ESQUERDO: APRESENTAÇÃO COM FOTOGRAFIA DA OFICINA */}
         <div className="relative w-[62%] xl:w-[64%] 2xl:w-[66%] flex flex-col justify-between p-10 lg:p-12 xl:p-16 min-h-screen overflow-hidden">
           {/* Imagem de Fundo Real (Asset Fornecido pelo Usuário) */}
@@ -336,12 +336,12 @@ function LoginForm() {
               fill
               priority
               quality={95}
-              className="object-cover object-right"
+              className="grayscale object-cover object-right"
               sizes="66vw"
             />
             {/* Overlay escuro de alto contraste garantindo legibilidade idêntica ao protótipo */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#070a0f]/95 via-[#090d14]/75 to-[#090d14]/50" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070a0f] via-transparent to-[#070a0f]/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-canvas/95 via-canvas/75 to-canvas/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas/40" />
           </div>
 
           {/* Topo Esquerdo: Logo & Slogan */}
@@ -355,19 +355,19 @@ function LoginForm() {
                   width={44}
                   height={44}
                   priority
-                  className="w-full h-full object-contain drop-shadow-[0_2px_10px_rgba(245,158,11,0.35)]"
+                  className="w-full h-full object-contain"
                 />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white whitespace-nowrap">
-                Oficina <span className="text-[#f59e0b]">Gestão</span>
+              <h1 className="ui-page-title">
+                Oficina <span className="text-accent">Gestão</span>
               </h1>
             </div>
 
             {/* Divisor Vertical */}
-            <div className="hidden sm:block w-px h-8 bg-slate-700/80" />
+            <div className="hidden sm:block w-px h-8 bg-hover/80" />
 
             {/* Subtítulo Institucional */}
-            <div className="hidden sm:block text-xs text-slate-300 font-medium leading-tight">
+            <div className="hidden sm:block text-xs text-ink font-medium leading-tight">
               <p>Mais controle</p>
               <p>para o seu negócio</p>
             </div>
@@ -375,12 +375,12 @@ function LoginForm() {
 
           {/* Meio Esquerdo: Título Heroico, Descrição e 3 Recursos */}
           <div className="relative z-10 my-auto py-10 lg:py-8 max-w-xl">
-            <h2 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold text-white tracking-tight leading-[1.12]">
+            <h2 className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold text-ink tracking-tight leading-[1.12]">
               Gestão completa da sua <br />
-              oficina <span className="text-[#f59e0b]">em um só lugar.</span>
+              oficina <span className="text-accent">em um só lugar.</span>
             </h2>
 
-            <p className="mt-5 text-sm sm:text-base text-slate-300 leading-relaxed font-normal max-w-lg">
+            <p className="mt-5 text-sm sm:text-base text-ink leading-relaxed font-normal max-w-lg">
               Controle seus clientes, ordens de serviço, estoque de peças e o histórico de cada máquina
               com praticidade e segurança.
             </p>
@@ -389,12 +389,12 @@ function LoginForm() {
             <div className="mt-9 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 lg:gap-5">
               {/* Bloco Clientes */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-slate-900/80 border border-slate-700/60 flex items-center justify-center text-[#f59e0b] shadow-inner">
-                  <User className="w-4 h-4 stroke-[2.2]" />
+                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                  <User aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white tracking-wide">Clientes</h3>
-                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                  <h3 className="text-xs font-bold text-ink tracking-wide">Clientes</h3>
+                  <p className="text-xs text-muted leading-snug mt-0.5">
                     Cadastros e histórico completo
                   </p>
                 </div>
@@ -402,12 +402,12 @@ function LoginForm() {
 
               {/* Bloco Ordens de Serviço */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-slate-900/80 border border-slate-700/60 flex items-center justify-center text-[#f59e0b] shadow-inner">
-                  <FileText className="w-4 h-4 stroke-[2.2]" />
+                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                  <FileText aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white tracking-wide">Ordens de Serviço</h3>
-                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                  <h3 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h3>
+                  <p className="text-xs text-muted leading-snug mt-0.5">
                     Do diagnóstico à finalização
                   </p>
                 </div>
@@ -415,12 +415,12 @@ function LoginForm() {
 
               {/* Bloco Estoque */}
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-lg bg-slate-900/80 border border-slate-700/60 flex items-center justify-center text-[#f59e0b] shadow-inner">
-                  <Package className="w-4 h-4 stroke-[2.2]" />
+                <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
+                  <Package aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white tracking-wide">Estoque</h3>
-                  <p className="text-[11px] text-slate-400 leading-snug mt-0.5">
+                  <h3 className="text-xs font-bold text-ink tracking-wide">Estoque</h3>
+                  <p className="text-xs text-muted leading-snug mt-0.5">
                     Controle de peças e movimentações
                   </p>
                 </div>
@@ -429,40 +429,40 @@ function LoginForm() {
           </div>
 
           {/* Rodapé do Painel Esquerdo */}
-          <div className="relative z-10 pt-6 flex items-center justify-between text-xs text-slate-400">
+          <div className="relative z-10 pt-6 flex items-center justify-between text-xs text-muted">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-slate-400">
-                <ShieldCheck className="w-4 h-4 text-slate-300" />
-                <span className="font-medium text-[11px] tracking-wide text-slate-300">
+              <div className="flex items-center gap-1.5 text-muted">
+                <ShieldCheck aria-hidden="true" className="w-4 h-4 text-ink" />
+                <span className="font-medium text-xs tracking-wide text-ink">
                   Sistema interno • Oficina Gestão
                 </span>
               </div>
-              <div className="w-32 xl:w-44 h-px bg-slate-700/50" />
+              <div className="w-32 xl:w-44 h-px bg-hover/50" />
             </div>
           </div>
 
           {/* Elemento Geométrico Decorativo no Canto Inferior Esquerdo (Âmbar) */}
           <div
-            className="absolute -bottom-8 -left-8 w-36 h-36 border-2 border-[#f59e0b]/40 rotate-45 pointer-events-none rounded-lg z-0"
+            className="absolute -bottom-8 -left-8 w-36 h-36 border-2 border-accent/40 rotate-45 pointer-events-none rounded-lg z-0"
             aria-hidden="true"
           />
           <div
-            className="absolute -bottom-12 -left-12 w-44 h-44 border border-[#f59e0b]/20 rotate-45 pointer-events-none rounded-xl z-0"
+            className="absolute -bottom-12 -left-12 w-44 h-44 border border-accent/20 rotate-45 pointer-events-none rounded-xl z-0"
             aria-hidden="true"
           />
         </div>
 
         {/* 2. PAINEL DIREITO: ÁREA ESTRUTURAL DE AUTENTICAÇÃO */}
-        <div className="relative w-[38%] xl:w-[36%] 2xl:w-[34%] bg-[#080c14] border-l border-slate-800/80 flex flex-col justify-center p-10 xl:p-14 min-h-screen">
+        <div className="relative w-[38%] xl:w-[36%] 2xl:w-[34%] bg-surface border-l border-line flex flex-col justify-center p-10 xl:p-14 min-h-screen">
           <div className="w-full max-w-[380px] mx-auto py-8">
             {/* Saudação com Barra Vertical Âmbar */}
             <div className="flex items-start gap-3.5 mb-7">
-              <div className="w-1.5 h-12 bg-[#f59e0b] rounded-full shrink-0 mt-1" />
+              <div className="w-1.5 h-12 bg-accent rounded-full shrink-0 mt-1" />
               <div>
-                <h2 className="text-2xl sm:text-[26px] font-bold tracking-tight text-white leading-tight">
+                <h2 className="text-2xl sm:text-[26px] font-bold tracking-tight text-ink leading-tight">
                   {twoFactorStep ? 'Código de Verificação' : 'Bem-vindo de volta!'}
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1 font-normal">
+                <p className="text-xs sm:text-sm text-muted mt-1 font-normal">
                   {twoFactorStep
                     ? 'Informe o código de 6 dígitos enviado para seu e-mail'
                     : 'Faça login para continuar'}
@@ -476,9 +476,9 @@ function LoginForm() {
                 id="login-error-alert"
                 role="alert"
                 aria-live="assertive"
-                className="mb-5 p-3.5 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs sm:text-sm flex items-start gap-2.5 shadow-lg shadow-red-950/20"
+                className="mb-5 p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs sm:text-sm flex items-start gap-2.5 shadow-lg shadow-none"
               >
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-danger" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
               </div>
             )}
@@ -487,9 +487,9 @@ function LoginForm() {
             {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
               <div
                 role="alert"
-                className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs sm:text-sm flex items-start gap-2.5 shadow-lg"
+                className="mb-5 p-3.5 rounded-xl bg-accent/40 border border-accent/30 text-accent text-xs sm:text-sm flex items-start gap-2.5 shadow-lg"
               >
-                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <Clock aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-accent" />
                 <div className="flex-1 font-medium leading-relaxed">
                   O código de verificação expirou após 5 minutos. Solicite um novo código.
                 </div>
@@ -502,9 +502,9 @@ function LoginForm() {
                 <div className="space-y-2">
                   <label
                     htmlFor="two-factor-code"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <KeyRound className="w-3.5 h-3.5 text-[#f59e0b]" />
+                    <KeyRound aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
                     <span>Código de 6 dígitos</span>
                   </label>
                   <input
@@ -521,24 +521,24 @@ function LoginForm() {
                       const val = e.target.value.replace(/\D/g, '').slice(0, 6);
                       setTwoFactorCode(val);
                     }}
-                    className="w-full text-center font-mono tracking-[0.4em] text-2xl py-3 px-4 rounded-lg bg-[#0e1422] border border-slate-800 text-white placeholder:text-slate-700 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] focus:outline-none transition-all"
+                    className="ui-field w-full text-center font-mono tracking-[0.4em] text-2xl border placeholder:text-subtle hover:border-control focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none transition-all"
                   />
                 </div>
 
                 {/* Linha do Timer e Reenvio */}
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <div className="flex items-center gap-1.5 text-slate-400">
-                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                  <div className="flex items-center gap-1.5 text-muted">
+                    <Clock aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
                     <span>
                       {countdownSeconds > 0 ? (
                         <>
                           Expira em{' '}
-                          <strong className="text-amber-400 font-mono">
+                          <strong className="text-accent font-mono">
                             {formatTimer(countdownSeconds)}
                           </strong>
                         </>
                       ) : (
-                        <span className="text-red-400 font-semibold">Expirado</span>
+                        <span className="text-danger font-semibold">Expirado</span>
                       )}
                     </span>
                   </div>
@@ -548,9 +548,9 @@ function LoginForm() {
                     id="resend-2fa-btn"
                     onClick={onResend2FA}
                     disabled={isResending || resendCooldown > 0}
-                    className="text-xs font-medium text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
+                    className="text-xs font-medium text-accent hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
                   >
-                    {isResending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                    {isResending ? <RefreshCw aria-hidden="true" className="w-3 h-3 animate-spin" /> : null}
                     <span>
                       {resendCooldown > 0
                         ? `Reenviar (${resendCooldown}s)`
@@ -571,16 +571,16 @@ function LoginForm() {
                     countdownSeconds === 0 ||
                     attemptsExceeded
                   }
-                  className="w-full mt-4 py-3 px-4 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                  className="ui-btn ui-btn-primary w-full mt-4 flex items-center justify-center gap-2 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                       <span>Verificando...</span>
                     </div>
                   ) : (
                     <>
-                      <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
+                      <ShieldCheck aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
                       <span>Verificar código</span>
                     </>
                   )}
@@ -591,9 +591,9 @@ function LoginForm() {
                   type="button"
                   onClick={voltarParaLogin}
                   disabled={isLoading}
-                  className="w-full py-2 text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
+                  className="w-full py-2 text-xs text-muted hover:text-ink transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
                   <span>Voltar para o login</span>
                 </button>
               </form>
@@ -604,9 +604,9 @@ function LoginForm() {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="email"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <Mail aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
                     <span>E-mail ou usuário</span>
                   </label>
                   <div className="relative">
@@ -617,17 +617,17 @@ function LoginForm() {
                       disabled={isLoading}
                       aria-invalid={desktopForm.formState.errors.email ? 'true' : 'false'}
                       placeholder="Digite seu e-mail ou usuário"
-                      className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                      className={`w-full px-3.5 py-2.5 rounded-lg bg-canvas border text-sm text-ink placeholder:text-subtle focus:outline-none transition-all duration-150 ${
                         desktopForm.formState.errors.email
-                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                          ? 'border-danger/70 focus:border-danger focus:ring-1 focus:ring-danger'
+                          : 'border-line hover:border-control focus:border-accent focus:ring-1 focus:ring-accent'
                       }`}
                       {...desktopForm.register('email')}
                     />
                   </div>
                   {desktopForm.formState.errors.email && (
-                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                       <span>{desktopForm.formState.errors.email.message}</span>
                     </p>
                   )}
@@ -637,9 +637,9 @@ function LoginForm() {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="senha"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <Lock aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
                     <span>Senha</span>
                   </label>
                   <div className="relative">
@@ -650,26 +650,26 @@ function LoginForm() {
                       disabled={isLoading}
                       aria-invalid={desktopForm.formState.errors.senha ? 'true' : 'false'}
                       placeholder="Digite sua senha"
-                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-canvas border text-sm text-ink placeholder:text-subtle focus:outline-none transition-all duration-150 ${
                         desktopForm.formState.errors.senha
-                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                          ? 'border-danger/70 focus:border-danger focus:ring-1 focus:ring-danger'
+                          : 'border-line hover:border-control focus:border-accent focus:ring-1 focus:ring-accent'
                       }`}
                       {...desktopForm.register('senha')}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-subtle hover:text-ink transition-colors focus:outline-none cursor-pointer"
                       aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                       tabIndex={0}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff aria-hidden="true" className="w-4 h-4" /> : <Eye aria-hidden="true" className="w-4 h-4" />}
                     </button>
                   </div>
                   {desktopForm.formState.errors.senha && (
-                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                       <span>{desktopForm.formState.errors.senha.message}</span>
                     </p>
                   )}
@@ -677,12 +677,12 @@ function LoginForm() {
 
                 {/* Linha de Manter Conectado & Esqueceu Senha */}
                 <div className="flex items-center justify-between pt-1 text-xs">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
-                    <input
+                  <label htmlFor="field-src-app-login-page-tsx-1" className="flex items-center gap-2 cursor-pointer select-none text-ink hover:text-ink transition-colors">
+                    <input id="field-src-app-login-page-tsx-1"
                       type="checkbox"
                       checked={manterConectado}
                       onChange={(e) => setManterConectado(e.target.checked)}
-                      className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded bg-canvas border-control text-accent accent-accent focus:ring-0 cursor-pointer"
                     />
                     <span>Manter conectado</span>
                   </label>
@@ -692,7 +692,7 @@ function LoginForm() {
                     onClick={() =>
                       alert('Para recuperação de senha, contate o administrador do sistema.')
                     }
-                    className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none"
                   >
                     Esqueceu sua senha?
                   </button>
@@ -703,16 +703,16 @@ function LoginForm() {
                   id="login-submit-btn"
                   type="submit"
                   disabled={isLoading}
-                  className="w-full mt-4 py-3 px-4 rounded-lg bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                  className="ui-btn ui-btn-primary w-full mt-4 flex items-center justify-center gap-2 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                       <span>Autenticando...</span>
                     </div>
                   ) : (
                     <>
-                      <LogIn className="w-4 h-4 stroke-[2.5]" />
+                      <LogIn aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
                       <span>Entrar</span>
                     </>
                   )}
@@ -727,7 +727,7 @@ function LoginForm() {
       {/* EXPERIÊNCIA MOBILE / TABLET (< 1024px)                                    */}
       {/* Fundo Fullscreen, Introdução Imersiva, Botão "Entrar" e Modal Central     */}
       {/* ========================================================================= */}
-      <div className="flex lg:hidden relative min-h-screen w-full flex-col justify-between p-5 sm:p-8 md:p-10 bg-[#070a0f] text-slate-100 overflow-x-hidden selection:bg-[#f59e0b]/30 selection:text-[#fbbf24]">
+      <div className="flex lg:hidden relative min-h-screen w-full flex-col justify-between p-5 sm:p-8 md:p-10 bg-canvas text-ink overflow-x-hidden selection:bg-accent/30 selection:text-accent">
         {/* Imagem de Fundo Real Fullscreen */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -736,13 +736,13 @@ function LoginForm() {
             fill
             priority
             quality={90}
-            className="object-cover object-center"
+            className="grayscale object-cover object-center"
             sizes="100vw"
           />
           {/* Camadas de Overlay Escuro para Contraste e Legibilidade Perfeita */}
-          <div className="absolute inset-0 bg-[#070a0f]/80" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#070a0f]/95 via-[#090d14]/75 to-[#070a0f]/95" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#070a0f] via-transparent to-[#070a0f]/40" />
+          <div className="absolute inset-0 bg-canvas/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-canvas/95 via-canvas/75 to-canvas/95" />
+          <div className="absolute inset-0 bg-gradient-to-t from-canvas via-transparent to-canvas/40" />
         </div>
 
         {/* 1. Header Superior Mobile/Tablet */}
@@ -756,11 +756,11 @@ function LoginForm() {
                 width={40}
                 height={40}
                 priority
-                className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(245,158,11,0.35)]"
+                className="w-full h-full object-contain"
               />
             </div>
-            <span className="text-lg sm:text-xl font-bold tracking-tight text-white whitespace-nowrap">
-              Oficina <span className="text-[#f59e0b]">Gestão</span>
+            <span className="text-lg sm:text-xl font-bold tracking-tight text-ink whitespace-nowrap">
+              Oficina <span className="text-accent">Gestão</span>
             </span>
           </div>
 
@@ -771,9 +771,9 @@ function LoginForm() {
             onClick={abrirModal}
             aria-haspopup="dialog"
             aria-expanded={isModalOpen}
-            className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-amber-500/25 active:scale-[0.97] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#f59e0b] focus:ring-offset-2 focus:ring-offset-[#070a0f]"
+            className="ui-btn ui-btn-primary sm:px-5 sm:py-2.5 sm:text-sm flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-canvas"
           >
-            <LogIn className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+            <LogIn aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
             <span>Entrar</span>
           </button>
         </header>
@@ -781,12 +781,12 @@ function LoginForm() {
         {/* 2. Conteúdo Principal da Introdução */}
         <main className="relative z-10 my-auto py-8 sm:py-12 max-w-2xl w-full mx-auto">
           <div className="space-y-4 sm:space-y-5">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-[1.18]">
+            <h1 className="ui-page-title">
               Gestão completa da sua <br />
-              oficina <span className="text-[#f59e0b]">em um só lugar.</span>
+              oficina <span className="text-accent">em um só lugar.</span>
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base text-slate-300 leading-relaxed font-normal max-w-xl">
+            <p className="text-xs sm:text-sm md:text-base text-ink leading-relaxed font-normal max-w-xl">
               Controle seus clientes, ordens de serviço, estoque de peças e o histórico de cada máquina
               com praticidade e segurança.
             </p>
@@ -795,39 +795,39 @@ function LoginForm() {
           {/* 3 Blocos de Recursos Adaptados para Telas Menores */}
           <div className="mt-8 sm:mt-10 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {/* Bloco Clientes */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/75 border border-slate-800/80 backdrop-blur-sm flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center text-[#f59e0b] shrink-0">
-                <User className="w-4 h-4 stroke-[2.2]" />
+            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+                <User aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-white tracking-wide">Clientes</h2>
-                <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                <h2 className="text-xs font-bold text-ink tracking-wide">Clientes</h2>
+                <p className="text-xs text-muted leading-tight mt-0.5">
                   Cadastros e histórico completo
                 </p>
               </div>
             </div>
 
             {/* Bloco Ordens de Serviço */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/75 border border-slate-800/80 backdrop-blur-sm flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center text-[#f59e0b] shrink-0">
-                <FileText className="w-4 h-4 stroke-[2.2]" />
+            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+                <FileText aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-white tracking-wide">Ordens de Serviço</h2>
-                <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                <h2 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h2>
+                <p className="text-xs text-muted leading-tight mt-0.5">
                   Do diagnóstico à finalização
                 </p>
               </div>
             </div>
 
             {/* Bloco Estoque */}
-            <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/75 border border-slate-800/80 backdrop-blur-sm flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/20 flex items-center justify-center text-[#f59e0b] shrink-0">
-                <Package className="w-4 h-4 stroke-[2.2]" />
+            <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
+                <Package aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
               </div>
               <div>
-                <h2 className="text-xs font-bold text-white tracking-wide">Estoque</h2>
-                <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                <h2 className="text-xs font-bold text-ink tracking-wide">Estoque</h2>
+                <p className="text-xs text-muted leading-tight mt-0.5">
                   Controle de peças e movimentações
                 </p>
               </div>
@@ -836,10 +836,10 @@ function LoginForm() {
         </main>
 
         {/* 3. Rodapé Mobile/Tablet */}
-        <footer className="relative z-10 pt-4 flex items-center justify-between text-xs text-slate-400">
+        <footer className="relative z-10 pt-4 flex items-center justify-between text-xs text-muted">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-slate-400" />
-            <span className="font-medium text-[11px] tracking-wide text-slate-400">
+            <ShieldCheck aria-hidden="true" className="w-4 h-4 text-muted" />
+            <span className="font-medium text-xs tracking-wide text-muted">
               Sistema interno • Oficina Gestão
             </span>
           </div>
@@ -847,7 +847,7 @@ function LoginForm() {
 
         {/* Detalhe Geométrico Decorativo */}
         <div
-          className="absolute -bottom-10 -left-10 w-32 h-32 border border-[#f59e0b]/20 rotate-45 pointer-events-none rounded-xl z-0"
+          className="absolute -bottom-10 -left-10 w-32 h-32 border border-accent/20 rotate-45 pointer-events-none rounded-xl z-0"
           aria-hidden="true"
         />
       </div>
@@ -858,7 +858,7 @@ function LoginForm() {
       {/* ========================================================================= */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md transition-opacity duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/75 transition-opacity duration-200"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               fecharModal();
@@ -870,30 +870,30 @@ function LoginForm() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-login-title"
-            className="relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto rounded-2xl bg-[#0c101a] border border-slate-800 p-6 sm:p-7 shadow-2xl shadow-black/90 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
+            className="ui-dialog relative w-full max-w-[420px] max-h-[90vh] overflow-y-auto border p-6 sm:p-7 animate-in fade-in zoom-in-95 duration-150 motion-reduce:animate-none"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Botão de Fechar X no Cabeçalho */}
             <button
               type="button"
               onClick={fecharModal}
-              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#f59e0b]/50"
+              className="absolute top-4 right-4 p-2 rounded-xl text-muted hover:text-ink hover:bg-elevated/80 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/50"
               aria-label="Fechar modal de login"
             >
-              <X className="w-5 h-5" />
+              <X aria-hidden="true" className="w-5 h-5" />
             </button>
 
             {/* Cabeçalho do Modal com Barra Âmbar */}
             <div className="flex items-start gap-3.5 mb-6 pr-8">
-              <div className="w-1.5 h-11 bg-[#f59e0b] rounded-full shrink-0 mt-0.5" />
+              <div className="w-1.5 h-11 bg-accent rounded-full shrink-0 mt-0.5" />
               <div>
                 <h2
                   id="modal-login-title"
-                  className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight"
+                  className="text-xl sm:text-2xl font-bold tracking-tight text-ink leading-tight"
                 >
                   {twoFactorStep ? 'Código de Verificação' : 'Entrar no Sistema'}
                 </h2>
-                <p className="text-xs text-slate-400 mt-1 font-normal">
+                <p className="text-xs text-muted mt-1 font-normal">
                   {twoFactorStep
                     ? 'Informe o código de 6 dígitos enviado para seu e-mail'
                     : 'Faça login para continuar'}
@@ -906,9 +906,9 @@ function LoginForm() {
               <div
                 role="alert"
                 aria-live="assertive"
-                className="mb-4 p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-start gap-2.5 shadow-md shadow-red-950/20"
+                className="mb-4 p-3 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-start gap-2.5 shadow-md shadow-none"
               >
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
+                <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-danger" />
                 <div className="flex-1 font-medium leading-relaxed">{errorMessage}</div>
               </div>
             )}
@@ -917,9 +917,9 @@ function LoginForm() {
             {twoFactorStep && countdownSeconds === 0 && !errorMessage && (
               <div
                 role="alert"
-                className="mb-4 p-3 rounded-xl bg-amber-950/40 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 shadow-md"
+                className="mb-4 p-3 rounded-xl bg-accent/40 border border-accent/30 text-accent text-xs flex items-start gap-2.5 shadow-md"
               >
-                <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <Clock aria-hidden="true" className="w-4 h-4 shrink-0 mt-0.5 text-accent" />
                 <div className="flex-1 font-medium leading-relaxed">
                   O código de verificação expirou após 5 minutos. Solicite um novo código.
                 </div>
@@ -932,9 +932,9 @@ function LoginForm() {
                 <div className="space-y-2">
                   <label
                     htmlFor="modal-two-factor-code"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <KeyRound className="w-3.5 h-3.5 text-[#f59e0b]" />
+                    <KeyRound aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
                     <span>Código de 6 dígitos</span>
                   </label>
                   <input
@@ -951,24 +951,24 @@ function LoginForm() {
                       const val = e.target.value.replace(/\D/g, '').slice(0, 6);
                       setTwoFactorCode(val);
                     }}
-                    className="w-full text-center font-mono tracking-[0.4em] text-2xl py-3 px-4 rounded-xl bg-[#0e1422] border border-slate-800 text-white placeholder:text-slate-700 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] focus:outline-none transition-all"
+                    className="ui-field w-full text-center font-mono tracking-[0.4em] text-2xl border placeholder:text-subtle hover:border-control focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none transition-all"
                   />
                 </div>
 
                 {/* Linha do Timer e Reenvio */}
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <div className="flex items-center gap-1.5 text-slate-400">
-                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                  <div className="flex items-center gap-1.5 text-muted">
+                    <Clock aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
                     <span>
                       {countdownSeconds > 0 ? (
                         <>
                           Expira em{' '}
-                          <strong className="text-amber-400 font-mono">
+                          <strong className="text-accent font-mono">
                             {formatTimer(countdownSeconds)}
                           </strong>
                         </>
                       ) : (
-                        <span className="text-red-400 font-semibold">Expirado</span>
+                        <span className="text-danger font-semibold">Expirado</span>
                       )}
                     </span>
                   </div>
@@ -977,9 +977,9 @@ function LoginForm() {
                     type="button"
                     onClick={onResend2FA}
                     disabled={isResending || resendCooldown > 0}
-                    className="text-xs font-medium text-[#f59e0b] hover:text-[#fbbf24] disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
+                    className="text-xs font-medium text-accent hover:text-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer focus:outline-none flex items-center gap-1"
                   >
-                    {isResending ? <RefreshCw className="w-3 h-3 animate-spin" /> : null}
+                    {isResending ? <RefreshCw aria-hidden="true" className="w-3 h-3 animate-spin" /> : null}
                     <span>
                       {resendCooldown > 0
                         ? `Reenviar (${resendCooldown}s)`
@@ -999,16 +999,16 @@ function LoginForm() {
                     countdownSeconds === 0 ||
                     attemptsExceeded
                   }
-                  className="w-full mt-4 py-3 px-4 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                  className="ui-btn ui-btn-primary w-full mt-4 flex items-center justify-center gap-2 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                       <span>Verificando...</span>
                     </div>
                   ) : (
                     <>
-                      <ShieldCheck className="w-4 h-4 stroke-[2.5]" />
+                      <ShieldCheck aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
                       <span>Verificar código</span>
                     </>
                   )}
@@ -1019,9 +1019,9 @@ function LoginForm() {
                   type="button"
                   onClick={voltarParaLogin}
                   disabled={isLoading}
-                  className="w-full py-2 text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
+                  className="w-full py-2 text-xs text-muted hover:text-ink transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
                   <span>Voltar para o login</span>
                 </button>
               </form>
@@ -1032,9 +1032,9 @@ function LoginForm() {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="modal-email"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <Mail aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
                     <span>E-mail ou usuário</span>
                   </label>
                   <div className="relative">
@@ -1045,17 +1045,17 @@ function LoginForm() {
                       disabled={isLoading}
                       aria-invalid={mobileForm.formState.errors.email ? 'true' : 'false'}
                       placeholder="Digite seu e-mail ou usuário"
-                      className={`w-full px-3.5 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                      className={`w-full px-3.5 py-2.5 rounded-lg bg-canvas border text-sm text-ink placeholder:text-subtle focus:outline-none transition-all duration-150 ${
                         mobileForm.formState.errors.email
-                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                          ? 'border-danger/70 focus:border-danger focus:ring-1 focus:ring-danger'
+                          : 'border-line hover:border-control focus:border-accent focus:ring-1 focus:ring-accent'
                       }`}
                       {...mobileForm.register('email')}
                     />
                   </div>
                   {mobileForm.formState.errors.email && (
-                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                       <span>{mobileForm.formState.errors.email.message}</span>
                     </p>
                   )}
@@ -1065,9 +1065,9 @@ function LoginForm() {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="modal-senha"
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 tracking-wide"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <Lock aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
                     <span>Senha</span>
                   </label>
                   <div className="relative">
@@ -1078,26 +1078,26 @@ function LoginForm() {
                       disabled={isLoading}
                       aria-invalid={mobileForm.formState.errors.senha ? 'true' : 'false'}
                       placeholder="Digite sua senha"
-                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-[#0e1422] border text-sm text-white placeholder:text-slate-600 focus:outline-none transition-all duration-150 ${
+                      className={`w-full pl-3.5 pr-10 py-2.5 rounded-lg bg-canvas border text-sm text-ink placeholder:text-subtle focus:outline-none transition-all duration-150 ${
                         mobileForm.formState.errors.senha
-                          ? 'border-red-500/70 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                          : 'border-slate-800 hover:border-slate-700 focus:border-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b]'
+                          ? 'border-danger/70 focus:border-danger focus:ring-1 focus:ring-danger'
+                          : 'border-line hover:border-control focus:border-accent focus:ring-1 focus:ring-accent'
                       }`}
                       {...mobileForm.register('senha')}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-subtle hover:text-ink transition-colors focus:outline-none cursor-pointer"
                       aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
                       tabIndex={0}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff aria-hidden="true" className="w-4 h-4" /> : <Eye aria-hidden="true" className="w-4 h-4" />}
                     </button>
                   </div>
                   {mobileForm.formState.errors.senha && (
-                    <p className="text-xs text-red-400 flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
+                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                       <span>{mobileForm.formState.errors.senha.message}</span>
                     </p>
                   )}
@@ -1105,12 +1105,12 @@ function LoginForm() {
 
                 {/* Linha de Manter Conectado & Esqueceu Senha */}
                 <div className="flex items-center justify-between pt-1 text-xs">
-                  <label className="flex items-center gap-2 cursor-pointer select-none text-slate-300 hover:text-white transition-colors">
-                    <input
+                  <label htmlFor="field-src-app-login-page-tsx-2" className="flex items-center gap-2 cursor-pointer select-none text-ink hover:text-ink transition-colors">
+                    <input id="field-src-app-login-page-tsx-2"
                       type="checkbox"
                       checked={manterConectado}
                       onChange={(e) => setManterConectado(e.target.checked)}
-                      className="w-4 h-4 rounded bg-[#0e1422] border-slate-700 text-[#f59e0b] accent-[#f59e0b] focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded bg-canvas border-control text-accent accent-accent focus:ring-0 cursor-pointer"
                     />
                     <span>Manter conectado</span>
                   </label>
@@ -1120,7 +1120,7 @@ function LoginForm() {
                     onClick={() =>
                       alert('Para recuperação de senha, contate o administrador do sistema.')
                     }
-                    className="text-[#f59e0b] hover:text-[#fbbf24] transition-colors font-medium text-xs cursor-pointer focus:outline-none"
+                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none"
                   >
                     Esqueceu sua senha?
                   </button>
@@ -1130,16 +1130,16 @@ function LoginForm() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full mt-4 py-3 px-4 rounded-xl bg-[#f59e0b] hover:bg-[#d97706] active:bg-[#b45309] text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
+                  className="ui-btn ui-btn-primary w-full mt-4 flex items-center justify-center gap-2 active:scale-[0.985] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer motion-reduce:transition-none motion-reduce:active:scale-100"
                 >
                   {isLoading ? (
                     <div className="flex items-center gap-2.5">
-                      <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />
                       <span>Autenticando...</span>
                     </div>
                   ) : (
                     <>
-                      <LogIn className="w-4 h-4 stroke-[2.5]" />
+                      <LogIn aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
                       <span>Entrar</span>
                     </>
                   )}
@@ -1157,8 +1157,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0b0f17] flex items-center justify-center text-slate-400">
-          <div className="w-7 h-7 border-2 border-[#f59e0b] border-t-transparent rounded-full animate-spin" />
+        <div className="min-h-screen bg-canvas flex items-center justify-center text-muted">
+          <div className="w-7 h-7 border-2 border-accent border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >

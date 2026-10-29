@@ -26,9 +26,9 @@ interface ConfiguracaoOficina {
 function Campo({ label, valor, muted }: { label: string; valor: string | null | undefined; muted?: boolean }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">{label}</span>
-      <span className={`text-sm font-medium ${muted ? 'text-slate-500 italic' : 'text-slate-100'}`}>
-        {valor || <span className="text-slate-600 italic">Não informado</span>}
+      <span className="text-xs text-subtle font-semibold">{label}</span>
+      <span className={`text-sm font-medium ${muted ? 'text-subtle italic' : 'text-ink'}`}>
+        {valor || <span className="text-subtle italic">Não informado</span>}
       </span>
     </div>
   );
@@ -138,14 +138,14 @@ export default function ConfiguracoesPage() {
     setSaveError(null);
   }
 
-  const inputClass = 'w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/60 transition-all';
+  const inputClass = 'ui-field';
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-slate-400 text-sm">Carregando configuração...</span>
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted text-sm">Carregando configuração...</span>
         </div>
       </div>
     );
@@ -154,12 +154,12 @@ export default function ConfiguracoesPage() {
   if (error) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        <div className="p-6 bg-red-950/30 border border-red-500/30 rounded-xl text-red-400 flex items-start gap-3">
-          <Info className="w-5 h-5 mt-0.5 shrink-0" />
+        <div className="p-6 bg-danger/10 border border-danger/30 rounded-xl text-danger flex items-start gap-3">
+          <Info aria-hidden="true" className="w-5 h-5 mt-0.5 shrink-0" />
           <div>
             <p className="font-semibold">Erro ao carregar configuração</p>
             <p className="text-sm mt-1">{error}</p>
-            <button onClick={loadConfig} className="mt-3 text-xs underline text-red-300 hover:text-red-100">
+            <button onClick={loadConfig} className="mt-3 text-xs underline text-danger hover:text-danger">
               Tentar novamente
             </button>
           </div>
@@ -174,12 +174,12 @@ export default function ConfiguracoesPage() {
       {/* Cabeçalho */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 min-w-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 shrink-0">
-            <Settings className="w-5 h-5 text-amber-400" />
+          <div className="p-2.5 rounded-xl bg-accent/10 border border-accent/20 shrink-0">
+            <Settings aria-hidden="true" className="w-5 h-5 text-accent" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-white">Configurações da Oficina</h1>
-            <p className="text-sm text-slate-400 mt-0.5">
+            <h1 className="ui-page-title">Configurações da Oficina</h1>
+            <p className="text-sm text-muted mt-0.5">
               Dados comerciais de referência — usados nos documentos da oficina
             </p>
           </div>
@@ -188,15 +188,15 @@ export default function ConfiguracoesPage() {
         <div className="flex items-center gap-2 shrink-0 self-start">
           <button
             onClick={loadConfig}
-            className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 transition-all"
+            className="ui-icon-btn p-2 rounded-lg bg-elevated border border-control text-muted hover:text-ink transition-all"
             title="Recarregar"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw aria-hidden="true" className="w-4 h-4" />
           </button>
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              className="px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-semibold hover:bg-amber-500/20 transition-all"
+              className="px-4 py-2 rounded-lg bg-accent/10 border border-accent/30 text-accent text-sm font-semibold hover:bg-accent/20 transition-all"
             >
               Editar
             </button>
@@ -205,9 +205,9 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Aviso importante */}
-      <div className="p-4 bg-blue-950/30 border border-blue-500/20 rounded-xl flex items-start gap-3">
-        <Info className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-        <p className="text-xs text-blue-300 leading-relaxed">
+      <div className="p-4 bg-surface/5 border border-line rounded-xl flex items-start gap-3">
+        <Info aria-hidden="true" className="w-4 h-4 text-ink mt-0.5 shrink-0" />
+        <p className="text-xs text-ink leading-relaxed">
           <strong>Sistema:</strong> {OFICINA.nomeSistema} &nbsp;•&nbsp;
           <strong>Oficina:</strong> {config?.nomeFantasia || OFICINA.nomeFantasia}
           <br />
@@ -216,31 +216,31 @@ export default function ConfiguracoesPage() {
       </div>
 
       {saveSuccess && (
-        <div className="p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm flex items-center gap-2">
-          <Shield className="w-4 h-4 shrink-0" />
+        <div className="p-3 bg-surface/5 border border-line rounded-xl text-ink text-sm flex items-center gap-2">
+          <Shield aria-hidden="true" className="w-4 h-4 shrink-0" />
           Configuração salva com sucesso!
         </div>
       )}
 
       {saveError && (
-        <div className="p-3 bg-red-950/30 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
-          <Info className="w-4 h-4 shrink-0" />
+        <div className="p-3 bg-danger/10 border border-danger/30 rounded-xl text-danger text-sm flex items-center gap-2">
+          <Info aria-hidden="true" className="w-4 h-4 shrink-0" />
           {saveError}
         </div>
       )}
 
       {/* Seção 1: Identidade Comercial */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2 text-slate-200 font-semibold">
-          <Building2 className="w-4 h-4 text-amber-400" />
+      <div className="bg-surface/60 border border-line rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-2 text-ink font-semibold">
+          <Building2 aria-hidden="true" className="w-4 h-4 text-accent" />
           <span>Identidade Comercial</span>
         </div>
 
         {editMode ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Nome Fantasia / Comercial *</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-1" className="block text-xs text-muted mb-1.5 font-medium">Nome Fantasia / Comercial *</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-1"
                 className={inputClass}
                 value={form.nomeFantasia}
                 onChange={e => setForm(f => ({ ...f, nomeFantasia: e.target.value }))}
@@ -248,8 +248,8 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Nome Empresarial / Razão Social</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-2" className="block text-xs text-muted mb-1.5 font-medium">Nome Empresarial / Razão Social</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-2"
                 className={inputClass}
                 value={form.nomeEmpresarial}
                 onChange={e => setForm(f => ({ ...f, nomeEmpresarial: e.target.value }))}
@@ -257,8 +257,8 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Responsável / Proprietário</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-3" className="block text-xs text-muted mb-1.5 font-medium">Responsável / Proprietário</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-3"
                 className={inputClass}
                 value={form.responsavel}
                 onChange={e => setForm(f => ({ ...f, responsavel: e.target.value }))}
@@ -266,8 +266,8 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">CNPJ</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-4" className="block text-xs text-muted mb-1.5 font-medium">CNPJ</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-4"
                 className={inputClass}
                 value={form.cnpj}
                 onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))}
@@ -286,17 +286,17 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Seção 2: Contato */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2 text-slate-200 font-semibold">
-          <Phone className="w-4 h-4 text-amber-400" />
+      <div className="bg-surface/60 border border-line rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-2 text-ink font-semibold">
+          <Phone aria-hidden="true" className="w-4 h-4 text-accent" />
           <span>Contato</span>
         </div>
 
         {editMode ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Telefone</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-5" className="block text-xs text-muted mb-1.5 font-medium">Telefone</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-5"
                 className={inputClass}
                 value={form.telefone}
                 onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
@@ -304,8 +304,8 @@ export default function ConfiguracoesPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">E-mail</label>
-              <input
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-6" className="block text-xs text-muted mb-1.5 font-medium">E-mail</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-6"
                 className={inputClass}
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
@@ -323,37 +323,37 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Seção 3: Endereço */}
-      <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2 text-slate-200 font-semibold">
-          <MapPin className="w-4 h-4 text-amber-400" />
+      <div className="bg-surface/60 border border-line rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-2 text-ink font-semibold">
+          <MapPin aria-hidden="true" className="w-4 h-4 text-accent" />
           <span>Endereço</span>
         </div>
 
         {editMode ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Logradouro</label>
-              <input className={inputClass} value={form.logradouro} onChange={e => setForm(f => ({ ...f, logradouro: e.target.value }))} placeholder="Rua, Avenida, etc." />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-7" className="block text-xs text-muted mb-1.5 font-medium">Logradouro</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-7" className={inputClass} value={form.logradouro} onChange={e => setForm(f => ({ ...f, logradouro: e.target.value }))} placeholder="Rua, Avenida, etc." />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Número</label>
-              <input className={inputClass} value={form.numero} onChange={e => setForm(f => ({ ...f, numero: e.target.value }))} placeholder="Ex: 1538" />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-8" className="block text-xs text-muted mb-1.5 font-medium">Número</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-8" className={inputClass} value={form.numero} onChange={e => setForm(f => ({ ...f, numero: e.target.value }))} placeholder="Ex: 1538" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Bairro</label>
-              <input className={inputClass} value={form.bairro} onChange={e => setForm(f => ({ ...f, bairro: e.target.value }))} placeholder="Bairro" />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-9" className="block text-xs text-muted mb-1.5 font-medium">Bairro</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-9" className={inputClass} value={form.bairro} onChange={e => setForm(f => ({ ...f, bairro: e.target.value }))} placeholder="Bairro" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">CEP</label>
-              <input className={inputClass} value={form.cep} onChange={e => setForm(f => ({ ...f, cep: e.target.value }))} placeholder="Ex: 19.914-080" />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-10" className="block text-xs text-muted mb-1.5 font-medium">CEP</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-10" className={inputClass} value={form.cep} onChange={e => setForm(f => ({ ...f, cep: e.target.value }))} placeholder="Ex: 19.914-080" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">Município</label>
-              <input className={inputClass} value={form.municipio} onChange={e => setForm(f => ({ ...f, municipio: e.target.value }))} placeholder="Cidade" />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-11" className="block text-xs text-muted mb-1.5 font-medium">Município</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-11" className={inputClass} value={form.municipio} onChange={e => setForm(f => ({ ...f, municipio: e.target.value }))} placeholder="Cidade" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1.5 font-medium">UF</label>
-              <input className={inputClass} value={form.uf} onChange={e => setForm(f => ({ ...f, uf: e.target.value.toUpperCase() }))} placeholder="SP" maxLength={2} />
+              <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-12" className="block text-xs text-muted mb-1.5 font-medium">UF</label>
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-12" className={inputClass} value={form.uf} onChange={e => setForm(f => ({ ...f, uf: e.target.value.toUpperCase() }))} placeholder="SP" maxLength={2} />
             </div>
           </div>
         ) : (
@@ -374,19 +374,19 @@ export default function ConfiguracoesPage() {
           <button
             onClick={handleCancel}
             disabled={isSaving}
-            className="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-700 transition-all disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-elevated border border-control text-ink text-sm font-semibold hover:bg-hover transition-all disabled:opacity-50"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving || !form.nomeFantasia.trim()}
-            className="px-5 py-2.5 rounded-xl bg-amber-500 text-slate-900 text-sm font-bold flex items-center gap-2 hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ui-btn ui-btn-primary flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
-              <><div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />Salvando...</>
+              <><div className="w-4 h-4 border-2 border-line border-t-transparent rounded-full animate-spin" />Salvando...</>
             ) : (
-              <><Save className="w-4 h-4" />Salvar Configuração</>
+              <><Save aria-hidden="true" className="w-4 h-4" />Salvar Configuração</>
             )}
           </button>
         </div>
@@ -394,8 +394,8 @@ export default function ConfiguracoesPage() {
 
       {/* Rodapé informativo */}
       <div className="text-center pt-2">
-        <p className="text-[11px] text-slate-600">
-          Sistema: <span className="text-slate-500">{OFICINA.nomeSistema}</span>
+        <p className="text-xs text-subtle">
+          Sistema: <span className="text-subtle">{OFICINA.nomeSistema}</span>
           &nbsp;•&nbsp;
           {config?.updatedAt && (
             <>Última atualização: {new Date(config.updatedAt).toLocaleString('pt-BR')}</>

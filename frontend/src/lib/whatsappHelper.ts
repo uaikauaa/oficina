@@ -224,7 +224,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
 
   switch (status) {
     case 'PRONTA': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? `A máquina *${equipamento}*, referente à Ordem de Serviço ${osBold}, está pronta para retirada em nossa oficina.`
         : `O seu atendimento referente à Ordem de Serviço ${osBold} está pronto para retirada em nossa oficina.`;
@@ -238,7 +238,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'AGUARDANDO_APROVACAO': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? ` referente à máquina *${equipamento}*`
         : '';
@@ -260,7 +260,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'EM_DIAGNOSTICO': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? `o equipamento *${equipamento}*, referente à Ordem de Serviço ${osBold},`
         : `o seu atendimento referente à Ordem de Serviço ${osBold}`;
@@ -269,7 +269,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'EM_MANUTENCAO': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? `o equipamento *${equipamento}*, referente à Ordem de Serviço ${osBold},`
         : `o seu atendimento referente à Ordem de Serviço ${osBold}`;
@@ -278,7 +278,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'AGUARDANDO_PECA': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? `, referente ao equipamento *${equipamento}*`
         : '';
@@ -287,7 +287,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'CONCLUIDA': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? `ao equipamento *${equipamento}*, da Ordem de Serviço ${osBold},`
         : `à Ordem de Serviço ${osBold}`;
@@ -310,7 +310,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     case 'ABERTA': {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const equipFrase = equipamento
         ? ` do equipamento *${equipamento}*`
         : '';
@@ -324,7 +324,7 @@ export function gerarMensagemWhatsappOS(params: WhatsAppOSParams): string {
     }
 
     default: {
-      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)} 👋`;
+      const saudacaoLinha = `${montarSaudacao(cliente, saudacao)}`;
       const statusAmigavel = formatarStatusAmigavel(params.status);
       const equipLinha = equipamento
         ? `*Equipamento:* ${equipamento}\n`
