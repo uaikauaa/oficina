@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import PwaInstallProvider from "@/components/PwaInstallProvider";
+import { BRAND_BACKGROUND } from "@/lib/brand";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1020",
+  themeColor: BRAND_BACKGROUND,
 };
 
 export default function RootLayout({

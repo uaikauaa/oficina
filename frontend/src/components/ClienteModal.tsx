@@ -721,7 +721,7 @@ export default function ClienteModal({
               {/* Endereço */}
               <div className="space-y-4">
                 <h3 className="text-xs font-bold text-accent flex items-center gap-2">
-                  <MapPin aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                  <MapPin aria-hidden="true" className="w-4 h-4 text-accent" />
                   <span>Endereço Principal</span>
                 </h3>
 
@@ -976,7 +976,7 @@ export default function ClienteModal({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="field-src-components-ClienteModal-tsx-18" className={LABEL_CLASS}>
-                    <Hash aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
+                    <Hash aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5 text-subtle" />
                     Número de Série
                   </label>
                   <input id="field-src-components-ClienteModal-tsx-18"
@@ -990,7 +990,7 @@ export default function ClienteModal({
 
                 <div>
                   <label htmlFor="field-src-components-ClienteModal-tsx-19" className={LABEL_CLASS}>
-                    <Calendar aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
+                    <Calendar aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5 text-subtle" />
                     Ano de Fabricação
                   </label>
                   <input id="field-src-components-ClienteModal-tsx-19"
@@ -1017,7 +1017,7 @@ export default function ClienteModal({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="field-src-components-ClienteModal-tsx-20" className={LABEL_CLASS}>
-                    <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
+                    <Zap aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5 text-subtle" />
                     Potência
                   </label>
                   <input id="field-src-components-ClienteModal-tsx-20"
@@ -1037,7 +1037,7 @@ export default function ClienteModal({
 
                 <div>
                   <label htmlFor="field-src-components-ClienteModal-tsx-21" className={LABEL_CLASS}>
-                    <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
+                    <Zap aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5 text-subtle" />
                     Tensão
                   </label>
                   <input id="field-src-components-ClienteModal-tsx-21"
@@ -1055,7 +1055,7 @@ export default function ClienteModal({
 
                 <div>
                   <label htmlFor="field-src-components-ClienteModal-tsx-22" className={LABEL_CLASS}>
-                    <Gauge aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5 text-subtle" />
+                    <Gauge aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5 text-subtle" />
                     Horímetro (Horas de Uso)
                   </label>
                   <input id="field-src-components-ClienteModal-tsx-22"
@@ -1101,7 +1101,7 @@ export default function ClienteModal({
                 disabled={isSubmitting}
                 className="px-4 py-2 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
               >
-                <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                <ArrowLeft aria-hidden="true" className="w-4 h-4" />
                 <span>Voltar para Dados do Cliente</span>
               </button>
 

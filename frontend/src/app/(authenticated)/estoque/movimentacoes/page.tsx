@@ -85,14 +85,14 @@ export default function MovimentacoesEstoquePage() {
   const getTipoIcon = (tipoMov: TipoMovimentacaoEstoque) => {
     switch (tipoMov) {
       case 'ENTRADA':
-        return <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />;
+        return <ArrowUpRight aria-hidden="true" className="w-4 h-4" />;
       case 'SAIDA':
-        return <ArrowDownRight aria-hidden="true" className="w-3.5 h-3.5" />;
+        return <ArrowDownRight aria-hidden="true" className="w-4 h-4" />;
       case 'AJUSTE_POSITIVO':
       case 'AJUSTE_NEGATIVO':
-        return <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />;
+        return <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />;
       case 'DEVOLUCAO':
-        return <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />;
+        return <RotateCcw aria-hidden="true" className="w-4 h-4" />;
       default:
         return null;
     }
@@ -106,7 +106,7 @@ export default function MovimentacoesEstoquePage() {
           <div>
             <div className="flex items-center gap-2 text-xs text-muted mb-2">
               <Link href="/estoque" className="hover:text-accent transition-colors flex items-center gap-1">
-                <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                <ArrowLeft aria-hidden="true" className="w-4 h-4" />
                 <span>Voltar ao Estoque</span>
               </Link>
             </div>
@@ -362,7 +362,7 @@ export default function MovimentacoesEstoquePage() {
                         {/* Usuário */}
                         <td className="py-3.5 px-4 whitespace-nowrap text-muted">
                           <div className="flex items-center gap-1.5 text-xs">
-                            <User aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
+                            <User aria-hidden="true" className="w-4 h-4 text-subtle" />
                             <span>{m.usuarioNome || 'Sistema'}</span>
                           </div>
                         </td>

@@ -206,7 +206,7 @@ export default function CompatibilidadeModal({
             className="p-4 rounded-xl bg-canvas/60 border border-line space-y-3"
           >
             <h3 className="text-xs font-bold text-ink flex items-center gap-2">
-              <Plus aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+              <Plus aria-hidden="true" className="w-4 h-4 text-accent" />
               <span>Vincular Novo Equipamento Compatível</span>
             </h3>
 
@@ -223,7 +223,7 @@ export default function CompatibilidadeModal({
                     placeholder="Buscar marca ou modelo..."
                     className="ui-field w-full border placeholder-subtle focus:outline-none focus:border-accent/50"
                   />
-                  <Search aria-hidden="true" className="w-3.5 h-3.5 text-subtle absolute right-2.5 top-2 pointer-events-none" />
+                  <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute right-2.5 top-2 pointer-events-none" />
                 </div>
               </div>
 
@@ -269,12 +269,12 @@ export default function CompatibilidadeModal({
               >
                 {adding ? (
                   <>
-                    <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                     <span>Vinculando...</span>
                   </>
                 ) : (
                   <>
-                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-4 h-4" />
                     <span>Adicionar Vínculo</span>
                   </>
                 )}

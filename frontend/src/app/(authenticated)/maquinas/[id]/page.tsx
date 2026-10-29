@@ -220,7 +220,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
               href={`/clientes/${maquina.clienteId}`}
               className="inline-flex items-center gap-1.5 text-muted hover:text-accent transition-colors"
             >
-              <User aria-hidden="true" className="w-3.5 h-3.5" />
+              <User aria-hidden="true" className="w-4 h-4" />
               <span>Cliente: {maquina.clienteNome}</span>
             </Link>
           </div>
@@ -290,7 +290,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                     className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
                       maquina.ativo
                         ? 'bg-ink/5 text-ink border border-line'
-                        : 'bg-danger/10 text-danger border border-danger/30'
+                        : 'bg-elevated text-muted border border-control'
                     }`}
                   >
                     {maquina.ativo ? 'Equipamento Ativo' : 'Inativo'}
@@ -319,7 +319,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                 onClick={() => setIsEditModalOpen(true)}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-semibold border border-control transition-colors cursor-pointer"
               >
-                <Edit2 aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                <Edit2 aria-hidden="true" className="w-4 h-4 text-muted" />
                 <span>Editar</span>
               </button>
 
@@ -333,7 +333,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                     : 'bg-ink/5 hover:bg-ink/5 text-ink border-line'
                 }`}
               >
-                <Power aria-hidden="true" className="w-3.5 h-3.5" />
+                <Power aria-hidden="true" className="w-4 h-4" />
                 <span>{maquina.ativo ? 'Inativar' : 'Reativar'}</span>
               </button>
 
@@ -475,7 +475,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                       : 'text-muted hover:text-ink'
                   }`}
                 >
-                  <TableIcon aria-hidden="true" className="w-3.5 h-3.5" />
+                  <TableIcon aria-hidden="true" className="w-4 h-4" />
                   <span>Tabela</span>
                 </button>
                 <button
@@ -487,7 +487,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                       : 'text-muted hover:text-ink'
                   }`}
                 >
-                  <Clock aria-hidden="true" className="w-3.5 h-3.5" />
+                  <Clock aria-hidden="true" className="w-4 h-4" />
                   <span>Linha do Tempo</span>
                 </button>
               </div>
@@ -510,7 +510,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                   href={`/ordens-servico/nova?clienteId=${maquina.clienteId}&maquinaId=${maquina.id}`}
                   className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                  <Plus aria-hidden="true" className="w-4 h-4" />
                   <span>Registrar Primeira Entrada</span>
                 </Link>
               ) : (
@@ -584,7 +584,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink text-xs font-semibold border border-control transition-colors cursor-pointer"
                             >
                               <span>Ver OS</span>
-                              <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />
+                              <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
                             </Link>
                           </td>
                         </tr>
@@ -652,7 +652,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-elevated hover:bg-accent/20 hover:text-accent text-ink text-xs font-semibold border border-control transition-all ml-2 cursor-pointer"
                           >
                             <span>Ver OS</span>
-                            <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />
+                            <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
                           </Link>
                         </div>
                       </div>
@@ -716,7 +716,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                               className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:text-accent transition-colors cursor-pointer"
                             >
                               <span>{expandido ? 'Ocultar Peças' : 'Ver Peças Utilizadas'}</span>
-                              {expandido ? <ChevronUp aria-hidden="true" className="w-3.5 h-3.5" /> : <ChevronDown aria-hidden="true" className="w-3.5 h-3.5" />}
+                              {expandido ? <ChevronUp aria-hidden="true" className="w-4 h-4" /> : <ChevronDown aria-hidden="true" className="w-4 h-4" />}
                             </button>
                           )}
                         </div>
@@ -726,7 +726,7 @@ export default function MaquinaDetalhesPage({ params }: PageProps) {
                           <div className="mt-3 bg-canvas rounded-xl border border-line p-3 overflow-hidden">
                             {isLoadingItens ? (
                               <div className="py-4 text-center text-subtle flex items-center justify-center gap-2">
-                                <div className="w-3.5 h-3.5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                                <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                                 <span>Carregando peças aplicadas...</span>
                               </div>
                             ) : itens.length === 0 ? (

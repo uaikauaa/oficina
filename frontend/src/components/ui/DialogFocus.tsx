@@ -1,11 +1,20 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 /** Mantém foco no dialog montado e o devolve ao acionador ao fechar. */
-export default function DialogFocus() {
+export default function DialogFocus({ onDismiss }: { onDismiss?: () => void }) {
   const marker = useRef<HTMLSpanElement>(null);
   useEffect(() => {
+    if (!onDismiss) return;
+    const dialog = marker.current?.closest('[role="dialog"]');
+    const onKey = (event: Event) => {
+      if ((event as KeyboardEvent).key === 'Escape') onDismiss();
+    };
+    dialog?.addEventListener('keydown', onKey);
+    return () => dialog?.removeEventListener('keydown', onKey);
+  }, [onDismiss]);
+  useLayoutEffect(() => {
     const dialog = marker.current?.closest('[role="dialog"]');
     if (!(dialog instanceof HTMLElement)) return;
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;

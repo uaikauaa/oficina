@@ -287,7 +287,7 @@ function ClientesContent() {
             }}
             className="ui-btn ui-btn-primary sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
           >
-            <Plus aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+            <Plus aria-hidden="true" className="w-4 h-4 " />
             <span>Novo Cliente</span>
           </button>
         </div>
@@ -348,7 +348,7 @@ function ClientesContent() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink p-1 transition-colors cursor-pointer"
                   title="Limpar busca"
                 >
-                  <X aria-hidden="true" className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -363,7 +363,7 @@ function ClientesContent() {
                   : 'bg-surface border-line text-ink hover:text-ink hover:border-control'
               }`}
             >
-              <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
+              <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
               <span>Mais Filtros</span>
               <ChevronDown aria-hidden="true" className={`w-4 h-4 ${isMaisFiltrosOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -452,7 +452,7 @@ function ClientesContent() {
                   : 'bg-surface/80 text-muted border-line hover:text-ink hover:border-control'
               }`}
             >
-              <User aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+              <User aria-hidden="true" className="w-4 h-4 text-accent" />
               <span>Pessoa Física {contadores?.pessoaFisica !== undefined && `(${contadores.pessoaFisica})`}</span>
             </button>
 
@@ -464,7 +464,7 @@ function ClientesContent() {
                   : 'bg-surface/80 text-muted border-line hover:text-ink hover:border-control'
               }`}
             >
-              <Building2 aria-hidden="true" className="w-3.5 h-3.5 text-ink" />
+              <Building2 aria-hidden="true" className="w-4 h-4 text-ink" />
               <span>Pessoa Jurídica {contadores?.pessoaJuridica !== undefined && `(${contadores.pessoaJuridica})`}</span>
             </button>
 
@@ -506,7 +506,7 @@ function ClientesContent() {
                   className="ui-icon-btn text-accent hover:text-accent ml-1 p-0.5 rounded transition-colors cursor-pointer"
                   title="Limpar todos os filtros"
                 >
-                  <X aria-hidden="true" className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               </span>
             </div>
@@ -550,7 +550,7 @@ function ClientesContent() {
                         onClick={() => setRefreshTrigger((prev) => prev + 1)}
                         className="px-3 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink text-xs font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
-                        <RefreshCw aria-hidden="true" className="w-3.5 h-3.5" />
+                        <RefreshCw aria-hidden="true" className="w-4 h-4" />
                         <span>Tentar novamente</span>
                       </button>
                     </td>
@@ -690,7 +690,7 @@ function ClientesContent() {
                               className="px-2.5 py-1 rounded-lg bg-accent/15 hover:bg-accent/25 text-accent text-xs font-bold inline-flex items-center gap-1 border border-accent/30 transition-all cursor-pointer"
                               title="Iniciar uma Nova Ordem de Serviço para este cliente"
                             >
-                              <Plus aria-hidden="true" className="w-3 h-3 stroke-[2.5]" />
+                              <Plus aria-hidden="true" className="w-3 h-3 " />
                               <span>OS</span>
                             </Link>
 
@@ -704,7 +704,7 @@ function ClientesContent() {
                               title="Editar dados cadastrais"
                               aria-label={`Editar dados cadastrais de ${cli.nomeRazaoSocial}`}
                             >
-                              <Edit2 aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Edit2 aria-hidden="true" className="w-4 h-4" />
                             </button>
 
                             {/* Alterar Status (Ativar / Inativar) */}
@@ -718,7 +718,7 @@ function ClientesContent() {
                               title={cli.ativo ? 'Inativar cliente' : 'Reativar cliente'}
                               aria-label={cli.ativo ? `Inativar cliente ${cli.nomeRazaoSocial}` : `Reativar cliente ${cli.nomeRazaoSocial}`}
                             >
-                              <Power aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Power aria-hidden="true" className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -746,7 +746,7 @@ function ClientesContent() {
                 onClick={() => setPage((prev) => Math.max(0, prev - 1))}
                 className="px-3 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink disabled:opacity-40 disabled:hover:bg-elevated transition-colors cursor-pointer flex items-center gap-1"
               >
-                <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                 <span>Anterior</span>
               </button>
 
@@ -761,7 +761,7 @@ function ClientesContent() {
                 className="px-3 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink disabled:opacity-40 disabled:hover:bg-elevated transition-colors cursor-pointer flex items-center gap-1"
               >
                 <span>Próxima</span>
-                <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                <ChevronRight aria-hidden="true" className="w-4 h-4" />
               </button>
             </div>
           </div>

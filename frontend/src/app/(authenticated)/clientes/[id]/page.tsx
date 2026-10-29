@@ -279,7 +279,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
               onClick={() => setIsEditModalOpen(true)}
               className="px-3.5 py-2 rounded-xl bg-elevated hover:bg-ink/5 hover:text-ink text-ink text-xs font-semibold flex items-center gap-1.5 border border-control hover:border-line transition-all cursor-pointer"
             >
-              <Edit2 aria-hidden="true" className="w-3.5 h-3.5" />
+              <Edit2 aria-hidden="true" className="w-4 h-4" />
               <span>Editar</span>
             </button>
 
@@ -291,7 +291,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                   : 'bg-elevated hover:bg-ink/5 hover:text-ink text-ink border-control hover:border-line'
               }`}
             >
-              <Power aria-hidden="true" className="w-3.5 h-3.5" />
+              <Power aria-hidden="true" className="w-4 h-4" />
               <span>{cliente.ativo ? 'Inativar' : 'Reativar'}</span>
             </button>
           </div>
@@ -349,7 +349,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                   )}
 
                   <span className="inline-flex items-center gap-1 text-subtle">
-                    <Clock aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Clock aria-hidden="true" className="w-4 h-4" />
                     <span>ID #{cliente.id}</span>
                   </span>
                 </div>
@@ -358,7 +358,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
 
             <div className="flex flex-col sm:items-end justify-center border-t sm:border-t-0 sm:border-l border-line pt-3 sm:pt-0 sm:pl-6 text-xs text-muted space-y-1">
               <div className="flex items-center gap-1.5">
-                <Calendar aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
+                <Calendar aria-hidden="true" className="w-4 h-4 text-subtle" />
                 <span>Cadastrado em: {new Date(cliente.createdAt).toLocaleDateString('pt-BR')}</span>
               </div>
               <div className="text-xs text-subtle">
@@ -528,7 +528,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
               onClick={() => { setEditingMaquina(null); setIsMaquinaModalOpen(true); }}
               className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+              <Plus aria-hidden="true" className="w-4 h-4" />
               <span>Novo Equipamento</span>
             </button>
           </div>
@@ -702,7 +702,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
               href={`/ordens-servico/nova?clienteId=${cliente.id}`}
               className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all cursor-pointer shrink-0"
             >
-              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+              <Plus aria-hidden="true" className="w-4 h-4" />
               <span>Nova Ordem de Serviço</span>
             </Link>
           </div>
@@ -777,7 +777,7 @@ export default function ClienteDetalhesPage({ params }: PageProps) {
                             className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-elevated hover:bg-accent/20 hover:text-accent text-ink text-xs font-semibold border border-control transition-all"
                           >
                             <span>Ver OS</span>
-                            <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />
+                            <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
                           </Link>
                         </td>
                       </tr>

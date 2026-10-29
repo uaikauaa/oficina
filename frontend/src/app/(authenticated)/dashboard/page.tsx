@@ -224,7 +224,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-accent hover:text-accent transition-colors shrink-0"
           >
             <span>Ver todas as OS</span>
-            <ArrowRight aria-hidden="true" className="w-3.5 h-3.5" />
+            <ArrowRight aria-hidden="true" className="w-4 h-4" />
           </Link>
         </div>
 
@@ -235,7 +235,7 @@ export default function DashboardPage() {
               onClick={carregarOrdensRecentes}
               className="px-3 py-1 rounded-lg bg-danger/20 hover:bg-danger/30 font-semibold text-xs flex items-center gap-1 cursor-pointer transition-colors"
             >
-              <RefreshCw aria-hidden="true" className="w-3.5 h-3.5" />
+              <RefreshCw aria-hidden="true" className="w-4 h-4" />
               <span>Tentar novamente</span>
             </button>
           </div>
@@ -265,7 +265,7 @@ export default function DashboardPage() {
               href="/ordens-servico/nova"
               className="ui-btn ui-btn-primary inline-flex items-center gap-2 transition-all cursor-pointer"
             >
-              <Plus aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+              <Plus aria-hidden="true" className="w-4 h-4 " />
               <span>Abrir Primeira Ordem de Serviço</span>
             </Link>
           </div>
@@ -344,7 +344,7 @@ export default function DashboardPage() {
                             aria-label={`Abrir detalhes da Ordem de Serviço ${os.numeroOs}`}
                           >
                             <span>Abrir</span>
-                            <Eye aria-hidden="true" className="w-3.5 h-3.5" />
+                            <Eye aria-hidden="true" className="w-4 h-4" />
                           </Link>
                         </td>
                       </tr>

@@ -314,7 +314,7 @@ export default function MaquinaModal({
             {/* SELEÇÃO DO CLIENTE (quando não for edição e não veio clienteId pré-definido) */}
             <div>
               <label htmlFor="field-src-components-MaquinaModal-tsx-1" className={LABEL_CLASS}>
-                <User aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                <User aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                 Cliente Proprietário <span className="text-danger">*</span>
               </label>
 
@@ -402,7 +402,7 @@ export default function MaquinaModal({
             {/* Tipo de Equipamento */}
             <div>
               <label htmlFor="field-src-components-MaquinaModal-tsx-2" className={LABEL_CLASS}>
-                <Wrench aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                <Wrench aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                 Tipo de Equipamento <span className="text-danger">*</span>
               </label>
               <div className="relative">
@@ -467,7 +467,7 @@ export default function MaquinaModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="field-src-components-MaquinaModal-tsx-5" className={LABEL_CLASS}>
-                  <Hash aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <Hash aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                   Número de Série
                 </label>
                 <input id="field-src-components-MaquinaModal-tsx-5"
@@ -482,7 +482,7 @@ export default function MaquinaModal({
               </div>
               <div>
                 <label htmlFor="field-src-components-MaquinaModal-tsx-6" className={LABEL_CLASS}>
-                  <Calendar aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <Calendar aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                   Ano de Fabricação
                 </label>
                 <input id="field-src-components-MaquinaModal-tsx-6"
@@ -505,7 +505,7 @@ export default function MaquinaModal({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label htmlFor="field-src-components-MaquinaModal-tsx-7" className={LABEL_CLASS}>
-                  <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <Zap aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                   Potência
                 </label>
                 <input id="field-src-components-MaquinaModal-tsx-7"
@@ -520,7 +520,7 @@ export default function MaquinaModal({
               </div>
               <div>
                 <label htmlFor="field-src-components-MaquinaModal-tsx-8" className={LABEL_CLASS}>
-                  <Zap aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <Zap aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                   Tensão
                 </label>
                 <input id="field-src-components-MaquinaModal-tsx-8"
@@ -535,7 +535,7 @@ export default function MaquinaModal({
               </div>
               <div>
                 <label htmlFor="field-src-components-MaquinaModal-tsx-9" className={LABEL_CLASS}>
-                  <Gauge aria-hidden="true" className="inline w-3.5 h-3.5 mr-1 -mt-0.5" />
+                  <Gauge aria-hidden="true" className="inline w-4 h-4 mr-1 -mt-0.5" />
                   Horímetro (h)
                 </label>
                 <input id="field-src-components-MaquinaModal-tsx-9"
@@ -580,12 +580,12 @@ export default function MaquinaModal({
             >
               {isLoading ? (
                 <>
-                  <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+                  <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                   <span>Salvando...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                  <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                   <span>{isEditing ? 'Salvar Alterações' : 'Cadastrar Equipamento'}</span>
                 </>
               )}

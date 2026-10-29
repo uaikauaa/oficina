@@ -300,7 +300,7 @@ function NovaOrdemServicoContent() {
                     onClick={() => setIsNovoClienteModalOpen(true)}
                     className="inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent font-semibold cursor-pointer py-1 px-2.5 rounded-lg bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-all self-start sm:self-auto"
                   >
-                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-4 h-4" />
                     <span>Cadastrar novo cliente</span>
                   </button>
                 </div>
@@ -358,7 +358,7 @@ function NovaOrdemServicoContent() {
                       onClick={() => setIsNovoClienteModalOpen(true)}
                       className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all cursor-pointer"
                     >
-                      <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                      <Plus aria-hidden="true" className="w-4 h-4" />
                       <span>Cadastrar novo cliente</span>
                     </button>
                   </div>
@@ -387,7 +387,7 @@ function NovaOrdemServicoContent() {
                   </div>
                 </div>
                 <span className="inline-flex items-center gap-1 text-xs text-ink bg-ink/5 px-2.5 py-1 rounded border border-line font-semibold">
-                  <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                  <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                   Cliente Vinculado
                 </span>
               </div>
@@ -409,7 +409,7 @@ function NovaOrdemServicoContent() {
                   onClick={() => setIsNovaMaquinaModalOpen(true)}
                   className="text-xs text-accent hover:text-accent font-semibold flex items-center gap-1 cursor-pointer"
                 >
-                  <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                  <Plus aria-hidden="true" className="w-4 h-4" />
                   <span>Cadastrar Máquina para este Cliente</span>
                 </button>
               </div>
@@ -433,7 +433,7 @@ function NovaOrdemServicoContent() {
                     onClick={() => setIsNovaMaquinaModalOpen(true)}
                     className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all mt-2 cursor-pointer"
                   >
-                    <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Plus aria-hidden="true" className="w-4 h-4" />
                     <span>Cadastrar Equipamento Agora</span>
                   </button>
                 </div>

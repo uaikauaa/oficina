@@ -242,7 +242,7 @@ function OrdensServicoContent() {
           className="ui-btn ui-btn-primary inline-flex items-center justify-center gap-2 sm:text-sm tracking-wide transition-all cursor-pointer transform shrink-0"
           aria-label="Criar Nova Ordem de Serviço"
         >
-          <Plus aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+          <Plus aria-hidden="true" className="w-4 h-4 " />
           <span>Nova Ordem de Serviço</span>
         </Link>
       </div>
@@ -269,7 +269,7 @@ function OrdensServicoContent() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink p-1 rounded-full hover:bg-elevated transition-all cursor-pointer"
                 title="Limpar busca digitada"
               >
-                <X aria-hidden="true" className="w-3.5 h-3.5" />
+                <X aria-hidden="true" className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -285,7 +285,7 @@ function OrdensServicoContent() {
                 : 'bg-surface border-line text-ink hover:border-control hover:text-ink'
               }`}
           >
-            <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
+            <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
             <span className="hidden sm:inline">
               {filtrosAvancadosAbertos ? 'Ocultar Filtros' : 'Mais Filtros'}
             </span>
@@ -304,7 +304,7 @@ function OrdensServicoContent() {
               className="ui-icon-btn inline-flex items-center gap-1 px-3 py-2.5 rounded-xl text-xs font-semibold bg-surface border border-line text-muted hover:text-ink hover:border-control transition-all cursor-pointer shrink-0"
               title="Limpar todos os filtros aplicados"
             >
-              <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />
+              <RotateCcw aria-hidden="true" className="w-4 h-4" />
               <span className="hidden md:inline">Limpar</span>
             </button>
           )}
@@ -362,7 +362,7 @@ function OrdensServicoContent() {
 
               {/* Datas Customizadas */}
               <div className="flex items-center gap-2">
-                <Calendar aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
+                <Calendar aria-hidden="true" className="w-4 h-4 text-subtle" />
                 <input
                   type="date"
                   value={dataInicio}
@@ -398,7 +398,7 @@ function OrdensServicoContent() {
             const isPronta = pill.id === 'PRONTA';
 
             return (
-              <button
+              <button aria-pressed={ativa}
                 key={pill.id || 'todas'}
                 type="button"
                 onClick={() => {
@@ -487,7 +487,7 @@ function OrdensServicoContent() {
               onClick={() => setRefreshTrigger((prev) => prev + 1)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-danger/20 hover:bg-danger/30 text-danger font-bold text-xs transition-colors cursor-pointer"
             >
-              <RefreshCw aria-hidden="true" className="w-3.5 h-3.5" />
+              <RefreshCw aria-hidden="true" className="w-4 h-4" />
               <span>Tentar novamente</span>
             </button>
           </div>
@@ -514,7 +514,7 @@ function OrdensServicoContent() {
                 onClick={limparTodosFiltros}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-elevated hover:bg-hover text-ink font-bold text-xs transition-all cursor-pointer"
               >
-                <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />
+                <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 <span>Limpar filtros</span>
               </button>
             ) : (
@@ -522,7 +522,7 @@ function OrdensServicoContent() {
                 href="/ordens-servico/nova"
                 className="ui-btn ui-btn-primary inline-flex items-center gap-1.5 transition-all cursor-pointer"
               >
-                <Plus aria-hidden="true" className="w-4 h-4 stroke-[3]" />
+                <Plus aria-hidden="true" className="w-4 h-4 " />
                 <span>+ Abrir Primeira Ordem de Serviço</span>
               </Link>
             )}
@@ -617,7 +617,7 @@ function OrdensServicoContent() {
                           title={`Abrir OS ${os.numeroOs}`}
                         >
                           <span>Abrir</span>
-                          <ArrowUpRight aria-hidden="true" className="w-3.5 h-3.5" />
+                          <ArrowUpRight aria-hidden="true" className="w-4 h-4" />
                         </Link>
                       </td>
                     </tr>

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { BRAND_BACKGROUND } from './brand.ts';
 
 const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
 const color = (name: string) => css.match(new RegExp(`--${name}: (#[0-9a-f]{6});`, 'i'))![1];
@@ -16,6 +17,7 @@ function contrast(a: string, b: string) {
 }
 
 test('design system: texto normal AA e controles em todas as superfícies sólidas', () => {
+  assert.equal(BRAND_BACKGROUND, color('background'), 'PWA deve manter a mesma identidade do CSS');
   for (const bg of ['background', 'surface', 'elevated', 'hover']) {
     for (const fg of ['foreground', 'muted', 'subtle', 'accent', 'danger']) {
       assert.ok(contrast(color(fg), color(bg)) >= 4.5, `${fg} em ${bg} deve atingir 4.5:1`);
@@ -35,7 +37,7 @@ test('design system: UI estática sem emojis, cores decorativas externas ou hex 
       if (entry === 'OrdemServicoImpressao.tsx') continue;
       const text = readFileSync(file, 'utf8');
       assert.doesNotMatch(text, /\p{Extended_Pictographic}/u, file);
-      assert.doesNotMatch(text, /(?:bg|text|border|ring|from|via|to|shadow)-(?:blue|sky|indigo|cyan|purple|green|emerald|rose|orange|amber|red)-\d/, file);
+      assert.doesNotMatch(text, /(?:bg|text|border|ring|from|via|to|shadow)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d/, file);
       assert.doesNotMatch(text, /\[#[\da-fA-F]{3,8}\]/, file);
     }
   }

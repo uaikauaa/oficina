@@ -309,32 +309,32 @@ export default function Header({ user }: HeaderProps) {
 
             {/* 2. CENTRO: Painel de Navegação Centralizado (Desktop lg+) */}
             <nav aria-label="Navegação principal" className="hidden lg:flex order-3 basis-full items-center gap-1 min-w-0 pt-2 border-t border-line">
-              <Link href="/dashboard" className={navLinkClass(isDashboardActive)}>
-                <LayoutDashboard aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isDashboardActive ? 'page' : undefined} href="/dashboard" className={navLinkClass(isDashboardActive)}>
+                <LayoutDashboard aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Painel</span>
               </Link>
-              <Link href="/clientes" className={navLinkClass(isClientesActive)}>
-                <Users aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isClientesActive ? 'page' : undefined} href="/clientes" className={navLinkClass(isClientesActive)}>
+                <Users aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Clientes</span>
               </Link>
-              <Link href="/maquinas" className={navLinkClass(isMaquinasActive)}>
-                <Wrench aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isMaquinasActive ? 'page' : undefined} href="/maquinas" className={navLinkClass(isMaquinasActive)}>
+                <Wrench aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Equipamentos</span>
               </Link>
-              <Link href="/ordens-servico" className={navLinkClass(isOsActive)}>
-                <FileText aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isOsActive ? 'page' : undefined} href="/ordens-servico" className={navLinkClass(isOsActive)}>
+                <FileText aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Ordens de Serviço</span>
               </Link>
-              <Link href="/produtos" className={navLinkClass(isProdutosActive)}>
-                <Package aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isProdutosActive ? 'page' : undefined} href="/produtos" className={navLinkClass(isProdutosActive)}>
+                <Package aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Peças &amp; Produtos</span>
               </Link>
-              <Link href="/estoque" className={navLinkClass(isEstoqueActive)}>
-                <Boxes aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isEstoqueActive ? 'page' : undefined} href="/estoque" className={navLinkClass(isEstoqueActive)}>
+                <Boxes aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Estoque</span>
               </Link>
-              <Link href="/relatorios" className={navLinkClass(isRelatoriosActive)}>
-                <BarChart3 aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+              <Link aria-current={isRelatoriosActive ? 'page' : undefined} href="/relatorios" className={navLinkClass(isRelatoriosActive)}>
+                <BarChart3 aria-hidden="true" className="w-4 h-4 shrink-0" />
                 <span>Relatórios</span>
               </Link>
             </nav>
@@ -351,7 +351,7 @@ export default function Header({ user }: HeaderProps) {
                 title="Busca Global (Ctrl+K)"
                 aria-label="Abrir busca rápida"
               >
-                <Search aria-hidden="true" className="w-3.5 h-3.5 text-muted shrink-0" />
+                <Search aria-hidden="true" className="w-4 h-4 text-muted shrink-0" />
                 <span className="hidden sm:inline lg:hidden xl:inline whitespace-nowrap">Buscar...</span>
                 <kbd className="hidden 2xl:inline-flex px-1.5 py-0.5 bg-surface text-muted rounded text-xs font-mono border border-control whitespace-nowrap ml-1">
                   Ctrl + K
@@ -463,9 +463,9 @@ export default function Header({ user }: HeaderProps) {
                               <div
                                 className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 mt-0.5 ${iconColor}`}
                               >
-                                {item.tipo === 'OS_PRONTA' && <CheckSquare aria-hidden="true" className="w-3.5 h-3.5" />}
-                                {item.tipo === 'OS_AGUARDANDO_APROVACAO' && <Clock aria-hidden="true" className="w-3.5 h-3.5" />}
-                                {item.tipo === 'ESTOQUE_BAIXO' && <AlertTriangle aria-hidden="true" className="w-3.5 h-3.5" />}
+                                {item.tipo === 'OS_PRONTA' && <CheckSquare aria-hidden="true" className="w-4 h-4" />}
+                                {item.tipo === 'OS_AGUARDANDO_APROVACAO' && <Clock aria-hidden="true" className="w-4 h-4" />}
+                                {item.tipo === 'ESTOQUE_BAIXO' && <AlertTriangle aria-hidden="true" className="w-4 h-4" />}
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -489,7 +489,7 @@ export default function Header({ user }: HeaderProps) {
                                 </p>
                               </div>
                               {item.link && (
-                                <ArrowRight aria-hidden="true" className="w-3.5 h-3.5 text-subtle group-hover:text-accent group-hover:translate-x-0.5 transition-all mt-1 shrink-0" />
+                                <ArrowRight aria-hidden="true" className="w-4 h-4 text-subtle group-hover:text-accent group-hover:translate-x-0.5 transition-all mt-1 shrink-0" />
                               )}
                             </button>
                           );
@@ -520,7 +520,7 @@ export default function Header({ user }: HeaderProps) {
                   <span className="text-xs font-semibold text-ink whitespace-nowrap hidden sm:inline lg:hidden xl:inline">
                     {firstName}
                   </span>
-                  <ChevronDown aria-hidden="true" className="w-3.5 h-3.5 text-muted shrink-0" />
+                  <ChevronDown aria-hidden="true" className="w-4 h-4 text-muted shrink-0" />
                 </button>
 
                 {/* Dropdown do Usuário */}
@@ -547,7 +547,7 @@ export default function Header({ user }: HeaderProps) {
                           : 'text-ink hover:text-ink hover:bg-elevated/60'
                       }`}
                     >
-                      <Settings className={`w-3.5 h-3.5 ${isConfiguracaoActive ? 'text-accent' : 'text-muted'}`} />
+                      <Settings className={`w-4 h-4 ${isConfiguracaoActive ? 'text-accent' : 'text-muted'}`} />
                       <span>Configurações</span>
                     </Link>
 
@@ -563,7 +563,7 @@ export default function Header({ user }: HeaderProps) {
                       }}
                       className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-danger hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                     >
-                      <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
+                      <LogOut aria-hidden="true" className="w-4 h-4" />
                       <span>{isLoggingOut ? 'Saindo...' : 'Sair do Sistema'}</span>
                     </button>
                   </div>
@@ -685,7 +685,7 @@ export default function Header({ user }: HeaderProps) {
                         : 'bg-elevated hover:bg-hover text-ink hover:text-ink border border-control'
                     }`}
                   >
-                    <Settings aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Settings aria-hidden="true" className="w-4 h-4" />
                     <span>Configurações</span>
                   </Link>
                   <button
@@ -696,7 +696,7 @@ export default function Header({ user }: HeaderProps) {
                     onClick={handleLogout}
                     className="px-2.5 py-1 rounded-lg bg-danger/10 hover:bg-danger/20 text-danger text-xs font-semibold flex items-center gap-1 border border-danger/20 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                   >
-                    <LogOut aria-hidden="true" className="w-3.5 h-3.5" />
+                    <LogOut aria-hidden="true" className="w-4 h-4" />
                     <span>{isLoggingOut ? 'Saindo...' : 'Sair'}</span>
                   </button>
                 </div>

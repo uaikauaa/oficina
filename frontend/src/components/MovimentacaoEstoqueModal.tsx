@@ -32,35 +32,30 @@ const TIPOS_MANUAIS: {
   label: string;
   desc: string;
   icon: typeof ArrowUpRight;
-  color: string;
 }[] = [
   {
     value: 'ENTRADA',
     label: 'Entrada de Estoque',
     desc: 'Recebimento de compra, nota fiscal ou reposição',
     icon: ArrowUpRight,
-    color: 'text-ink border-line bg-ink/5',
   },
   {
     value: 'SAIDA',
     label: 'Saída Avulsa',
     desc: 'Descarte, venda balcão avulsa ou consumo interno',
     icon: ArrowDownRight,
-    color: 'text-danger border-danger/30 bg-danger/10',
   },
   {
     value: 'AJUSTE_POSITIVO',
     label: 'Ajuste (+)',
     desc: 'Correção de inventário físico para aumento de saldo',
     icon: SlidersHorizontal,
-    color: 'text-ink border-line bg-ink/5',
   },
   {
     value: 'AJUSTE_NEGATIVO',
     label: 'Ajuste (-)',
     desc: 'Correção de inventário físico para redução de saldo',
     icon: SlidersHorizontal,
-    color: 'text-accent border-accent/30 bg-accent/10',
   },
 ];
 

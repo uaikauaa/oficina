@@ -12,6 +12,10 @@ const movement = { id: 1, produtoId: 10, produtoCodigo: 'P-010', produtoNome: vi
 const paged = (content: unknown[]) => ({ content, page: 0, size: 15, totalElements: content.length, totalPages: 1, first: true, last: true });
 
 export async function visualMocks(page: Page, login = false) {
+  // O prompt do sistema operacional não faz parte da referência visual da página.
+  await page.addInitScript(() => {
+    window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); event.stopImmediatePropagation(); }, true);
+  });
   await page.clock.setFixedTime(new Date('2026-10-29T15:00:00Z'));
   await page.route('**/api/**', async route => {
     const path = new URL(route.request().url()).pathname;

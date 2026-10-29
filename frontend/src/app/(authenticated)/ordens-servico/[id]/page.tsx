@@ -31,6 +31,7 @@ import {
   Info,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
+import DialogFocus from '@/components/ui/DialogFocus';
 import OrdemServicoImpressao, { type ConfiguracaoOficinaImpressao } from '@/components/OrdemServicoImpressao';
 import {
   gerarLinkWhatsappOS,
@@ -601,7 +602,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
               className="ui-icon-btn px-3 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink font-semibold text-xs border border-control transition-all flex items-center gap-1.5 cursor-pointer"
               title="Imprimir recibo da Ordem de Serviço"
             >
-              <Printer aria-hidden="true" className="w-3.5 h-3.5 text-ink" />
+              <Printer aria-hidden="true" className="w-4 h-4 text-ink" />
               <span>Imprimir recibo</span>
             </button>
           </div>
@@ -617,7 +618,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
             <div className="p-4 rounded-xl bg-surface/80 border border-line space-y-2.5">
               <div className="flex items-center justify-between border-b border-line pb-2">
                 <span className="text-xs font-bold text-muted flex items-center gap-1.5">
-                  <Wrench aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                  <Wrench aria-hidden="true" className="w-4 h-4 text-accent" />
                   Equipamento
                 </span>
                 <Link
@@ -660,7 +661,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
             <div className="p-4 rounded-xl bg-surface/80 border border-line space-y-2.5">
               <div className="flex items-center justify-between border-b border-line pb-2">
                 <span className="text-xs font-bold text-muted flex items-center gap-1.5">
-                  <User aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                  <User aria-hidden="true" className="w-4 h-4 text-accent" />
                   Cliente
                 </span>
                 <Link
@@ -716,7 +717,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                         : 'Contatar cliente via WhatsApp'
                     }
                   >
-                    <MessageCircle aria-hidden="true" className="w-3.5 h-3.5" />
+                    <MessageCircle aria-hidden="true" className="w-4 h-4" />
                     <span>
                       {os.status === 'AGUARDANDO_APROVACAO'
                         ? 'Enviar Orçamento WhatsApp'
@@ -745,7 +746,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
             <div className="p-4 rounded-xl bg-surface/80 border border-line space-y-2">
               <div className="flex items-center justify-between border-b border-line pb-2">
                 <span className="text-xs font-bold text-muted flex items-center gap-1.5">
-                  <DollarSign aria-hidden="true" className="w-3.5 h-3.5 text-ink" />
+                  <DollarSign aria-hidden="true" className="w-4 h-4 text-ink" />
                   Resumo Financeiro
                 </span>
                 <button
@@ -927,7 +928,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                             : `Atenção: Necessário registrar testes com no mínimo 15 caracteres (atual: ${testesLength}/15)`
                         }
                       >
-                        <Zap aria-hidden="true" className="w-3.5 h-3.5" />
+                        <Zap aria-hidden="true" className="w-4 h-4" />
                         <span>Liberar (PRONTA)</span>
                       </button>
                     </>
@@ -952,7 +953,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                         onClick={() => handleOpenStatusModal('CONCLUIDA')}
                         className="ui-btn ui-btn-primary"
                       >
-                        <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                        <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                         <span>Entregar e Concluir OS</span>
                       </button>
                       <button
@@ -980,7 +981,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
 
             {/* CABEÇALHO DE ABAS DO COCKPIT */}
             <div className="flex border-b border-line bg-surface/40 rounded-t-xl px-2 pt-2 gap-1 overflow-x-auto">
-              <button
+              <button aria-pressed={activeTab === 'laudo'}
                 type="button"
                 id="tab-btn-laudo"
                 onClick={() => handleTabChange('laudo')}
@@ -990,11 +991,11 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     : 'text-muted hover:text-ink border-transparent hover:bg-surface/40'
                 }`}
               >
-                <Zap aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                <Zap aria-hidden="true" className="w-4 h-4 text-accent" />
                 <span>Laudo & Testes</span>
               </button>
 
-              <button
+              <button aria-pressed={activeTab === 'pecas'}
                 type="button"
                 id="tab-btn-pecas"
                 onClick={() => handleTabChange('pecas')}
@@ -1004,11 +1005,11 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     : 'text-muted hover:text-ink border-transparent hover:bg-surface/40'
                 }`}
               >
-                <Package aria-hidden="true" className="w-3.5 h-3.5 text-ink" />
+                <Package aria-hidden="true" className="w-4 h-4 text-ink" />
                 <span>Peças & Serviços ({itens.length})</span>
               </button>
 
-              <button
+              <button aria-pressed={activeTab === 'historico'}
                 type="button"
                 id="tab-btn-historico"
                 onClick={() => handleTabChange('historico')}
@@ -1018,11 +1019,11 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     : 'text-muted hover:text-ink border-transparent hover:bg-surface/40'
                 }`}
               >
-                <History aria-hidden="true" className="w-3.5 h-3.5 text-ink" />
+                <History aria-hidden="true" className="w-4 h-4 text-ink" />
                 <span>Histórico da Máquina</span>
               </button>
 
-              <button
+              <button aria-pressed={activeTab === 'observacoes'}
                 type="button"
                 id="tab-btn-observacoes"
                 onClick={() => handleTabChange('observacoes')}
@@ -1032,7 +1033,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                     : 'text-muted hover:text-ink border-transparent hover:bg-surface/40'
                 }`}
               >
-                <Clock aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                <Clock aria-hidden="true" className="w-4 h-4 text-muted" />
                 <span>Observações & Dados</span>
               </button>
             </div>
@@ -1062,9 +1063,9 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                         className="ui-btn ui-btn-primary disabled:opacity-50 transition-all flex items-center gap-1.5 cursor-pointer"
                       >
                         {isSavingLaudo ? (
-                          <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+                          <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                         ) : (
-                          <Save aria-hidden="true" className="w-3.5 h-3.5" />
+                          <Save aria-hidden="true" className="w-4 h-4" />
                         )}
                         <span>{isSavingLaudo ? 'Salvando...' : 'Salvar Laudo'}</span>
                       </button>
@@ -1107,7 +1108,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                         <div className="flex items-center gap-2">
                           <label htmlFor="field-src-app-authenticated-ordens-servico-id-page-tsx-3" className="text-xs font-bold text-ink flex items-center gap-1.5">
-                            <Zap aria-hidden="true" className="w-3.5 h-3.5" />
+                            <Zap aria-hidden="true" className="w-4 h-4" />
                             <span>Testes Realizados na Bancada (Obrigatório para status PRONTA):</span>
                           </label>
                         </div>
@@ -1127,7 +1128,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                           </span>
                           {isTestesValidosParaPronta ? (
                             <span className="text-xs text-ink font-semibold flex items-center gap-1">
-                              <CheckCircle2 aria-hidden="true" className="w-3.5 h-3.5" />
+                              <CheckCircle2 aria-hidden="true" className="w-4 h-4" />
                               <span>Válido para liberação</span>
                             </span>
                           ) : (
@@ -1143,7 +1144,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                         <div className="p-3 rounded-xl bg-canvas border border-line space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold text-muted flex items-center gap-1.5">
-                              <Sparkles aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                              <Sparkles aria-hidden="true" className="w-4 h-4 text-accent" />
                               <span>Modelos Rápidos de Teste (clique para carregar e editar):</span>
                             </span>
                             <span className="text-xs text-subtle">Totalmente editáveis</span>
@@ -1447,7 +1448,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                       className="text-xs text-ink hover:underline font-semibold flex items-center gap-1"
                     >
                       <span>Abrir Ficha da Máquina</span>
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </Link>
                   </div>
 
@@ -1611,10 +1612,14 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-canvas/80">
           <div
             data-testid="adicionar-peca-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="adicionar-peca-title"
             className="ui-dialog border w-full max-w-lg max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] flex flex-col min-w-0 overflow-hidden animate-in fade-in zoom-in-95"
           >
+            <DialogFocus onDismiss={() => { if (!isSubmittingItem) setIsItemModalOpen(false); }} />
             <div className="p-3 sm:p-4 border-b border-line flex items-center justify-between gap-2 shrink-0">
-              <h3 className="text-sm font-bold text-ink flex items-center gap-2 min-w-0">
+              <h3 id="adicionar-peca-title" className="text-sm font-bold text-ink flex items-center gap-2 min-w-0">
                 <Package aria-hidden="true" className="w-4 h-4 text-accent shrink-0" />
                 <span>Adicionar Peça / Componente à OS</span>
               </h3>
@@ -1658,7 +1663,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                       onClick={() => handleBuscaPecaChange('')}
                       className="absolute right-2.5 top-2.5 text-subtle hover:text-ink"
                     >
-                      <X aria-hidden="true" className="w-3.5 h-3.5" />
+                      <X aria-hidden="true" className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -1666,7 +1671,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                 {/* RESULTADOS DA BUSCA */}
                 {isSearchingPecas && (
                   <div className="py-2 text-center text-xs text-muted flex items-center justify-center gap-1.5">
-                    <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin text-accent" />
+                    <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin text-accent" />
                     <span>Pesquisando catálogo técnico...</span>
                   </div>
                 )}
@@ -1835,7 +1840,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                 >
                   {isSubmittingItem ? (
                     <>
-                      <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                       <span>Adicionando...</span>
                     </>
                   ) : (
@@ -1870,15 +1875,17 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
       {/* ========================================================================= */}
       {isStatusModalOpen && targetStatus && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80">
-          <div className="ui-dialog border w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95">
+          <div role="dialog" aria-modal="true" aria-labelledby="status-modal-title" className="ui-dialog border w-full max-w-lg max-h-[90dvh] overflow-y-auto">
+            <DialogFocus onDismiss={() => { if (!isSubmittingStatus) setIsStatusModalOpen(false); }} />
             <div className="p-4 border-b border-line flex items-center justify-between">
-              <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+              <h3 id="status-modal-title" className="text-sm font-bold text-ink flex items-center gap-2">
                 <span>Alterar Status para:</span>
                 <span className="text-accent">{STATUS_ORDEM_SERVICO_LABELS[targetStatus]}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsStatusModalOpen(false)}
+                aria-label="Fechar alteração de status"
                 className="text-muted hover:text-ink text-xs font-semibold cursor-pointer p-1"
               >
                 <X aria-hidden="true" className="w-4 h-4" />
@@ -1914,7 +1921,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                   />
                   {statusTestes.trim().length < 15 && (
                     <p className="text-xs text-danger flex items-center gap-1">
-                      <AlertTriangle aria-hidden="true" className="w-3.5 h-3.5" />
+                      <AlertTriangle aria-hidden="true" className="w-4 h-4" />
                       <span>Mínimo de 15 caracteres para validar a bancada antes de liberar como PRONTA.</span>
                     </p>
                   )}
@@ -1966,7 +1973,7 @@ export default function OrdemServicoDetalhesPage({ params }: PageProps) {
                 >
                   {isSubmittingStatus ? (
                     <>
-                      <Loader2 aria-hidden="true" className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
                       <span>Salvando...</span>
                     </>
                   ) : (

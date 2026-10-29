@@ -300,7 +300,7 @@ export default function ProdutoModal({
               <Package aria-hidden="true" className="w-5 h-5" />
             </div>
             <div className="min-w-0">
-              <h2 id="produto-modal-title" className="text-sm sm:text-base font-bold text-ink truncate">
+              <h2 id="produto-modal-title" className="text-sm sm:text-base font-bold text-ink break-words">
                 {isEditing ? 'Editar Peça / Componente' : 'Cadastrar Nova Peça / Componente'}
               </h2>
               <p className="text-xs text-muted truncate">
@@ -365,7 +365,7 @@ export default function ProdutoModal({
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {TIPO_OPTIONS.map((opt) => (
-                <button
+                <button aria-pressed={formData.tipo === opt.value}
                   key={opt.value}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, tipo: opt.value }))}

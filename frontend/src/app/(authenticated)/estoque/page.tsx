@@ -261,7 +261,7 @@ export default function EstoquePage() {
                   className="absolute right-2.5 top-2.5 text-subtle hover:text-ink transition-colors cursor-pointer"
                   title="Limpar busca"
                 >
-                  <X aria-hidden="true" className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -343,7 +343,7 @@ export default function EstoquePage() {
                 }}
                 className="inline-flex items-center gap-1 text-muted hover:text-accent text-xs transition-colors cursor-pointer"
               >
-                <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />
+                <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 <span>Limpar Filtros</span>
               </button>
             </div>
@@ -512,7 +512,7 @@ export default function EstoquePage() {
                             className="ui-icon-btn px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-control bg-elevated/80 hover:bg-hover text-xs font-semibold text-ink hover:text-ink inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                             title="Ajustar saldo, registrar compra ou descarte"
                           >
-                            <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5 text-accent shrink-0" />
+                            <SlidersHorizontal aria-hidden="true" className="w-4 h-4 text-accent shrink-0" />
                             <span className="hidden xl:inline">Movimentar</span>
                           </button>
                         </td>

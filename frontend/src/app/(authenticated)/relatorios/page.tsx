@@ -674,7 +674,7 @@ export default function RelatoriosPage() {
               aria-label="Fechar notificação"
               className="p-1 rounded hover:bg-ink/10 text-muted hover:text-ink cursor-pointer"
             >
-              <X aria-hidden="true" className="w-3.5 h-3.5" />
+              <X aria-hidden="true" className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -710,7 +710,7 @@ export default function RelatoriosPage() {
                 className="ui-icon-btn px-3 py-1.5 rounded-lg bg-ink/5 hover:bg-ink/5 border border-line text-ink hover:text-ink text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                 title="Exportar dados filtrados da aba ativa em formato CSV completo"
               >
-                <Download className={`w-3.5 h-3.5 text-ink ${isExporting ? 'animate-bounce' : ''}`} />
+                <Download className={`w-4 h-4 text-ink ${isExporting ? 'animate-bounce' : ''}`} />
                 <span>{isExporting ? 'Exportando...' : rotuloExportarAtivo}</span>
               </button>
             )}
@@ -732,7 +732,7 @@ export default function RelatoriosPage() {
               className="ui-icon-btn px-3 py-1.5 rounded-lg bg-surface border border-line hover:border-accent/30 text-ink hover:text-ink text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
               title="Atualizar dados da aba atual"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-accent' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-accent' : ''}`} />
               <span className="hidden sm:inline">Atualizar</span>
             </button>
           </div>
@@ -750,14 +750,14 @@ export default function RelatoriosPage() {
               onClick={() => setError(null)}
               className="text-muted hover:text-ink cursor-pointer"
             >
-              <X aria-hidden="true" className="w-3.5 h-3.5" />
+              <X aria-hidden="true" className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* ABAS SLIM DE NAVEGAÇÃO (6 RELATÓRIOS OFICIAIS) */}
         <div className="border-b border-line flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-px">
-          <button
+          <button aria-pressed={activeTab === 'ordens-servico'}
             type="button"
             onClick={() => { setActiveTab('ordens-servico'); setOsPage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -766,11 +766,11 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <FileText aria-hidden="true" className="w-3.5 h-3.5" />
+            <FileText aria-hidden="true" className="w-4 h-4" />
             <span>Ordens de Serviço</span>
           </button>
 
-          <button
+          <button aria-pressed={activeTab === 'estoque'}
             type="button"
             onClick={() => { setActiveTab('estoque'); setEstoquePage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -779,11 +779,11 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <Boxes aria-hidden="true" className="w-3.5 h-3.5" />
+            <Boxes aria-hidden="true" className="w-4 h-4" />
             <span>Situação do Estoque</span>
           </button>
 
-          <button
+          <button aria-pressed={activeTab === 'movimentacoes'}
             type="button"
             onClick={() => { setActiveTab('movimentacoes'); setMovPage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -792,11 +792,11 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <ArrowLeftRight aria-hidden="true" className="w-3.5 h-3.5" />
+            <ArrowLeftRight aria-hidden="true" className="w-4 h-4" />
             <span>Movimentações</span>
           </button>
 
-          <button
+          <button aria-pressed={activeTab === 'pecas-mais-utilizadas'}
             type="button"
             onClick={() => { setActiveTab('pecas-mais-utilizadas'); setPecasPage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -805,11 +805,11 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <TrendingUp aria-hidden="true" className="w-3.5 h-3.5" />
+            <TrendingUp aria-hidden="true" className="w-4 h-4" />
             <span>Peças Mais Utilizadas</span>
           </button>
 
-          <button
+          <button aria-pressed={activeTab === 'clientes'}
             type="button"
             onClick={() => { setActiveTab('clientes'); setClientesPage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -818,11 +818,11 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <Users aria-hidden="true" className="w-3.5 h-3.5" />
+            <Users aria-hidden="true" className="w-4 h-4" />
             <span>Clientes</span>
           </button>
 
-          <button
+          <button aria-pressed={activeTab === 'equipamentos'}
             type="button"
             onClick={() => { setActiveTab('equipamentos'); setEquipamentosPage(0); }}
             className={`px-3 py-2 rounded-t-lg text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap cursor-pointer ${
@@ -831,7 +831,7 @@ export default function RelatoriosPage() {
                 : 'border-transparent text-muted hover:text-ink hover:bg-surface/40'
             }`}
           >
-            <Wrench aria-hidden="true" className="w-3.5 h-3.5" />
+            <Wrench aria-hidden="true" className="w-4 h-4" />
             <span>Equipamentos</span>
           </button>
         </div>
@@ -1089,7 +1089,7 @@ export default function RelatoriosPage() {
                       }}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{osPage + 1}</strong> de <strong>{osRelatorio.itens.totalPages}</strong>
@@ -1103,7 +1103,7 @@ export default function RelatoriosPage() {
                       }}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1154,7 +1154,7 @@ export default function RelatoriosPage() {
                       type="checkbox"
                       checked={estoqueBaixo}
                       onChange={(e) => { setEstoqueBaixo(e.target.checked); setEstoquePage(0); }}
-                      className="w-3.5 h-3.5 rounded bg-canvas border-control text-accent focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded bg-canvas border-control text-accent focus:ring-0 cursor-pointer"
                     />
                     <span>Apenas Estoque Baixo</span>
                   </label>
@@ -1164,7 +1164,7 @@ export default function RelatoriosPage() {
                       type="checkbox"
                       checked={estoqueZerado}
                       onChange={(e) => { setEstoqueZerado(e.target.checked); setEstoquePage(0); }}
-                      className="w-3.5 h-3.5 rounded bg-canvas border-control text-danger focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded bg-canvas border-control text-danger focus:ring-0 cursor-pointer"
                     />
                     <span>Apenas Zerados</span>
                   </label>
@@ -1291,7 +1291,7 @@ export default function RelatoriosPage() {
                       onClick={() => setEstoquePage((prev) => Math.max(0, prev - 1))}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{estoquePage + 1}</strong> de <strong>{estoqueRelatorio.totalPages}</strong>
@@ -1302,7 +1302,7 @@ export default function RelatoriosPage() {
                       onClick={() => setEstoquePage((prev) => prev + 1)}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1530,7 +1530,7 @@ export default function RelatoriosPage() {
                       onClick={() => setMovPage((prev) => Math.max(0, prev - 1))}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{movPage + 1}</strong> de <strong>{movRelatorio.totalPages}</strong>
@@ -1541,7 +1541,7 @@ export default function RelatoriosPage() {
                       onClick={() => setMovPage((prev) => prev + 1)}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1653,7 +1653,7 @@ export default function RelatoriosPage() {
                       onClick={() => setPecasPage((prev) => Math.max(0, prev - 1))}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{pecasPage + 1}</strong> de <strong>{pecasRelatorio.totalPages}</strong>
@@ -1664,7 +1664,7 @@ export default function RelatoriosPage() {
                       onClick={() => setPecasPage((prev) => prev + 1)}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1763,7 +1763,7 @@ export default function RelatoriosPage() {
                       onClick={() => setClientesPage((prev) => Math.max(0, prev - 1))}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{clientesPage + 1}</strong> de <strong>{clientesRelatorio.totalPages}</strong>
@@ -1774,7 +1774,7 @@ export default function RelatoriosPage() {
                       onClick={() => setClientesPage((prev) => prev + 1)}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -1879,7 +1879,7 @@ export default function RelatoriosPage() {
                       onClick={() => setEquipamentosPage((prev) => Math.max(0, prev - 1))}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                     </button>
                     <span>
                       Página <strong>{equipamentosPage + 1}</strong> de <strong>{equipamentosRelatorio.totalPages}</strong>
@@ -1890,7 +1890,7 @@ export default function RelatoriosPage() {
                       onClick={() => setEquipamentosPage((prev) => prev + 1)}
                       className="p-1 rounded-md bg-elevated text-ink disabled:opacity-40 hover:bg-hover cursor-pointer"
                     >
-                      <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                      <ChevronRight aria-hidden="true" className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

@@ -335,7 +335,6 @@ function LoginForm() {
               alt="Bancada de ferramentas e máquinas de solda da oficina"
               fill
               priority
-              quality={95}
               className="grayscale object-cover object-right"
               sizes="66vw"
             />
@@ -390,7 +389,7 @@ function LoginForm() {
               {/* Bloco Clientes */}
               <div className="space-y-2">
                 <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
-                  <User aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                  <User aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-ink tracking-wide">Clientes</h3>
@@ -403,7 +402,7 @@ function LoginForm() {
               {/* Bloco Ordens de Serviço */}
               <div className="space-y-2">
                 <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
-                  <FileText aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                  <FileText aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h3>
@@ -416,7 +415,7 @@ function LoginForm() {
               {/* Bloco Estoque */}
               <div className="space-y-2">
                 <div className="w-9 h-9 rounded-lg bg-surface/80 border border-control flex items-center justify-center text-accent shadow-inner">
-                  <Package aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                  <Package aria-hidden="true" className="w-4 h-4 " />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-ink tracking-wide">Estoque</h3>
@@ -441,15 +440,6 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Elemento Geométrico Decorativo no Canto Inferior Esquerdo (Âmbar) */}
-          <div
-            className="absolute -bottom-8 -left-8 w-36 h-36 border-2 border-accent/40 rotate-45 pointer-events-none rounded-lg z-0"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -bottom-12 -left-12 w-44 h-44 border border-accent/20 rotate-45 pointer-events-none rounded-xl z-0"
-            aria-hidden="true"
-          />
         </div>
 
         {/* 2. PAINEL DIREITO: ÁREA ESTRUTURAL DE AUTENTICAÇÃO */}
@@ -504,7 +494,7 @@ function LoginForm() {
                     htmlFor="two-factor-code"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <KeyRound aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                    <KeyRound aria-hidden="true" className="w-4 h-4 text-accent" />
                     <span>Código de 6 dígitos</span>
                   </label>
                   <input
@@ -528,7 +518,7 @@ function LoginForm() {
                 {/* Linha do Timer e Reenvio */}
                 <div className="flex items-center justify-between text-xs pt-1">
                   <div className="flex items-center gap-1.5 text-muted">
-                    <Clock aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
+                    <Clock aria-hidden="true" className="w-4 h-4 text-subtle" />
                     <span>
                       {countdownSeconds > 0 ? (
                         <>
@@ -580,7 +570,7 @@ function LoginForm() {
                     </div>
                   ) : (
                     <>
-                      <ShieldCheck aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+                      <ShieldCheck aria-hidden="true" className="w-4 h-4 " />
                       <span>Verificar código</span>
                     </>
                   )}
@@ -593,7 +583,7 @@ function LoginForm() {
                   disabled={isLoading}
                   className="w-full py-2 text-xs text-muted hover:text-ink transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                  <ArrowLeft aria-hidden="true" className="w-4 h-4" />
                   <span>Voltar para o login</span>
                 </button>
               </form>
@@ -606,7 +596,7 @@ function LoginForm() {
                     htmlFor="email"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Mail aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                    <Mail aria-hidden="true" className="w-4 h-4 text-muted" />
                     <span>E-mail ou usuário</span>
                   </label>
                   <div className="relative">
@@ -627,7 +617,7 @@ function LoginForm() {
                   </div>
                   {desktopForm.formState.errors.email && (
                     <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                      <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
                       <span>{desktopForm.formState.errors.email.message}</span>
                     </p>
                   )}
@@ -639,7 +629,7 @@ function LoginForm() {
                     htmlFor="senha"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Lock aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                    <Lock aria-hidden="true" className="w-4 h-4 text-muted" />
                     <span>Senha</span>
                   </label>
                   <div className="relative">
@@ -669,7 +659,7 @@ function LoginForm() {
                   </div>
                   {desktopForm.formState.errors.senha && (
                     <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                      <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
                       <span>{desktopForm.formState.errors.senha.message}</span>
                     </p>
                   )}
@@ -712,7 +702,7 @@ function LoginForm() {
                     </div>
                   ) : (
                     <>
-                      <LogIn aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+                      <LogIn aria-hidden="true" className="w-4 h-4 " />
                       <span>Entrar</span>
                     </>
                   )}
@@ -735,7 +725,6 @@ function LoginForm() {
             alt="Bancada de ferramentas e máquinas de solda da oficina"
             fill
             priority
-            quality={90}
             className="grayscale object-cover object-center"
             sizes="100vw"
           />
@@ -773,7 +762,7 @@ function LoginForm() {
             aria-expanded={isModalOpen}
             className="ui-btn ui-btn-primary sm:px-5 sm:py-2.5 sm:text-sm flex items-center gap-2 active:scale-[0.97] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-canvas"
           >
-            <LogIn aria-hidden="true" className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />
+            <LogIn aria-hidden="true" className="w-4 h-4 sm:w-4 sm:h-4 " />
             <span>Entrar</span>
           </button>
         </header>
@@ -797,7 +786,7 @@ function LoginForm() {
             {/* Bloco Clientes */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
-                <User aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                <User aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
                 <h2 className="text-xs font-bold text-ink tracking-wide">Clientes</h2>
@@ -810,7 +799,7 @@ function LoginForm() {
             {/* Bloco Ordens de Serviço */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
-                <FileText aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                <FileText aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
                 <h2 className="text-xs font-bold text-ink tracking-wide">Ordens de Serviço</h2>
@@ -823,7 +812,7 @@ function LoginForm() {
             {/* Bloco Estoque */}
             <div className="p-3.5 sm:p-4 rounded-xl bg-surface/75 border border-line flex sm:flex-col items-center sm:items-start gap-3 sm:gap-2.5">
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shrink-0">
-                <Package aria-hidden="true" className="w-4 h-4 stroke-[2.2]" />
+                <Package aria-hidden="true" className="w-4 h-4 " />
               </div>
               <div>
                 <h2 className="text-xs font-bold text-ink tracking-wide">Estoque</h2>
@@ -845,11 +834,6 @@ function LoginForm() {
           </div>
         </footer>
 
-        {/* Detalhe Geométrico Decorativo */}
-        <div
-          className="absolute -bottom-10 -left-10 w-32 h-32 border border-accent/20 rotate-45 pointer-events-none rounded-xl z-0"
-          aria-hidden="true"
-        />
       </div>
 
       {/* ========================================================================= */}
@@ -934,7 +918,7 @@ function LoginForm() {
                     htmlFor="modal-two-factor-code"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <KeyRound aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                    <KeyRound aria-hidden="true" className="w-4 h-4 text-accent" />
                     <span>Código de 6 dígitos</span>
                   </label>
                   <input
@@ -958,7 +942,7 @@ function LoginForm() {
                 {/* Linha do Timer e Reenvio */}
                 <div className="flex items-center justify-between text-xs pt-1">
                   <div className="flex items-center gap-1.5 text-muted">
-                    <Clock aria-hidden="true" className="w-3.5 h-3.5 text-subtle" />
+                    <Clock aria-hidden="true" className="w-4 h-4 text-subtle" />
                     <span>
                       {countdownSeconds > 0 ? (
                         <>
@@ -1008,7 +992,7 @@ function LoginForm() {
                     </div>
                   ) : (
                     <>
-                      <ShieldCheck aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+                      <ShieldCheck aria-hidden="true" className="w-4 h-4 " />
                       <span>Verificar código</span>
                     </>
                   )}
@@ -1021,7 +1005,7 @@ function LoginForm() {
                   disabled={isLoading}
                   className="w-full py-2 text-xs text-muted hover:text-ink transition-colors flex items-center justify-center gap-1.5 cursor-pointer focus:outline-none"
                 >
-                  <ArrowLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                  <ArrowLeft aria-hidden="true" className="w-4 h-4" />
                   <span>Voltar para o login</span>
                 </button>
               </form>
@@ -1034,7 +1018,7 @@ function LoginForm() {
                     htmlFor="modal-email"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Mail aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                    <Mail aria-hidden="true" className="w-4 h-4 text-muted" />
                     <span>E-mail ou usuário</span>
                   </label>
                   <div className="relative">
@@ -1055,7 +1039,7 @@ function LoginForm() {
                   </div>
                   {mobileForm.formState.errors.email && (
                     <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                      <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
                       <span>{mobileForm.formState.errors.email.message}</span>
                     </p>
                   )}
@@ -1067,7 +1051,7 @@ function LoginForm() {
                     htmlFor="modal-senha"
                     className="flex items-center gap-1.5 text-xs font-semibold text-ink tracking-wide"
                   >
-                    <Lock aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                    <Lock aria-hidden="true" className="w-4 h-4 text-muted" />
                     <span>Senha</span>
                   </label>
                   <div className="relative">
@@ -1097,7 +1081,7 @@ function LoginForm() {
                   </div>
                   {mobileForm.formState.errors.senha && (
                     <p className="text-xs text-danger flex items-center gap-1 font-medium pt-0.5">
-                      <AlertCircle aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
+                      <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
                       <span>{mobileForm.formState.errors.senha.message}</span>
                     </p>
                   )}
@@ -1139,7 +1123,7 @@ function LoginForm() {
                     </div>
                   ) : (
                     <>
-                      <LogIn aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+                      <LogIn aria-hidden="true" className="w-4 h-4 " />
                       <span>Entrar</span>
                     </>
                   )}

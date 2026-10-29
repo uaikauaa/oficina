@@ -197,7 +197,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
               {resultado.clientes && resultado.clientes.length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-2">
-                    <Users aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Users aria-hidden="true" className="w-4 h-4" />
                     <span>Clientes ({resultado.clientes.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -238,7 +238,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
               {resultado.maquinas && resultado.maquinas.length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-2">
-                    <Wrench aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Wrench aria-hidden="true" className="w-4 h-4" />
                     <span>Equipamentos ({resultado.maquinas.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -279,7 +279,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
               {resultado.ordensServico && resultado.ordensServico.length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-2">
-                    <FileText aria-hidden="true" className="w-3.5 h-3.5" />
+                    <FileText aria-hidden="true" className="w-4 h-4" />
                     <span>Ordens de Serviço ({resultado.ordensServico.length})</span>
                   </div>
                   <div className="space-y-1">
@@ -322,7 +322,7 @@ export default function BuscaRapidaModal({ isOpen, onClose }: BuscaRapidaModalPr
               {resultado.produtos && resultado.produtos.length > 0 && (
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-accent px-2">
-                    <Package aria-hidden="true" className="w-3.5 h-3.5" />
+                    <Package aria-hidden="true" className="w-4 h-4" />
                     <span>Peças & Produtos ({resultado.produtos.length})</span>
                   </div>
                   <div className="space-y-1">

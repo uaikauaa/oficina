@@ -331,7 +331,7 @@ export default function ProdutosPage() {
               onClick={handleNovoProduto}
               className="ui-btn ui-btn-primary sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
             >
-              <Plus aria-hidden="true" className="w-4 h-4 stroke-[2.5]" />
+              <Plus aria-hidden="true" className="w-4 h-4 " />
               <span>Nova Peça / Produto</span>
             </button>
           </div>
@@ -357,7 +357,7 @@ export default function ProdutosPage() {
               onClick={() => setStatusToast(null)}
               className="p-1 hover:opacity-70 text-muted"
             >
-              <X aria-hidden="true" className="w-3.5 h-3.5" />
+              <X aria-hidden="true" className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -385,7 +385,7 @@ export default function ProdutosPage() {
                   className="absolute right-2.5 top-2.5 text-subtle hover:text-ink transition-colors cursor-pointer"
                   title="Limpar busca"
                 >
-                  <X aria-hidden="true" className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -401,7 +401,7 @@ export default function ProdutosPage() {
                   : 'bg-canvas border-line text-ink hover:border-control hover:text-ink'
                 }`}
             >
-              <SlidersHorizontal aria-hidden="true" className="w-3.5 h-3.5" />
+              <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">
                 {filtrosAvancadosAbertos ? 'Menos Filtros' : 'Mais Filtros'}
               </span>
@@ -420,7 +420,7 @@ export default function ProdutosPage() {
                 className="ui-icon-btn inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold bg-canvas border border-line text-muted hover:text-ink hover:border-control transition-all cursor-pointer shrink-0"
                 title="Limpar todos os filtros aplicados"
               >
-                <RotateCcw aria-hidden="true" className="w-3.5 h-3.5" />
+                <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 <span className="hidden md:inline">Limpar</span>
               </button>
             )}
@@ -481,7 +481,7 @@ export default function ProdutosPage() {
           <div className="flex items-center justify-between gap-2 pt-1 border-t border-line">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-800">
               {/* Pill Todas */}
-              <button
+              <button aria-pressed={pillAtiva === 'TODAS'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('TODAS');
@@ -496,7 +496,7 @@ export default function ProdutosPage() {
               </button>
 
               {/* Pill Peças */}
-              <button
+              <button aria-pressed={pillAtiva === 'PECA'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('PECA');
@@ -512,7 +512,7 @@ export default function ProdutosPage() {
               </button>
 
               {/* Pill Consumíveis */}
-              <button
+              <button aria-pressed={pillAtiva === 'CONSUMIVEL'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('CONSUMIVEL');
@@ -528,7 +528,7 @@ export default function ProdutosPage() {
               </button>
 
               {/* Pill Produtos */}
-              <button
+              <button aria-pressed={pillAtiva === 'PRODUTO'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('PRODUTO');
@@ -544,7 +544,7 @@ export default function ProdutosPage() {
               </button>
 
               {/* Pill Estoque Crítico */}
-              <button
+              <button aria-pressed={pillAtiva === 'CRITICO'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('CRITICO');
@@ -555,7 +555,7 @@ export default function ProdutosPage() {
                     : 'bg-canvas text-danger border-line hover:border-danger/40'
                   }`}
               >
-                <AlertTriangle aria-hidden="true" className="w-3.5 h-3.5" />
+                <AlertTriangle aria-hidden="true" className="w-4 h-4" />
                 <span>Estoque Crítico</span>
               </button>
             </div>
@@ -593,7 +593,7 @@ export default function ProdutosPage() {
                 className="ui-icon-btn text-muted hover:text-accent transition-colors p-0.5 ml-2 cursor-pointer shrink-0"
                 title="Remover todos os filtros"
               >
-                <X aria-hidden="true" className="w-3.5 h-3.5" />
+                <X aria-hidden="true" className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -807,7 +807,7 @@ export default function ProdutosPage() {
                               className="ui-icon-btn px-2 py-1 rounded-lg text-ink hover:text-accent bg-elevated/80 hover:bg-accent/10 border border-control hover:border-accent/30 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
                               title="Registrar entrada, saída ou ajuste de estoque (sem sair da tela)"
                             >
-                              <Boxes aria-hidden="true" className="w-3.5 h-3.5 text-accent" />
+                              <Boxes aria-hidden="true" className="w-4 h-4 text-accent" />
                               <span>± Estoque</span>
                             </button>
 
@@ -819,7 +819,7 @@ export default function ProdutosPage() {
                               title="Compatibilidade Técnica (produto_maquina)"
                               aria-label="Compatibilidade técnica"
                             >
-                              <Wrench aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Wrench aria-hidden="true" className="w-4 h-4" />
                             </button>
 
                             {/* Editar Peça */}
@@ -830,7 +830,7 @@ export default function ProdutosPage() {
                               title="Editar Peça"
                               aria-label="Editar peça"
                             >
-                              <Edit2 aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Edit2 aria-hidden="true" className="w-4 h-4" />
                             </button>
 
                             {/* Ativar / Inativar Peça (Fase 1 e 10) */}
@@ -844,7 +844,7 @@ export default function ProdutosPage() {
                               title={p.ativo ? 'Inativar peça' : 'Ativar peça'}
                               aria-label={p.ativo ? 'Inativar peça' : 'Ativar peça'}
                             >
-                              <Power aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Power aria-hidden="true" className="w-4 h-4" />
                             </button>
                           </div>
                         </td>

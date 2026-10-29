@@ -4,7 +4,9 @@ Data: 29/10/2026. Branch: `refactor/identidade-visual-oficina`.
 
 ## Diagnóstico anterior à implementação
 
-O App Router contém 15 rotas (14 telas e o redirecionamento `/`). Foram inspecionados layouts, componentes, contratos de `lib/types.ts`, cliente HTTP, assets e testes. Não há gráficos de biblioteca: indicadores, tabelas, rankings e histórico são construídos com HTML e Lucide. A versão atual não contém `InstallAppButton.tsx`, manifesto ou service worker; instalar PWA é uma lacuna anterior, não uma funcionalidade a implementar nesta refatoração.
+O App Router inicial continha 15 rotas (14 telas e o redirecionamento `/`). Foram inspecionados layouts, componentes, contratos de `lib/types.ts`, cliente HTTP, assets e testes. Não há gráficos de biblioteca: indicadores, tabelas, rankings e histórico são construídos com HTML e Lucide.
+
+A branch inicial `release/oficina-pre-oracle-20261023`, no commit `217cfe2`, estava 13 commits atrás de `origin/main`. A atualização da `main` foi incorporada na branch de refatoração: preserva o PWA já existente, com `InstallAppButton`, `PwaInstallProvider`, `/manifest.webmanifest` e `/pwa/icon-192.png`/`icon-512.png`. Não há service worker nem operações offline. Há também o fallback 404 gerado pelo Next (`/_not-found` no build), sem dados operacionais ou página customizada no baseline.
 
 As capturas antigas em `frontend/screenshots` das rotas privadas mostram redirecionamentos para login e **não** servem de evidência das telas internas. Os novos comparativos usam respostas sintéticas interceptadas exclusivamente no navegador de testes, sem alterar autenticação, backend ou dados operacionais.
 
@@ -44,6 +46,8 @@ Todas as páginas privadas dependem de `(authenticated)/layout.tsx` (sessão via
 | `ConfirmModal` | Escape, loading, confirmar/cancelar; vermelho/âmbar conforme intenção. Falta contenção/restauração de foco; usar padrão compartilhado de dialog sem reescrever callbacks. |
 | `EmptyState` | Ícone/título/descrição/ação; título 12px e descrição 11px. Aumentar leitura e remover moldura pontilhada excessiva. |
 | `OrdemServicoImpressao` | Recibo A4 via helpers e configuração do backend, dados cliente/máquina/itens/totais. Manter layout claro de impressão isolado: branco de papel/preto técnico são exceção de mídia, não nova identidade cromática. |
+| `InstallAppButton` | Prompt nativo quando disponível; instruções manuais em portal fora do header sticky, Escape/fechar/Entendi. Preservar comportamento, padronizar botão/superfície/foco e manter ações visíveis em 360px. |
+| `PwaInstallProvider` | Mantém evento de instalação entre navegações; detecta standalone/iOS e appinstalled. Lógica preservada; tema do manifesto/ícones passa a consumir grafite comum de `lib/brand.ts`. |
 
 Componentes locais: filtros e paginação das listagens; `Campo` em configurações; controles de abas, laudo e dialogs de peça/status na OS; presets e tabelas em relatórios. Não introduzir abstrações para contratos distintos; extrair somente estilo de controles, superfície de dialog, métricas e ícones de domínio.
 
@@ -63,8 +67,30 @@ Emojis estáticos: raio/bateria/chave em `MaquinaModal`, `ClienteModal`, listage
 4. **Estados:** sucesso/ativo/concluído neutros com texto/ícone; seleção/foco/atenção âmbar; erro/exclusão/crítico vermelho. Saídas de estoque e inatividade não são falhas.
 5. **Validação:** capturas antes/depois com os mesmos dados, todas as telas em 360/390/768/1024/1366/1920; modais/abas/menus/print; lint, TS, build, unitários e Playwright. Integração real só no ambiente descartável de CI conforme teste existente.
 
-Paleta: grafite `#0B1017`, gelo `#E7E9ED`, âmbar `#D4A64A`, vermelho `#C76565`. Superfícies e texto secundário derivados de neutros. Imagens fotográficas e favicon preexistentes são assets de marca, não tokens; evitar que cores da fotografia concorram com UI usando tratamento monocromático em CSS.
+Paleta final: grafite `#0B1017`, gelo `#E7E9ED`, âmbar `#D4A64A`, vermelho `#D78181`. O vermelho parte da referência `#C76565`, com luminosidade ajustada para alcançar 4,5:1 inclusive em superfície de hover. Superfícies e texto secundário são variações neutras. Imagens fotográficas e favicon preexistentes são assets de marca; a fotografia do login recebeu tratamento monocromático em CSS. Os metadados PWA e a geração de PNG precisam de um valor fora do CSS: `lib/brand.ts`, mantido em paridade com o token grafite por teste.
 
 ## Resultados
 
-Resultados de implementação e validação serão registrados após execução, sem antecipar aprovação.
+Implementação concluída na branch de refatoração, após incorporar o PWA de `main`. [Design System](design-system.md), [registro dos arquivos e decisões](registro-refatoracao-visual.md) e [comparativo com 76 PNGs](visual/README.md).
+
+| Verificação final | Resultado |
+| --- | --- |
+| `npm run lint` | Aprovado, sem erros ou avisos de código |
+| `npx tsc --noEmit` | Aprovado |
+| `npm run build` | Aprovado; 18 entradas no build incluindo manifesto e ícones PWA |
+| `node --experimental-strip-types --test --test-reporter=dot src/lib/*.test.ts` | 362 testes aprovados |
+| `npx playwright test --workers=2` sobre build de produção | 88 aprovados, 2 ignorados pelas condições existentes; 57,3 segundos |
+| Paleta e emojis estáticos | Teste aprovado em `app`, `components` e `lib`; sem emojis nem classes cromáticas externas na UI autoral |
+| Contraste dos tokens | Texto ≥ 4,5:1 e bordas de controles ≥ 3:1 nas superfícies sólidas testadas |
+| Responsividade | 14 telas × 6 larguras; 10 dialogs × 6 larguras, sem overflow global; matriz anterior de 320–2560px também aprovada |
+| Teclado e modais | Tab/Shift+Tab contidos, Escape e restauração de foco aprovados nos dez dialogs; campos e botões com nomes acessíveis |
+| Impressão | Testes A4, textos contínuos, cinco colunas, configuração e isolamento do recibo aprovados |
+| Escopo | Nenhum diff no backend, migrations, `api.ts`, middleware, dependências ou lockfile |
+
+Os dois skips são o login com credenciais administrativas reais não fornecidas no ambiente e a integração banco/SMTP executada apenas no ambiente descartável de CI. Não foram adicionados skips, removidos asserts nem ampliados timeouts.
+
+Ocorrências investigadas: overflow de 7px em produtos/320px corrigido por quebra das ações; controles sem nome no mobile corrigidos; foco de retorno do modal de peça corrigido antes do autofocus; vermelho clareado após teste de contraste. Uma execução interrompida registrou dois timeouts com duração anormal de aproximadamente 16 minutos; ambos passaram isoladamente sem alterações e passaram novamente na suíte final completa.
+
+Avisos preexistentes do ambiente: convenção `middleware` depreciada pelo Next e comando `next start` usado pelo harness existente apesar de `output: standalone`. A suíte de produção completou com sucesso; a migração desses mecanismos não fez parte da mudança visual.
+
+Limites: a verificação automatizada não certifica conformidade WCAG integral nem substitui testes com leitores de tela/dispositivos físicos. Instalação nativa do sistema operacional depende do navegador/HTTPS; o manifesto, PNGs e fluxo de instruções foram testados. As capturas usam fixtures sintéticos e não representam dados operacionais reais. O PR será aberto para revisão, sem integração automática à `main`.

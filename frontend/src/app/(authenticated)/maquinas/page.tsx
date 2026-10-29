@@ -303,7 +303,7 @@ export default function MaquinasPage() {
                 onClick={() => setIsNovoModalOpen(true)}
                 className="ui-btn ui-btn-primary inline-flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                <Plus aria-hidden="true" className="w-4 h-4" />
                 <span>Cadastrar Primeiro Equipamento</span>
               </button>
             </div>
@@ -356,7 +356,7 @@ export default function MaquinasPage() {
                           href={`/clientes/${m.clienteId}`}
                           className="font-medium text-ink hover:text-accent flex items-center gap-1.5 transition-colors group"
                         >
-                          <User aria-hidden="true" className="w-3.5 h-3.5 text-muted group-hover:text-accent shrink-0" />
+                          <User aria-hidden="true" className="w-4 h-4 text-muted group-hover:text-accent shrink-0" />
                           <span className="truncate max-w-[200px]">{m.clienteNome}</span>
                         </Link>
                       </td>
@@ -367,7 +367,7 @@ export default function MaquinasPage() {
                           className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
                             m.ativo
                               ? 'bg-ink/5 text-ink border border-line'
-                              : 'bg-danger/10 text-danger border border-danger/30'
+                              : 'bg-elevated text-muted border border-control'
                           }`}
                         >
                           {m.ativo ? 'Ativo' : 'Inativo'}
@@ -383,7 +383,7 @@ export default function MaquinasPage() {
                             className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-elevated hover:bg-hover text-ink text-xs font-semibold border border-control transition-colors cursor-pointer"
                             title="Ver detalhes e histórico do equipamento"
                           >
-                            <Eye aria-hidden="true" className="w-3.5 h-3.5 text-muted" />
+                            <Eye aria-hidden="true" className="w-4 h-4 text-muted" />
                             <span className="hidden sm:inline">Ver</span>
                           </Link>
 
@@ -394,7 +394,7 @@ export default function MaquinasPage() {
                               className="ui-btn ui-btn-primary inline-flex items-center gap-1 transition-all cursor-pointer"
                               title={`Abrir nova OS para ${m.marca} ${m.modelo}`}
                             >
-                              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Plus aria-hidden="true" className="w-4 h-4" />
                               <span>OS</span>
                             </Link>
                           ) : (
@@ -404,7 +404,7 @@ export default function MaquinasPage() {
                               className="ui-icon-btn inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-elevated/50 text-subtle text-xs font-semibold border border-line cursor-not-allowed opacity-50"
                               title="Equipamento inativo. Reative o equipamento para abrir nova Ordem de Serviço."
                             >
-                              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+                              <Plus aria-hidden="true" className="w-4 h-4" />
                               <span>OS</span>
                             </button>
                           )}
@@ -435,7 +435,7 @@ export default function MaquinasPage() {
                 className="ui-icon-btn px-3 py-1.5 rounded-lg bg-elevated border border-control disabled:opacity-40 text-ink flex items-center gap-1 cursor-pointer hover:bg-hover disabled:cursor-not-allowed transition-colors"
                 aria-label="Página anterior"
               >
-                <ChevronLeft aria-hidden="true" className="w-3.5 h-3.5" />
+                <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                 <span>Anterior</span>
               </button>
               <span className="px-2 font-medium text-ink">
@@ -448,7 +448,7 @@ export default function MaquinasPage() {
                 aria-label="Próxima página"
               >
                 <span>Próxima</span>
-                <ChevronRight aria-hidden="true" className="w-3.5 h-3.5" />
+                <ChevronRight aria-hidden="true" className="w-4 h-4" />
               </button>
             </div>
           </div>
