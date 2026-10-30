@@ -1,0 +1,26 @@
+# Cloud Build para o frontend Next.js no Google Cloud Run.
+# Uso (PowerShell):
+# gcloud builds submit ./frontend --config=./frontend/cloudbuild.yaml --substitutions="_BACKEND_URL=https://BACKEND.run.app,_IMAGE=REGION-docker.pkg.dev/PROJECT/REPO/oficina-frontend:TAG"
+#
+# _BACKEND_URL deve ser a URL HTTPS do serviço Cloud Run do backend.
+# A URL é incorporada pelo Next.js em rewrites() durante o build.
+# Nenhuma senha ou token deve ser informado como substituição de build.
+steps:
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: sh
+    args:
+      - -ec
+      - |
+        case "${_BACKEND_URL}" in
+          https://*) ;;
+          *) echo "ERRO: _BACKEND_URL precisa ser uma URL HTTPS." >&2; exit 1 ;;
+        esac
+        docker build \
+          --build-arg "INTERNAL_BACKEND_URL=${_BACKEND_URL}" \
+          --tag "${_IMAGE}" \
+          .
+images:
+  - "${_IMAGE}"
+timeout: 1200s
+options:
+  logging: CLOUD_LOGGING_ONLY
