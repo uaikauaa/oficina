@@ -8,7 +8,10 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV INTERNAL_BACKEND_URL=http://backend:8080
+# Next.js resolve rewrites() no build. O alvo /api precisa ser informado
+# durante o build em Cloud Run; o default preserva Docker Compose local.
+ARG INTERNAL_BACKEND_URL=http://backend:8080
+ENV INTERNAL_BACKEND_URL=${INTERNAL_BACKEND_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
