@@ -155,7 +155,7 @@ public class OrdemServicoController {
     public ResponseEntity<byte[]> gerarPdf(@PathVariable Long id) {
         byte[] pdfBytes = ordemServicoService.gerarPdf(id);
         OrdemServicoResponseDTO os = ordemServicoService.buscarPorId(id);
-        String filename = "OS-" + (os.numeroOs() != null ? os.numeroOs() : id) + ".pdf";
+        String filename = "OS-" + (os.numeroOs() != null ? os.numeroOs().replaceAll("[^A-Za-z0-9._-]", "_") : id) + ".pdf";
 
         return ResponseEntity.ok()
                 .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
@@ -174,7 +174,7 @@ public class OrdemServicoController {
     public ResponseEntity<byte[]> gerarDocumentoServico(@PathVariable Long id) {
         byte[] pdfBytes = ordemServicoService.gerarDocumentoServico(id);
         OrdemServicoResponseDTO os = ordemServicoService.buscarPorId(id);
-        String filename = "DS-" + (os.numeroOs() != null ? os.numeroOs() : id) + ".pdf";
+        String filename = "DS-" + (os.numeroOs() != null ? os.numeroOs().replaceAll("[^A-Za-z0-9._-]", "_") : id) + ".pdf";
 
         return ResponseEntity.ok()
                 .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
@@ -193,7 +193,7 @@ public class OrdemServicoController {
     public ResponseEntity<byte[]> gerarRecibo(@PathVariable Long id) {
         byte[] pdfBytes = ordemServicoService.gerarRecibo(id);
         OrdemServicoResponseDTO os = ordemServicoService.buscarPorId(id);
-        String filename = "RECIBO-OS-" + (os.numeroOs() != null ? os.numeroOs() : id) + ".pdf";
+        String filename = "RECIBO-OS-" + (os.numeroOs() != null ? os.numeroOs().replaceAll("[^A-Za-z0-9._-]", "_") : id) + ".pdf";
 
         return ResponseEntity.ok()
                 .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")

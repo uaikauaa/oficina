@@ -2,6 +2,8 @@
 
 > **Status: preparação para homologação.** Este documento **não** registra um deploy realizado. Não aponte o primeiro deploy para a branch `production` do Neon nem execute comandos com segredos no histórico do terminal.
 
+> **Auditoria 30/10/2026: NO-GO para produção.** Consulte o [relatório final](auditoria-final/README.md) e cumpra o [checklist](auditoria-final/checklist-implantacao.md). Os comandos abaixo são preparação, não autorização de deploy. Use contas de serviço distintas para frontend, backend e build; somente backend recebe credenciais de banco/SMTP.
+
 ## Arquitetura escolhida
 
 - GitHub: **um único repositório**, com `frontend/` e `backend/`. Não separar o monorepo.
@@ -10,7 +12,7 @@
 - Browser: `https://FRONTEND.run.app/api/*` → rewrite do Next.js → `https://BACKEND.run.app/api/*`. O navegador continua na **mesma origem** para cookies, CSRF e CSP.
 - TLS: HTTPS gerenciado pelo Cloud Run. Nginx e Docker Compose continuam disponíveis para o ambiente Oracle/VPS; não são necessários neste modelo.
 
-**Importante:** o Next.js avalia `rewrites()` durante o build. Por isso, `INTERNAL_BACKEND_URL` deve ser passado **no build da imagem frontend** (além de definido no runtime). O valor `http://backend:8080` continua sendo o default do Docker Compose, mas não resolve no Cloud Run.
+**Importante:** o Next.js avalia `rewrites()` durante o build. Por isso, `INTERNAL_BACKEND_URL` deve ser passado **no build da imagem frontend** (se também definido no runtime, deve coincidir com o manifesto compilado; divergências abortam a inicialização). O valor `http://backend:8080` continua sendo o default do Docker Compose, mas não resolve no Cloud Run.
 
 ## 1. Pré-requisitos (ações manuais)
 
@@ -67,7 +69,7 @@ No **Cloud Run → Criar serviço → Implantar uma imagem existente**, selecion
 
 Configurar as variáveis exigidas pelo `backend/src/main/resources/application*.properties`:
 
-- **Não secretas:** `SPRING_PROFILES_ACTIVE=prod`, `SERVER_PORT=8080`, `SECURITY_COOKIE_SECURE=true`, `CORS_ALLOWED_ORIGINS=https://FRONTEND.run.app` (atualizar após obter URL), `DB_URL` (JDBC com `sslmode=require` para **homologação**), `DB_USERNAME`, `MAIL_HOST`, `MAIL_PORT=587`, `MAIL_USERNAME`, `MAIL_FROM`, `MAIL_SMTP_AUTH=true`, `MAIL_SMTP_STARTTLS=true`, `HIKARI_MAX_POOL_SIZE=4`, `HIKARI_MIN_IDLE=0`, `SWAGGER_ENABLED=false`, `API_DOCS_ENABLED=false`.
+- **Não secretas:** `SPRING_PROFILES_ACTIVE=prod`, `SERVER_PORT=8080`, `SECURITY_COOKIE_SECURE=true`, `CORS_ALLOWED_ORIGINS=https://FRONTEND.run.app` (atualizar após obter URL), `DB_URL` (JDBC com `sslmode=verify-full com CA confiável` para **homologação**), `DB_USERNAME`, `MAIL_HOST`, `MAIL_PORT=587`, `MAIL_USERNAME`, `MAIL_FROM`, `MAIL_SMTP_AUTH=true`, `MAIL_SMTP_STARTTLS=true`, `HIKARI_MAX_POOL_SIZE=4`, `HIKARI_MIN_IDLE=0`, `SWAGGER_ENABLED=false`, `API_DOCS_ENABLED=false`.
 - **Secretas:** `DB_PASSWORD`, `JWT_SECRET`, `MAIL_PASSWORD`; adicionar `INITIAL_ADMIN_PASSWORD` como segredo **somente se** o bootstrap inicial for necessário. Evitar deixar senha inicial persistente após a criação da conta.
 - **Proxy/IP:** `TRUSTED_PROXIES` deve permanecer vazio até validar o comportamento real do encaminhamento de IPs no Cloud Run. Não confiar indiscriminadamente em `X-Forwarded-For`.
 

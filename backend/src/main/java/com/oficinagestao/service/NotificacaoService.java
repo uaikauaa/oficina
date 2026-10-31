@@ -193,7 +193,7 @@ public class NotificacaoService {
             }
             log.info("Sincronização de notificações concluída com sucesso.");
         } catch (Exception e) {
-            log.warn("Não foi possível sincronizar notificações iniciais na inicialização: {}", e.getMessage());
+            log.warn("Não foi possível sincronizar notificações iniciais na inicialização: {}", e.getClass().getSimpleName());
         }
     }
 }

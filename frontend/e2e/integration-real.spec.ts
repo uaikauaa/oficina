@@ -65,20 +65,34 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
 
   const me = await context.request.get('/api/auth/me');
   expect(me.status(), 'The browser must have a real authenticated cookie session').toBe(200);
+  const authCookies = (await context.cookies()).filter(cookie => ['access_token', 'refresh_token'].includes(cookie.name));
+  expect(authCookies).toHaveLength(2);
+  for (const cookie of authCookies) {
+    expect(cookie.httpOnly).toBe(true);
+    expect(cookie.sameSite).toBe(cookie.name === 'refresh_token' ? 'Strict' : 'Lax');
+  }
+  const missingCsrf = await context.request.post('/api/clientes', { data: {} });
+  expect(missingCsrf.status()).toBe(403);
+  const badCsrf = await context.request.post('/api/clientes', { headers: { 'X-XSRF-TOKEN': 'invalid' }, data: {} });
+  expect(badCsrf.status()).toBe(403);
+  const missing = await context.request.get('/api/ordens-servico/999999999');
+  expect(missing.status()).toBe(404);
 
+  const clientName = `Cliente CI ${Date.now()} <img src=x onerror=window.auditXss=1>`;
   const clientResponse = await context.request.post('/api/clientes', {
     headers: await csrfHeader(context),
-    data: { tipoPessoa: 'FISICA', nomeRazaoSocial: 'Cliente integração CI',
-      telefone: '14999990000', email: 'cliente.integration@oficina.invalid' },
+    data: { tipoPessoa: 'FISICA', nomeRazaoSocial: clientName,
+      id: 999999999, telefone: `149${Date.now().toString().slice(-8)}`, email: `cliente.${Date.now()}@oficina.invalid` },
   });
   expect(clientResponse.status(), await clientResponse.text()).toBe(201);
   const client = await clientResponse.json() as { id: number };
   expect(client.id).toBeGreaterThan(0);
+  expect(client.id).not.toBe(999999999);
 
   const machineResponse = await context.request.post('/api/maquinas', {
     headers: await csrfHeader(context),
     data: { clienteId: client.id, tipoEquipamento: 'MAQUINA_SOLDA',
-      marca: 'ESAB CI', modelo: 'LHN Teste', numeroSerie: 'CI-SYNTH-001' },
+      marca: 'ESAB CI', modelo: 'LHN Teste', numeroSerie: `CI-SYNTH-${Date.now()}` },
   });
   expect(machineResponse.status(), await machineResponse.text()).toBe(201);
   const machine = await machineResponse.json() as { id: number };
@@ -86,7 +100,7 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
 
   const productResponse = await context.request.post('/api/produtos', {
     headers: await csrfHeader(context),
-    data: { nome: 'Placa inversora CI', tipo: 'PECA',
+    data: { nome: `Placa inversora CI ${Date.now()}`, tipo: 'PECA',
       precoCusto: 20, precoVenda: 30, estoqueMinimo: 1, estoqueInicial: 3 },
   });
   expect(productResponse.status(), await productResponse.text()).toBe(201);
@@ -110,13 +124,32 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   const order = await orderResponse.json() as { id: number; numeroOs: string };
   expect(order.id).toBeGreaterThan(0);
   expect(order.numeroOs).toMatch(/^OS-/);
+  for (const format of ['pdf', 'documento-servico', 'recibo']) {
+    const pdf = await context.request.get(`/api/ordens-servico/${order.id}/${format}`);
+    expect(pdf.status()).toBe(200);
+    expect(pdf.headers()['content-type']).toContain('application/pdf');
+    expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
+    expect(pdf.headers()['cache-control']).toContain('no-store');
+  }
 
   const itemResponse = await context.request.post('/api/ordens-servico/' + order.id + '/itens', {
     headers: await csrfHeader(context),
-    data: { produtoId: product.id, quantidade: 2, valorDesconto: 0 },
+    data: { produtoId: product.id, quantidade: 2, valorDesconto: 0,
+      valorUnitario: 0.01, valorTotal: 0.02, ordemServicoId: 999999999 },
   });
   expect(itemResponse.status(), await itemResponse.text()).toBe(201);
-  const item = await itemResponse.json() as { id: number };
+  const item = await itemResponse.json() as { id: number; valorUnitario: number; ordemServicoId: number };
+  expect(Number(item.valorUnitario), 'Price comes from the server catalog').toBe(30);
+  expect(item.ordemServicoId).toBe(order.id);
+  const otherOrderResponse = await context.request.post('/api/ordens-servico', {
+    headers: await csrfHeader(context), data: { clienteId: client.id, maquinaId: machine.id, problemaRelatado: 'Teste vinculo item/OS' },
+  });
+  expect(otherOrderResponse.status()).toBe(201);
+  const otherOrder = await otherOrderResponse.json() as { id: number };
+  const wrongParent = await context.request.delete(`/api/ordens-servico/${otherOrder.id}/itens/${item.id}`, {
+    headers: await csrfHeader(context),
+  });
+  expect(wrongParent.status(), 'A nested item must belong to the specified order').toBe(404);
 
   let balance = await context.request.get('/api/produtos/' + product.id);
   expect(balance.status()).toBe(200);
@@ -140,6 +173,9 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(movementHistory.status()).toBe(200);
   const history = await movementHistory.json() as { content: Array<{ tipoMovimentacao: string }> };
   expect(history.content.some(x => x.tipoMovimentacao === 'DEVOLUCAO')).toBeTruthy();
+  await page.goto(`/clientes/${client.id}`);
+  await expect(page.getByText(clientName, { exact: true }).first()).toBeVisible();
+  expect(await page.evaluate(() => Object.hasOwn(window, 'auditXss')), 'Stored text must not execute HTML').toBe(false);
 
   // Logout pelo botão REAL do navegador: confirma que a camada apiFetch não
   // usa token CSRF obsoleto nem exige uma segunda tentativa manual.

@@ -63,9 +63,9 @@ public class EmailServiceImpl implements EmailService {
                     "Oficina Gestão"
             );
             mailSender.send(message);
-            log.info("E-mail com código de verificação 2FA enviado com sucesso para [{}]", to);
+            log.info("E-mail de verificacao 2FA enviado.");
         } catch (Exception e) {
-            log.error("Falha ao enviar e-mail de verificação 2FA para [{}]: {}", to, e.getMessage());
+            log.error("Falha no transporte SMTP de 2FA; tipo={}", e.getClass().getSimpleName());
             throw new RuntimeException("Falha no envio do e-mail de autenticação.", e);
         }
     }

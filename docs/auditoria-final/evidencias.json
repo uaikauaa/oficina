@@ -1,0 +1,233 @@
+{
+  "scope": "Local isolado; sem GCP/Neon/produção",
+  "date": "2026-10-30",
+  "main": "8130fb7914c0030c0d374dd0e1d87f28b83ddac2",
+  "pr10Head": "a788f6372dfa1b8e0dceeaaa3212e5e5f0ab82de",
+  "tests": {
+    "backend": {
+      "passed": 800,
+      "failed": 0,
+      "skipped": 0
+    },
+    "frontendUnit": {
+      "passed": 362
+    },
+    "ui": {
+      "passed": 63,
+      "skipped": 1
+    },
+    "realIntegration": {
+      "passed": 1
+    },
+    "apiMethodRoutePairs": 83
+  },
+  "scans": [
+    {
+      "file": "audit-image-backend-final-scan.log",
+      "artifact": "oficina-audit-backend:20261030",
+      "artifactId": "sha256:a0a0c6fda4d66016f02e56ae912e4c04c5eae9d062cb5adc75071e8a315458e5",
+      "findings": 13
+    },
+    {
+      "file": "audit-image-frontend-final-scan.log",
+      "artifact": "oficina-audit-frontend:20261030",
+      "artifactId": "sha256:58431461ecbc99a0217ac084286f3f7ee48311eb31c3b7049c9f90c5615b0b15",
+      "findings": 0
+    }
+  ],
+  "localLogHashes": [
+    {
+      "path": "audit-auth-after.log",
+      "sha256": "39ef3ba7d18822580db773bac15d9169b1e55f8b43c6100dbf4e05479386800b"
+    },
+    {
+      "path": "audit-auth-before.log",
+      "sha256": "2ec2f5da101ffa767a055976069b22ecf5e4f15264c62cbca4a948a3c1b9a9eb"
+    },
+    {
+      "path": "audit-auth-final.log",
+      "sha256": "c132f06c89419029f8d7f3d1eb2e6ed2e52b7134f31889e547bec44b3b5cd024"
+    },
+    {
+      "path": "audit-auth-updated.log",
+      "sha256": "430109b114cab831d3c012821f0610355b25954793940397da9f5976a992683c"
+    },
+    {
+      "path": "audit-backend-after.log",
+      "sha256": "c34384bfcf71b7376cfd4bfcb5cc0a26820c883c8f12cd93b6fa2c11e46001d8"
+    },
+    {
+      "path": "audit-backend-baseline.log",
+      "sha256": "169f45e5b250e37fad996abf5ce3b03a035f6807eeccca3b54e51eeabf39ef6e"
+    },
+    {
+      "path": "audit-backend-final.log",
+      "sha256": "eb9a8bea52582619589a7d024108b02da13a7de37602eed900bcf9800a733e44"
+    },
+    {
+      "path": "audit-backup-restore.log",
+      "sha256": "67d76baa3e4772f020dbd3992a7b261bb180b62c6b68635eb10bc4fd0a0b3d74"
+    },
+    {
+      "path": "audit-backup-source.log",
+      "sha256": "67d76baa3e4772f020dbd3992a7b261bb180b62c6b68635eb10bc4fd0a0b3d74"
+    },
+    {
+      "path": "audit-db-restart.log",
+      "sha256": "8dc697add3bb22df87aec9581174cb78e276c9c8239221a84386cda20fc8ca18"
+    },
+    {
+      "path": "audit-dependencies.log",
+      "sha256": "bb9b818d3cb65f4348977e11607d2f7c6340c5a3d92f99c80f944964245cb56e"
+    },
+    {
+      "path": "audit-docker-backend.log",
+      "sha256": "b372e29682bf6a3fb150aeb9f0aecb0b55cce9d5cd9bf48c33d9eb69b45ba9e3"
+    },
+    {
+      "path": "audit-docker-frontend.log",
+      "sha256": "b0abd37d3bb957e2e33211c107329e79086c065577d2d480a32a57178f24cdd0"
+    },
+    {
+      "path": "audit-dockerfile-scan-stderr.log",
+      "sha256": "4619cc983102edbe87545f1619a6c62ce829735b5ec0b03b42c7e8c1d7adb13f"
+    },
+    {
+      "path": "audit-dockerfile-scan.log",
+      "sha256": "58eaca9ec79ddbadc328d43378e30285c1b8beda42106f475491867f7b4675c4"
+    },
+    {
+      "path": "audit-frontend-build.log",
+      "sha256": "594adce898934274cc0035388f41e8cc48bf96fe05c0cd3cccf19411aff6d0ab"
+    },
+    {
+      "path": "audit-frontend-lint.log",
+      "sha256": "1fab52d0ac089f94c4f67e4832298abdbb06382ba5033aefa09d34d1a6711727"
+    },
+    {
+      "path": "audit-frontend-unit.log",
+      "sha256": "bd77d6eebfad7a19807773ca5ce3fe5e6c9bc08a3ddf6ea061685ecde28c42f7"
+    },
+    {
+      "path": "audit-gitleaks-files.log",
+      "sha256": "77a1a4181bf145e7bdd06a0c0ad430fee674dbc84d380d2f1acc6a3a48a1dcf6"
+    },
+    {
+      "path": "audit-gitleaks-history-results.log",
+      "sha256": "33a900b30d71692da97133369ee988087e839c622a094868f42ead57acc43862"
+    },
+    {
+      "path": "audit-gitleaks-history.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit-gitleaks-pull.log",
+      "sha256": "e3aa6a42d71ef51efd0eac26a457605d1b470a981ea818155a237939deb59758"
+    },
+    {
+      "path": "audit-gitleaks-source-results.log",
+      "sha256": "18bd40a390c6d02f74a2822c60158764995f1352eb70589298bb1614ca34cb38"
+    },
+    {
+      "path": "audit-gitleaks-source.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "audit-history-clone.log",
+      "sha256": "834a75ae979b7940a4371f878c7b6381933575d35c71edf9fd134da1d584ba6d"
+    },
+    {
+      "path": "audit-image-backend-final-scan-stderr.log",
+      "sha256": "9bc5b833bdd04536e60c10a2cbbb84a0009c9feea5462ef773ef77fc6787489d"
+    },
+    {
+      "path": "audit-image-backend-final-scan.log",
+      "sha256": "fb5dcd171853d31322aba16423f5f06475be496d95067b0ffaa65df82aaf2a42"
+    },
+    {
+      "path": "audit-image-backend-scan-stderr.log",
+      "sha256": "8d5adaa0ff848451eaaaa133fa40d08d4bf030946c958df0588e64361b0b8df4"
+    },
+    {
+      "path": "audit-image-backend-scan.log",
+      "sha256": "aa96231ec7060b50d790c743725e1ef13425a37f1c00a565307967ae34368bf9"
+    },
+    {
+      "path": "audit-image-frontend-final-scan-stderr.log",
+      "sha256": "b7acb930fd097cba3473261d3cb4344726b265cdda42e25ff4a2096c1b5ac972"
+    },
+    {
+      "path": "audit-image-frontend-final-scan.log",
+      "sha256": "72c7d7538f9da9b07c4d976da60417ec80ac3d8adbe2b382f7cf1f3dc5f9b7a0"
+    },
+    {
+      "path": "audit-image-frontend-scan-stderr.log",
+      "sha256": "72f1d0a740c1d78325e85f459ee734f60a7bb3119bdc4b426370f78d29023128"
+    },
+    {
+      "path": "audit-image-frontend-scan.log",
+      "sha256": "4f6ac769f1f8f6498b2e8b610e05348c56c5db661ad1c1a2d60d655003f20b39"
+    },
+    {
+      "path": "audit-mailpit-pull.log",
+      "sha256": "24c940a3a2babed7048ff6ad63ab6cae8df1786aac74add6e4a05e38815b2e63"
+    },
+    {
+      "path": "audit-maven-after-scan-stderr.log",
+      "sha256": "31e715eb113872903db8de5f609c5b07e123a5ce4b8596b5eb883ee508e9d466"
+    },
+    {
+      "path": "audit-maven-after-scan.log",
+      "sha256": "269245ba4ee6ffd72230b6d54cfee8bf354cf52ea71494c5e5742dddef7e884f"
+    },
+    {
+      "path": "audit-maven-scan-stderr.log",
+      "sha256": "7d9cc9f3a7fd5f41bf90dd57a9cf7499a0375f8f1a5167c3821352bc4157d3a5"
+    },
+    {
+      "path": "audit-maven-scan.log",
+      "sha256": "b22b9c3582e7a3b476e8b1ad3ae426e933f077811449d14c65e3baab9fdbb34e"
+    },
+    {
+      "path": "audit-npm-after.log",
+      "sha256": "7ba6c2e023442d4c3d13f61f4711a60198da02db751f2f3c4a0ce50abd339930"
+    },
+    {
+      "path": "audit-npm-baseline.log",
+      "sha256": "12645041ba75345c155781d5caaa767c56c58462f6d4615c88fd78ebff1e01db"
+    },
+    {
+      "path": "audit-playwright.log",
+      "sha256": "8a2bc65939dc9781bd1fcacc9a4ed22287cdccf2254120228cc790507a0dcbf1"
+    },
+    {
+      "path": "audit-proxy-mismatch.log",
+      "sha256": "797a7e2916232c96d97aa89565707f7a556834be39ffac045fe8e65da56271ef"
+    },
+    {
+      "path": "audit-proxy-transport.log",
+      "sha256": "ae0f067fa406b735e58ce029305bb24edd75eb197cf9fc20c7f79a532cf2063f"
+    },
+    {
+      "path": "audit-r3-backend-initial.log",
+      "sha256": "2996930af1722678ac285f6701cd4b428d0d5226a7ce32f166d82cd204d1ff4b"
+    },
+    {
+      "path": "audit-real-final-image.log",
+      "sha256": "24a8a446b77b3888977db7f08617ce216b9f3651c9974232e8c360a455d1c3fc"
+    },
+    {
+      "path": "audit-real-integration.log",
+      "sha256": "b9fb9dda3b2ab913cc4c0b8486218faadf4177dcd4df05246f44d38cd0cf841e"
+    },
+    {
+      "path": "audit-sigterm-backend.log",
+      "sha256": "b41654c6908e2de8c64cbdef77901b156711ffa31435087e94ee67b72bc07471"
+    },
+    {
+      "path": "audit-sigterm-frontend.log",
+      "sha256": "e82a70e121cc18b2ce3cbff75b137443eae28a80ec55d41ce6927240d824a31c"
+    }
+  ],
+  "note": "Logs locais ignorados pelo Git; hashes permitem identificar evidência sem publicar payloads, sessões ou traces. Logs intermediários incluem falhas, não são todos resultados finais."
+}

@@ -15,6 +15,7 @@ import com.oficinagestao.repository.RefreshTokenRepository;
 import com.oficinagestao.repository.TwoFactorChallengeRepository;
 import com.oficinagestao.repository.UsuarioRepository;
 import com.oficinagestao.exception.BusinessException;
+import com.oficinagestao.exception.RateLimitException;
 import com.oficinagestao.security.JwtService;
 import com.oficinagestao.security.LoginAttemptService;
 import com.oficinagestao.security.PasswordPolicyValidator;
@@ -145,7 +146,7 @@ public class AuthService {
             throw new BadCredentialsException("Muitas tentativas incorretas. Conta bloqueada temporariamente. Tente novamente mais tarde.");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        Usuario usuario = usuarioRepository.findByEmailForUpdate(email).orElse(null);
 
         // Prevenção contra enumeração de usuários: tempo e mensagem uniformes (VULN-03)
         if (usuario == null) {
@@ -165,6 +166,8 @@ public class AuthService {
             loginAttemptService.loginFailed(ip, email);
             throw new BadCredentialsException("Credenciais inválidas.");
         }
+
+        validarLimiteEmail(usuario.getId());
 
         // Autenticação prévia bem-sucedida: reseta tentativas de login para IP e email
         loginAttemptService.loginSucceeded(ip, email);
@@ -194,7 +197,7 @@ public class AuthService {
             emailService.sendTwoFactorCode(usuario.getEmail(), code);
         } catch (Exception e) {
             auditoriaService.registrarComRequest(usuario.getId(), "TwoFactorChallenge", resolveChallengeId(challenge), "2FA_EMAIL_FAILED", httpRequest);
-            log.error("Falha ao enviar e-mail 2FA para o usuário ID [{}]: {}", usuario.getId(), e.getMessage());
+            log.error("Falha no transporte 2FA para usuario ID [{}]; tipo={}", usuario.getId(), e.getClass().getSimpleName());
             throw new BusinessException("Falha ao enviar e-mail com código de verificação. Tente novamente.");
         }
 
@@ -205,10 +208,15 @@ public class AuthService {
 
     @Transactional(noRollbackFor = { BadCredentialsException.class })
     public LoginResult verificarTwoFactor(TwoFactorVerifyRequest request, HttpServletRequest httpRequest) {
+        Usuario usuario = bloquearUsuarioDoDesafio(request.challengeToken());
         TwoFactorChallenge challenge = twoFactorChallengeRepository.findByChallengeToken(request.challengeToken())
                 .orElseThrow(() -> new BadCredentialsException("Desafio inválido ou expirado."));
 
-        Usuario usuario = challenge.getUsuario();
+        if (!Boolean.TRUE.equals(usuario.getAtivo())) {
+            challenge.revoke();
+            twoFactorChallengeRepository.save(challenge);
+            throw new BadCredentialsException("Desafio inválido ou expirado.");
+        }
 
         if (Boolean.TRUE.equals(challenge.getRevogado()) || Boolean.TRUE.equals(challenge.getUtilizado())) {
             throw new BadCredentialsException("Desafio inválido ou expirado.");
@@ -290,6 +298,7 @@ public class AuthService {
 
     @Transactional
     public LoginChallengeResponse reenviarTwoFactor(TwoFactorResendRequest request, HttpServletRequest httpRequest) {
+        Usuario usuario = bloquearUsuarioDoDesafio(request.challengeToken());
         TwoFactorChallenge oldChallenge = twoFactorChallengeRepository.findByChallengeToken(request.challengeToken())
                 .orElseThrow(() -> new BadCredentialsException("Desafio inválido ou expirado."));
 
@@ -302,10 +311,11 @@ public class AuthService {
             throw new BusinessException("Aguarde alguns instantes antes de solicitar um novo código.");
         }
 
-        Usuario usuario = oldChallenge.getUsuario();
         if (!Boolean.TRUE.equals(usuario.getAtivo())) {
             throw new DisabledException("Conta de usuário inativa.");
         }
+
+        validarLimiteEmail(usuario.getId());
 
         // Invalida o desafio anterior
         oldChallenge.revoke();
@@ -332,7 +342,7 @@ public class AuthService {
             emailService.sendTwoFactorCode(usuario.getEmail(), newCode);
         } catch (Exception e) {
             auditoriaService.registrarComRequest(usuario.getId(), "TwoFactorChallenge", resolveChallengeId(newChallenge), "2FA_EMAIL_FAILED", httpRequest);
-            log.error("Falha ao reenviar e-mail 2FA para o usuário ID [{}]: {}", usuario.getId(), e.getMessage());
+            log.error("Falha no transporte 2FA para usuario ID [{}]; tipo={}", usuario.getId(), e.getClass().getSimpleName());
             throw new BusinessException("Falha ao reenviar e-mail com código de verificação. Tente novamente.");
         }
 
@@ -350,6 +360,9 @@ public class AuthService {
         }
 
         String tokenHash = tokenHashUtil.hash(refreshTokenValue);
+        Usuario usuario = refreshTokenRepository.findUsuarioIdByTokenHash(tokenHash)
+                .flatMap(usuarioRepository::findByIdForUpdate)
+                .orElseThrow(() -> new BadCredentialsException("Refresh token não encontrado."));
         RefreshToken oldToken = refreshTokenRepository.findByTokenHash(tokenHash)
                 .orElseThrow(() -> new BadCredentialsException("Refresh token não encontrado."));
 
@@ -357,6 +370,8 @@ public class AuthService {
             if (oldToken.getUsuario() != null) {
                 refreshTokenRepository.revokeAllByUsuarioId(oldToken.getUsuario().getId());
             }
+            usuario.incrementTokenVersion();
+            usuarioRepository.save(usuario);
             throw new RevokedRefreshReuseException();
         }
 
@@ -364,7 +379,6 @@ public class AuthService {
             throw new BadCredentialsException("Refresh token expirado.");
         }
 
-        Usuario usuario = oldToken.getUsuario();
         if (!Boolean.TRUE.equals(usuario.getAtivo())) {
             throw new DisabledException("Conta de usuário inativa.");
         }
@@ -438,13 +452,20 @@ public class AuthService {
 
         // 1. Se informou email (via Authentication), localiza o usuário
         if (email != null && !email.isBlank()) {
-            usuarioParaLogout = usuarioRepository.findByEmail(email).orElse(null);
+            usuarioParaLogout = usuarioRepository.findByEmailForUpdate(email).orElse(null);
         }
 
         // 2. Revogar refresh token caso informado
         if (refreshTokenValue != null && !refreshTokenValue.isBlank()) {
             String tokenHash = tokenHashUtil.hash(refreshTokenValue);
-            Optional<RefreshToken> tokenOpt = refreshTokenRepository.findByTokenHash(tokenHash);
+            Optional<Long> tokenUserId = refreshTokenRepository.findUsuarioIdByTokenHash(tokenHash);
+            if (usuarioParaLogout == null) {
+                usuarioParaLogout = tokenUserId.flatMap(usuarioRepository::findByIdForUpdate).orElse(null);
+            }
+            // Never lock another account's token while holding this account's lock.
+            Optional<RefreshToken> tokenOpt = usuarioParaLogout != null
+                    && tokenUserId.filter(usuarioParaLogout.getId()::equals).isPresent()
+                    ? refreshTokenRepository.findByTokenHash(tokenHash) : Optional.empty();
             if (tokenOpt.isPresent()) {
                 RefreshToken token = tokenOpt.get();
                 token.revoke();
@@ -457,6 +478,10 @@ public class AuthService {
 
         // 3. SEC-07: Invalida os access tokens da usuária incrementando sua tokenVersion
         if (usuarioParaLogout != null) {
+            // Logout already invalidates all access tokens through tokenVersion.
+            // Revoke all refresh tokens too, including concurrent rotated descendants.
+            refreshTokenRepository.revokeAllByUsuarioId(usuarioParaLogout.getId());
+            twoFactorChallengeRepository.revokeAllActiveByUsuarioId(usuarioParaLogout.getId());
             usuarioParaLogout.incrementTokenVersion();
             usuarioRepository.save(usuarioParaLogout);
             auditoriaService.registrarComRequest(usuarioParaLogout.getId(), "Usuario", usuarioParaLogout.getId().toString(), "LOGOUT", httpRequest);
@@ -469,7 +494,7 @@ public class AuthService {
             throw new BadCredentialsException("Usuário não autenticado.");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmailForUpdate(email)
                 .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado."));
 
         if (!Boolean.TRUE.equals(usuario.getAtivo())) {
@@ -501,6 +526,7 @@ public class AuthService {
 
         // 6. Invalidar/revogar todos os refresh tokens existentes do usuário
         refreshTokenRepository.revokeAllByUsuarioId(usuario.getId());
+        twoFactorChallengeRepository.revokeAllActiveByUsuarioId(usuario.getId());
 
         // 7. Log de auditoria da alteração de credencial
         auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "PASSWORD_CHANGE", httpRequest);
@@ -518,6 +544,22 @@ public class AuthService {
 
     private String extrairIp(HttpServletRequest request) {
         return ipAddressResolver.extrairIp(request);
+    }
+
+    private Usuario bloquearUsuarioDoDesafio(String token) {
+        return twoFactorChallengeRepository.findUsuarioIdByChallengeToken(token)
+                .flatMap(usuarioRepository::findByIdForUpdate)
+                .orElseThrow(() -> new BadCredentialsException("Desafio inválido ou expirado."));
+    }
+
+    private void validarLimiteEmail(Long usuarioId) {
+        // Persistent and serialized by the account row lock, including across instances.
+        // Counts all attempts, even challenges later used or revoked.
+        OffsetDateTime now = OffsetDateTime.now();
+        if (twoFactorChallengeRepository.existsByUsuarioIdAndDataCriacaoAfter(usuarioId, now.minusSeconds(30))
+                || twoFactorChallengeRepository.countByUsuarioIdAndDataCriacaoAfter(usuarioId, now.minusHours(1)) >= 10) {
+            throw new RateLimitException();
+        }
     }
 
     private String resolveChallengeId(TwoFactorChallenge challenge) {
