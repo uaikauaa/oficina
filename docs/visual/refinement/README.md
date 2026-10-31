@@ -26,13 +26,13 @@ O texto “Sistema interno • Oficina Gestão” foi removido de ambas as vers�
 | Playwright, build de produção na porta 3001 | 104 cenários passaram |
 | Playwright, regressão de logout na porta 3000 | 10 cenários passaram |
 | `git diff --check` | Passou |
-| Checagem adicional `npx tsc -p e2e/tsconfig.json --noEmit` | Sete erros preexistentes em `forms-b02-b07.spec.ts`, descritos abaixo |
+| Checagem adicional `npx tsc -p e2e/tsconfig.json --noEmit` | Aprovada na revisão do PR #9; adicionada como etapa obrigatória do CI |
 
 Os 104 cenários incluem 28 novos testes de refinamento e as suítes existentes de responsividade, interações, formulários, produto, impressão, PWA e recuperação de sessão. Foram verificadas 360, 390, 768, 1024, 1366 e 1920px, além da matriz anterior de 320 a 2560px. Não foi observado overflow horizontal global; tabelas continuam com rolagem interna. Modais, notificações e seus controles foram verificados dentro do viewport. O modal de login também foi exercitado em 360×520px, com Tab, Shift+Tab, Escape e retorno de foco.
 
 As respostas dos cenários operacionais e de autenticação são sintéticas, interceptadas no navegador: não houve criação ou alteração de registros reais para validar a interface. O servidor de desenvolvimento permaneceu disponível na porta 3000 durante a validação do build em 3001.
 
-A checagem TypeScript adicional dos arquivos E2E aponta `TS2339` em `frontend/e2e/forms-b02-b07.spec.ts`, linhas 314, 315, 335, 336, 363, 364 e 365, por acesso a propriedades de variáveis inferidas como `never`. Esse arquivo está idêntico ao HEAD de entrada e os seus cenários Playwright passaram; ele não foi modificado nesta tarefa. O build da aplicação não apresenta esses erros. Os avisos já existentes sobre `middleware` e uso de `next start` com saída `standalone` também permanecem fora desta alteração visual.
+Na revisão do PR #9, os sete diagnósticos `TS2339` dos testes E2E em `frontend/e2e/forms-b02-b07.spec.ts` foram corrigidos substituindo os acessos de propriedades de uma variável capturada assincronamente por asserções de objeto com Playwright, sem alterar os cenários nem o comportamento de produção. A validação `npx tsc -p e2e/tsconfig.json --noEmit` passou no GitHub Actions, onde agora é obrigatória antes dos testes de navegador. Os avisos preexistentes sobre `middleware` e uso de `next start` com saída `standalone` permanecem fora da alteração visual.
 
 ## Antes e depois
 
