@@ -311,8 +311,8 @@ test('B05: formulário envia intenção explícita ao apagar endereço existente
   await dialog.locator('input[name="endereco.logradouro"]').fill('');
   await dialog.getByRole('button', { name: 'Salvar Alterações' }).click();
   await expect(dialog).toBeHidden();
-  expect(payload?.removerEndereco).toBe(true);
-  expect(payload?.endereco).toBeUndefined();
+  expect(payload).toEqual(expect.objectContaining({ removerEndereco: true }));
+  expect(payload).not.toHaveProperty('endereco');
 });
 
 test('B06: configurações envia strings vazias para limpar nome empresarial e CNPJ', async ({ page }) => {
@@ -332,8 +332,7 @@ test('B06: configurações envia strings vazias para limpar nome empresarial e C
   await page.getByPlaceholder('Ex: 45.076.507/0001-67').fill('');
   await page.getByRole('button', { name: 'Salvar Configuração' }).click();
   await expect(page.getByText('Configuração salva com sucesso!')).toBeVisible();
-  expect(payload?.nomeEmpresarial).toBe('');
-  expect(payload?.cnpj).toBe('');
+  expect(payload).toEqual(expect.objectContaining({ nomeEmpresarial: '', cnpj: '' }));
 });
 
 test('B04: laudo envia limpeza explícita dos três campos técnicos', async ({ page }) => {
@@ -360,7 +359,5 @@ test('B04: laudo envia limpeza explícita dos três campos técnicos', async ({ 
   await page.getByPlaceholder('Registre os testes executados na bancada (corrente, arco, voltagem, estabilização sob carga, etc)...').fill('');
   await page.getByRole('button', { name: 'Salvar Laudo' }).click();
   await expect(page.getByText('Laudo técnico e valores atualizados com sucesso!')).toBeVisible();
-  expect(payload?.diagnostico).toBe('');
-  expect(payload?.solucaoAplicada).toBe('');
-  expect(payload?.testesRealizados).toBe('');
+  expect(payload).toEqual(expect.objectContaining({ diagnostico: '', solucaoAplicada: '', testesRealizados: '' }));
 });
