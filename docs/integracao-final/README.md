@@ -1,6 +1,6 @@
 # Integração dos PRs #9, #10 e #11 — Oficina Gestão
 
-**Estado em 31/10/2026:** integração de código preparada em `integrate/cloud-run-security-20261031`; **merge na `main` BLOQUEADO** até concluir a classificação dos diagnósticos do VS Code e revisar formalmente os 13 alertas Java residuais. **Cloud Run para homologação BLOQUEADO** até checar a configuração real de IAM, Neon, TLS/SMTP, limites de abuso e custos. **Produção NO-GO.** Nenhum deploy foi realizado.
+**Estado em 31/10/2026:** integração de código preparada no [PR #12](https://github.com/uaikauaa/oficina/pull/12), branch `integrate/cloud-run-security-20261031`; **merge na `main` BLOQUEADO** até concluir a classificação dos diagnósticos do VS Code e revisar formalmente os 13 alertas Java residuais. **Cloud Run para homologação BLOQUEADO** até checar a configuração real de IAM, Neon, TLS/SMTP, limites de abuso e custos. **Produção NO-GO.** Nenhum deploy foi realizado.
 
 ## A. Git e branches
 
@@ -54,13 +54,13 @@ Backend exposto diretamente exige Spring Security, mas não elimina abuso distri
 | npm runtime / Trivy frontend | 2 varreduras | 2 sem alertas | 0 | 0 | Aprovado |
 | Trivy backend | 13 achados | 13 triados | 0 | 0 | Pendente de aceite/upgrade |
 | Gitleaks fonte | 5 sinais | 5 fixtures triadas | 0 credencial real confirmada | 0 | Triado |
-| Workflows no SHA final da integração | 4 | A conferir no PR de integração | — | — | Pendente no momento deste relatório |
+| Workflows no PR de integração | 4 | 4 | 0 | 0 essenciais | Aprovados: [CI](https://github.com/uaikauaa/oficina/actions/runs/41238127292), [integração real](https://github.com/uaikauaa/oficina/actions/runs/41238127305), [Flyway/E2E](https://github.com/uaikauaa/oficina/actions/runs/41238127375), [Oracle](https://github.com/uaikauaa/oficina/actions/runs/41238127365); passos condicionais de falha foram pulados |
 
 Evidências locais: `audit-final-backend.log`, `audit-final-unit.log`, `audit-final-lint.log`, `audit-final-tsc.log`, `audit-final-e2e-tsc.log`, `audit-final-frontend-build.log`, `audit-final-playwright.log`, `audit-final-real-integration.log`, dois logs de Docker e JSONs dos scanners. Logs, dumps, traces e dados sintéticos não foram adicionados ao Git. O Docker e os testes locais não equivalem a homologação na nuvem.
 
 ## H. Vereditos
 
-- **INTEGRAÇÃO NA MAIN: BLOQUEADA.** Código consolidado e testado localmente, mas faltam classificação individual dos diagnósticos do VS Code, decisão técnica dos CVEs residuais e quatro checks no SHA exato da branch de integração. O PR de integração deve permanecer aberto.
+- **INTEGRAÇÃO NA MAIN: BLOQUEADA.** Código consolidado e testado localmente e no GitHub, mas faltam classificação individual dos diagnósticos do VS Code e decisão técnica dos CVEs residuais. O PR de integração deve permanecer aberto.
 - **PRONTIDÃO PARA HOMOLOGAÇÃO CLOUD RUN: BLOQUEADA.** Falta verificar IAM/proxy, Neon TLS/certificado e suspensão, SMTP real, proteção distribuída e custos/cotas no projeto autorizado.
 - **PRODUÇÃO: NO-GO.** O relatório anterior mantém esses controles como pendências; nenhum resultado local autoriza tráfego de produção.
 
