@@ -33,7 +33,7 @@ public class RefreshTokenCleanupScheduler {
             int totalRemovidos = authService.purgarTokensExpiradosOuRevogados();
             log.info("Rotina agendada de purga finalizada com sucesso. {} token(s) removido(s).", totalRemovidos);
         } catch (Exception e) {
-            log.error("Erro durante a execução da purga agendada de refresh tokens: {}", e.getMessage(), e);
+            log.error("Erro durante a execução da purga agendada de refresh tokens: {}", e.getClass().getSimpleName());
         }
     }
 }
