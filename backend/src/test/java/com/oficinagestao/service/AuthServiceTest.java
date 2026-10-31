@@ -62,6 +62,21 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Mirror repository identity projections; transaction/locking behavior is exercised
+        // separately by AuthLifecycleAuditIntegrationTest against real PostgreSQL.
+        java.util.Map<Long, Usuario> lockedUsers = new java.util.HashMap<>();
+        lenient().when(twoFactorChallengeRepository.findUsuarioIdByChallengeToken(anyString())).thenAnswer(inv -> {
+            var challenge = twoFactorChallengeRepository.findByChallengeToken(inv.getArgument(0));
+            challenge.ifPresent(c -> lockedUsers.put(c.getUsuario().getId() != null ? c.getUsuario().getId() : 1L, c.getUsuario()));
+            return challenge.map(c -> c.getUsuario().getId() != null ? c.getUsuario().getId() : 1L);
+        });
+        lenient().when(refreshTokenRepository.findUsuarioIdByTokenHash(anyString())).thenAnswer(inv -> {
+            var token = refreshTokenRepository.findByTokenHash(inv.getArgument(0));
+            token.ifPresent(t -> lockedUsers.put(t.getUsuario().getId() != null ? t.getUsuario().getId() : 1L, t.getUsuario()));
+            return token.map(t -> t.getUsuario().getId() != null ? t.getUsuario().getId() : 1L);
+        });
+        lenient().when(usuarioRepository.findByIdForUpdate(anyLong())).thenAnswer(inv ->
+                Optional.ofNullable(lockedUsers.get(inv.getArgument(0))));
         loginAttemptService = new LoginAttemptService(5, 15);
         authService = new AuthService(
                 usuarioRepository,
@@ -84,7 +99,7 @@ class AuthServiceTest {
         usuario.setId(1L);
         usuario.addRole(new Role("ROLE_ADMIN", "Admin"));
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaCorreta123", "hash_senha")).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("hashed_2fa_code");
 
@@ -205,7 +220,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_senha", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaCorreta123", "hash_senha")).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("hashed_2fa_code");
 
@@ -576,7 +591,7 @@ class AuthServiceTest {
     void shouldThrowBadCredentialsWhenPasswordIsInvalid() {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_senha", true);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaErrada", "hash_senha")).thenReturn(false);
 
         LoginRequest request = new LoginRequest("admin@oficina.com", "SenhaErrada");
@@ -589,7 +604,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("Deve lançar BadCredentialsException quando o usuário não existir")
     void shouldThrowBadCredentialsWhenUserDoesNotExist() {
-        when(usuarioRepository.findByEmail("inexistente@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("inexistente@oficina.com")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("inexistente@oficina.com", "QualquerSenha");
 
@@ -602,7 +617,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("VULN-03 Teste 1: Login com e-mail inexistente deve rejeitar com mensagem genérica, sem 2FA e sem cookies")
     void shouldRejectLoginWhenEmailDoesNotExistWithoutLeakingInfo() {
-        when(usuarioRepository.findByEmail("naoexiste@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("naoexiste@oficina.com")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("naoexiste@oficina.com", "QualquerSenha123");
 
@@ -620,7 +635,7 @@ class AuthServiceTest {
     void shouldRejectLoginWhenEmailExistsAndWrongPassword() {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_real", true);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaIncorreta", "hash_real")).thenReturn(false);
 
         LoginRequest request = new LoginRequest("admin@oficina.com", "SenhaIncorreta");
@@ -639,7 +654,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_real", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaCorreta123", "hash_real")).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("hash_2fa");
 
@@ -658,7 +673,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("VULN-03 Teste 4: Dummy BCrypt deve ser executado com hash válido quando usuário não existe")
     void shouldExecuteDummyBCryptWhenUserDoesNotExist() {
-        when(usuarioRepository.findByEmail("inexistente_timing@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("inexistente_timing@oficina.com")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("inexistente_timing@oficina.com", "TentativaDeAtaque123");
 
@@ -678,13 +693,13 @@ class AuthServiceTest {
     @DisplayName("VULN-03 Teste 5: Respostas para usuário inexistente e senha incorreta devem ser indistinguíveis")
     void shouldEnsureIdenticalResponseBetweenNonExistentUserAndWrongPassword() {
         // Cenário A: Usuário inexistente
-        when(usuarioRepository.findByEmail("inexistente_teste5@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("inexistente_teste5@oficina.com")).thenReturn(Optional.empty());
         LoginRequest requestA = new LoginRequest("inexistente_teste5@oficina.com", "SenhaQualquer");
         BadCredentialsException exA = assertThrows(BadCredentialsException.class, () -> authService.login(requestA, httpRequest));
 
         // Cenário B: Usuário existente + senha incorreta
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_real", true);
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaIncorreta", "hash_real")).thenReturn(false);
         LoginRequest requestB = new LoginRequest("admin@oficina.com", "SenhaIncorreta");
         BadCredentialsException exB = assertThrows(BadCredentialsException.class, () -> authService.login(requestB, httpRequest));
@@ -699,7 +714,7 @@ class AuthServiceTest {
     @DisplayName("VULN-03 Teste 7: Rate limiting deve funcionar igualmente para e-mail existente com senha incorreta")
     void shouldEnforceRateLimitingForExistentEmailWithWrongPassword() {
         Usuario usuario = new Usuario("Proprietária", "admin_lockout@oficina.com", "hash_real", true);
-        when(usuarioRepository.findByEmail("admin_lockout@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin_lockout@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches(anyString(), eq("hash_real"))).thenReturn(false);
         when(httpRequest.getRemoteAddr()).thenReturn("192.168.1.99");
 
@@ -719,7 +734,7 @@ class AuthServiceTest {
     void shouldThrowBadCredentialsWhenUserIsInactive() {
         Usuario usuario = new Usuario("Proprietária", "inativa@oficina.com", "hash_senha", false);
 
-        when(usuarioRepository.findByEmail("inativa@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("inativa@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaValida", "hash_senha")).thenReturn(true);
 
         LoginRequest request = new LoginRequest("inativa@oficina.com", "SenhaValida");
@@ -733,7 +748,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("ISSUE-003: Deve bloquear login após atingir o limite de 5 tentativas consecutivas inválidas")
     void shouldBlockLoginAfterMaxAttempts() {
-        when(usuarioRepository.findByEmail("admin_brute@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("admin_brute@oficina.com")).thenReturn(Optional.empty());
         when(httpRequest.getRemoteAddr()).thenReturn("192.168.1.50");
 
         LoginRequest request = new LoginRequest("admin_brute@oficina.com", "SenhaErrada");
@@ -752,7 +767,7 @@ class AuthServiceTest {
     @Test
     @DisplayName("SEC-03: headers falsificados nao distribuem tentativas entre IPs artificiais")
     void shouldRateLimitBySocketPeerDespiteSpoofedForwardedHeaders() {
-        when(usuarioRepository.findByEmail("admin_sec03@oficina.com")).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailForUpdate("admin_sec03@oficina.com")).thenReturn(Optional.empty());
 
         LoginRequest request = new LoginRequest("admin_sec03@oficina.com", "SenhaErrada");
         for (int i = 0; i < 5; i++) {
@@ -782,7 +797,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin_vitima@oficina.com", "hash_real", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin_vitima@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin_vitima@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaErradaAtacante", "hash_real")).thenReturn(false);
         when(passwordEncoder.matches("SenhaCorretaLegitima", "hash_real")).thenReturn(true);
         when(passwordEncoder.encode(anyString())).thenReturn("hash_2fa");
@@ -970,7 +985,7 @@ class AuthServiceTest {
         RefreshToken token = new RefreshToken(usuario, TokenHashUtil.hashStatic("refresh-to-revoke"), OffsetDateTime.now().plusDays(3));
 
         when(refreshTokenRepository.findByTokenHash(TokenHashUtil.hashStatic("refresh-to-revoke"))).thenReturn(Optional.of(token));
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
 
         authService.logout("admin@oficina.com", "refresh-to-revoke", httpRequest);
 
@@ -1036,7 +1051,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
         when(passwordEncoder.matches("NovaSenhaSegura#2026", "hash_antigo")).thenReturn(false);
         when(passwordEncoder.encode("NovaSenhaSegura#2026")).thenReturn("hash_novo_bcrypt");
@@ -1058,7 +1073,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaErrada@123", "hash_antigo")).thenReturn(false);
 
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaErrada@123", "NovaSenhaSegura#2026", "NovaSenhaSegura#2026");
@@ -1078,7 +1093,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
 
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenhaSegura#2026", "ConfirmacaoDiferente#2026");
@@ -1097,7 +1112,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
 
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "SenhaAtual@123", "SenhaAtual@123");
@@ -1116,7 +1131,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "admin@oficina.com", "hash_antigo", true);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("admin@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("admin@oficina.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("SenhaAtual@123", "hash_antigo")).thenReturn(true);
         when(passwordEncoder.matches("admin123", "hash_antigo")).thenReturn(false);
 
@@ -1135,7 +1150,7 @@ class AuthServiceTest {
         Usuario usuario = new Usuario("Proprietária", "inativo@oficina.com", "hash_antigo", false);
         usuario.setId(1L);
 
-        when(usuarioRepository.findByEmail("inativo@oficina.com")).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailForUpdate("inativo@oficina.com")).thenReturn(Optional.of(usuario));
 
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenhaSegura#2026", "NovaSenhaSegura#2026");
 

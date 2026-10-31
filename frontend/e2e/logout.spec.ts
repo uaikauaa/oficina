@@ -28,7 +28,7 @@ async function prepare(page: Page, context: BrowserContext, responses: LogoutRes
   await context.route('**/*', async route => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.origin !== 'http://localhost:3000') {
+    if (url.origin !== new URL(process.env.E2E_BASE_URL || 'http://localhost:3000').origin) {
       unexpected.push('external request');
       await route.abort();
       return;

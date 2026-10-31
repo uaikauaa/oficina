@@ -8,16 +8,19 @@
 steps:
   - name: gcr.io/cloud-builders/docker
     entrypoint: sh
+    env:
+      - 'BUILD_BACKEND_URL=${_BACKEND_URL}'
+      - 'BUILD_IMAGE=${_IMAGE}'
     args:
       - -ec
       - |
-        case "${_BACKEND_URL}" in
+        case "$${BUILD_BACKEND_URL}" in
           https://*) ;;
           *) echo "ERRO: _BACKEND_URL precisa ser uma URL HTTPS." >&2; exit 1 ;;
         esac
         docker build \
-          --build-arg "INTERNAL_BACKEND_URL=${_BACKEND_URL}" \
-          --tag "${_IMAGE}" \
+          --build-arg "INTERNAL_BACKEND_URL=$${BUILD_BACKEND_URL}" \
+          --tag "$${BUILD_IMAGE}" \
           .
 images:
   - "${_IMAGE}"

@@ -14,6 +14,12 @@ import java.util.Optional;
 @Repository
 public interface TwoFactorChallengeRepository extends JpaRepository<TwoFactorChallenge, Long> {
 
+    @Query("SELECT c.usuario.id FROM TwoFactorChallenge c WHERE c.challengeToken = :token")
+    Optional<Long> findUsuarioIdByChallengeToken(@Param("token") String token);
+
+    boolean existsByUsuarioIdAndDataCriacaoAfter(Long usuarioId, java.time.OffsetDateTime since);
+    long countByUsuarioIdAndDataCriacaoAfter(Long usuarioId, java.time.OffsetDateTime since);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<TwoFactorChallenge> findByChallengeToken(String challengeToken);
 
