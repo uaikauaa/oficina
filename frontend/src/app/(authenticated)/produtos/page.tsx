@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import DomainIcon from '@/components/ui/DomainIcon';
 import Link from 'next/link';
 import {
   Package,
@@ -16,7 +17,6 @@ import {
   X,
   SlidersHorizontal,
   RotateCcw,
-  CheckCircle2,
   Loader2,
   AlertCircle,
   MapPin,
@@ -24,6 +24,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import ConfirmModal from '@/components/ConfirmModal';
+import FeedbackNotice from '@/components/ui/FeedbackNotice';
 import ProdutoModal from '@/components/ProdutoModal';
 import CompatibilidadeModal from '@/components/CompatibilidadeModal';
 import MovimentacaoEstoqueModal from '@/components/MovimentacaoEstoqueModal';
@@ -294,33 +295,33 @@ export default function ProdutosPage() {
         {/* =================================================================== */}
         {/* TOPO: CABEÇALHO COMPACTO & CTA PRINCIPAL (Fases 3 e 13) */}
         {/* =================================================================== */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-slate-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-line">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm shrink-0">
-              <Package className="w-5 h-5" />
+            <div className="p-2 rounded-xl bg-accent/10 text-accent border border-accent/20 shadow-sm shrink-0">
+              <Package aria-hidden="true" className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="ui-page-title">
                   Peças &amp; Produtos
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface border border-line text-ink">
                   {totalElements} {totalElements === 1 ? 'item' : 'itens'}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5 hidden sm:block">
+              <p className="text-xs sm:text-sm text-muted mt-0.5 hidden sm:block">
                 Catálogo técnico de componentes de reposição e controle de estoque
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 min-w-0">
             <Link
               href="/estoque"
-              className="px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-all shadow-sm"
+              className="px-3.5 py-2.5 rounded-xl border border-control bg-surface/80 hover:bg-elevated text-xs font-semibold text-ink hover:text-ink flex items-center gap-2 transition-all shadow-sm"
               title="Acessar painel consolidado de estoque"
             >
-              <Boxes className="w-4 h-4 text-amber-400" />
+              <Boxes aria-hidden="true" className="w-4 h-4 text-accent" />
               <span className="hidden sm:inline">Painel de Estoque</span>
               <span className="sm:hidden">Estoque</span>
             </Link>
@@ -328,9 +329,9 @@ export default function ProdutosPage() {
             <button
               id="novo-produto-btn"
               onClick={handleNovoProduto}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-all cursor-pointer shrink-0"
+              className="ui-btn ui-btn-primary sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <Plus aria-hidden="true" className="w-4 h-4 " />
               <span>Nova Peça / Produto</span>
             </button>
           </div>
@@ -338,53 +339,33 @@ export default function ProdutosPage() {
 
         {/* Toast Notificação de Feedback */}
         {statusToast && (
-          <div
-            className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-1 duration-200 ${statusToast.tipo === 'sucesso'
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
-              }`}
-          >
-            <div className="flex items-center gap-2">
-              {statusToast.tipo === 'sucesso' ? (
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-              ) : (
-                <AlertCircle className="w-4 h-4 shrink-0" />
-              )}
-              <span>{statusToast.mensagem}</span>
-            </div>
-            <button
-              onClick={() => setStatusToast(null)}
-              className="p-1 hover:opacity-70 text-slate-400"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          <FeedbackNotice message={statusToast.mensagem} variant={statusToast.tipo === 'sucesso' ? 'success' : 'error'} onDismiss={() => setStatusToast(null)} />
         )}
 
         {/* =================================================================== */}
         {/* TOOLBAR COMPACTA: BUSCA + PILLS + MAIS FILTROS (Fases 4, 5 e 6) */}
         {/* =================================================================== */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md space-y-3 shadow-lg">
+        <div className="p-3 sm:p-4 rounded-2xl bg-surface/60 border border-line space-y-3 shadow-lg">
           {/* Linha de Busca Principal e Botão de Filtros Avançados */}
           <div className="flex items-center gap-2">
             {/* Campo de Busca com Debounce 400ms e Botão [✕] */}
             <div className="relative flex-1">
-              <input
+              <input aria-label="Buscar por código, nome, marca, SKU ou localização ..."
                 type="text"
                 value={termoInput}
                 onChange={(e) => setTermoInput(e.target.value)}
-                placeholder="Buscar por código, nome, marca, SKU ou localização (📍)..."
-                className="w-full bg-slate-950 border border-slate-700/80 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                placeholder="Buscar por código, nome, marca, SKU ou localização ..."
+                className="ui-field w-full border pl-9 pr-8 placeholder-subtle focus:outline-none focus:border-accent/60 focus:ring-1 focus:ring-accent/20 transition-all"
               />
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+              <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute left-3 top-2.5 pointer-events-none" />
               {termoInput && (
                 <button
                   type="button"
                   onClick={() => setTermoInput('')}
-                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-2.5 text-subtle hover:text-ink transition-colors cursor-pointer"
                   title="Limpar busca"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -393,17 +374,19 @@ export default function ProdutosPage() {
             <button
               type="button"
               onClick={() => setFiltrosAvancadosAbertos((prev) => !prev)}
+              aria-label={filtrosAvancadosAbertos ? 'Menos Filtros' : 'Mais Filtros'}
+              aria-expanded={filtrosAvancadosAbertos}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer shrink-0 ${filtrosAvancadosAbertos || categoriaId || fornecedorId
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-                  : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
+                  ? 'bg-accent/15 border-accent/40 text-accent'
+                  : 'bg-canvas border-line text-ink hover:border-control hover:text-ink'
                 }`}
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <SlidersHorizontal aria-hidden="true" className="w-4 h-4" />
               <span className="hidden sm:inline">
                 {filtrosAvancadosAbertos ? 'Menos Filtros' : 'Mais Filtros'}
               </span>
               {(categoriaId || fornecedorId) && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold flex items-center justify-center">
+                <span className="w-4 h-4 rounded-full bg-accent text-inverse text-xs font-extrabold flex items-center justify-center">
                   {(categoriaId ? 1 : 0) + (fornecedorId ? 1 : 0)}
                 </span>
               )}
@@ -414,10 +397,10 @@ export default function ProdutosPage() {
               <button
                 type="button"
                 onClick={limparTodosFiltros}
-                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 transition-all cursor-pointer shrink-0"
+                className="ui-icon-btn inline-flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-semibold bg-canvas border border-line text-muted hover:text-ink hover:border-control transition-all cursor-pointer shrink-0"
                 title="Limpar todos os filtros aplicados"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 <span className="hidden md:inline">Limpar</span>
               </button>
             )}
@@ -425,20 +408,20 @@ export default function ProdutosPage() {
 
           {/* Painel Retrátil de Filtros Avançados (Fase 6) */}
           {filtrosAvancadosAbertos && (
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="p-3 rounded-xl bg-canvas/80 border border-line grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
               {/* Categoria */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                <label htmlFor="field-src-app-authenticated-produtos-page-tsx-1" className="block text-xs font-semibold text-muted mb-1">
                   Filtrar por Categoria:
                 </label>
-                <select
+                <select id="field-src-app-authenticated-produtos-page-tsx-1"
                   value={categoriaId}
                   onChange={(e) => {
                     setCategoriaId(e.target.value);
                     setPage(0);
                   }}
                   disabled={loadingFiltrosAuxiliares}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  className="ui-field w-full border focus:outline-none focus:border-accent/50"
                 >
                   <option value="">Todas as categorias</option>
                   {categorias.map((c) => (
@@ -451,17 +434,17 @@ export default function ProdutosPage() {
 
               {/* Fornecedor */}
               <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                <label htmlFor="field-src-app-authenticated-produtos-page-tsx-2" className="block text-xs font-semibold text-muted mb-1">
                   Filtrar por Fornecedor:
                 </label>
-                <select
+                <select id="field-src-app-authenticated-produtos-page-tsx-2"
                   value={fornecedorId}
                   onChange={(e) => {
                     setFornecedorId(e.target.value);
                     setPage(0);
                   }}
                   disabled={loadingFiltrosAuxiliares}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                  className="ui-field w-full border focus:outline-none focus:border-accent/50"
                 >
                   <option value="">Todos os fornecedores</option>
                   {fornecedores.map((f) => (
@@ -475,84 +458,84 @@ export default function ProdutosPage() {
           )}
 
           {/* Linha de Pills Operacionais Horizontais (Fase 5) */}
-          <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/50">
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-line">
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-slate-800">
               {/* Pill Todas */}
-              <button
+              <button aria-pressed={pillAtiva === 'TODAS'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('TODAS');
                   setPage(0);
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${pillAtiva === 'TODAS'
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm'
-                    : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white'
+                    ? 'bg-accent text-inverse border-accent shadow-sm'
+                    : 'bg-canvas text-ink border-line hover:border-control hover:text-ink'
                   }`}
               >
                 Todas
               </button>
 
               {/* Pill Peças */}
-              <button
+              <button aria-pressed={pillAtiva === 'PECA'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('PECA');
                   setPage(0);
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border ${pillAtiva === 'PECA'
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm'
-                    : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white'
+                    ? 'bg-accent text-inverse border-accent shadow-sm'
+                    : 'bg-canvas text-ink border-line hover:border-control hover:text-ink'
                   }`}
               >
-                <span>⚡</span>
+                <DomainIcon type="MAQUINA_SOLDA" />
                 <span>Peças / Componentes</span>
               </button>
 
               {/* Pill Consumíveis */}
-              <button
+              <button aria-pressed={pillAtiva === 'CONSUMIVEL'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('CONSUMIVEL');
                   setPage(0);
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border ${pillAtiva === 'CONSUMIVEL'
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm'
-                    : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white'
+                    ? 'bg-accent text-inverse border-accent shadow-sm'
+                    : 'bg-canvas text-ink border-line hover:border-control hover:text-ink'
                   }`}
               >
-                <span>🔋</span>
+                <DomainIcon type="GERADOR_ENERGIA" />
                 <span>Consumíveis</span>
               </button>
 
               {/* Pill Produtos */}
-              <button
+              <button aria-pressed={pillAtiva === 'PRODUTO'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('PRODUTO');
                   setPage(0);
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border ${pillAtiva === 'PRODUTO'
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm'
-                    : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-white'
+                    ? 'bg-accent text-inverse border-accent shadow-sm'
+                    : 'bg-canvas text-ink border-line hover:border-control hover:text-ink'
                   }`}
               >
-                <span>📦</span>
+                <DomainIcon type="PRODUTO" />
                 <span>Produtos</span>
               </button>
 
               {/* Pill Estoque Crítico */}
-              <button
+              <button aria-pressed={pillAtiva === 'CRITICO'}
                 type="button"
                 onClick={() => {
                   setPillAtiva('CRITICO');
                   setPage(0);
                 }}
                 className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer border ${pillAtiva === 'CRITICO'
-                    ? 'bg-rose-500 text-white border-rose-400 shadow-sm'
-                    : 'bg-slate-950 text-rose-400 border-slate-800 hover:border-rose-500/40'
+                    ? 'bg-danger text-ink border-danger shadow-sm'
+                    : 'bg-canvas text-danger border-line hover:border-danger/40'
                   }`}
               >
-                <AlertTriangle className="w-3.5 h-3.5" />
+                <AlertTriangle aria-hidden="true" className="w-4 h-4" />
                 <span>Estoque Crítico</span>
               </button>
             </div>
@@ -566,31 +549,31 @@ export default function ProdutosPage() {
                   setPage(0);
                 }}
                 className={`px-2.5 py-1 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${somenteAtivos
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
-                    : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-slate-200'
+                    ? 'bg-ink/5 text-ink border-line hover:bg-ink/5'
+                    : 'bg-canvas text-muted border-line hover:text-ink'
                   }`}
                 title={somenteAtivos ? 'Exibindo apenas ativas (clique para ver todas)' : 'Exibindo ativas e inativas'}
               >
-                {somenteAtivos ? '✓ Somente Ativas' : 'Todas as Situações'}
+                {somenteAtivos ? 'Somente Ativas' : 'Todas as Situações'}
               </button>
             </div>
           </div>
 
           {/* Chip de Feedback de Filtro Ativo (Fase 11) */}
           {temFiltrosAtivos && (
-            <div className="flex items-center justify-between p-2 px-3 rounded-xl bg-slate-950 border border-amber-500/30 text-xs">
+            <div className="flex items-center justify-between p-2 px-3 rounded-xl bg-canvas border border-accent/30 text-xs">
               <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                <span className="text-slate-400 shrink-0">Filtrando por:</span>
-                <span className="font-bold text-amber-300 truncate">{descricaoFiltroAtivo}</span>
-                <span className="text-slate-500 shrink-0">({totalElements} encontrados)</span>
+                <span className="text-muted shrink-0">Filtrando por:</span>
+                <span className="font-bold text-accent truncate">{descricaoFiltroAtivo}</span>
+                <span className="text-subtle shrink-0">({totalElements} encontrados)</span>
               </div>
               <button
                 type="button"
                 onClick={limparTodosFiltros}
-                className="text-slate-400 hover:text-amber-400 transition-colors p-0.5 ml-2 cursor-pointer shrink-0"
+                className="ui-icon-btn text-muted hover:text-accent transition-colors p-0.5 ml-2 cursor-pointer shrink-0"
                 title="Remover todos os filtros"
               >
-                <X className="w-3.5 h-3.5" />
+                <X aria-hidden="true" className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -598,8 +581,8 @@ export default function ProdutosPage() {
 
         {/* Mensagem de Erro Geral se houver */}
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs flex items-center gap-2">
+            <AlertCircle aria-hidden="true" className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -607,11 +590,11 @@ export default function ProdutosPage() {
         {/* =================================================================== */}
         {/* TABELA OPERACIONAL COMPACTA (Fases 7 e 13 — 1366x768 @ 125%) */}
         {/* =================================================================== */}
-        <div className="rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-md overflow-hidden shadow-xl">
+        <div className="rounded-2xl border border-line bg-surface/60 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="ui-table">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/70 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
+                <tr className="border-b border-line bg-canvas/70 text-muted uppercase text-xs tracking-wider font-bold">
                   <th className="py-2.5 px-3.5">Código / SKU</th>
                   <th className="py-2.5 px-3.5">Peça & Marca</th>
                   <th className="py-2.5 px-3.5">Tipo / Categoria</th>
@@ -621,12 +604,12 @@ export default function ProdutosPage() {
                   <th className="py-2.5 px-3.5 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-line/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-muted">
                       <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />
+                        <Loader2 aria-hidden="true" className="w-4 h-4 text-accent animate-spin" />
                         <span>Carregando catálogo de peças...</span>
                       </div>
                     </td>
@@ -634,37 +617,37 @@ export default function ProdutosPage() {
                 ) : produtos.length === 0 ? (
                   /* Estados Vazios Contextuais (Fase 11) */
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={7} className="py-12 text-center text-muted">
                       <div className="max-w-md mx-auto space-y-3">
-                        <Package className="w-9 h-9 text-slate-600 mx-auto" />
+                        <Package className="w-9 h-9 text-subtle mx-auto" />
                         {temFiltrosAtivos ? (
                           <>
-                            <p className="font-semibold text-slate-300">
+                            <p className="font-semibold text-ink">
                               Nenhuma peça ou produto encontrado para os filtros aplicados.
                             </p>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-xs text-subtle">
                               Tente buscar por outro termo ou limpar os filtros para ver todo o catálogo.
                             </p>
                             <button
                               type="button"
                               onClick={limparTodosFiltros}
-                              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all cursor-pointer"
+                              className="px-3 py-1.5 rounded-xl bg-elevated hover:bg-hover text-ink text-xs font-bold transition-all cursor-pointer"
                             >
-                              ✕ Limpar Filtros
+                              Limpar Filtros
                             </button>
                           </>
                         ) : (
                           <>
-                            <p className="font-semibold text-slate-300">
+                            <p className="font-semibold text-ink">
                               Nenhuma peça ou produto cadastrado no catálogo.
                             </p>
-                            <p className="text-[11px] text-slate-500">
+                            <p className="text-xs text-subtle">
                               Cadastre novos componentes técnicos para movimentar o estoque e abastecer ordens de serviço.
                             </p>
                             <button
                               type="button"
                               onClick={handleNovoProduto}
-                              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all cursor-pointer"
+                              className="ui-btn ui-btn-primary transition-all cursor-pointer"
                             >
                               + Cadastrar Primeira Peça
                             </button>
@@ -681,13 +664,13 @@ export default function ProdutosPage() {
                     return (
                       <tr
                         key={p.id}
-                        className={`hover:bg-slate-800/40 transition-colors group ${!p.ativo ? 'opacity-60 bg-slate-950/40' : ''
+                        className={`hover:bg-elevated/40 transition-colors group ${!p.ativo ? 'opacity-60 bg-canvas/40' : ''
                           }`}
                       >
                         {/* Código / SKU */}
                         <td className="py-2.5 px-3.5 whitespace-nowrap">
                           <span
-                            className="font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-[11px]"
+                            className="font-mono font-bold text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded text-xs"
                             title={p.codigo}
                           >
                             {formatarCodigoSku(p.codigo, p.id)}
@@ -697,11 +680,11 @@ export default function ProdutosPage() {
                               href={p.linkCompra}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 font-sans text-[11px] text-sky-400 hover:text-sky-300 hover:underline mt-1"
+                              className="inline-flex items-center gap-1 font-sans text-xs text-ink hover:text-ink hover:underline mt-1"
                               title={`Abrir link de compra: ${p.linkCompra}`}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <ExternalLink className="w-3 h-3 shrink-0" />
+                              <ExternalLink aria-hidden="true" className="w-3 h-3 shrink-0" />
                               <span>Link de Compra</span>
                             </a>
                           )}
@@ -710,17 +693,17 @@ export default function ProdutosPage() {
                         {/* Nome & Marca */}
                         <td className="py-2.5 px-3.5">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-white group-hover:text-amber-300 transition-colors">
+                            <span className="font-bold text-ink group-hover:text-accent transition-colors">
                               {p.nome}
                             </span>
                             {p.marca && (
-                              <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-slate-800 text-amber-400/90 border border-amber-500/20">
+                              <span className="px-1.5 py-0.2 rounded text-xs font-semibold bg-elevated text-accent border border-accent/20">
                                 {p.marca}
                               </span>
                             )}
                           </div>
                           {p.descricao && (
-                            <span className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                            <span className="text-xs text-muted line-clamp-1 mt-0.5">
                               {p.descricao}
                             </span>
                           )}
@@ -729,42 +712,43 @@ export default function ProdutosPage() {
                         {/* Tipo & Categoria */}
                         <td className="py-2.5 px-3.5 whitespace-nowrap">
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-medium text-slate-300 text-[11px]">
-                              {p.tipo === 'PECA' && '⚡ Peça'}
-                              {p.tipo === 'CONSUMIVEL' && '🔋 Consumível'}
-                              {p.tipo === 'PRODUTO' && '📦 Produto'}
-                              {p.tipo === 'SERVICO' && '🛠️ Serviço'}
+                            <span className="font-medium text-ink text-xs">
+                              <DomainIcon type={p.tipo} className="inline-block w-4 h-4 mr-1.5 align-text-bottom" />
+                              {p.tipo === 'PECA' && 'Peça'}
+                              {p.tipo === 'CONSUMIVEL' && 'Consumível'}
+                              {p.tipo === 'PRODUTO' && 'Produto'}
+                              {p.tipo === 'SERVICO' && 'Serviço'}
                             </span>
                             {p.categoriaNome ? (
-                              <span className="text-[10px] text-indigo-400 flex items-center gap-1">
+                              <span className="text-xs text-ink flex items-center gap-1">
                                 <Tag className="w-2.5 h-2.5" />
                                 <span>{p.categoriaNome}</span>
                               </span>
                             ) : (
-                              <span className="text-[10px] text-slate-600">-</span>
+                              <span className="text-xs text-subtle">-</span>
                             )}
                           </div>
                         </td>
 
                         {/* Localização */}
-                        <td className="py-2.5 px-3.5 whitespace-nowrap text-slate-400 text-[11px]">
+                        <td className="py-2.5 px-3.5 whitespace-nowrap text-muted text-xs">
                           {p.localizacao ? (
-                            <span className="inline-flex items-center gap-1 text-slate-300">
-                              <MapPin className="w-3 h-3 text-amber-500/80" />
+                            <span className="inline-flex items-center gap-1 text-ink">
+                              <MapPin aria-hidden="true" className="w-3 h-3 text-accent" />
                               <span>{p.localizacao}</span>
                             </span>
                           ) : (
-                            <span className="text-slate-600">-</span>
+                            <span className="text-subtle">-</span>
                           )}
                         </td>
 
                         {/* Preço de Venda */}
                         <td className="py-2.5 px-3.5 text-right whitespace-nowrap">
-                          <span className="font-bold text-white">
+                          <span className="font-bold text-ink">
                             {formatarMoeda(p.precoVenda)}
                           </span>
                           {p.precoCusto > 0 && (
-                            <span className="block text-[10px] text-slate-500">
+                            <span className="block text-xs text-subtle">
                               Custo: {formatarMoeda(p.precoCusto)}
                             </span>
                           )}
@@ -777,18 +761,18 @@ export default function ProdutosPage() {
                             onClick={() => handleAbrirMovimentacao(p)}
                             title="Clique para ajustar o estoque desta peça"
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${isZerado
-                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30 hover:bg-rose-500/20'
+                                ? 'bg-danger/10 text-danger border-danger/30 hover:bg-danger/20'
                                 : isCritico
-                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
-                                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+                                  ? 'bg-accent/10 text-accent border-accent/30 hover:bg-accent/20'
+                                  : 'bg-ink/5 text-ink border-line hover:bg-ink/5'
                               }`}
                           >
                             <span>{p.estoqueAtual}</span>
-                            <span className="text-[10px] font-normal opacity-80">
+                            <span className="text-xs font-normal opacity-80">
                               {formatarUnidadeMedida(p.unidadeMedida)}
                             </span>
                           </button>
-                          <span className="block text-[10px] text-slate-500 mt-0.5">
+                          <span className="block text-xs text-subtle mt-0.5">
                             Mín: {p.estoqueMinimo}
                           </span>
                         </td>
@@ -800,10 +784,10 @@ export default function ProdutosPage() {
                             <button
                               type="button"
                               onClick={() => handleAbrirMovimentacao(p)}
-                              className="px-2 py-1 rounded-lg text-slate-300 hover:text-amber-400 bg-slate-800/80 hover:bg-amber-500/10 border border-slate-700/80 hover:border-amber-500/30 text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer"
+                              className="ui-icon-btn px-2 py-1 rounded-lg text-ink hover:text-accent bg-elevated/80 hover:bg-accent/10 border border-control hover:border-accent/30 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
                               title="Registrar entrada, saída ou ajuste de estoque (sem sair da tela)"
                             >
-                              <Boxes className="w-3.5 h-3.5 text-amber-400" />
+                              <Boxes aria-hidden="true" className="w-4 h-4 text-accent" />
                               <span>± Estoque</span>
                             </button>
 
@@ -811,22 +795,22 @@ export default function ProdutosPage() {
                             <button
                               type="button"
                               onClick={() => handleAbrirCompatibilidades(p)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors cursor-pointer"
+                              className="ui-icon-btn p-1.5 rounded-lg text-muted hover:text-ink hover:bg-ink/5 transition-colors cursor-pointer"
                               title="Compatibilidade Técnica (produto_maquina)"
                               aria-label="Compatibilidade técnica"
                             >
-                              <Wrench className="w-3.5 h-3.5" />
+                              <Wrench aria-hidden="true" className="w-4 h-4" />
                             </button>
 
                             {/* Editar Peça */}
                             <button
                               type="button"
                               onClick={() => handleEditarProduto(p)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 transition-colors cursor-pointer"
+                              className="ui-icon-btn p-1.5 rounded-lg text-muted hover:text-accent hover:bg-accent/10 transition-colors cursor-pointer"
                               title="Editar Peça"
                               aria-label="Editar peça"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 aria-hidden="true" className="w-4 h-4" />
                             </button>
 
                             {/* Ativar / Inativar Peça (Fase 1 e 10) */}
@@ -834,13 +818,13 @@ export default function ProdutosPage() {
                               type="button"
                               onClick={() => handleAbrirConfirmacaoStatus(p)}
                               className={`p-1.5 rounded-lg transition-colors cursor-pointer ${p.ativo
-                                  ? 'text-slate-400 hover:text-rose-400 hover:bg-rose-500/10'
-                                  : 'text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10'
+                                  ? 'text-muted hover:text-danger hover:bg-danger/10'
+                                  : 'text-subtle hover:text-ink hover:bg-ink/5'
                                 }`}
                               title={p.ativo ? 'Inativar peça' : 'Ativar peça'}
                               aria-label={p.ativo ? 'Inativar peça' : 'Ativar peça'}
                             >
-                              <Power className="w-3.5 h-3.5" />
+                              <Power aria-hidden="true" className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -854,10 +838,10 @@ export default function ProdutosPage() {
 
           {/* Paginação */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-800/80 bg-slate-950/40 text-xs">
-              <span className="text-slate-400">
-                Mostrando <strong className="text-white">{produtos.length}</strong> de{' '}
-                <strong className="text-white">{totalElements}</strong> registros
+            <div className="flex items-center justify-between px-4 py-2.5 border-t border-line bg-canvas/40 text-xs">
+              <span className="text-muted">
+                Mostrando <strong className="text-ink">{produtos.length}</strong> de{' '}
+                <strong className="text-ink">{totalElements}</strong> registros
               </span>
 
               <div className="flex items-center gap-1.5">
@@ -865,24 +849,24 @@ export default function ProdutosPage() {
                   type="button"
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
-                  className="p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-line text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   title="Página anterior"
                   aria-label="Página anterior"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                 </button>
-                <span className="text-slate-300 font-semibold px-2 text-[11px]">
+                <span className="text-ink font-semibold px-2 text-xs">
                   Página {page + 1} de {totalPages}
                 </span>
                 <button
                   type="button"
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page >= totalPages - 1}
-                  className="p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-line text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   title="Próxima página"
                   aria-label="Próxima página"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             </div>

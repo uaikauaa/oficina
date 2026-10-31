@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import DialogFocus from '@/components/ui/DialogFocus';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface ConfirmModalProps {
@@ -48,33 +49,34 @@ export default function ConfirmModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-canvas/80"
     >
-      <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <DialogFocus />
+      <div className="ui-dialog relative w-full max-w-md max-h-[90dvh] overflow-y-auto">
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div
               className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${
                 isDestructive
-                  ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                  : 'bg-amber-500/10 border border-amber-500/20 text-amber-400'
+                  ? 'bg-danger/10 border border-danger/20 text-danger'
+                  : 'bg-accent/10 border border-accent/20 text-accent'
               }`}
             >
-              <AlertTriangle className="w-5 h-5" />
+              <AlertTriangle aria-hidden="true" className="w-5 h-5" />
             </div>
 
             <div className="flex-1">
-              <h3 id="confirm-modal-title" className="text-base font-bold text-white leading-tight">{title}</h3>
-              <p className="text-xs text-slate-400 mt-2 leading-relaxed">{message}</p>
+              <h3 id="confirm-modal-title" className="text-base font-bold text-ink leading-tight">{title}</h3>
+              <p className="text-xs text-muted mt-2 leading-relaxed">{message}</p>
             </div>
 
             <button
               type="button"
               onClick={onCancel}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer"
+              className="ui-icon-btn text-muted hover:text-ink p-1 rounded-lg hover:bg-elevated transition-colors cursor-pointer"
               aria-label="Fechar modal"
             >
-              <X className="w-4 h-4" />
+              <X aria-hidden="true" className="w-4 h-4" />
             </button>
           </div>
 
@@ -83,7 +85,7 @@ export default function ConfirmModal({
               type="button"
               onClick={onCancel}
               disabled={isLoading}
-              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors cursor-pointer"
+              className="ui-btn ui-btn-secondary"
             >
               {cancelText}
             </button>
@@ -91,11 +93,7 @@ export default function ConfirmModal({
               type="button"
               onClick={onConfirm}
               disabled={isLoading}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50 ${
-                isDestructive
-                  ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20'
-                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
-              }`}
+              className={`ui-btn ${isDestructive ? 'ui-btn-danger' : 'ui-btn-primary'}`}
             >
               {isLoading ? 'Processando...' : confirmText}
             </button>

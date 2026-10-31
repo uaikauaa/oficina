@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { BRAND_BACKGROUND } from '@/lib/brand';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/login',
     scope: '/',
     display: 'standalone',
-    background_color: '#020617',
-    theme_color: '#0b1020',
+    background_color: BRAND_BACKGROUND,
+    theme_color: BRAND_BACKGROUND,
     lang: 'pt-BR',
     icons: [
       { src: '/pwa/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

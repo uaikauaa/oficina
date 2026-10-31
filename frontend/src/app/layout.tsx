@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import PwaInstallProvider from "@/components/PwaInstallProvider";
+import { BRAND_BACKGROUND } from "@/lib/brand";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b1020",
+  themeColor: BRAND_BACKGROUND,
 };
 
 export default function RootLayout({
@@ -35,7 +36,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500/30 selection:text-amber-200">
+      <body className="min-h-full flex flex-col bg-canvas text-ink selection:bg-accent/30 selection:text-accent">
         <PwaInstallProvider>{children}</PwaInstallProvider>
       </body>
     </html>

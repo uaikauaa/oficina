@@ -51,14 +51,15 @@ export default function AuthenticatedLayout({
   }, [router, pathname]);
 
   if (!user) {
-    return <div className="min-h-screen bg-slate-950" aria-label="Verificando sessão" />;
+    return <div className="min-h-screen bg-canvas" aria-label="Verificando sessão" />;
   }
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col print:bg-white print:min-h-0">
+      <div className="min-h-screen bg-canvas text-ink flex flex-col print:bg-white print:min-h-0">
+        <a href="#conteudo-principal" className="ui-btn ui-btn-primary ui-skip-link print:hidden">Ir para o conteúdo</a>
         <Header user={user} />
-        <div className="flex-1 flex flex-col">{children}</div>
+        <div id="conteudo-principal" tabIndex={-1} className="flex-1 flex flex-col min-w-0">{children}</div>
       </div>
     </AuthContext.Provider>
   );

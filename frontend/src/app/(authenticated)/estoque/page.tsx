@@ -151,14 +151,14 @@ export default function EstoquePage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm">
+              <div className="p-2.5 rounded-2xl bg-accent/10 text-accent border border-accent/20 shadow-sm">
                 <Boxes className="w-6 h-6" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              <h1 className="ui-page-title">
                 Controle de Estoque & Saldos
               </h1>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400">
+            <p className="text-xs sm:text-sm text-muted">
               Acompanhamento de inventário físico, pontos de pedido e movimentações atômicas
             </p>
           </div>
@@ -166,9 +166,9 @@ export default function EstoquePage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/estoque/movimentacoes"
-              className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-2 transition-all shadow-sm"
+              className="px-4 py-2.5 rounded-xl border border-control bg-surface/80 hover:bg-elevated text-xs font-semibold text-ink hover:text-ink flex items-center gap-2 transition-all shadow-sm"
             >
-              <History className="w-4 h-4 text-cyan-400" />
+              <History aria-hidden="true" className="w-4 h-4 text-ink" />
               <span>Histórico de Movimentações</span>
             </Link>
           </div>
@@ -177,91 +177,91 @@ export default function EstoquePage() {
         {/* Cards de Resumo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total de Itens */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
+          <div className="p-5 rounded-2xl bg-surface/60 border border-line">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Total de Peças Ativas</span>
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <Package className="w-4 h-4" />
+              <span className="text-xs font-semibold text-muted">Total de Peças Ativas</span>
+              <div className="p-2 rounded-xl bg-accent/10 text-accent border border-accent/20">
+                <Package aria-hidden="true" className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold text-white">
+              <span className="text-2xl font-bold text-ink">
                 {resumo?.totalProdutos ?? 0}
               </span>
-              <span className="text-xs text-slate-500 block mt-0.5">itens cadastrados</span>
+              <span className="text-xs text-subtle block mt-0.5">itens cadastrados</span>
             </div>
           </div>
 
           {/* Estoque Baixo */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
+          <div className="p-5 rounded-2xl bg-surface/60 border border-line">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Estoque Crítico (Baixo)</span>
-              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <AlertTriangle className="w-4 h-4" />
+              <span className="text-xs font-semibold text-muted">Estoque Crítico (Baixo)</span>
+              <div className="p-2 rounded-xl bg-accent/10 text-accent border border-accent/20">
+                <AlertTriangle aria-hidden="true" className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold text-amber-400">
+              <span className="text-2xl font-bold text-accent">
                 {resumo?.itensEstoqueBaixo ?? 0}
               </span>
-              <span className="text-xs text-slate-500 block mt-0.5">abaixo do estoque mínimo</span>
+              <span className="text-xs text-subtle block mt-0.5">abaixo do estoque mínimo</span>
             </div>
           </div>
 
           {/* Sem Estoque */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
+          <div className="p-5 rounded-2xl bg-surface/60 border border-line">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Zerados / Sem Estoque</span>
-              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                <XCircle className="w-4 h-4" />
+              <span className="text-xs font-semibold text-muted">Zerados / Sem Estoque</span>
+              <div className="p-2 rounded-xl bg-danger/10 text-danger border border-danger/20">
+                <XCircle aria-hidden="true" className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold text-rose-400">
+              <span className="text-2xl font-bold text-danger">
                 {resumo?.itensSemEstoque ?? 0}
               </span>
-              <span className="text-xs text-slate-500 block mt-0.5">necessita reposição urgente</span>
+              <span className="text-xs text-subtle block mt-0.5">necessita reposição urgente</span>
             </div>
           </div>
 
           {/* Valor Total do Estoque */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md">
+          <div className="p-5 rounded-2xl bg-surface/60 border border-line">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Valorização Total</span>
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <TrendingUp className="w-4 h-4" />
+              <span className="text-xs font-semibold text-muted">Valorização Total</span>
+              <div className="p-2 rounded-xl bg-ink/5 text-ink border border-line">
+                <TrendingUp aria-hidden="true" className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold text-emerald-400">
+              <span className="text-2xl font-bold text-ink">
                 {formatarMoeda(resumo?.valorTotalEstoque ?? 0)}
               </span>
-              <span className="text-xs text-slate-500 block mt-0.5">calculado a preço de custo</span>
+              <span className="text-xs text-subtle block mt-0.5">calculado a preço de custo</span>
             </div>
           </div>
         </div>
 
         {/* Toolbar de Busca e Filtros */}
-        <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-md space-y-3">
+        <div className="p-4 rounded-2xl bg-surface/60 border border-line space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Campo de Busca Textual */}
             <div className="relative">
-              <input
+              <input aria-label="Buscar por código, nome ou marca..."
                 type="text"
                 value={termoInput}
                 onChange={(e) => setTermoInput(e.target.value)}
                 placeholder="Buscar por código, nome ou marca..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-8 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border pl-9 pr-8 placeholder-subtle focus:outline-none focus:border-accent/50"
               />
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" />
+              <Search aria-hidden="true" className="w-4 h-4 text-subtle absolute left-3 top-2.5 pointer-events-none" />
               {termoInput && (
                 <button
                   type="button"
                   onClick={() => setTermoInput('')}
-                  className="absolute right-2.5 top-2.5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                  className="absolute right-2.5 top-2.5 text-subtle hover:text-ink transition-colors cursor-pointer"
                   title="Limpar busca"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X aria-hidden="true" className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -270,13 +270,14 @@ export default function EstoquePage() {
             <div>
               <select
                 value={categoriaId}
+                aria-label="Categoria"
                 onFocus={carregarCategorias}
                 onPointerDown={carregarCategorias}
                 onChange={(e) => {
                   setCategoriaId(e.target.value);
                   setPage(0);
                 }}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               >
                 <option value="">{carregandoCategorias ? 'Carregando categorias...' : 'Todas as categorias'}</option>
                 {categorias.map((c) => (
@@ -291,13 +292,14 @@ export default function EstoquePage() {
             <div>
               <select
                 value={fornecedorId}
+                aria-label="Fornecedor"
                 onFocus={carregarFornecedores}
                 onPointerDown={carregarFornecedores}
                 onChange={(e) => {
                   setFornecedorId(e.target.value);
                   setPage(0);
                 }}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               >
                 <option value="">{carregandoFornecedores ? 'Carregando fornecedores...' : 'Todos os fornecedores'}</option>
                 {fornecedores.map((f) => (
@@ -310,13 +312,13 @@ export default function EstoquePage() {
 
             {/* Filtro por Nível de Estoque */}
             <div>
-              <select
+              <select aria-label="Todos os saldos"
                 value={filtroNivel}
                 onChange={(e) => {
                   setFiltroNivel(e.target.value as 'TODOS' | 'CRITICO' | 'ZERADO');
                   setPage(0);
                 }}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                className="ui-field w-full border focus:outline-none focus:border-accent/50"
               >
                 <option value="TODOS">Todos os saldos</option>
                 <option value="CRITICO">Apenas estoque crítico (&le; mín)</option>
@@ -325,9 +327,9 @@ export default function EstoquePage() {
           </div>
 
           {(termoDebounced || categoriaId || fornecedorId || filtroNivel !== 'TODOS') && (
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
-              <span className="text-slate-400">
-                Filtros ativos: <strong className="text-amber-400">{totalElements}</strong> registros encontrados
+            <div className="flex items-center justify-between pt-2 border-t border-line text-xs">
+              <span className="text-muted">
+                Filtros ativos: <strong className="text-accent">{totalElements}</strong> registros encontrados
               </span>
               <button
                 type="button"
@@ -339,9 +341,9 @@ export default function EstoquePage() {
                   setFiltroNivel('TODOS');
                   setPage(0);
                 }}
-                className="inline-flex items-center gap-1 text-slate-400 hover:text-amber-400 text-xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-muted hover:text-accent text-xs transition-colors cursor-pointer"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw aria-hidden="true" className="w-4 h-4" />
                 <span>Limpar Filtros</span>
               </button>
             </div>
@@ -350,17 +352,17 @@ export default function EstoquePage() {
 
         {/* Mensagem de Erro */}
         {error && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+          <div className="p-4 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs">
             {error}
           </div>
         )}
 
         {/* Tabela de Saldos de Estoque */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur-md overflow-hidden shadow-xl">
+        <div className="rounded-2xl border border-line bg-surface/60 overflow-hidden shadow-xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
+            <table className="ui-table">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
+                <tr className="border-b border-line bg-canvas/60 text-muted uppercase text-xs tracking-wider font-bold">
                   <th className="py-2.5 px-2.5 sm:px-3">Peça / Componente</th>
                   <th className="py-2.5 px-2 sm:px-2.5">Categoria</th>
                   <th className="py-2.5 px-2 sm:px-2.5">Localização</th>
@@ -371,20 +373,20 @@ export default function EstoquePage() {
                   <th className="py-2.5 px-2.5 sm:px-3 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-line/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-muted">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
                         <span>Carregando saldos em estoque...</span>
                       </div>
                     </td>
                   </tr>
                 ) : produtos.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-500">
-                      <Boxes className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                    <td colSpan={8} className="py-12 text-center text-subtle">
+                      <Boxes className="w-8 h-8 text-subtle mx-auto mb-2" />
                       <p>Nenhuma peça com saldo encontrada com os filtros selecionados.</p>
                     </td>
                   </tr>
@@ -402,25 +404,25 @@ export default function EstoquePage() {
                     return (
                       <tr
                         key={p.id}
-                        className="hover:bg-slate-800/40 transition-colors group"
+                        className="hover:bg-elevated/40 transition-colors group"
                       >
                         {/* Peça & Marca */}
                         <td className="py-2.5 px-2.5 sm:px-3">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-1.5 py-0.5 rounded text-[11px] shrink-0">
+                            <span className="font-bold text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded text-xs shrink-0">
                               {p.codigo}
                             </span>
-                            <span className="font-bold text-white group-hover:text-amber-300 transition-colors break-words">
+                            <span className="font-bold text-ink group-hover:text-accent transition-colors break-words">
                               {p.nome}
                             </span>
                             {p.marca && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-amber-400 border border-amber-500/20 shrink-0">
+                              <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-elevated text-accent border border-accent/20 shrink-0">
                                 {p.marca}
                               </span>
                             )}
                           </div>
                           {p.fornecedorNome && (
-                            <span className="block text-[10px] text-slate-500 mt-0.5 truncate max-w-[200px] sm:max-w-xs" title={`Fornecedor: ${p.fornecedorNome}`}>
+                            <span className="block text-xs text-subtle mt-0.5 truncate max-w-[200px] sm:max-w-xs" title={`Fornecedor: ${p.fornecedorNome}`}>
                               Fornecedor: {p.fornecedorNome}
                             </span>
                           )}
@@ -429,42 +431,42 @@ export default function EstoquePage() {
                         {/* Categoria */}
                         <td className="py-2.5 px-2 sm:px-2.5">
                           {p.categoriaNome ? (
-                            <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 break-words max-w-[110px] sm:max-w-[130px] leading-tight">
+                            <span className="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-ink/5 text-ink border border-line break-words max-w-[110px] sm:max-w-[130px] leading-tight">
                               {p.categoriaNome}
                             </span>
                           ) : (
-                            <span className="text-[10px] text-slate-500">-</span>
+                            <span className="text-xs text-subtle">-</span>
                           )}
                         </td>
 
                         {/* Localização */}
-                        <td className="py-2.5 px-2 sm:px-2.5 text-slate-300">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-ink">
                           {p.localizacao ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] break-words max-w-[90px]">
-                              <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
+                            <span className="inline-flex items-center gap-1 text-xs break-words max-w-[90px]">
+                              <MapPin aria-hidden="true" className="w-3 h-3 text-subtle shrink-0" />
                               <span>{p.localizacao}</span>
                             </span>
                           ) : (
-                            <span className="text-slate-600">-</span>
+                            <span className="text-subtle">-</span>
                           )}
                         </td>
 
                         {/* Barra de Nível Físico */}
                         <td className="py-2.5 px-2 sm:px-2.5 text-center">
                           <div className="w-14 sm:w-16 md:w-20 mx-auto space-y-0.5">
-                            <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                            <div className="w-full bg-canvas h-1.5 rounded-full overflow-hidden border border-line">
                               <div
                                 className={`h-full transition-all rounded-full ${
                                   isZerado
-                                    ? 'bg-rose-500'
+                                    ? 'bg-danger'
                                     : isCritico
-                                    ? 'bg-amber-500'
-                                    : 'bg-emerald-500'
+                                    ? 'bg-accent'
+                                    : 'bg-elevated'
                                 }`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
-                            <span className="text-[10px] text-slate-500 block leading-tight">
+                            <span className="text-xs text-subtle block leading-tight">
                               {isZerado ? 'Esgotado' : isCritico ? 'Crítico' : 'Normal'}
                             </span>
                           </div>
@@ -473,32 +475,32 @@ export default function EstoquePage() {
                         {/* Saldo Atual */}
                         <td className="py-2.5 px-2 sm:px-2.5 text-center whitespace-nowrap">
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold border ${
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-extrabold border ${
                               isZerado
-                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                                ? 'bg-danger/10 text-danger border-danger/30'
                                 : isCritico
-                                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                                ? 'bg-accent/10 text-accent border-accent/30'
+                                : 'bg-ink/5 text-ink border-line'
                             }`}
                           >
                             <span>{p.estoqueAtual}</span>
-                            <span className="text-[10px] font-normal opacity-80">
+                            <span className="text-xs font-normal opacity-80">
                               {p.unidadeMedida}
                             </span>
                           </span>
                         </td>
 
                         {/* Estoque Mínimo */}
-                        <td className="py-2.5 px-2 sm:px-2.5 text-center whitespace-nowrap text-slate-400 font-semibold text-[11px]">
+                        <td className="py-2.5 px-2 sm:px-2.5 text-center whitespace-nowrap text-muted font-semibold text-xs">
                           {p.estoqueMinimo} {p.unidadeMedida}
                         </td>
 
                         {/* Valor Investido */}
                         <td className="py-2.5 px-2 sm:px-2.5 text-right whitespace-nowrap">
-                          <span className="font-bold text-white text-[11px] sm:text-xs">
+                          <span className="font-bold text-ink text-xs sm:text-xs">
                             {formatarMoeda(valorInvestido)}
                           </span>
-                          <span className="block text-[10px] text-slate-500">
+                          <span className="block text-xs text-subtle">
                             Unit: {formatarMoeda(p.precoCusto)}
                           </span>
                         </td>
@@ -507,10 +509,10 @@ export default function EstoquePage() {
                         <td className="py-2.5 px-2.5 sm:px-3 text-right whitespace-nowrap">
                           <button
                             onClick={() => handleAbrirMovimentacao(p)}
-                            className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="ui-icon-btn px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-control bg-elevated/80 hover:bg-hover text-xs font-semibold text-ink hover:text-ink inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                             title="Ajustar saldo, registrar compra ou descarte"
                           >
-                            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <SlidersHorizontal aria-hidden="true" className="w-4 h-4 text-accent shrink-0" />
                             <span className="hidden xl:inline">Movimentar</span>
                           </button>
                         </td>
@@ -524,30 +526,30 @@ export default function EstoquePage() {
 
           {/* Paginação */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-950/40 text-xs">
-              <span className="text-slate-400">
-                Total de <strong className="text-white">{totalElements}</strong> itens
+            <div className="flex items-center justify-between px-4 py-3 border-t border-line bg-canvas/40 text-xs">
+              <span className="text-muted">
+                Total de <strong className="text-ink">{totalElements}</strong> itens
               </span>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
                   disabled={page === 0}
-                  className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-control text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors"
                   aria-label="Página anterior"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft aria-hidden="true" className="w-4 h-4" />
                 </button>
-                <span className="text-slate-300 font-semibold px-2">
+                <span className="text-ink font-semibold px-2">
                   Página {page + 1} de {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
                   disabled={page >= totalPages - 1}
-                  className="p-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                  className="ui-icon-btn p-1.5 rounded-lg border border-control text-muted hover:text-ink hover:bg-elevated disabled:opacity-30 disabled:pointer-events-none transition-colors"
                   aria-label="Próxima página"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             </div>
