@@ -30,7 +30,7 @@ O fluxo Chromium → Next standalone → Spring Boot → PostgreSQL → Mailpit 
 | C. Vulnerabilidades, impacto e regressões | [vulnerabilidades.md](vulnerabilidades.md) |
 | D. Cloud Run e riscos operacionais | [cloud-run.md](cloud-run.md) |
 | E. Comandos, resultados e limitações | [testes.md](testes.md), [evidencias.json](evidencias.json) |
-| F. Correções para revisão | Branch indicada acima; PR separado, sem merge automático |
+| F. Correções para revisão | [PR #11](https://github.com/uaikauaa/oficina/pull/11), separado e draft, sem merge automático |
 | G. Sequência de implantação | [checklist-implantacao.md](checklist-implantacao.md) |
 | H. Veredito | **NO-GO**; condições abaixo e checklist |
 | Linguagens, versões e dependências | [stack.md](stack.md), [dependencias.json](dependencias.json) |

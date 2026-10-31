@@ -30,7 +30,7 @@ Execução local em worktree separado, com contas sintéticas e containers ident
 
 ## Reprodução
 
-Executar somente contra PostgreSQL e SMTP descartáveis. No backend, configurar `TEST_DB_URL`, `TEST_DB_USERNAME` e `TEST_DB_PASSWORD` para o banco sintético, conforme `src/test/resources/application-test.properties`, e tamb?m `TEST_DB_EXPECTED_PORT=5432` (porta do banco descart?vel desta execu??o) e `TEST_FLYWAY_LOCATION=filesystem:<caminho-absoluto>/backend/src/test/resources/db/synthetic-migration`; executar `./mvnw.cmd clean verify`. O ambiente dos testes não é o mesmo banco da integração com as 22 migrations reais.
+Executar somente contra PostgreSQL e SMTP descartáveis. No backend, configurar `TEST_DB_URL`, `TEST_DB_USERNAME` e `TEST_DB_PASSWORD` para o banco sintético, conforme `src/test/resources/application-test.properties`, e também `TEST_DB_EXPECTED_PORT=5432` (porta do banco descartável desta execução) e `TEST_FLYWAY_LOCATION=filesystem:<caminho-absoluto>/backend/src/test/resources/db/synthetic-migration`; executar `./mvnw.cmd clean verify`. O ambiente dos testes não é o mesmo banco da integração com as 22 migrations reais.
 
 No frontend: `npm ci`, `npm run lint`, `npm test`, `npm run build`. Para UI contra imagem local: definir `E2E_BASE_URL=http://localhost:13001`, `E2E_EXTERNAL_SERVER=true`, executar `npx playwright test --grep-invert @integration-real --output=test-results/ui-audit`. O teste opcional com credenciais externas permanece ignorado quando elas não são fornecidas.
 
