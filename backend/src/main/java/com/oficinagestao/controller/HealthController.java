@@ -44,7 +44,7 @@ public class HealthController {
         try (Connection connection = dataSource.getConnection()) {
             dbUp = connection.isValid(2); // Timeout de 2 segundos
         } catch (Exception e) {
-            log.error("Health check detectou falha na conectividade com o banco de dados: {}", e.getMessage());
+            log.error("Health check detectou falha na conectividade com o banco de dados: {}", e.getClass().getSimpleName());
         }
 
         if (dbUp) {

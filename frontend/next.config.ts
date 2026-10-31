@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { getSecurityHeaders } from "./src/lib/securityHeaders.ts";
+import { validateBackendOrigin } from "./src/lib/backendUrl.ts";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -30,7 +31,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
+        destination: `${validateBackendOrigin(backendUrl)}/api/:path*`,
       },
     ];
   },

@@ -15,6 +15,9 @@ import java.util.Optional;
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
+    @Query("SELECT r.usuario.id FROM RefreshToken r WHERE r.tokenHash = :hash")
+    Optional<Long> findUsuarioIdByTokenHash(@Param("hash") String hash);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<RefreshToken> findByTokenHash(String tokenHash);
 
