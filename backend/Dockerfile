@@ -8,6 +8,7 @@ RUN mvn -B -ntp package -Dmaven.test.skip=true
 
 FROM eclipse-temurin:21-jre-alpine AS runtime
 
+RUN apk upgrade --no-cache
 RUN addgroup -S app && adduser -S app -G app
 WORKDIR /app
 COPY --from=build --chown=app:app /workspace/target/backend-0.0.1-SNAPSHOT.jar ./app.jar
