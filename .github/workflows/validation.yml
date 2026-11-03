@@ -90,10 +90,14 @@ jobs:
         env:
           INTERNAL_BACKEND_URL: http://127.0.0.1:8080
         run: npm run build
+      - name: TLS e SMTP locais com certificados efemeros
+        run: node --test ../scripts/homologation/tls-isolated.test.mjs
+      - name: Proxy standalone - cookies CSRF JWT erros PDF CSV e limites
+        run: node ../scripts/test-proxy-runtime.mjs
       - name: E2E mockados sem servidor backend produtivo
         env:
           CI: 'true'
-        run: npx playwright test --project=chromium --grep-invert 'Autenticação e Login E2E'
+        run: npx playwright test --project=chromium
       - name: Guardar evidencias em caso de falha
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

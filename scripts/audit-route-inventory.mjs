@@ -39,7 +39,7 @@ for (const [method, route, handler, auth] of rows) {
     if (fs.existsSync(path.join(root, dto))) constraints = [...new Set([...read(dto).matchAll(/@(NotNull|NotBlank|Size|Pattern|Email|Positive|PositiveOrZero|DecimalMin|DecimalMax|Min|Max|Valid)\b/g)].map(m => m[1]))];
     validations.push(`${body}${signature.includes('@Valid') ? ' @Valid' : ''}${constraints.length ? ': ' + constraints.join(', ') : ''}`);
   }
-  if (signature.includes('Pageable')) validations.push('Pageable (max size 2000); sort finito, <=3 campos/64 caracteres');
+  if (signature.includes('Pageable')) validations.push('Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres');
   if (query.length) validations.push(query.join(', '));
   if (controller === 'AuthController') validations.push('regras AuthService, token/challenge/cookies conforme operacao');
   if (!validations.length) validations.push('sem body; service/seguranca central');
@@ -61,7 +61,7 @@ lines.push('', '## Rotas da plataforma backend', '',
   '| OPTIONS | rotas /api acima | CorsFilter; lista exata de origens/metodos/headers | preflight valido sem sessao | dispensado; nao modifica estado | sem recurso; baixo | CsrfAndCorsSecurityTest |',
   '| Outros metodos/caminhos | /** | firewall + mappings; rotas nao implementadas nao executam negocio | /api exige ADMIN; demais autenticados | conforme matcher | rejeicao; medio | CsrfMvcRoutingTest; RouteAuthorizationAuditTest |',
   '', '## Frontend', '',
-  'Todas as paginas entregam shell HTML/React publico; o layout autenticado recupera /api/auth/me antes de mostrar dados. A autorizacao efetiva e no backend. Nao ha Server Actions nem armazenamento de JWT em localStorage/sessionStorage. Middleware e no-op e nao e uma barreira de seguranca.', '',
+  'Paginas entregam shell HTML/React publico com renderizacao dinamica e CSP por nonce. O layout autenticado recupera /api/auth/me antes de mostrar dados. A autorizacao efetiva e no backend. Nao ha Server Actions nem armazenamento de JWT em localStorage/sessionStorage. Proxy Next gera o nonce; o Route Handler server-side encaminha /api com identidade IAM quando executado no Cloud Run.', '',
   '| Metodo | Rota | Arquivo | Autenticacao / autorizacao | CSRF | Validacao / dados | Risco | Evidencia |',
   '|---|---|---|---|---|---|---|---|');
 function walk(dir) { return fs.readdirSync(path.join(root, dir), { withFileTypes:true }).flatMap(e => e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]); }
@@ -72,7 +72,7 @@ for (const file of walk('frontend/src/app').filter(f => /\/(page\.tsx|route\.tsx
 }
 for (const file of walk('frontend/public')) lines.push(`| GET, HEAD | /${file.replace('frontend/public/','')} | [${file}](../../${file}) | publica | leitura dispensada | asset local estatico | baixo | build Docker; navegacao Playwright |`);
 lines.push('| GET, HEAD | /_next/static/**, /_next/image | Next.js runtime | publica | leitura dispensada | assets/otimizacao; sem remotePatterns de dominios arbitrarios | medio | Next atualizado; build e imagem Trivy |',
-  '| Todos os metodos | /api/:path* | next.config.ts; docker-entrypoint.mjs | proxy preserva regras Spring da matriz acima | preservado no proxy | destino fixo validado no build; runtime divergente aborta | alto | integration-real.spec.ts; audit-proxy-transport.mjs |',
+  '| GET, HEAD, OPTIONS, POST, PUT, PATCH, DELETE | /api/:path* | app/api/[...path]/route.ts; server/backendProxy.ts | proxy preserva JWT/cookies Spring; identidade Google somente servidor no Cloud Run | preservado no proxy | origem de runtime validada; corpo <=64KiB; resposta no-store; downloads em stream | alto | integration-real.spec.ts; backendProxy.test.ts; test-proxy-runtime.mjs |',
   '| GET e navegacao RSC | paginas acima | Next App Router | mesma politica de shell; nenhuma credencial em SSR | leitura dispensada | React Server Components internos | medio | build; Playwright |',
   '| Outros | /** | Next 404/405 | publico, sem operacao de negocio | n/a | erro de pagina/metodo; baixo | build; smoke local |', '',
   'Para regenerar: executar RouteAuthorizationAuditTest com PostgreSQL descartavel e depois `node scripts/audit-route-inventory.mjs`. A prova de cobertura e o TSV produzido em runtime; a descricao de validacao e extraida dos controllers/DTOs e nao substitui revisao das regras de negocio.');

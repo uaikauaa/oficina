@@ -29,7 +29,7 @@ class FlywayEmptySchemaIntegrationTest {
     private Environment environment;
 
     @Test
-    void emptySchemaMigratesFromV1ToV22WithoutBaseline() throws Exception {
+    void emptySchemaMigratesFromV1ToV23WithoutBaseline() throws Exception {
         String schema = "flyway_empty_" + UUID.randomUUID().toString().replace("-", "");
 
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
@@ -48,7 +48,7 @@ class FlywayEmptySchemaIntegrationTest {
 
             new FlywayConfig().flywayMigrationStrategy().migrate(flyway);
 
-            assertEquals("22", flyway.info().current().getVersion().getVersion());
+            assertEquals("23", flyway.info().current().getVersion().getVersion());
             assertFalse(environment.getProperty("spring.flyway.baseline-on-migrate", Boolean.class, true));
 
             try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
@@ -74,7 +74,7 @@ class FlywayEmptySchemaIntegrationTest {
     }
 
     @Test
-    void existingV21SchemaMigratesToV22() throws Exception {
+    void existingV21SchemaMigratesToV23() throws Exception {
         String schema = "flyway_upgrade_" + UUID.randomUUID().toString().replace("-", "");
         try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement()) {
             statement.execute("CREATE SCHEMA " + schema);
@@ -90,7 +90,7 @@ class FlywayEmptySchemaIntegrationTest {
                     .locations(SyntheticMigrations.location(environment)).baselineOnMigrate(false).validateOnMigrate(true).load();
             v22.migrate();
             v22.validate();
-            assertEquals("22", v22.info().current().getVersion().getVersion());
+            assertEquals("23", v22.info().current().getVersion().getVersion());
 
             try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();
                  ResultSet column = statement.executeQuery("SELECT numeric_precision, numeric_scale FROM information_schema.columns "

@@ -65,13 +65,15 @@ test.describe('Autenticação e Login E2E', () => {
   test('3. Login com credenciais válidas deve autenticar e solicitar 2FA ou navegar para /dashboard', async ({
     page,
   }) => {
-    const email = process.env.INITIAL_ADMIN_EMAIL;
-    const password = process.env.INITIAL_ADMIN_PASSWORD;
-
-    if (!email || !password) {
-      test.skip(true, 'Credenciais administrativas não fornecidas no ambiente local');
-      return;
-    }
+    const email = 'synthetic.login@oficina.invalid';
+    const password = 'SyntheticOnly#2026!';
+    await page.route('**/api/auth/me', route => route.fulfill({ status: 401, json: {} }));
+    await page.route('**/api/auth/refresh', route => route.fulfill({ status: 401, json: {} }));
+    await page.route('**/api/auth/csrf', route => route.fulfill({ json: { token: 'synthetic-csrf' } }));
+    await page.route('**/api/auth/login', route => {
+      expect(route.request().postDataJSON().email).toBe(email);
+      return route.fulfill({ json: { twoFactorRequired: true, challengeToken: 'synthetic-opaque-challenge' } });
+    });
 
     await page.goto('/login');
 
@@ -83,6 +85,7 @@ test.describe('Autenticação e Login E2E', () => {
     const twoFactorInput = page.locator('#two-factor-code, #modal-two-factor-code').first();
     const dashboardTitle = page.getByText('Painel Operacional');
 
-    await expect(twoFactorInput.or(dashboardTitle)).toBeVisible({ timeout: 15000 });
+    await expect(twoFactorInput).toBeVisible({ timeout: 15000 });
+    await expect(dashboardTitle).not.toBeVisible();
   });
 });

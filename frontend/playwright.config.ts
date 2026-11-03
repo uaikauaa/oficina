@@ -12,6 +12,8 @@ if (target.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(target.h
 
 export default defineConfig({
   testDir: './e2e',
+  // The real suite has its own isolated PostgreSQL/SMTP job and must never use operational credentials.
+  testIgnore: process.env.RUN_REAL_INTEGRATION === 'true' ? [] : ['**/integration-real.spec.ts'],
   timeout: 30000,
   retries: 0,
   workers: process.env.CI ? 2 : undefined,

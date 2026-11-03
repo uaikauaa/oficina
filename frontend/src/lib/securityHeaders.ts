@@ -13,11 +13,13 @@ export interface SecurityHeader {
  * Não há fontes ou scripts externos (fontes Geist são locais via next/font; ícones Lucide são SVG inline).
  */
 export function buildContentSecurityPolicy(
-  isProd: boolean = process.env.NODE_ENV === 'production'
+  isProd: boolean = process.env.NODE_ENV === 'production',
+  nonce?: string
 ): string {
+  if (nonce && !/^[A-Za-z0-9+/=_-]{16,128}$/.test(nonce)) throw new Error('Nonce invalido');
   const scriptSrc = isProd
-    ? "script-src 'self' 'unsafe-inline'"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
+    ? (nonce ? `script-src 'nonce-${nonce}' 'strict-dynamic'` : "script-src 'none'")
+    : (nonce ? `script-src 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'` : "script-src 'self' 'unsafe-inline' 'unsafe-eval'");
 
   const connectSrc = isProd
     ? "connect-src 'self'"
@@ -26,9 +28,13 @@ export function buildContentSecurityPolicy(
   const directives = [
     "default-src 'self'",
     scriptSrc,
-    "style-src 'self' 'unsafe-inline'",
+    nonce ? `style-src 'self' 'nonce-${nonce}'` : "style-src 'self'",
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
+    "object-src 'none'",
+    "worker-src 'self'",
+    "manifest-src 'self'",
     connectSrc,
     "frame-ancestors 'none'",
     "base-uri 'self'",

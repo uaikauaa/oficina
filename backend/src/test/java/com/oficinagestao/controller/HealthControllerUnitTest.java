@@ -69,4 +69,16 @@ class HealthControllerUnitTest {
         assertEquals("DOWN", response.getBody().get("status"));
         assertEquals("DOWN", response.getBody().get("database"));
     }
+
+    @Test
+    void concurrentProbesDoNotCreateADatabaseConnectionStampede() throws Exception {
+        when(dataSource.getConnection()).thenReturn(connection);
+        when(connection.isValid(2)).thenReturn(true);
+        try (var executor = java.util.concurrent.Executors.newFixedThreadPool(4)) {
+            var tasks = new java.util.ArrayList<java.util.concurrent.Callable<HttpStatus>>();
+            for (int i = 0; i < 16; i++) tasks.add(() -> (HttpStatus) healthController.health().getStatusCode());
+            for (var future : executor.invokeAll(tasks)) assertEquals(HttpStatus.OK, future.get());
+        }
+        verify(dataSource, times(1)).getConnection();
+    }
 }

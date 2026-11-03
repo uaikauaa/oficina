@@ -1,5 +1,7 @@
 # Auditoria de segurança e hardening — 03/11/2026
 
+**Estado atualizado do PR #13:** veja [continuação da implementação, evidências e riscos residuais](continuacao.md). O texto abaixo preserva o registro inicial de `b968f5e`; os estados ABUSE-01, EDGE-01, CSP-01 e DATA-01 foram substituídos pela continuação. Nenhum resultado local aprova automaticamente IAM, Neon ou SMTP do ambiente Google.
+
 **Base:** `main` em `65e7e44b7f37383f605cfec54ea21a3d5a6a4d36` (PR #12). Trabalho isolado em `security/hardening-production-20261103`, PR #13. Nenhum deploy, merge ou acesso ao Neon de produção foi realizado. O PDF de pesquisa fornecido pelo solicitante foi lido como catálogo de ameaças; as decisões abaixo usam o código e testes desta revisão.
 
 ## Escopo e evidências

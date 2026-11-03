@@ -47,6 +47,7 @@ public class IpAddressResolver {
      * Se vazio, nenhum header de proxy é aceito — comportamento seguro por padrão.
      */
     private final Set<String> trustedProxies;
+    private ProxyClientContextVerifier clientContext = new ProxyClientContextVerifier("", false, java.time.Clock.systemUTC());
 
     /**
      * Construtor Spring principal — recebe a lista de proxies confiáveis das propriedades.
@@ -55,9 +56,11 @@ public class IpAddressResolver {
      */
     @Autowired
     public IpAddressResolver(
-            @Value("${security.trusted-proxies:}") List<String> trustedProxyList
+            @Value("${security.trusted-proxies:}") List<String> trustedProxyList,
+            ProxyClientContextVerifier clientContext
     ) {
         this.trustedProxies = buildTrustedSet(trustedProxyList);
+        this.clientContext = clientContext;
     }
 
     /**
@@ -116,6 +119,8 @@ public class IpAddressResolver {
             return DEFAULT_IP;
         }
 
+        String verified = clientContext.verifiedIp(request);
+        if (verified != null) return verified;
         String remoteAddr = resolverRemoteAddr(request.getRemoteAddr());
 
         // SEC-03: Somente aceita headers de proxy quando a origem imediata é confiável.

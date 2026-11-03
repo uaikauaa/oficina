@@ -3,7 +3,8 @@
 # gcloud builds submit ./frontend --config=./frontend/cloudbuild.yaml --substitutions="_BACKEND_URL=https://BACKEND.run.app,_IMAGE=REGION-docker.pkg.dev/PROJECT/REPO/oficina-frontend:TAG"
 #
 # _BACKEND_URL deve ser a URL HTTPS do serviço Cloud Run do backend.
-# A URL é incorporada pelo Next.js em rewrites() durante o build.
+# Configure INTERNAL_BACKEND_URL no runtime do frontend. O handler server-side
+# usa identidade Google automaticamente quando K_SERVICE está presente.
 # Nenhuma senha ou token deve ser informado como substituição de build.
 steps:
   - name: gcr.io/cloud-builders/docker

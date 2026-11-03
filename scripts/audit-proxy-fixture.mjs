@@ -7,6 +7,10 @@ http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': 'application/pdf', 'Cache-Control': 'no-store' });
     return res.end(pdf);
   }
+  if (url.pathname === '/api/csv') {
+    res.writeHead(200, { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="synthetic.csv"' });
+    return res.end('id,nome\n1,Sintético\n');
+  }
   if (url.pathname === '/api/cookies') {
     res.writeHead(200, { 'Set-Cookie': ['audit_a=synthetic; HttpOnly; Path=/; SameSite=Lax',
       'audit_b=synthetic; HttpOnly; Path=/api; SameSite=Strict'], 'Content-Type': 'application/json' });
@@ -22,5 +26,7 @@ http.createServer(async (req, res) => {
   for await (const chunk of req) { body += chunk; if (body.length > 4096) { res.writeHead(413); return res.end(); } }
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ method: req.method, body, csrfPreserved: req.headers['x-xsrf-token'] === 'synthetic-csrf',
-    cookiePreserved: req.headers.cookie === 'audit_a=synthetic' }));
+    cookiePreserved: req.headers.cookie === 'audit_a=synthetic',
+    appJwtPreserved: req.headers.authorization === 'Bearer synthetic-app-jwt',
+    browserIdentityDropped: !req.headers['x-serverless-authorization'] && !req.headers['x-forwarded-for'] }));
 }).listen(8080, '0.0.0.0');

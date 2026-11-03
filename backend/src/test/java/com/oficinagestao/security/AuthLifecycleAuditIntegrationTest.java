@@ -41,7 +41,7 @@ class AuthLifecycleAuditIntegrationTest {
     final String password = "AuditOnly#2026Original!";
 
     @BeforeEach void setup() {
-        attempts.resetAll();
+        jdbc.update("DELETE FROM security_rate_limits");
         user = new Usuario("Audit synthetic", "audit-" + UUID.randomUUID() + "@oficina.invalid",
                 encoder.encode(password), true);
         user.addRole(roles.findByNome("ROLE_ADMIN").orElseThrow());
@@ -53,7 +53,7 @@ class AuthLifecycleAuditIntegrationTest {
         jdbc.update("DELETE FROM refresh_tokens WHERE usuario_id = ?", user.getId());
         jdbc.update("DELETE FROM two_factor_challenges WHERE usuario_id = ?", user.getId());
         users.deleteById(user.getId());
-        attempts.resetAll();
+        jdbc.update("DELETE FROM security_rate_limits");
     }
 
     String challenge() {

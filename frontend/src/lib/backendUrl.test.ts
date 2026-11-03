@@ -12,12 +12,13 @@ test('proxy accepts only origins and never embeds credentials or URL paths', () 
   }
 });
 
-test('standalone startup rejects runtime/build mismatch without revealing target values', () => {
+test('standalone validates the runtime origin and refuses insecure Cloud Run configuration', () => {
   const manifest = { rewrites: { beforeFiles: [], afterFiles: [
     { source: '/api/:path*', destination: 'https://backend.example.invalid/api/:path*' },
   ], fallback: [] } };
-  assert.doesNotThrow(() => assertProxyTarget(manifest, undefined));
+  assert.throws(() => assertProxyTarget(manifest, undefined));
   assert.doesNotThrow(() => assertProxyTarget(manifest, 'https://backend.example.invalid/'));
-  assert.throws(() => assertProxyTarget(manifest, 'https://wrong.example.invalid'), /diverge do build/);
-  assert.throws(() => assertProxyTarget({ rewrites: [] }, undefined), /ausente/);
+  assert.doesNotThrow(() => assertProxyTarget(manifest, 'https://runtime.example.invalid'));
+  assert.throws(() => assertProxyTarget({}, 'http://backend:8080', { K_SERVICE: 'synthetic' }), /HTTPS/);
+  assert.throws(() => assertProxyTarget({}, 'https://backend.invalid', { K_SERVICE: 'synthetic', CLOUD_RUN_IAM: 'false' }), /identidade/);
 });

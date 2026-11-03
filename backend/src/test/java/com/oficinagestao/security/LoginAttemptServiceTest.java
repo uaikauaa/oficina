@@ -14,14 +14,21 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Testes de segurança e unidade para LoginAttemptService (SEC-02).
  */
+@org.springframework.boot.test.context.SpringBootTest
+@org.springframework.test.context.ActiveProfiles("test")
 class LoginAttemptServiceTest {
+    @org.springframework.beans.factory.annotation.Autowired SharedRateLimitService store;
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+    int count() { return jdbc.queryForObject("SELECT count(*) FROM security_rate_limits", Integer.class); }
+    long used(String scope, String subject) { return store.inspect(scope, subject, 5).used(); }
 
     private LoginAttemptService loginAttemptService;
 
     @BeforeEach
     void setUp() {
         // 5 tentativas máximas, 15 minutos de bloqueio, cache máx 10.000
-        loginAttemptService = new LoginAttemptService(5, 15);
+        jdbc.update("DELETE FROM security_rate_limits");
+        loginAttemptService = new LoginAttemptService(store, 5, 15);
     }
 
     @Test
@@ -35,8 +42,8 @@ class LoginAttemptServiceTest {
         loginAttemptService.loginFailed(ip, email);
 
         assertFalse(loginAttemptService.isBlocked(ip, email));
-        assertEquals(1, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip)));
-        assertEquals(1, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpEmailKey(ip, email)));
+        assertEquals(1, used("login-ip", ip));
+        assertEquals(1, used("login-pair", ip + "|" + email));
     }
 
     @Test
@@ -50,7 +57,7 @@ class LoginAttemptServiceTest {
             assertFalse(loginAttemptService.isBlocked(ip, email));
         }
 
-        assertEquals(4, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip)));
+        assertEquals(4, used("login-ip", ip));
     }
 
     @Test
@@ -86,7 +93,7 @@ class LoginAttemptServiceTest {
     }
 
     @Test
-    @DisplayName("5. Login bem-sucedido deve resetar contador de tentativas")
+    @DisplayName("5. Login bem-sucedido limpa o par e preserva o or?amento de IP")
     void loginBemSucedidoDeveResetarContador() {
         String ip = "192.168.1.104";
         String email = "admin5@oficina.com";
@@ -95,12 +102,12 @@ class LoginAttemptServiceTest {
             loginAttemptService.loginFailed(ip, email);
         }
 
-        assertEquals(3, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip)));
+        assertEquals(3, used("login-ip", ip));
 
         loginAttemptService.loginSucceeded(ip, email);
 
-        assertEquals(0, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip)));
-        assertEquals(0, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpEmailKey(ip, email)));
+        assertEquals(3, used("login-ip", ip));
+        assertEquals(0, used("login-pair", ip + "|" + email));
         assertFalse(loginAttemptService.isBlocked(ip, email));
     }
 
@@ -142,7 +149,7 @@ class LoginAttemptServiceTest {
     @DisplayName("8. Estado expirado deixa de bloquear automaticamente na verificação")
     void estadoExpiradoDeixaDeBloquear() {
         // Serviço com duração de bloqueio 0 minutos (expiração imediata)
-        LoginAttemptService shortLivedService = new LoginAttemptService(5, 0);
+        LoginAttemptService shortLivedService = new LoginAttemptService(store, 5, 15);
         String ip = "192.168.1.150";
         String email = "expiracao@oficina.com";
 
@@ -151,18 +158,20 @@ class LoginAttemptServiceTest {
         }
 
         // Como o tempo expirou de imediato, a verificação limpa e retorna false
+        jdbc.update("UPDATE security_rate_limits SET expires_at = now() - interval '1 second'");
         assertFalse(shortLivedService.isBlocked(ip, email));
     }
 
     @Test
     @DisplayName("9. Rotina periódica agendada (scheduledCleanup) remove entradas expiradas")
     void scheduledCleanupDeveRemoverEntradasExpiradas() {
-        LoginAttemptService shortLivedService = new LoginAttemptService(5, 0);
+        LoginAttemptService shortLivedService = new LoginAttemptService(store, 5, 15);
         shortLivedService.loginFailed("192.168.1.201", "expirado@oficina.com");
-        assertTrue(shortLivedService.getAttemptsCacheSize() > 0);
+        assertTrue(count() > 0);
 
-        shortLivedService.scheduledCleanup();
-        assertEquals(0, shortLivedService.getAttemptsCacheSize());
+        jdbc.update("UPDATE security_rate_limits SET expires_at = now() - interval '1 second'");
+        store.cleanup();
+        assertEquals(0, count());
     }
 
     @Test
@@ -179,8 +188,8 @@ class LoginAttemptServiceTest {
             loginAttemptService.loginFailed(ip2, email);
         }
 
-        assertEquals(3, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip1)));
-        assertEquals(2, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip2)));
+        assertEquals(3, used("login-ip", ip1));
+        assertEquals(2, used("login-ip", ip2));
         assertFalse(loginAttemptService.isBlocked(ip1, email));
         assertFalse(loginAttemptService.isBlocked(ip2, email));
 
@@ -193,10 +202,10 @@ class LoginAttemptServiceTest {
     }
 
     @Test
-    @DisplayName("11. Proteção contra saturação de memória: eviction desaloja entradas antigas se atingir limite máximo")
+    @DisplayName("11. Persistent buckets are never evicted to release an active attacker budget")
     void devePrevenirCrescimentoIlimitadoDeMemoria() {
-        int maxCapacity = 20;
-        LoginAttemptService limitedService = new LoginAttemptService(5, 15, maxCapacity);
+
+        LoginAttemptService limitedService = new LoginAttemptService(store, 5, 15);
 
         // Insere tentativas de 30 IPs diferentes (cada uma gera ip e ip_email)
         for (int i = 0; i < 30; i++) {
@@ -204,7 +213,7 @@ class LoginAttemptServiceTest {
         }
 
         // O tamanho do cache nunca deve explodir além de limites razoáveis de segurança
-        assertTrue(limitedService.getAttemptsCacheSize() <= maxCapacity + 2,
+        assertEquals(60, count(),
                 "O cache de tentativas deve respeitar a capacidade máxima configurada.");
     }
 
@@ -232,18 +241,19 @@ class LoginAttemptServiceTest {
         executor.shutdown();
 
         assertTrue(finished);
-        assertEquals(threads, loginAttemptService.getAttemptsForKey(loginAttemptService.buildIpKey(ip)));
+        assertEquals(threads, used("login-ip", ip));
         assertTrue(loginAttemptService.isBlocked(ip, email));
     }
 
     @Test
-    @DisplayName("13. resetAll limpa o estado completamente, simulando comportamento limpo de restart")
-    void resetAllDeveLimparEstado() {
+    @DisplayName("13. Restart preserves persisted counters")
+    void restartPreservesState() {
         loginAttemptService.loginFailed("192.168.1.99", "admin@oficina.com");
-        assertTrue(loginAttemptService.getAttemptsCacheSize() > 0);
+        assertTrue(count() > 0);
 
-        loginAttemptService.resetAll();
-        assertEquals(0, loginAttemptService.getAttemptsCacheSize());
+        loginAttemptService = new LoginAttemptService(store, 5, 15);
+        assertEquals(2, count());
+        assertEquals(1, used("login-ip", "192.168.1.99"));
         assertFalse(loginAttemptService.isBlocked("192.168.1.99", "admin@oficina.com"));
     }
 }

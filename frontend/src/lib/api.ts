@@ -1,10 +1,7 @@
 // AUDIT-001: Suporte à arquitetura de mesma origem (Next.js rewrites: /api/* -> Spring Boot).
 // No navegador (client-side), as requisições utilizam caminho relativo ('') para mesma origem via rewrite do Next.js.
 // No servidor (SSR/testes), utiliza INTERNAL_BACKEND_URL ou NEXT_PUBLIC_API_URL se definidos.
-export const API_URL =
-  typeof window !== 'undefined'
-    ? ''
-    : (process.env.INTERNAL_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '');
+export const API_URL = '';
 
 /**
  * AUDIT-002: Extrai mensagem amigável e segura de erro de login com base no status HTTP e corpo da resposta.

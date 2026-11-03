@@ -98,7 +98,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, ativo:Boolean"
     ],
     "data": "categorias",
@@ -144,7 +144,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, tipoPessoa:TipoPessoa, ativo:Boolean"
     ],
     "data": "dados pessoais e historico",
@@ -176,7 +176,7 @@
     "csrf": "L",
     "validation": [
       "IDs Long; conversao 400, inexistente 404",
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, tipoEquipamento:TipoEquipamento, ativo:Boolean"
     ],
     "data": "equipamentos, proprietario, historico",
@@ -193,7 +193,7 @@
     "csrf": "L",
     "validation": [
       "IDs Long; conversao 400, inexistente 404",
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "status:StatusOrdemServico"
     ],
     "data": "cliente, equipamento, itens e valores da OS",
@@ -225,7 +225,7 @@
     "csrf": "L",
     "validation": [
       "IDs Long; conversao 400, inexistente 404",
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "status:StatusOrdemServico"
     ],
     "data": "dados pessoais e historico",
@@ -271,7 +271,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "produtoId:Long, tipo:TipoMovimentacaoEstoque, dataInicio:OffsetDateTime, dataFim:OffsetDateTime, numeroOs:String, termo:String"
     ],
     "data": "saldos e movimentacoes",
@@ -302,7 +302,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, ativo:Boolean"
     ],
     "data": "cadastro de fornecedores",
@@ -328,7 +328,7 @@
     "method": "GET",
     "route": "/api/health",
     "file": "backend/src/main/java/com/oficinagestao/controller/HealthController.java",
-    "line": 39,
+    "line": 41,
     "handler": "HealthController#health",
     "auth": "PUBLIC",
     "csrf": "L",
@@ -348,7 +348,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, tipoEquipamento:TipoEquipamento, ativo:Boolean"
     ],
     "data": "equipamentos, proprietario, historico",
@@ -380,7 +380,7 @@
     "csrf": "L",
     "validation": [
       "IDs Long; conversao 400, inexistente 404",
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres"
     ],
     "data": "equipamentos, proprietario, historico",
     "risk": "alto",
@@ -411,7 +411,7 @@
     "csrf": "L",
     "validation": [
       "IDs Long; conversao 400, inexistente 404",
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres"
     ],
     "data": "cliente, equipamento, itens e valores da OS",
     "risk": "alto",
@@ -441,7 +441,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, status:StatusOrdemServico, dataInicio:OffsetDateTime, dataFim:OffsetDateTime"
     ],
     "data": "cliente, equipamento, itens e valores da OS",
@@ -562,7 +562,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "termo:String, tipo:TipoProduto, categoriaId:Long, fornecedorId:Long, ativo:Boolean, estoqueBaixo:Boolean"
     ],
     "data": "catalogo, custos e compatibilidade",
@@ -623,7 +623,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres"
     ],
     "data": "dados pessoais e financeiros agregados",
     "risk": "alto",
@@ -638,7 +638,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres"
     ],
     "data": "dados pessoais e financeiros agregados",
     "risk": "alto",
@@ -653,7 +653,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "categoriaId:Long, fornecedorId:Long, estoqueBaixo:Boolean, zerado:Boolean"
     ],
     "data": "dados pessoais e financeiros agregados",
@@ -669,7 +669,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "dataInicio:OffsetDateTime, dataFim:OffsetDateTime, produtoId:Long, tipo:TipoMovimentacaoEstoque, numeroOs:String"
     ],
     "data": "dados pessoais e financeiros agregados",
@@ -685,7 +685,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres",
       "dataInicio:OffsetDateTime, dataFim:OffsetDateTime, status:StatusOrdemServico, incluirResumo:Boolean"
     ],
     "data": "dados pessoais e financeiros agregados",
@@ -701,7 +701,7 @@
     "auth": "ADMIN",
     "csrf": "L",
     "validation": [
-      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+      "Pageable (max size 200, page <=10000); sort finito, <=3 campos/64 caracteres"
     ],
     "data": "dados pessoais e financeiros agregados",
     "risk": "alto",
