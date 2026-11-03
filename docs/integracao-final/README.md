@@ -1,6 +1,6 @@
 # Integração dos PRs #9, #10 e #11 — Oficina Gestão
 
-**Estado em 31/10/2026:** integração de código preparada no [PR #12](https://github.com/uaikauaa/oficina/pull/12), branch `integrate/cloud-run-security-20261031`; **merge na `main` BLOQUEADO** até concluir a classificação dos diagnósticos do VS Code e revisar formalmente os 13 alertas Java residuais. **Cloud Run para homologação BLOQUEADO** até checar a configuração real de IAM, Neon, TLS/SMTP, limites de abuso e custos. **Produção NO-GO.** Nenhum deploy foi realizado.
+**Estado em 03/11/2026:** integração de código preparada no [PR #12](https://github.com/uaikauaa/oficina/pull/12), branch `integrate/cloud-run-security-20261031`. A classificação dos diagnósticos do VS Code segue pendente da exportação local; por orientação posterior do usuário, ela não bloqueia o merge de código se os demais gates forem aprovados. Os 13 alertas Java foram triados individualmente e a decisão técnica de integração consta abaixo. **Cloud Run para homologação BLOQUEADO** até checar a configuração real de IAM, Neon, TLS/SMTP, limites de abuso e custos. **Produção NO-GO.** Nenhum deploy foi realizado.
 
 ## A. Git e branches
 
@@ -16,13 +16,13 @@ Os jobs do commit `be12cc0` não foram confundidos com sucesso: [CI #96](https:/
 
 ## B. VS Code
 
-As [capturas fornecidas](../auditoria/prints/README.md) exibem **540 itens no painel** e contagens por arquivo, sem detalhes individuais. [Investigação do editor](vscode.md): Maven/Java 21 recompilou 159 fontes principais e 79 de teste e passou nos 800 testes em 03/11/2026; o classpath de teste resolveu 125 JARs. Logs do JDT LS mostram conflito de bundles, reinicializações e erro interno, mas **não identificam mensagem/linha/código dos 540 itens**. Não é correto converter eventos de log em diagnósticos nem declarar que os 540 desapareceram. A classificação individual continua obrigatória antes do merge.
+As [capturas fornecidas](../auditoria/prints/README.md) exibem **540 itens no painel** e contagens por arquivo, sem detalhes individuais. O [inventário dos 65 arquivos visíveis](inventario-vscode.md) atribui 535 contagens; cinco não são localizáveis pelos recortes. [Investigação do editor](vscode.md): Maven/Java 21 recompilou 159 fontes principais e 79 de teste e passou nos 800 testes em 03/11/2026; o classpath de teste resolveu 125 JARs. Logs do JDT LS mostram conflito de bundles, reinicializações e erro interno, mas **não identificam mensagem/linha/código dos 540 itens**. Não é correto converter eventos de log em diagnósticos nem declarar que os 540 desapareceram. A classificação individual permanece pendente da exportação prometida pelo usuário; não bloqueia a integração conforme sua instrução mais recente.
 
 ## C. Segurança
 
 As correções do PR #11 de logout/refresh concorrentes, revogação 2FA, limite de e-mails, SMTP obrigatório em produção, headers, ordenação e PDFs continuam na integração. Suite backend de 800 testes inclui regressões e concorrência. O inventário foi regenerado do runtime: **83 pares método/rota**, com 401/403/CSRF e métodos alternativos, em [matriz](../auditoria-final/matriz-rotas.md). O fluxo real também cobriu CSRF, texto HTML armazenado, campos extras, vínculo de OS/item, preço calculado pelo servidor e três PDFs. Esses testes são limitados e não certificam ausência universal de IDOR, SQLi ou XSS.
 
-Trivy na imagem backend final continua apontando [13 CVEs, com triagem individual](cves.md); não houve supressão global. Gitleaks em snapshot de 592 arquivos rastreados encontrou cinco ocorrências, todas em fixtures sintéticas de testes, sem credencial real confirmada. `npm audit` completo passou a apontar 16 avisos moderados na cadeia ESLint/minimatch de desenvolvimento; **zero alto/crítico**, `npm audit --omit=dev` zero e imagem frontend zero. Revisar o risco de dependências antes de aprovar o merge e acompanhar novas versões.
+Trivy na imagem backend final continua apontando [13 CVEs, com triagem individual](cves.md); não houve supressão global. Gitleaks em snapshot de 592 arquivos rastreados encontrou cinco ocorrências, todas em fixtures sintéticas de testes, sem credencial real confirmada. `npm audit` completo passou a apontar 16 avisos moderados na cadeia ESLint/minimatch de desenvolvimento; **zero alto/crítico**, `npm audit --omit=dev` zero e imagem frontend zero. A decisão técnica para merge de código é aceitar temporariamente os alertas inventariados porque nenhum caminho crítico/alto explorável foi demonstrado na configuração atual e os testes dos controles passaram. Os JARs vulneráveis continuam instalados; acompanhar versões e migrar a linha Spring em PR próprio antes da homologação.
 
 ## D. Frontend
 
@@ -60,8 +60,8 @@ Evidências locais: `audit-final-backend.log`, `audit-final-unit.log`, `audit-fi
 
 ## H. Vereditos
 
-- **INTEGRAÇÃO NA MAIN: BLOQUEADA.** Código consolidado e testado localmente e no GitHub, mas faltam classificação individual dos diagnósticos do VS Code e decisão técnica dos CVEs residuais. O PR de integração deve permanecer aberto.
+- **INTEGRAÇÃO NA MAIN: TECNICAMENTE APROVADA, sujeita aos checks do SHA final e confirmação do diff/HEAD.** Nenhum erro de compilação foi reproduzido, os testes essenciais passaram e os CVEs residuais foram triados e aceitos somente para merge de código. Os diagnósticos individuais do VS Code permanecem pendentes; o usuário instruiu prosseguir com a integração sem essa exportação.
 - **PRONTIDÃO PARA HOMOLOGAÇÃO CLOUD RUN: BLOQUEADA.** Falta verificar IAM/proxy, Neon TLS/certificado e suspensão, SMTP real, proteção distribuída e custos/cotas no projeto autorizado.
 - **PRODUÇÃO: NO-GO.** O relatório anterior mantém esses controles como pendências; nenhum resultado local autoriza tráfego de produção.
 
-Se os bloqueios forem resolvidos, conferir novamente o HEAD da `main`, o diff e os checks do SHA final antes de qualquer merge. Após merge autorizado pelos critérios da missão, repetir checks no commit resultante. Nenhum merge é autorizado por este documento sozinho.
+Antes do merge, conferir novamente o HEAD da `main`, o diff e os checks do SHA final. Após merge, repetir checks no commit resultante. A aceitação dos CVEs vale somente para integração de código, não para disponibilização pública.
