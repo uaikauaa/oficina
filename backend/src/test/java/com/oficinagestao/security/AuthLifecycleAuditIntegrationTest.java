@@ -94,6 +94,22 @@ class AuthLifecycleAuditIntegrationTest {
         verify(mail, times(1)).sendTwoFactorCode(eq(user.getEmail()), anyString());
     }
 
+    @Test void loginKeepsSecondFactorSecretOutOfResponseAndDatabase() {
+        LoginChallengeResponse response = auth.login(new LoginRequest(user.getEmail(), password, false), request);
+        var code = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(mail).sendTwoFactorCode(eq(user.getEmail()), code.capture());
+        assertTrue(code.getValue().matches("[0-9]{6}"));
+        assertFalse(response.toString().contains(code.getValue()));
+        String storedHash = jdbc.queryForObject(
+                "SELECT codigo_hash FROM two_factor_challenges WHERE challenge_token = ?",
+                String.class, response.challengeToken());
+        assertNotEquals(code.getValue(), storedHash);
+        assertTrue(encoder.matches(code.getValue(), storedHash));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM refresh_tokens WHERE usuario_id = ?",
+                Integer.class, user.getId()));
+        assertFalse(response.toString().contains("accessToken"));
+    }
+
     @Test void hourlyEmailBudgetIncludesAlreadyRevokedChallenges() {
         for (int i = 0; i < 10; i++) challenge();
         jdbc.update("UPDATE two_factor_challenges SET data_criacao = now() - interval '2 minutes', revogado = true WHERE usuario_id = ?", user.getId());

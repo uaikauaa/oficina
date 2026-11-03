@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const rows = read('backend/target/audit-routes.tsv').trim().split(/\r?\n/).map(line => line.split('\t'));
-const out = path.join(root, 'docs/auditoria-final'); fs.mkdirSync(out, { recursive: true });
+const out = path.join(root, process.argv[2] ?? 'docs/auditoria-final'); fs.mkdirSync(out, { recursive: true });
 const data = {
   Auth: 'credenciais, desafios 2FA, sessoes', Csrf: 'token CSRF (sem JWT)', Health: 'estado de conectividade',
   Cliente: 'dados pessoais e historico', Maquina: 'equipamentos, proprietario, historico', Produto: 'catalogo, custos e compatibilidade',
@@ -13,7 +13,7 @@ const data = {
   ConfiguracaoOficina: 'identidade comercial e contatos', Notificacao: 'alertas operacionais compartilhados',
   Busca: 'clientes, maquinas, OS e produtos', System: 'ambiente e usuario autenticado',
 };
-const lines = ['# Matriz de rotas — 30/10/2026', '',
+const lines = [`# Matriz de rotas — ${process.argv[2] ? '03/11/2026' : '30/10/2026'}`, '',
   `Inventario gerado de **${rows.length} combinacoes metodo/rota** registradas pelo Spring MVC, incluindo aliases.`, '',
   'Cada linha da API foi exercitada por `RouteAuthorizationAuditTest`: anonimo 401 e ROLE_USER 403 nas rotas ADMIN; mutacoes com cookie sem CSRF ou com par divergente 403. Os papeis desse teste sao simulados pelo Spring Test; assinatura JWT, tokenVersion e revogacao sao verificados nas suites de autenticacao. Nao equivale a testar todos os bodies de negocio em cada rota.', '',
   'A oficina e compartilhada entre todos os ADMIN. Nao existe isolamento por filial/tenant ou proprietario de conta. Acesso de um ADMIN a outro cliente e comportamento do modelo, nao BOLA. Vinculos cliente/maquina e item/OS sao validados pelos services.', '',

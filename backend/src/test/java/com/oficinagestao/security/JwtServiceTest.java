@@ -11,6 +11,57 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class JwtServiceTest {
 
+    @Test
+    void generatedTokenHasBoundedAudienceAndNoDisplayName() {
+        JwtService service = new JwtService("jwt-security-regression-secret-with-at-least-32-chars", 900000L);
+        var usuario = new com.oficinagestao.entity.Usuario(
+                "NOME PRIVADO SINTETICO", "jwt-security@example.invalid", "hash", true);
+        org.springframework.test.util.ReflectionTestUtils.setField(usuario, "id", 19L);
+        String token = service.generateToken(usuario);
+
+        String[] parts = token.split("\\.");
+        String header = new String(java.util.Base64.getUrlDecoder().decode(parts[0]), java.nio.charset.StandardCharsets.UTF_8);
+        String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]), java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(header.contains("\"alg\":\"HS256\""));
+        assertFalse(payload.contains("NOME PRIVADO SINTETICO"));
+        assertFalse(payload.contains("\"nome\""));
+        assertEquals(JwtService.ISSUER, service.extractClaims(token).getIssuer());
+        assertTrue(service.extractClaims(token).getAudience().contains(JwtService.AUDIENCE));
+    }
+
+    @Test
+    void rejectsSignedTokenWithoutExpectedIssuerAndAudience() throws Exception {
+        String secret = "jwt-security-regression-secret-with-at-least-32-chars";
+        JwtService service = new JwtService(secret, 900000L);
+        byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                .digest(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(digest);
+        String unscoped = io.jsonwebtoken.Jwts.builder()
+                .subject("jwt-security@example.invalid")
+                .issuedAt(new java.util.Date())
+                .expiration(new java.util.Date(System.currentTimeMillis() + 900000L))
+                .signWith(key, io.jsonwebtoken.Jwts.SIG.HS256)
+                .compact();
+        assertFalse(service.validateToken(unscoped));
+    }
+
+    @Test
+    void rejectsSignedTokenWithoutExpiration() throws Exception {
+        String secret = "jwt-security-regression-secret-with-at-least-32-chars";
+        JwtService service = new JwtService(secret, 900000L);
+        byte[] digest = java.security.MessageDigest.getInstance("SHA-256")
+                .digest(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var key = io.jsonwebtoken.security.Keys.hmacShaKeyFor(digest);
+        String noExpiry = io.jsonwebtoken.Jwts.builder()
+                .subject("jwt-security@example.invalid")
+                .issuer(JwtService.ISSUER)
+                .audience().add(JwtService.AUDIENCE).and()
+                .issuedAt(new java.util.Date())
+                .signWith(key, io.jsonwebtoken.Jwts.SIG.HS256)
+                .compact();
+        assertFalse(service.validateToken(noExpiry));
+    }
+
     // =========================================================================
     // FASE 4.2.3: 8 CASOS DE TESTE OBRIGATÓRIOS DO JWT SECRET
     // =========================================================================
