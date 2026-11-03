@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext, type BrowserContext } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 /**
  * Real stack smoke: Chromium -> Next.js /api rewrite -> Spring Boot -> PostgreSQL.
@@ -82,12 +83,15 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   const clientResponse = await context.request.post('/api/clientes', {
     headers: await csrfHeader(context),
     data: { tipoPessoa: 'FISICA', nomeRazaoSocial: clientName,
-      id: 999999999, telefone: `149${Date.now().toString().slice(-8)}`, email: `cliente.${Date.now()}@oficina.invalid` },
+      id: 999999999, ativo: false, roles: ['ROLE_ADMIN'], ['__proto__']: { auditPrototypeCanary: true },
+      telefone: `149${Date.now().toString().slice(-8)}`, email: `cliente.${Date.now()}@oficina.invalid` },
   });
   expect(clientResponse.status(), await clientResponse.text()).toBe(201);
-  const client = await clientResponse.json() as { id: number };
+  const client = await clientResponse.json() as { id: number; ativo: boolean; roles?: unknown };
   expect(client.id).toBeGreaterThan(0);
   expect(client.id).not.toBe(999999999);
+  expect(client.ativo).toBe(true);
+  expect(client.roles).toBeUndefined();
 
   const machineResponse = await context.request.post('/api/maquinas', {
     headers: await csrfHeader(context),
@@ -176,6 +180,19 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   await page.goto(`/clientes/${client.id}`);
   await expect(page.getByText(clientName, { exact: true }).first()).toBeVisible();
   expect(await page.evaluate(() => Object.hasOwn(window, 'auditXss')), 'Stored text must not execute HTML').toBe(false);
+  expect(await page.evaluate(() => Object.hasOwn(Object.prototype, 'auditPrototypeCanary'))).toBe(false);
+
+  const formulaClient = await context.request.post('/api/clientes', {
+    headers: await csrfHeader(context), data: { tipoPessoa: 'FISICA', nomeRazaoSocial: '=1+1' },
+  });
+  expect(formulaClient.status()).toBe(201);
+  await page.goto('/relatorios');
+  await page.getByRole('button', { name: 'Clientes', exact: true }).click();
+  const downloadReady = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Exportar Clientes (CSV)', exact: true }).click();
+  const csvPath = await (await downloadReady).path();
+  expect(csvPath).toBeTruthy();
+  expect(await readFile(csvPath!, 'utf8'), 'CSV text must not be emitted as a formula').toContain('"\t=1+1"');
 
   // Logout pelo botão REAL do navegador: confirma que a camada apiFetch não
   // usa token CSRF obsoleto nem exige uma segunda tentativa manual.

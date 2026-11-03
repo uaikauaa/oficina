@@ -19,6 +19,7 @@ try {
   }
   if (!ready) throw new Error('Isolated proxy did not start');
   await import('./audit-proxy-transport.mjs');
+  await (await import('./audit-http-parser.mjs')).checkLocalHttpParser();
 } finally {
   await Promise.all(children.map(async child => {
     if (child.exitCode !== null) return;

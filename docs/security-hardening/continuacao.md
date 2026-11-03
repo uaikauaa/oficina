@@ -1,5 +1,7 @@
 # Continuação do PR #13 — controles compartilhados e proxy privado
 
+**Estado posterior:** a [auditoria independente](../auditoria-independente-20261103/README.md) reproduziu os controles e corrigiu quatro achados adicionais. Exige RATE_LIMIT_SECRET independente e descreve a manutenção necessária para V24/rotação. Os números abaixo são da execução anterior.
+
 Esta revisão substitui o estado dos achados ABUSE-01, EDGE-01, CSP-01 e DATA-01 registrado em `b968f5e`. PR permanece **draft**, sem merge ou deploy. Todo dado usado nos ensaios foi sintético; não houve conexão com Neon, SMTP ou serviços Google de produção.
 
 ## Resultado por requisito

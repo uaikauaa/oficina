@@ -58,7 +58,7 @@ jobs:
           test "$TEST_FLYWAY_LOCATION" = "filesystem:$migration_dir"
           test -d "$migration_dir" && test ! -L "$migration_dir"
           mapfile -t entries < "$manifest"
-          test "${#entries[@]}" -eq 23
+          test "${#entries[@]}" -eq 24
           names=()
           for index in "${!entries[@]}"; do
             version=$((index + 1))

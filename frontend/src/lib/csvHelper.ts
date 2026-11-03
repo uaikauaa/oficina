@@ -22,10 +22,16 @@ export function escaparCampoCsv(valor: string | number | boolean | null | undefi
     return '';
   }
 
-  const texto = String(valor);
+  const bruto = String(valor);
+  // Quoting CSV delimiters alone does not prevent spreadsheet formula execution.
+  // Prefix untrusted text, including formulas hidden behind whitespace/format controls.
+  // Real numbers remain numbers so negative financial amounts keep their meaning.
+  const numericLiteral = /^-\d+(?:[.,]\d+)?$/.test(bruto);
+  const formula = typeof valor === 'string' && !numericLiteral && /^[\s\p{Cc}\p{Cf}]*[=+\-@＝＋－＠]/u.test(bruto);
+  const texto = formula ? '\t' + bruto : bruto;
 
   // Se contiver ponto e vírgula, aspas duplas ou quebras de linha, deve ser envolvido por aspas
-  const precisaDeAspas = texto.includes(';') || texto.includes('"') || texto.includes('\n') || texto.includes('\r');
+  const precisaDeAspas = formula || texto.includes(';') || texto.includes('"') || texto.includes('\n') || texto.includes('\r');
 
   if (precisaDeAspas) {
     // Escapa aspas duplicando-as

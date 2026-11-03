@@ -38,10 +38,10 @@ try {
         '-e', 'POSTGRES_USER=ci_isolado', '-e', 'POSTGRES_PASSWORD=ci-integration-db-only', 'postgres:16-alpine']
         : ['-p', '127.0.0.1:1025:1025', '-p', '127.0.0.1:8025:8025', 'axllent/mailpit:latest'])]);
   }
-  const startBackend = port => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
+  const startBackend = (port, jwtSecret = 'ci-integration-only-jwt-2026-synthetic-value-never-for-production') => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
     stdio: ['ignore', log, log], env: { ...process.env, SPRING_PROFILES_ACTIVE: 'dev', PORT: String(port), TRUSTED_PROXIES: '',
       DB_URL: 'jdbc:postgresql://127.0.0.1:15433/oficina_integracao_ci', DB_USERNAME: 'ci_isolado', DB_PASSWORD: 'ci-integration-db-only',
-      JWT_SECRET: 'ci-integration-only-jwt-2026-synthetic-value-never-for-production', SECURITY_COOKIE_SECURE: 'false',
+      JWT_SECRET: jwtSecret, RATE_LIMIT_SECRET: 'ci-integration-independent-rate-secret-only-2026', SECURITY_COOKIE_SECURE: 'false',
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',
       MAIL_USERNAME: 'ci.integration@oficina.invalid', MAIL_PASSWORD: 'ci-smtp-only', MAIL_FROM: 'ci.integration@oficina.invalid',
       MAIL_SMTP_AUTH: 'false', MAIL_SMTP_STARTTLS: 'false', INITIAL_ADMIN_NAME: 'Admin Sintetico CI',
@@ -76,11 +76,11 @@ try {
   assert.equal(distributed.filter(response => response.status === 401).length, 10);
   assert.equal(distributed.filter(response => response.status === 429).length, 2);
   await stop(backend);
-  backend = startBackend(8080);
+  backend = startBackend(8080, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026');
   await waitReady(backend, 8080);
   assert.equal((await attempt(8080, 100)).status, 429);
   assert.equal((await attempt(8082, 101)).status, 429);
-  console.log('PASS: two real JVMs, 12 concurrent distributed attempts, exact shared request budget, forged XFF ignored, restart preserved the block.');
+  console.log('PASS: two real JVMs, 12 concurrent distributed attempts, exact shared request budget, forged XFF ignored, restart with JWT key rotation preserved the block.');
 } finally {
   await stop(backend); await stop(replica);
   closeSync(log);

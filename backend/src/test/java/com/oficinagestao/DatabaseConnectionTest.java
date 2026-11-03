@@ -50,14 +50,14 @@ class DatabaseConnectionTest {
     }
 
     @Test
-    @DisplayName("Deve validar que as migrations Flyway V1 a V23 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
+    @DisplayName("Deve validar que as migrations Flyway V1 a V24 foram aplicadas e as tabelas essenciais existem sem estruturas fiscais")
     void shouldValidateFlywayMigrationsAndTables() throws Exception {
         assertNotNull(flyway, "O bean Flyway deve estar inicializado.");
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("23", current.getVersion().getVersion(), "A versão atual da migration deve ser 23.");
-        assertEquals("shared security rate limits", current.getDescription());
+        assertEquals("24", current.getVersion().getVersion(), "A versão atual da migration deve ser 24.");
+        assertEquals("rate limit key generation", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
@@ -68,7 +68,7 @@ class DatabaseConnectionTest {
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens", "configuracao_oficina", "two_factor_challenges", "notificacoes", "security_rate_limits");
+                "refresh_tokens", "configuracao_oficina", "two_factor_challenges", "notificacoes", "security_rate_limits", "security_rate_key_state");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {

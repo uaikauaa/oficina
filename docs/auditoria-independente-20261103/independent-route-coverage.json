@@ -1,0 +1,748 @@
+[ {
+  "handler" : "ClienteController#obterHistorico",
+  "route" : "/api/clientes/{id}/historico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "BuscaController#buscarRapida",
+  "route" : "/api/busca/rapida",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "AuthController#refresh",
+  "route" : "/api/auth/refresh",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 401,
+  "adminJwtStatus" : 401
+}, {
+  "handler" : "RelatorioController#relatorioEstoque",
+  "route" : "/api/relatorios/estoque",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ProdutoController#cadastrar",
+  "route" : "/api/produtos",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "ClienteController#obterResumo",
+  "route" : "/api/clientes/{id}/resumo",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "OrdemServicoController#gerarPdf",
+  "route" : "/api/ordens-servico/{id}/pdf",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "AuthController#logout",
+  "route" : "/api/auth/logout",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 200,
+  "userJwtStatus" : 200,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "HealthController#health",
+  "route" : "/api/health",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 200,
+  "userJwtStatus" : 200,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ProdutoController#atualizar",
+  "route" : "/api/produtos/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "CategoriaController#listar",
+  "route" : "/api/categorias",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ClienteController#buscarPorId",
+  "route" : "/api/clientes/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "FornecedorController#cadastrar",
+  "route" : "/api/fornecedores",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "SystemController#status",
+  "route" : "/api/system/status",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "OrdemServicoController#listar",
+  "route" : "/api/ordens-servico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "CategoriaController#alterarStatus",
+  "route" : "/api/categorias/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#atualizar",
+  "route" : "/api/ordens-servico/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ProdutoController#removerCompatibilidade",
+  "route" : "/api/produtos/{id}/maquinas/{maquinaId}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "DELETE",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ProdutoController#removerCompatibilidade",
+  "route" : "/api/produtos/{id}/compatibilidades/{maquinaId}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "DELETE",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "CsrfController#token",
+  "route" : "/api/auth/csrf",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 200,
+  "userJwtStatus" : 200,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ProdutoController#listarCompatibilidades",
+  "route" : "/api/produtos/{id}/compatibilidades",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ProdutoController#listarCompatibilidades",
+  "route" : "/api/produtos/{id}/maquinas",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ConfiguracaoOficinaController#obter",
+  "route" : "/api/configuracao-oficina",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "MaquinaController#listar",
+  "route" : "/api/maquinas",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "NotificacaoController#listarRecentes",
+  "route" : "/api/notificacoes",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "OrdemServicoController#buscarPorId",
+  "route" : "/api/ordens-servico/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "CategoriaController#listarAtivas",
+  "route" : "/api/categorias/ativas",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "EstoqueController#registrarSaida",
+  "route" : "/api/estoque/saida",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#criar",
+  "route" : "/api/ordens-servico",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "MaquinaController#buscarPorId",
+  "route" : "/api/maquinas/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "EstoqueController#obterResumo",
+  "route" : "/api/estoque/resumo",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ClienteController#atualizar",
+  "route" : "/api/clientes/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#adicionarPeca",
+  "route" : "/api/ordens-servico/{id}/itens",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "ClienteController#alterarStatus",
+  "route" : "/api/clientes/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "EstoqueController#listarMovimentacoes",
+  "route" : "/api/estoque/movimentacoes",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "MaquinaController#listarPorCliente",
+  "route" : "/api/clientes/{clienteId}/maquinas",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "AuthController#verifyTwoFactor",
+  "route" : "/api/auth/2fa/verify",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 400,
+  "userJwtStatus" : 400,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "RelatorioController#relatorioEquipamentos",
+  "route" : "/api/relatorios/equipamentos",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "EstoqueController#registrarAjuste",
+  "route" : "/api/estoque/ajuste",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "MaquinaController#criar",
+  "route" : "/api/maquinas",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "RelatorioController#relatorioOs",
+  "route" : "/api/relatorios/ordens-servico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "AuthController#login",
+  "route" : "/api/auth/login",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 400,
+  "userJwtStatus" : 400,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#listarPorCliente",
+  "route" : "/api/clientes/{clienteId}/ordens-servico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ConfiguracaoOficinaController#atualizar",
+  "route" : "/api/configuracao-oficina",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "ClienteController#criar",
+  "route" : "/api/clientes",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "FornecedorController#buscarPorId",
+  "route" : "/api/fornecedores/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "EstoqueController#movimentar",
+  "route" : "/api/estoque/movimentar",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#gerarDocumentoServico",
+  "route" : "/api/ordens-servico/{id}/documento-servico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "CategoriaController#buscarPorId",
+  "route" : "/api/categorias/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "MaquinaController#obterResumo",
+  "route" : "/api/maquinas/{id}/resumo",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "OrdemServicoController#listarPorMaquina",
+  "route" : "/api/maquinas/{maquinaId}/ordens-servico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "MaquinaController#atualizar",
+  "route" : "/api/maquinas/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "AuthController#resendTwoFactor",
+  "route" : "/api/auth/2fa/resend",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 400,
+  "userJwtStatus" : 400,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#gerarRecibo",
+  "route" : "/api/ordens-servico/{id}/recibo",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "RelatorioController#relatorioClientes",
+  "route" : "/api/relatorios/clientes",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "CategoriaController#cadastrar",
+  "route" : "/api/categorias",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#removerItem",
+  "route" : "/api/ordens-servico/{id}/itens/{itemId}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "DELETE",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ProdutoController#alterarStatus",
+  "route" : "/api/produtos/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "RelatorioController#relatorioMovimentacoes",
+  "route" : "/api/relatorios/movimentacoes",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "OrdemServicoController#obterContadoresDashboard",
+  "route" : "/api/ordens-servico/contadores-dashboard",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "RelatorioController#relatorioPecasMaisUtilizadas",
+  "route" : "/api/relatorios/pecas-mais-utilizadas",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ClienteController#obterContadoresStatus",
+  "route" : "/api/clientes/contadores-status",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ProdutoController#buscarPorId",
+  "route" : "/api/produtos/{id}",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "OrdemServicoController#listarItens",
+  "route" : "/api/ordens-servico/{id}/itens",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "ProdutoController#adicionarCompatibilidade",
+  "route" : "/api/produtos/{id}/compatibilidades",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "ProdutoController#adicionarCompatibilidade",
+  "route" : "/api/produtos/{id}/maquinas",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "FornecedorController#atualizar",
+  "route" : "/api/fornecedores/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "OrdemServicoController#obterContadoresStatus",
+  "route" : "/api/ordens-servico/contadores-status",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "OrdemServicoController#alterarStatus",
+  "route" : "/api/ordens-servico/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "CategoriaController#atualizar",
+  "route" : "/api/categorias/{id}",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "ProdutoController#listar",
+  "route" : "/api/produtos",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "EstoqueController#registrarEntrada",
+  "route" : "/api/estoque/entrada",
+  "cookieMutationCsrfTested" : true,
+  "method" : "POST",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "MaquinaController#obterHistorico",
+  "route" : "/api/maquinas/{id}/historico",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "FornecedorController#listar",
+  "route" : "/api/fornecedores",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "AuthController#me",
+  "route" : "/api/auth/me",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "ClienteController#listar",
+  "route" : "/api/clientes",
+  "cookieMutationCsrfTested" : false,
+  "method" : "GET",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 200
+}, {
+  "handler" : "NotificacaoController#marcarComoLida",
+  "route" : "/api/notificacoes/{id}/ler",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "NotificacaoController#marcarComoLida",
+  "route" : "/api/notificacoes/{id}/ler",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 404
+}, {
+  "handler" : "MaquinaController#alterarStatus",
+  "route" : "/api/maquinas/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "NotificacaoController#marcarTodasComoLidas",
+  "route" : "/api/notificacoes/ler-todas",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 204
+}, {
+  "handler" : "NotificacaoController#marcarTodasComoLidas",
+  "route" : "/api/notificacoes/ler-todas",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 204
+}, {
+  "handler" : "FornecedorController#alterarStatus",
+  "route" : "/api/fornecedores/{id}/status",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PATCH",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+}, {
+  "handler" : "AuthController#alterarSenha",
+  "route" : "/api/auth/alterar-senha",
+  "cookieMutationCsrfTested" : true,
+  "method" : "PUT",
+  "probe" : "missing IDs and empty JSON; business state rolled back",
+  "anonymousStatus" : 401,
+  "userJwtStatus" : 403,
+  "adminJwtStatus" : 400
+} ]

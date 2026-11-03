@@ -14,9 +14,12 @@ class ProxyClientContextVerifierTest {
     final Clock clock = Clock.fixed(Instant.parse("2026-11-03T12:00:00Z"), ZoneOffset.UTC);
     final ProxyClientContextVerifier verifier = new ProxyClientContextVerifier(secret, true, clock);
     MockHttpServletRequest request(String method, String path, long timestamp, String ip) throws Exception {
+        return request(method, path, timestamp, ip, secret);
+    }
+    MockHttpServletRequest request(String method, String path, long timestamp, String ip, String signingKey) throws Exception {
         var request = new MockHttpServletRequest(method, path);
         Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        mac.init(new SecretKeySpec(signingKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
         String signature = HexFormat.of().formatHex(mac.doFinal((timestamp + "\n" + ip + "\n" + method + "\n" + path).getBytes(StandardCharsets.UTF_8)));
         request.addHeader("X-Oficina-Client-Context", "v1." + timestamp + "." + Base64.getUrlEncoder().withoutPadding()
                 .encodeToString(ip.getBytes(StandardCharsets.UTF_8)) + "." + signature);
@@ -48,5 +51,14 @@ class ProxyClientContextVerifierTest {
         assertThrows(IllegalStateException.class, () -> new ProxyClientContextVerifier("", true, clock));
         assertNull(new ProxyClientContextVerifier("", false, clock).verifiedIp(new MockHttpServletRequest("GET", "/api/clientes")));
         assertNull(verifier.verifiedIp(new MockHttpServletRequest("GET", "/api/health")));
+    }
+    @Test void serviceContextRotationRejectsOldSignaturesAndRequiresCoordinatedRollout() throws Exception {
+        String newKey = "synthetic-rotated-service-context-secret-2026";
+        var rotated = new ProxyClientContextVerifier(newKey, true, clock);
+        var oldRequest = request("GET", "/api/clientes", clock.instant().getEpochSecond(), "203.0.113.20");
+        assertThrows(SecurityException.class, () -> rotated.verifiedIp(oldRequest));
+        var newRequest = request("GET", "/api/clientes", clock.instant().getEpochSecond(), "203.0.113.20", newKey);
+        assertEquals("203.0.113.20", rotated.verifiedIp(newRequest));
+        assertThrows(SecurityException.class, () -> verifier.verifiedIp(newRequest));
     }
 }

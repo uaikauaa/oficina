@@ -68,20 +68,32 @@ export async function proxyRequest(request: Request, config: ProxyConfig = proxy
   let body: Uint8Array | undefined;
   if (!['GET', 'HEAD'].includes(request.method) && request.body) {
     const reader = request.body.getReader();
-    const chunks: Uint8Array[] = [];
+    const buffer = new Uint8Array(MAX_PROXY_BODY);
     let total = 0;
+    let expired = false;
+    let aborted = false;
+    const cancel = () => { void reader.cancel().catch(() => {}); };
+    const abort = () => { aborted = true; cancel(); };
+    const deadline = setTimeout(() => { expired = true; cancel(); }, 10000);
+    if (request.signal.aborted) abort();
+    else request.signal.addEventListener('abort', abort, { once: true });
     try {
       while (true) {
         const part = await reader.read();
         if (part.done) break;
         total += part.value.byteLength;
-        if (total > MAX_PROXY_BODY) { await reader.cancel(); return error(413, 'PAYLOAD_TOO_LARGE'); }
-        chunks.push(part.value);
+        if (total > MAX_PROXY_BODY) { cancel(); return error(413, 'PAYLOAD_TOO_LARGE'); }
+        buffer.set(part.value, total - part.value.byteLength);
       }
-    } finally { reader.releaseLock(); }
-    body = new Uint8Array(total);
-    let offset = 0;
-    for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+      if (expired) return error(408, 'BODY_TIMEOUT');
+      if (aborted) return error(400, 'REQUEST_ABORTED');
+      body = buffer.subarray(0, total);
+    } catch { return error(400, 'INVALID_BODY'); }
+    finally {
+      clearTimeout(deadline);
+      request.signal.removeEventListener('abort', abort);
+      reader.releaseLock();
+    }
   }
   try {
     if (config.clientContext) {

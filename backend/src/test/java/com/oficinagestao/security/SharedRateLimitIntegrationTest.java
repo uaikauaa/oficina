@@ -21,7 +21,7 @@ class SharedRateLimitIntegrationTest {
     @BeforeEach void clear() { jdbc.update("DELETE FROM security_rate_limits"); }
 
     @Test void replicasAndRestartShareExactlyOneAtomicBudget() throws Exception {
-        String secret = "oficina-gestao-test-only-jwt-secret-2026-with-safe-length";
+        String secret = "oficina-test-only-independent-rate-secret-2026";
         var replicas = List.of(store, new SharedRateLimitService(jdbc, secret), new SharedRateLimitService(jdbc, secret));
         try (var executor = Executors.newFixedThreadPool(8)) {
             var tasks = new ArrayList<Callable<Boolean>>();

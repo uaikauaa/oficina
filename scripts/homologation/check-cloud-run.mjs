@@ -40,6 +40,10 @@ const frontSecret = variables(frontendService).find(value => value.name === 'SER
 const backSecret = variables(backendService).find(value => value.name === 'SERVICE_PROXY_SECRET')?.valueFrom?.secretKeyRef;
 assert.ok(frontSecret?.name && frontSecret?.key, 'Frontend service secret must come from Secret Manager');
 assert.equal(backSecret?.name, frontSecret.name); assert.equal(backSecret?.key, frontSecret.key);
+const rateSecret = variables(backendService).find(value => value.name === 'RATE_LIMIT_SECRET')?.valueFrom?.secretKeyRef;
+const jwtSecret = variables(backendService).find(value => value.name === 'JWT_SECRET')?.valueFrom?.secretKeyRef;
+assert.ok(rateSecret?.name && jwtSecret?.name, 'JWT and rate keys must come from Secret Manager');
+assert.equal(new Set([rateSecret.name, jwtSecret.name, backSecret.name]).size, 3, 'Separate secret references are required');
 assert.equal(variables(frontendService).find(value => value.name === 'TRUSTED_PROXY_HOPS')?.value, env.HML_EXPECTED_PROXY_HOPS);
 assert.match(env.HML_EXPECTED_PROXY_HOPS || '', /^[1-5]$/);
 const policy = JSON.parse(call(['run', 'services', 'get-iam-policy', env.HML_BACKEND_SERVICE, '--project', project, '--region', region, '--format=json']));

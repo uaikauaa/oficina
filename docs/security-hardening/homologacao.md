@@ -4,6 +4,8 @@ Não houve deploy nesta tarefa. Os comandos abaixo são verificações de leitur
 
 ## Cloud Run, TLS público e IAM
 
+Além do roteiro abaixo, configurar RATE_LIMIT_SECRET por referência exclusiva no Secret Manager, diferente de JWT_SECRET e SERVICE_PROXY_SECRET. O verificador agora exige três referências distintas. Não imprimir valores para compará-los. Testar a rotação coordenada descrita na [auditoria independente](../auditoria-independente-20261103/README.md): JWT não pode zerar budgets; a chave RATE exige drenagem e expiração das janelas antes da troca; contexto IP exige corte coordenado entre Next e API. A transição V24 sobre contadores legados ativos falha fechada até expirarem. Não apagar contadores para obter aprovação.
+
 Preparar projeto exclusivo com nome terminado em `-security-test`, serviços com label `environment=security-test`, duas contas de serviço de teste distintas e backend sem invoker público. Frontend deve usar a conta esperada e conter INTERNAL_BACKEND_URL HTTPS da URL canônica do backend, TRUSTED_PROXY_HOPS verificado e SERVICE_PROXY_SECRET via Secret Manager. Backend usa a mesma versão desse segredo, com JWT_SECRET separado. Não gerar arquivos de chave de conta de serviço.
 
 Variáveis não secretas necessárias: HML_ISOLATED=true, HML_PROJECT, HML_REGION, HML_FRONTEND_SERVICE, HML_BACKEND_SERVICE, HML_FRONTEND_SERVICE_ACCOUNT, HML_DENIED_SERVICE_ACCOUNT e HML_EXPECTED_PROXY_HOPS. A identidade que executa o ensaio precisa poder ler a configuração e emitir tokens de teste por impersonação das duas contas. O script não imprime os tokens. Cloud Shell/Linux é o runner recomendado para gcloud; nenhuma credencial de produção deve estar nessa sessão.

@@ -1,0 +1,182 @@
+{
+  "generatedAt": "2026-11-03T22:10:48.965Z",
+  "baseline": "6566c3a87a2c80433f84d851d8a83ea65dd2a250",
+  "branch": "security/hardening-production-20261103",
+  "node": "v24.21.0",
+  "codeIdentity": "source-fingerprints.json uses normalized LF SHA256; PR final head identifies the committed delivery",
+  "junit": {
+    "tests": 830,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontendUnit": {
+    "passed": 376,
+    "skipped": 0
+  },
+  "playwright": {
+    "ui": 119,
+    "real": 1,
+    "skippedInExecutedRuns": 0
+  },
+  "apiMappings": 83,
+  "addedOrRemovedMappings": 0,
+  "negativeVectors": [
+    {
+      "probe": "/api/graphql",
+      "status": 404
+    },
+    {
+      "probe": "/graphql",
+      "status": 404
+    },
+    {
+      "probe": "/api/upload",
+      "status": 404
+    },
+    {
+      "probe": "/ws",
+      "status": 404
+    },
+    {
+      "probe": "/api/unknown-shadow-api",
+      "status": 404
+    },
+    {
+      "probe": "TRACE",
+      "status": 400
+    },
+    {
+      "probe": "CONNECT",
+      "status": 400
+    },
+    {
+      "probe": "PROPFIND",
+      "status": 400
+    },
+    {
+      "probe": "Host/forwarded host/CRLF query",
+      "status": 200
+    }
+  ],
+  "executions": [
+    {
+      "name": "maven-clean",
+      "localLog": "audit-independent-maven-final.log",
+      "sha256": "bb89254b068b417646e3a688167f78b5335b7f7328c97bd6b46179e9a5f25bb8",
+      "completedAt": "2026-11-03T22:00:19.454Z",
+      "result": "PASS"
+    },
+    {
+      "name": "maven-final-expanded",
+      "localLog": "audit-independent-maven-complete.log",
+      "sha256": "36fbaf438cbcc67a19c069ce61b1d38a058c75e29f4ed1773c87902a1bcfd8ac",
+      "completedAt": "2026-11-03T22:05:07.243Z",
+      "result": "PASS"
+    },
+    {
+      "name": "frontend-unit",
+      "localLog": "audit-independent-unit.log",
+      "sha256": "0b5915ebf47cf6359167d7a2bdbb73bc13edd6f30ab55d8b2c90a9bae368ca11",
+      "completedAt": "2026-11-03T21:51:07.215Z",
+      "result": "PASS"
+    },
+    {
+      "name": "next-build",
+      "localLog": "audit-independent-build.log",
+      "sha256": "796535517a8326446ab14330003b68f7cfd902d1fbc3f4d3ce5e1d98dd6a7771",
+      "completedAt": "2026-11-03T21:51:13.101Z",
+      "result": "PASS"
+    },
+    {
+      "name": "playwright-ui",
+      "localLog": "audit-independent-playwright.log",
+      "sha256": "b59e17e927497b39a4e704345a08abc2913b7146b9dbd04cd30ad988abf66c61",
+      "completedAt": "2026-11-03T21:58:54.327Z",
+      "result": "PASS"
+    },
+    {
+      "name": "playwright-real-and-two-jvms",
+      "localLog": "audit-independent-real.log",
+      "sha256": "e703b33f1b9086dcc119854f0f2d66a7eee5e71300a17d8650deb1ea90b9b526",
+      "completedAt": "2026-11-03T22:03:55.711Z",
+      "result": "PASS"
+    },
+    {
+      "name": "http-proxy-and-parser",
+      "localLog": "audit-independent-proxy.log",
+      "sha256": "4ce9940cf4cf43634781d43bc9fc26ab9c711aadfebb42b9fac3fd77ae3957ee",
+      "completedAt": "2026-11-03T21:56:05.602Z",
+      "result": "PASS"
+    },
+    {
+      "name": "tls-smtp-local",
+      "localLog": "audit-independent-tls.log",
+      "sha256": "feae0b0445e96186fb96d07b7318a2472b4148683c4d9bdbb1fcd99aa4105396",
+      "completedAt": "2026-11-03T21:56:26.416Z",
+      "result": "PASS"
+    },
+    {
+      "name": "docker-backend",
+      "localLog": "audit-independent-docker-backend.log",
+      "sha256": "1b371a3688b60345704df9e5b6ab93bd49d8f72a429a9fcbc7ebb8a6a6b63944",
+      "completedAt": "2026-11-03T22:00:52.060Z",
+      "result": "PASS"
+    },
+    {
+      "name": "docker-frontend",
+      "localLog": "audit-independent-docker-frontend.log",
+      "sha256": "667db352e58a2567c62e13b6b6cf839951903fbe5176e742fdd8520136199577",
+      "completedAt": "2026-11-03T22:01:23.379Z",
+      "result": "PASS"
+    }
+  ],
+  "trivy": {
+    "backend": {
+      "createdAt": "2026-11-03T22:08:00.614014839Z",
+      "artifact": "oficina-security-backend:20261103",
+      "imageId": "sha256:680ffbf884b22a94ca8219ec8d32da2a9ef0fe6529adbdf4d1e46c0cf050f794",
+      "vulnerabilities": 0,
+      "secrets": 0
+    },
+    "frontend": {
+      "createdAt": "2026-11-03T22:08:38.226230484Z",
+      "artifact": "oficina-security-frontend:20261103",
+      "imageId": "sha256:8771e7c92ec7e9eabf0d20a741c78aa38ccfb83a5931865a2ce5b448339f7da2",
+      "vulnerabilities": 0,
+      "secrets": 0
+    },
+    "files": {
+      "createdAt": "2026-11-03T22:07:55.781703539Z",
+      "artifact": "/scan",
+      "vulnerabilities": 0,
+      "secrets": 0
+    }
+  },
+  "npm": {
+    "runtime": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    },
+    "full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 16,
+      "high": 0,
+      "critical": 0,
+      "total": 16
+    }
+  },
+  "remoteWorkflows": "Consult PR #13 checks for the final commit; local records do not claim future CI success",
+  "externalControls": {
+    "googleCloudIam": "NAO VERIFICADO",
+    "googleIngressIpAndTls": "NAO VERIFICADO",
+    "neon": "NAO VERIFICADO",
+    "smtpReal": "NAO VERIFICADO",
+    "production": "NAO APROVADA"
+  }
+}

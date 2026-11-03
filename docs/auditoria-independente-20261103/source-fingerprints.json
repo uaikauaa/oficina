@@ -1,0 +1,1646 @@
+[
+  {
+    "file": ".github/workflows/ci.yml",
+    "sha256Lf": "2d8293e9167a92e9cb119a3f8b60d93c7eebd63f9661aad205da44a22fef33b1"
+  },
+  {
+    "file": ".github/workflows/integration-real.yml",
+    "sha256Lf": "ec857cdaa7fbabf8185d84b6cce643f14079fd02636ad2518505dab8c8745184"
+  },
+  {
+    "file": ".github/workflows/oracle-readiness.yml",
+    "sha256Lf": "fb2c64c45d08b483d56194eea1852eb4622c15ff8fb04cfbeddb2238d4fd3c80"
+  },
+  {
+    "file": ".github/workflows/validation.yml",
+    "sha256Lf": "562acc4c4a72519dd07c9d1e22cee2a176520b9f0ef85baa606a1535cb8074c3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/OficinaGestaoApplication.java",
+    "sha256Lf": "f5e209f1e5d09afec41b74181f14e335f83483372bf8bdf3f72978f7a7c92325"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/AdminAccountBootstrap.java",
+    "sha256Lf": "96639d8ef9ded81290ee193a73ce9f65a6153583fb690a66bf53933bc3d942f0"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/BoundedSortConfiguration.java",
+    "sha256Lf": "562d77192a73b34588c94371ce1149aa8189332552d6788a139f66b577cdf0a9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/ConfiguracaoOficinaBootstrap.java",
+    "sha256Lf": "08f2e8e746ad3c35e8e41274eff03bd7ad00324a096d966c69968421acee44ca"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/DotenvEnvironmentPostProcessor.java",
+    "sha256Lf": "f0f716a2ce8376e71c11d45f517c168ac6a490c70568a41a90a88014decdb811"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/FlywayConfig.java",
+    "sha256Lf": "874a6067f6b52ec5ef924bc18f825d0c4e99e40b1e278253400075725f0d8904"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/ForwardedHeadersSecurityValidator.java",
+    "sha256Lf": "0689e4bc38d893ad21f64a772351e27e0e2e6979f50518b1123cb86b82d4a116"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/OpenApiConfig.java",
+    "sha256Lf": "48833a2462b76452b550c2683ffd8e77568d9ad88acdfcbdd1f7119285858982"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/ProductionSecurityValidator.java",
+    "sha256Lf": "14464c1a5e22720303308e1b676d713534946849ddcbd17d8e8ff90ba33b4489"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/RefreshTokenCleanupScheduler.java",
+    "sha256Lf": "6fdcad19dc8fb39d0e4b05890a0086e29650c71704f260a4a2631e68997d8350"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/config/ResourceLimitsConfiguration.java",
+    "sha256Lf": "99d620a35235afa2ae38f02572dbd7342a2e4c34456a7bfe01f54620d874e27f"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "sha256Lf": "e19becfd9458591013c1db8c7429b1a9249ed6f4ee27af5053a4b439832aaa40"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/BuscaController.java",
+    "sha256Lf": "6bf1712f83b043ff08c47d14576772691b01f988d7587eac18aab810b82e0275"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "sha256Lf": "96752730eec0b8b83ff179b0d3fd1b36c4b73fd2064512459c9b4f9fe813c5e7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "sha256Lf": "e2a664e723b0959325aeeb2b1e32366b30257a20ef0d50122db2ac77988f2770"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/ConfiguracaoOficinaController.java",
+    "sha256Lf": "803e80762c693ab808eebedc0579c505efb9c67d01f201d2b78d80d080c494a2"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/CsrfController.java",
+    "sha256Lf": "3c32981447ba3ba616991e5950c5b40bb480a33b7365e9879e2e342970f7aceb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "sha256Lf": "139fb7de6ed93c962909d7059c99f20d95c221a9bd3b237102316b7ff9bfcea4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "sha256Lf": "5787a53b423a6d9f41d97e6be130336ef64b147d803d1363ae04e888b5dd23be"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/HealthController.java",
+    "sha256Lf": "5e71d7149bc1b5aacd52ed796d53604b8e072c197aeff70bab84ec9daac18869"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "sha256Lf": "a3b56ea3d86e7eb0066929763e65b83081fef8f2d14aa41b34f5219f42525135"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "sha256Lf": "befd44788d66381804b473c2a3e2a46a218200d4ede886918358730fbf3c3673"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "sha256Lf": "c1e5f28556fab30d5f40f12e00ba9404879878a62e026cc75ed4217e5b0737a4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "sha256Lf": "a69f4d5cbfb6f0d3a7cc8d5d0e57f6f55322d483d0e79a7059c03b27f1f4e6eb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "sha256Lf": "dc281b705c24e6100fd465eed9863a3af62e1d31d4d6ff33a8fbeb5508eb280b"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/controller/SystemController.java",
+    "sha256Lf": "015497af97a9db25fa7a455f052221bf8c1336ad78f4e3b273f32d26ec1e9660"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/AlterarSenhaRequest.java",
+    "sha256Lf": "8626c72361e1ede89786d3e87d88b7ab7c1cec0a80cf7b00fab8644aa9fe424f"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/BuscaRapidaDTO.java",
+    "sha256Lf": "e5dfc9cd32598ffc47898ca0e7e33b06f20089b1fc96dd98731b0800a10193ca"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/CategoriaCreateDTO.java",
+    "sha256Lf": "30b617e21dd5bba39a45d5440c665ba5d28016ae999c7d3bd25779144f735c7c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/CategoriaResponseDTO.java",
+    "sha256Lf": "3c7b3cd01f8f12ea0823c46dba759c4d24d88f36c83a217124c702500af39901"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/CategoriaUpdateDTO.java",
+    "sha256Lf": "edcbf8017045c839ffb5dcff3f6b5731450422ca6b77572bc225bb27f2b78f1c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ClienteContadoresStatusDTO.java",
+    "sha256Lf": "3eaffd1c04a4e83d5cb9413a87e0673174b31605328583d971995af980c4096b"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ClienteCreateDTO.java",
+    "sha256Lf": "3d1c5ac94223e8317f1678808d3dfb2ee7f7dce824247ebd90ecb5d9147eb8dc"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ClienteResponseDTO.java",
+    "sha256Lf": "e694d4fb9cedc3bbb6b011907b1744e71c1cdde3c32b7289892a92858c824391"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ClienteResumoDTO.java",
+    "sha256Lf": "f2e7bc22edcf3bded081f0cb3a6c6ca437a48023c335c2db2d05c64e38c13bbf"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ClienteUpdateDTO.java",
+    "sha256Lf": "97047ebab54ba23bf507357cbe3cc6aee4698c47295a77e08e1f7755e3ba5244"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/CompatibilidadeResponseDTO.java",
+    "sha256Lf": "477f70cee4a7dcc6b10cac1aedaf0feebd721665493bedf8a375e5a8cd104b56"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ConfiguracaoOficinaResponseDTO.java",
+    "sha256Lf": "84e80ed22552306868f7286b1e896b9a1fcc82d06a2c4d0b0330a0404ca44c4f"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ConfiguracaoOficinaUpdateDTO.java",
+    "sha256Lf": "842747e02c5dfc44707bc3270efb1fa5527e079e0942a368da91ffb74de1d570"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/CurrentUserResponse.java",
+    "sha256Lf": "436b6440c742450c7b77c6b92987efe6dabb2a632bd38156e45818530a182476"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EnderecoDTO.java",
+    "sha256Lf": "1f0990e007916a5489fb26960ce82512d098244b8a284797ea51d6f912b5068e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EstoqueAjusteDTO.java",
+    "sha256Lf": "192a8399ec4dc660c38cee4cd6d0685ed8acfaefc5c4d6d7bcc67f6b7ab38790"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EstoqueEntradaDTO.java",
+    "sha256Lf": "0a3f2bead74040881a36d3a302b7e60259c1328681aa90af88b0d525462831f9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EstoqueMovimentacaoResponseDTO.java",
+    "sha256Lf": "91a09da2f64c32c316c57de3f84cfd7c3fd0eab6b3c0b1ebbdb489aeddbd2e21"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EstoqueResumoDTO.java",
+    "sha256Lf": "357dd959d407ebd141ceeba82706002f8c561a1fefb3fc5e47ae523368f86ecd"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/EstoqueSaidaDTO.java",
+    "sha256Lf": "71ae704135f3786a7f4e303aecdb0d5b7e5d61e92827f9373a8771d1012d5b3e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/FornecedorCreateDTO.java",
+    "sha256Lf": "501798c7bb1d83e2346e5e226cfd9916a36a619b3e94efb5c4507262bc2e9bd3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/FornecedorResponseDTO.java",
+    "sha256Lf": "a34883272d88f4ccfe31b7797323fe680b7e5f5120d0165bc8053afd73f4a854"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/FornecedorUpdateDTO.java",
+    "sha256Lf": "13d7f6020cf3b65bd4bf3d2979ceb708574c474fc046bcb62a5cb95b7376c367"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/LoginChallengeResponse.java",
+    "sha256Lf": "408c8ebe4ae1ff58a9f8dd474b8a853b49318a6a32a816caa1dc9442fc096175"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/LoginRequest.java",
+    "sha256Lf": "0d7833ae96095da3900adb9c54fdb755c3800d600e926b9aec1d43193a13c9e4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/LoginResponse.java",
+    "sha256Lf": "ac5b1fd8f8988c6233b0e8e632f701fe8e61b592af6bd32075ab696c0e031898"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/LoginResult.java",
+    "sha256Lf": "5aef2d3eb15317a376a117f1d4e5491ecda91b2d21eabd487fdd56eca1282ade"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MaquinaCreateDTO.java",
+    "sha256Lf": "0818e800d5a7812d1f509849dd02fae0941152d16ed50bbfff9f7241f3e948d5"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MaquinaResponseDTO.java",
+    "sha256Lf": "3528dc6e0c253cd39c96d61b850b1a1ae9e7a7a90d43cd56f019cbddbae1dbc6"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MaquinaResumoDTO.java",
+    "sha256Lf": "b93fcd484ff87437b888beb18bffccd4ad5c2f6bf7251b62925571961075d2a5"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MaquinaUpdateDTO.java",
+    "sha256Lf": "1fdc78c90b92bb245510977694ed7ca4604db2b50938b9ec99653a29910a9aad"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MensagemResponse.java",
+    "sha256Lf": "401347e4f2c353d52a3a324d5c2098806a0142425fdc93f70c54b529eb9894a7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/MovimentacaoManualDTO.java",
+    "sha256Lf": "e12f388181f8e42bab8e75721104a19174de4c24afad462b3fad240784d9d098"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/NotificacaoResponseDTO.java",
+    "sha256Lf": "253557631c40dcc1d9e168cbacde6bc267550e576cd4dff7b6543c38e668964a"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/NotificacoesResumoDTO.java",
+    "sha256Lf": "a3fac3d3808ee4ebed1b563b8668a3a2bd252da891bd0ede031ef1e764ff2e15"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoContadoresDashboardDTO.java",
+    "sha256Lf": "633c1b9dbb5e46aab45d53f4aaf38e84652f68035900a11d23463eea31eba209"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoContadoresStatusDTO.java",
+    "sha256Lf": "eea3e7965b50b71910817307995ac3b8d6a47ab7d940510577e79706000efee1"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoCreateDTO.java",
+    "sha256Lf": "8a9c42664d2fd049b3355c749a30e85c75dbbb8d7abb393790edf68b5a7f3c4d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoItemCreateDTO.java",
+    "sha256Lf": "803ffd7206f40f183beb671a1a0732b34b47c524d5633915ef4cc4cb21455ccd"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoItemResponseDTO.java",
+    "sha256Lf": "cb58df0927ef107cd3786460108a7efa521c80237a740ac18ed2edbb7072240d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoResponseDTO.java",
+    "sha256Lf": "b47b031f0ffd71d4314b926adf010a5603225b66d32041c7863dcfb1ac758850"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoStatusDTO.java",
+    "sha256Lf": "ce8a749abe8bfde489d9c588a3374a3e28cf133a48788139d3b5760e6719a848"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/OrdemServicoUpdateDTO.java",
+    "sha256Lf": "3d7f19681819d34fe7552ae3ef6a81e97fd8663df55721927fb68ab7bb5ca5b5"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/PageResponse.java",
+    "sha256Lf": "97555fcb09d01f42ff1418e7d817fc99a74c5331479c34f36bdbed10fc1f8555"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/PecaMaisUtilizadaDTO.java",
+    "sha256Lf": "bc186e37d9fcf783dcbbffea3fd97a516a7b11febd338bb2b187714e99a60319"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ProdutoCompatibilidadeDTO.java",
+    "sha256Lf": "5c1016810acc48c9524cd774fab4e4122cb9e1468d971bc9df9d14baf320ff63"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ProdutoCreateDTO.java",
+    "sha256Lf": "02ec2f679f51f0d41df31ef803fe040ee06074a0c56fc644c2f6f5ab67c420b3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ProdutoResponseDTO.java",
+    "sha256Lf": "98eff45b48a8090d2bacf9eb18d845926b2314efdf9f057a501a33ac1aaf9027"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/ProdutoUpdateDTO.java",
+    "sha256Lf": "016150141d809cc7450fa6b46a74b80812943cdfec424fe0e1710a1220954e65"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/RelatorioClienteItemDTO.java",
+    "sha256Lf": "7257cd5970aa20e0d9cabb66ed981eb4ce93c318e1a646e3bbcd60e4837886b3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/RelatorioEstoqueItemDTO.java",
+    "sha256Lf": "1c20ad999e82423a6310cfb5483f3fd5a107c0301d67b3a0b4370b45bff5b234"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/RelatorioMaquinaItemDTO.java",
+    "sha256Lf": "76361cf5f693fbc6da89185e05b1ad74ae7764a41d5b4d9332d60ba7a397d199"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/RelatorioOsResponseDTO.java",
+    "sha256Lf": "d97c7182ac9edffec60d8f99bee844682923a6fb21a96bf33905723b1b09eb7e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/RelatorioOsResumoDTO.java",
+    "sha256Lf": "0b0c65660a380f42b36f6a985f4caec0f4c5c98691adf6c21505554d07b0ae67"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/StatusUpdateDTO.java",
+    "sha256Lf": "3831cbe8037c09ef57d4ee7413cac513048cb0a465f35527d83093cfbdc7c6d9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/SystemStatusResponse.java",
+    "sha256Lf": "156192d30b4a719859dd6bebe66a70cdefab4a796d95e76d01fee72e71c8ce27"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/TwoFactorResendRequest.java",
+    "sha256Lf": "e2ac205abf2b7a1b3ee2130e6da23b906a00ce820e61a60c82913fa24899f3cd"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/dto/TwoFactorVerifyRequest.java",
+    "sha256Lf": "90be8f23972323f9f6027f8ac9cb9003145f586e4d1a71016e8d8ee42f171db3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Auditoria.java",
+    "sha256Lf": "f3b503b5b2bad91bf554b89fe29e5327636516762fbe7dde47a12a556a34add4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Categoria.java",
+    "sha256Lf": "2c669cbcf63ce56284ac8c70222ccc78517a7a9471b781a96228159b897c76ad"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Cliente.java",
+    "sha256Lf": "7eda385a968768873366313497ad522ef87e1c04dbab81f38608fdaee7c11cb7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/ConfiguracaoOficina.java",
+    "sha256Lf": "a386dc64e8862b5595fdc5f3566e8ee25758ec44813c37d3e09e5357e330fa47"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Endereco.java",
+    "sha256Lf": "93b10e92caec2d3b1da87055be13529dd8dc02a316b5a6ea0a1a7855f49e3836"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/EstoqueMovimentacao.java",
+    "sha256Lf": "2d85baad8e9e2391a11ceb30c6f96c98a2a4f5554c71feb85d99137a05b4aff7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Fornecedor.java",
+    "sha256Lf": "1ceadc7c89222018c0608e03e04a70dad8afa690682bd9774421dd10e6e9d95f"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Maquina.java",
+    "sha256Lf": "55c6c459d9aa530cf9039e459469998229522e89d5db7e92faced80aa3048544"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Notificacao.java",
+    "sha256Lf": "73f4a28a70428531e288836ad8b1b3e6cbfaeec132e9db3c8b5adc41b1f83b27"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/OrdemServico.java",
+    "sha256Lf": "46a579b65ecbb6532aeb30e114cfdecd825e632186464c3454fd9494c599c6b9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/OrdemServicoItem.java",
+    "sha256Lf": "d5aa7894e0e48b95ea0131ee554cbbce9ca0f16719d8062d1a033a74d2e6dab1"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Produto.java",
+    "sha256Lf": "7027f8212570c455d621a72fe49650df515233d7fb56cb8fafd18681447e0164"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/ProdutoMaquina.java",
+    "sha256Lf": "d6a0684bf23a5142418a361dd744b8b03c197b5996ebd462f06fd8787e450ce4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/RefreshToken.java",
+    "sha256Lf": "46a3d11760b3cb4f183dfd96172819a62ec0426d7031c26ca8157521af6507da"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Role.java",
+    "sha256Lf": "d4436c5fb4f5dca9eed233e3002bea45c54e821c1cfc690f6f832e268071b6cf"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/StatusOrdemServico.java",
+    "sha256Lf": "c2f1273b6faf4f4d8753e7940109fc81e37a0cafe848cbb0fbcaba6320b0eaac"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoEndereco.java",
+    "sha256Lf": "b513b07111eee5648cf134c88c4e95c72a623fc85521cce7eee523dc33a260b9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoEquipamento.java",
+    "sha256Lf": "7697b02567409414936eb50f37eaea80dd9a2d29d611c62c3d39cd753e60ab58"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoItemOrdemServico.java",
+    "sha256Lf": "ebb0ee5f22f9100b774aa31bbaa4fd7193a1c444f2129d5273ffe9ff21e27e69"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoMovimentacaoEstoque.java",
+    "sha256Lf": "ffa398bdf96a89e6575e6757ca33a15f9c29813b9103301fcd67ed8ca375e24b"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoNotificacao.java",
+    "sha256Lf": "d74dc483f292cb73fdb9688b2ea8ba3e496706cd500bf25478887d5d600c97cb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoPessoa.java",
+    "sha256Lf": "e6159b76ce87d6443649e099f43c1c2405c8cd5ff2970925527f659c13072436"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TipoProduto.java",
+    "sha256Lf": "b6dc02ac702546ed2ecabb1d8449ab75c196c0205966c02afc44f3809ebc34a5"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/TwoFactorChallenge.java",
+    "sha256Lf": "6514c3a8b799feda4fdeace3ad662b7157e5ca3da54a9dd70d7b2b06e9a15823"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/entity/Usuario.java",
+    "sha256Lf": "dcbdfaa6572757601a9352feffd36e9fc6659339318d960486e12fde582de61c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/ApiErrorResponse.java",
+    "sha256Lf": "87855d5e572326359d7a93a7bac00b1d70aadb4b7700d6453cf2905772d7893c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/BusinessException.java",
+    "sha256Lf": "3b5793bd6dabe2a01de1528370f89a838df060a126864e79fdd2e0c0bd8ca3e9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/ConfiguracaoOficinaIndisponivelException.java",
+    "sha256Lf": "31a0eac0e4bacc9e3a2949c05842358ce6931ba0155dc0f2bdef3a7484e18644"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/ConflictException.java",
+    "sha256Lf": "cc03195b8711337ba667dc807ead2580f53ae408a9deed75bbf6948b95e42b4d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/GlobalExceptionHandler.java",
+    "sha256Lf": "8f2defc51262861105593af06ace615832a120465ef9a0156ad5d7dd5d38efeb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/RateLimitException.java",
+    "sha256Lf": "e1900fac5896fb2051cc9d35ba34ee22aa4045edba3b6a593acf792aba00697c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/exception/ResourceNotFoundException.java",
+    "sha256Lf": "1ad1a55d8a1004e9e35c91d79909c5310a17e8d2b3378fe13834e2da0ab0d520"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/AuditoriaRepository.java",
+    "sha256Lf": "22e0598ec3a36cfad759010e6670a59f538f36a12f9b6c3c46503c4a48685bc2"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/CategoriaRepository.java",
+    "sha256Lf": "942bbe77477660b9a48c72be7655917d0c4c6599f1fdc1d5e8bc833866d8bfa9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/ClienteRepository.java",
+    "sha256Lf": "e90ab59641f599c6e1a19b47c7d8e022dec3aab53320fafca60221172306c405"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/ConfiguracaoOficinaRepository.java",
+    "sha256Lf": "1133c4a466268b95214d7e62b28d7a2b667fee75e3e15ab1816b0a6dd7e340f4"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/EstoqueMovimentacaoRepository.java",
+    "sha256Lf": "402abe36b09c7be82fc098e23a46928a1ef1e4451f1f75f9ef7b4670f8eacc7d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/FornecedorRepository.java",
+    "sha256Lf": "828dc87ab9410fe9baa53e9ef5d170a92f61d7eeb0bc114c9b98dfed0ebeb973"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/MaquinaRepository.java",
+    "sha256Lf": "0d785a60cf667413cff18509a6d3417884447f50221234c8dc2d2062d953229b"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/NotificacaoRepository.java",
+    "sha256Lf": "8c327355ee7ee724942aef8aba80f9c87d5c1abeffbd350195ea349bfa125f89"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/OrdemServicoItemRepository.java",
+    "sha256Lf": "95dd16c21a87359c620159c9167a2bf50b9384994ff65a64fccd19e4818b6f18"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/OrdemServicoRepository.java",
+    "sha256Lf": "e7d3d20702f5387303e5874ba96a18cfd261fa5f2b84c0040b2ca63d3488e5b3"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/ProdutoMaquinaRepository.java",
+    "sha256Lf": "20ee7f92cb918568f5cf0136e0269899e453418b98cb2472afbeaeb994bc64eb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/ProdutoRepository.java",
+    "sha256Lf": "97ae57f3373accdb8667c1b3befe86a63a9a80a7b2b17bb5f8e4a93a1cbcbe27"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/RefreshTokenRepository.java",
+    "sha256Lf": "a1d85ec08ed38a6fd1a938b7a64a058de264a989b6d91ea3ac60cfc8500d3024"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/RoleRepository.java",
+    "sha256Lf": "cc7003e6d329862c235a01d2fd4e8de8efdf1eec532af6d867544e89899fa14d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/TwoFactorChallengeRepository.java",
+    "sha256Lf": "a8091a2d7cef3a3afa036122ad0066f76ee269092d3c79fc3a301adfccf227f6"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/repository/UsuarioRepository.java",
+    "sha256Lf": "6e0182dd0be08dfdb8cc92099b08e5dcbaf72fee668e22e999e022d6091d642e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/AuthenticatedUser.java",
+    "sha256Lf": "87e48d4abdaff77e5825928c19d09301949619797038964ad4dad2cebdfc7a1e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/CookieAuthenticationCsrfMatcher.java",
+    "sha256Lf": "fd4b310a673d94f66036afe97649f42696538af40db6387c6a2111077e5174e9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/HeaderOnlyCsrfTokenRequestHandler.java",
+    "sha256Lf": "4c55f2c453f8a374f19b374fc62d0ee6c1136da99a5c285aacbed0b1935a66c2"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/IpAddressResolver.java",
+    "sha256Lf": "40faef5850ed3a6ee7752fcbe3f500441d6441214b69565263b1de5924268d6d"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/JwtAuthenticationFilter.java",
+    "sha256Lf": "dad3f6aee25d4dfd3b3314f8e48a2891b987ba3afb1f14b4519368cd4d792cd9"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/JwtService.java",
+    "sha256Lf": "cd3b0cad34b8bb4d1502c60f86e0b8b25450cd33262a776403af53daa5094dbe"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/LoginAttemptService.java",
+    "sha256Lf": "d9c6d6da00d0318e92003caa278d0884c87e5be37a13f2aaf10b8bd185e220fb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/PasswordPolicyValidator.java",
+    "sha256Lf": "1d49d36303e5b9bf883ef182e95d12e3c4cdbea76cbcb246026438123b8105e7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/ProxyClientContextVerifier.java",
+    "sha256Lf": "79c92636bbe3ca8dff935f59186001b8a8fb92d118c884013242b61852929c62"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/SecurityConfig.java",
+    "sha256Lf": "f60363a0424715ef8f01adf7bb2dca2701ad9351726683dd40efdf33bb7cf176"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/SecurityUtils.java",
+    "sha256Lf": "29e5316b0f4140aad03b6c5fdf3ae9ce18ad0c84e41bf4e4a2b472f897727616"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/SharedRateLimitService.java",
+    "sha256Lf": "9eec1d15b9ebb4f87bbfb2b617fb89437f7fb47e89ab1259dfb8e011737f4979"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/security/TokenHashUtil.java",
+    "sha256Lf": "8c11906e91f6d0a369fb0e23813e74a0c3843f4a698b562aecae612f8202b394"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/AuditoriaService.java",
+    "sha256Lf": "4cf20a2c61f9effacf7b0f0b603877313d7c606ec29d52beb1bc2cda6ba90e8e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/AuthService.java",
+    "sha256Lf": "4bf7bf9dc72949fe4c85ad39ed358eebea3e616489afa1fb94f64248ad56460f"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/BuscaService.java",
+    "sha256Lf": "6228186f9554534ff57118b41ca3feb982a8c8028edff889d4cfa99c115ed4bb"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/CategoriaService.java",
+    "sha256Lf": "12ad87e37163b46ce437f6d4726613c5ecef31a8f14bc0efd1369f1ade18039c"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/ClienteService.java",
+    "sha256Lf": "8217cfd47b961ecdb3488025a7f75e6f0bc2cf4d9175b70ad15670552c06f335"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/ConfiguracaoOficinaService.java",
+    "sha256Lf": "c88152c3ceb7fa1c6e12cdd2c5f13cd5f3e2ed0c00209b963cf17f9a0a418453"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/EmailService.java",
+    "sha256Lf": "7453abd003673b0ce4afb884bf6c75fbc21009ec4cc18fdbf0dc47957832bc49"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/EmailServiceImpl.java",
+    "sha256Lf": "b61045c1d62b6f670cb0b2407b6fcaf89e00d134081ba07bda3ebff13126d78e"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/EstoqueService.java",
+    "sha256Lf": "297d9af6cea57a88b822f2db06b8e29575edec9b9473671e498a1ea31678dbb7"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/FornecedorService.java",
+    "sha256Lf": "8c54fe70533f39e078a373bf77fbd06429dbd4c2e887352d07514dc1c1352491"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/MaquinaService.java",
+    "sha256Lf": "3c8d363b637b65e0d489fc2a99daa34ea51e668de8a0ab5c0492aa59e2e80594"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/NotificacaoService.java",
+    "sha256Lf": "e4a00c9c686d2f971b5002d9614b81471f72327a32b022a7a7134d93432155ee"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/OrdemServicoItemService.java",
+    "sha256Lf": "48754a284f204034c28a9aa30e02beabb59f7db57c9eec7a9bc6747383359896"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/OrdemServicoService.java",
+    "sha256Lf": "d2b02386469ffe2cd622700f6ab80ed26398858711b1ba09a851706c3a0d727b"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/PdfService.java",
+    "sha256Lf": "8b38b36aa2309353173e1dfa007e648902df4cb0749cb59e649f5b04215c14da"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/ProdutoService.java",
+    "sha256Lf": "004e2e85b3da2e8804cb30b5e71cd582a1d4a6487f8bec3783edf2215f720c10"
+  },
+  {
+    "file": "backend/src/main/java/com/oficinagestao/service/RelatorioService.java",
+    "sha256Lf": "de8ad29e60633c2fd5a616d51e8a025f6069000120e27b9df0d2c065e090d1f1"
+  },
+  {
+    "file": "backend/src/main/resources/application-dev.properties",
+    "sha256Lf": "385892b468887af56d1ac2344dd74b110da255d75c615cb36d96055dc6eea4d3"
+  },
+  {
+    "file": "backend/src/main/resources/application-prod.properties",
+    "sha256Lf": "d02ab04928be17ccdbc3d84c546e68a63a1de5618fda1a6f4e6122b93135c57f"
+  },
+  {
+    "file": "backend/src/main/resources/application.properties",
+    "sha256Lf": "51c96f585d81e72b89f6d50d9a6c732dda3251eb37fd789ff3e5aa9120c02d70"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V10__add_composite_foreign_key_os_maquina_cliente.sql",
+    "sha256Lf": "66f6b199aaec6a29f7604cc818a956e2fb88e3de0c8a3a6e72e70bf1b79ae09b"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V11__create_configuracao_oficina.sql",
+    "sha256Lf": "87d857d1214921a16cfde1df0318219350c7e2b1fb76d0d77cfbbaaecddd9d23"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V12__update_admin_and_config_defaults.sql",
+    "sha256Lf": "4afffe1745abcbb25b22f30d8abe5f35431ec8fc0f7a2e00c912f1a431468ac7"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V13__create_fiscal_dps_and_tomador_ibge.sql",
+    "sha256Lf": "16044b51c9848c98b7fbed710059d7bab351911e1c978643c5f45058c2d8d773"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V14__remove_unused_fiscal_structures.sql",
+    "sha256Lf": "4f1185a74a32519ef9a9279f15e0f01c4967494c196b3ef27e4ae89c03f03efd"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V15__remove_cliente_codigo_ibge.sql",
+    "sha256Lf": "0d90f4c0280730b0bdab262112380560c0005909424b953487a28f84870562f2"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V16__refactor_produto_codigo_and_link_compra.sql",
+    "sha256Lf": "535da882d367fa24f2b1ba40b2b79eecdc0bb1339048afd294e8a8c995aca31c"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V17__add_remember_me_to_refresh_tokens.sql",
+    "sha256Lf": "e5221cbc7c4da905e45c853ed82fed6be6309683bc8998cc70a2e8cadef32958"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V18__create_two_factor_challenges.sql",
+    "sha256Lf": "29e2021912288abd45e6b244170e60a62a6fe0151ca09118edd38ad33341bd35"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V19__create_notificacoes.sql",
+    "sha256Lf": "cd3fbee2cad635f32a450741756e0c5e77794e8fd8a24f5bab8d25163b64a903"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V1__create_initial_schema.sql",
+    "sha256Lf": "cfbccd4df3f9818760c9b99d1552caabc23dcfa4a0143ae150f5135a29d82e95"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V20__add_token_version_to_usuarios.sql",
+    "sha256Lf": "6044f8f269236b3aa22e084ab901ac9beb5e58a7aa45d07577d55226a321dc1a"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V21__hash_refresh_tokens.sql",
+    "sha256Lf": "0629268c8dff48061e54604a1dd945e8eec3b42a94318808fa50a6e32bb2fd4f"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V22__expand_produto_margem_lucro.sql",
+    "sha256Lf": "00944c71c3fda9b2e2a8fe0a8bfac6664e9f965f4fbe95be1306e481132fe981"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V23__shared_security_rate_limits.sql",
+    "sha256Lf": "49f3ac18db347dc52a07fae9167c25b333c6579539598c1ec832c91d97450853"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V24__rate_limit_key_generation.sql",
+    "sha256Lf": "5961a2859c59b8ae9651a35572abca804237257249a2ddc199bb7c2950b18c88"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V2__simplify_initial_roles.sql",
+    "sha256Lf": "8b9abfc69843263ef127d9c671c800df22856ef1ed3c8c87aaacf1e14be49174"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V3__add_refresh_tokens.sql",
+    "sha256Lf": "ea743ccd763a1124f7be3c3ef7ed91746c844de3c5a00f76ae7150ce410e9a64"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V4__correct_equipment_domain.sql",
+    "sha256Lf": "e1abd4dda156d562904930631498051ed700ee8003a8cf3eb88f8cc55bd8668c"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V5__align_service_order_domain.sql",
+    "sha256Lf": "9d3ada21bebd8693d938e07746bcd13e45d48475b14fb641c7d438095a41d98c"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V6__maquinas_tipo_check_and_adjustments.sql",
+    "sha256Lf": "e4e15aa9d757d31d173fcf4465ae97926566e6493eefedfa4a7325fd43ff99f3"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V7__add_stock_constraints_and_indices.sql",
+    "sha256Lf": "c3d1d549ed8ad9b8dd2cfe36098d7c7ce8e343fe476e16247d54e03052609749"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V8__add_ordem_servico_sequence.sql",
+    "sha256Lf": "028933acae5cc61cad74f105c92805e39af0713526b2e665998e4d3d13ecc535"
+  },
+  {
+    "file": "backend/src/main/resources/db/migration/V9__add_produto_marca_and_seed_categorias.sql",
+    "sha256Lf": "a8b0aaa88b3f7627dc453f2dd45a1d83d92aa47f07e03f501cdcf98854432145"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/DatabaseConnectionTest.java",
+    "sha256Lf": "c857ac0e3609b9d94cde3606e03e3802ea36ad1f4c60a17d2f1e97e4ba481e32"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/OficinaGestaoApplicationTests.java",
+    "sha256Lf": "d4dca38147f4221884139210a74bcc095222b00ae90101467275a3ac8afd79b8"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ActuatorSecurityTest.java",
+    "sha256Lf": "cd7477f018f381e4c582aa6eb1910f60967e2171c57075af880a719d7a42a7a6"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/AdminAccountBootstrapTest.java",
+    "sha256Lf": "7fb05abec0a144d942bd0a068a43552db0daeacd92b87499f8f1177088de400f"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ConfiguracaoOficinaBootstrapTest.java",
+    "sha256Lf": "be1564bcb9f7aa7a54baf230adb13a67f5ba6039c9e8f3c42eb0a4e8cacaa1d3"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/DotenvEnvironmentPostProcessorTest.java",
+    "sha256Lf": "49d059375ade94c1639cc833d0d2ce85e9ff9d627a62330480c1602d01bbb3b5"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/FlywayConfigTest.java",
+    "sha256Lf": "e94db7933e9067c6d201ba6efe8b18f0ce265dbaea2b67e8826beead89721981"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/FlywayEmptySchemaIntegrationTest.java",
+    "sha256Lf": "47b948ffba0d2c4d3717f3600163d80605ea87d201e2c1e497a1ac6f25f2ded5"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ForwardedHeadersSecurityValidatorTest.java",
+    "sha256Lf": "212e20dfc7ffe93892194f52ee861f7088ed6ffa5f5a117dc587ecc3615486c9"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/OpenApiDocumentationTest.java",
+    "sha256Lf": "314cd2225c0340ea8e9afe469a1b51f419d9a9bacef9273b2fb730f355c67f71"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ProductionOpenApiSecurityTest.java",
+    "sha256Lf": "f868c993c674633aff26f1aab0e44660d05893c98d9df8101ec28144f13c9fc7"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ProductionSecurityValidatorTest.java",
+    "sha256Lf": "b975ebea11cd9baf7b47828f204e63990e9828f04097923de41324a8a2bd35d2"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ProductionSmtpConfigurationTest.java",
+    "sha256Lf": "00bec123625949f14170fbff9955fa2d30ca5a2b7aa68e0ede63c96ff1fa05ae"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/RefreshTokenCleanupSchedulerTest.java",
+    "sha256Lf": "2f7505ce42a9a0c113448a3fd7901e40d844969324c4df488eb38c6f07b260d0"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/ResourceLimitsFailureTest.java",
+    "sha256Lf": "a83b9336606c75a88f73c447210142466ff714fa939886605c9b63a311ea967a"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/SmtpConfigurationTest.java",
+    "sha256Lf": "2927c80a174e32e2aac1901cab0ca8584b5ead2d06f57a5c4bf18391a503af75"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/config/SmtpDowngradeAuditTest.java",
+    "sha256Lf": "997a0b8b853969631611a21d39b8ab729c3c2bc422bddc8a9422e2fcaa1946f6"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/AuthControllerTest.java",
+    "sha256Lf": "45e1b5ae11753eea8c61c9952d63cc38511d18352d6d575d96cbcd7be3ab89c1"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/ClienteControllerTest.java",
+    "sha256Lf": "35dd99c6febb300d1ed7b357d93b6c83cd00f31407626c60336a375e657a77a2"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/ConfiguracaoOficinaControllerTest.java",
+    "sha256Lf": "a16e9c43b15e260b4c3ee9f157a7979f358463b668a6c3f5966321aa9aadebfe"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/ConfiguracaoOficinaHttpIsolationTest.java",
+    "sha256Lf": "bb3634cc1788906ba3755da2ef22c7e4d75241b42c526dbd80c4f4acd049cf5e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/HealthControllerTest.java",
+    "sha256Lf": "89356eedf4e183a1b5e86a4eb18f013f2279eb03ae8740d1b9d560eeffe834e3"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/HealthControllerUnitTest.java",
+    "sha256Lf": "7e7eb8f4417d8f1d0b68de9d101009e0594c091716621351e43d5d5f32399512"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/NotificacaoControllerTest.java",
+    "sha256Lf": "19f37ab8db029f610aa87aaec597b38a5f0206c4460726321a2a28de6fd729e0"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/OrdemServicoControllerTest.java",
+    "sha256Lf": "32160732aa263be776873e5c89952314483a510bc5c11efea9f83815e56825cf"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/ProdutoControllerTest.java",
+    "sha256Lf": "60ae22caf3149eaa8586ce143611239a8466c5916dc3656df270f4292b963fd1"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/controller/SystemControllerTest.java",
+    "sha256Lf": "ee5c343962a0883d5ebb4a8cf13f3575a3a89d849332a6801c659551426bd9dd"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/entity/UsuarioTest.java",
+    "sha256Lf": "071e4d5cba2fd94f0a27a13008b3649c5e1b99492ef21c17971db187de44050f"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/exception/GlobalExceptionHandlerTest.java",
+    "sha256Lf": "b455c850961ad02625211d06820e410b58e1cce6cc2021ba912163fb6e7518ed"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/AuthLifecycleAuditIntegrationTest.java",
+    "sha256Lf": "0f33fadfd6a625a21eebcad1b52e1b5f48eed4e3b0bf4d46c9da19f334f78bff"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/CsrfAndCorsSecurityTest.java",
+    "sha256Lf": "c88b24e123f905db2281639d832f342cad1e5cc0661d52a85e9cf4b19f3c133e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/CsrfIsolationTest.java",
+    "sha256Lf": "a868b11a9c696ef6e2d1e8bba37c641b556d6a785124a3307438eb56f75029d9"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/CsrfMvcRoutingTest.java",
+    "sha256Lf": "e9bb1b5683b82ee77c46bf659513ce10b7c056812474730201f077cb671e9e71"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/ForwardedHeadersSpringIntegrationTest.java",
+    "sha256Lf": "5a11baf132f2686ae4a509d41671bd8910f41e5d2a5c90f09c7b70b8e1420a6e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/IndependentRouteAuditTest.java",
+    "sha256Lf": "df8a0420053eb6f5c00cfb2a8195203d951c70fb8758a4fac822f1c1c27a490f"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/IpAddressResolverTest.java",
+    "sha256Lf": "bf8c5394473fe60fe6a86551d63d73cd027aad249eff331e559adf27c03a2197"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/JwtBoundaryAuditTest.java",
+    "sha256Lf": "f4b75374e73dab23bf1d468f479dff4aa4140c3eb97888b15c01029d89558f90"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/JwtServiceTest.java",
+    "sha256Lf": "101628db4a3fd2f5f60cd229735d0700ac31d87f1626af575442d5db7d5cdf25"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/LoginAttemptServiceTest.java",
+    "sha256Lf": "fe70c5c2d690b40b837e39d2ceb890cdce1f21ba4b3dbaf54ecbbb7d9c664c95"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/PasswordPolicyValidatorTest.java",
+    "sha256Lf": "5eadba18329f6d72786a04d39ee04bae46f55269630e206ef4fa6989364dc11d"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/ProxyClientContextVerifierTest.java",
+    "sha256Lf": "1f42d1146e5d69e49911ffae9f3b2c7bd97bae6838a258ae4edce0db281c1892"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/RateKeyRotationAuditTest.java",
+    "sha256Lf": "70d272c16b80a79adf3bacfa2e5e183d18731ebe27e2cfa69b9a9e7122c55a35"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/RefreshReusePersistenceTest.java",
+    "sha256Lf": "379703a8922cf7ca1261b5498134114e4fa5e60c6061206c7d92a22057878e25"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/RefreshTokenHashSecurityTest.java",
+    "sha256Lf": "0e69c853c3c2257b6754fabd8cbfaea367b41b636225cfff1426e7176849997d"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/ResourceLimitsIntegrationTest.java",
+    "sha256Lf": "463c3395c9a2464e390ed12a4d0b86ff9b71ce5c5443e17b0119e3a498f96c2f"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/RouteAuthorizationAuditTest.java",
+    "sha256Lf": "80a83e366351f376e7d3dcc89dcdaf1c08a7d12e00668e2239b7f696a1414189"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/SecurityUtilsTest.java",
+    "sha256Lf": "43c1d390880953c133f7b4297e041af84d4ad94b53a3d43ffc9dea52ee31117d"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/SensitiveOutputAuditTest.java",
+    "sha256Lf": "86e0fcbbb341157a42d2443957a02f2d5ac8c21161be782e9995fde8e4bb2368"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/SharedRateLimitIntegrationTest.java",
+    "sha256Lf": "d4cb36528287a3ad565eef86a8cda278f235ca1244f7ec3cc226d301c0ebe600"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/TokenHashUtilTest.java",
+    "sha256Lf": "1737a04ca408a26650c014ba46f5311bb95440c1125f818428925e87a1046033"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/security/TokenVersionSecurityTest.java",
+    "sha256Lf": "5140eaaf50410ec0d1e288feaf75d33cb3959c2762d26c89f287ec21949d1cf9"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/AuditoriaIpSecurityTest.java",
+    "sha256Lf": "c82952266c25d9b9f64a6341ccf73b216b44bb180805711130ba25084136826e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/AuthServiceTest.java",
+    "sha256Lf": "25037f69f58b315ed56ab24062f7bcf04cbac61044b1a2e7f6f606fd93c44f6d"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/CategoriaServiceTest.java",
+    "sha256Lf": "bd4ad465f6c35b690afc245d15fee4ac1b29e79f2cacd0b86caef805099b1f7e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ClienteServiceTest.java",
+    "sha256Lf": "5febc48181905187092d59769c34fca2a21a6d63e426f3b6188bf3aeb60c9e5f"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ConfiguracaoOficinaServiceIntegrityTest.java",
+    "sha256Lf": "cee780ecbb9afc94d121476a45b591455fd1ab333b000c0d962f893f0d6ff857"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/EstoqueServiceTest.java",
+    "sha256Lf": "68609592ddec7783a492feb5d0ed31f8bf5aa227392fa92602af6658c9f40741"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/FinanceRegressionIntegrationTest.java",
+    "sha256Lf": "45b0f44afdaf40ffaa551a6e8ffb295d666db38d00d729bf6531379afbcb11dd"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/FormClearIntegrationTest.java",
+    "sha256Lf": "a958438d2fd6ad425ee77aeb2ea5c9ed7a67ae50b47f685e27a1299f6db27530"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/FornecedorServiceTest.java",
+    "sha256Lf": "8fa64eab5d049f087ee14e4a6b353683293d4184c5be4b0acd690bfdfbcb27a9"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/HistoricoBuscaTest.java",
+    "sha256Lf": "1b1f85b2ddeb91d3732bfbdd9fdbac8cfef14060630276ad0b6d5db620403bfb"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ImpressaoConfigPdfIntegrationTest.java",
+    "sha256Lf": "d58fde21da96125a482511435a7c33f1f5b2b6fc040e014269333ec2513b8a16"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/IntegracaoEstoqueOSTest.java",
+    "sha256Lf": "9ec163fbf4a4e4fa2f1152680b7a17628464550e1c0cd396af016cb5b5e44a08"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/MaquinaServiceTest.java",
+    "sha256Lf": "fdca8175e22579d90e8b250dad3b71647a22bd7803133fb793268178beea7083"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/NotificacaoConcurrencyIntegrationTest.java",
+    "sha256Lf": "3e74e10240fad13e0ebdcaa46e1ac8a5bf63a7d2dc1458721d847e226bb6b1ab"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/NotificacaoServiceTest.java",
+    "sha256Lf": "5221ea67d9505c80d30c7367cfe8bf9980a6ea5afe6489b699280cfcac96d44a"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/OrdemServicoConcurrencyIntegrationTest.java",
+    "sha256Lf": "329826c5329769288d662c7e2f3fd9a5e81ea5850e621477017d58af0c6af09c"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/OrdemServicoFinanceiroTest.java",
+    "sha256Lf": "91d8d83c461d2b27d37532e82b3b0de2915500a61b14caedd08685b791345d97"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/OrdemServicoItemServiceTest.java",
+    "sha256Lf": "4cecc4c8e49baffa07a5717b46e9d5c2c03b3e1915ab889a952441a6cdc38533"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/OrdemServicoPdfTest.java",
+    "sha256Lf": "4d64529e4b79dbcd88fea95d0d9c1e13db0898f96d46b8334f6b8a792d6d5977"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/OrdemServicoServiceTest.java",
+    "sha256Lf": "43e7a9d3ce736fb9ac995831f872781981b8952db49af245c3f9c0bda75f77e1"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/PdfConfiguracaoOficinaIsolationTest.java",
+    "sha256Lf": "619f1d35916a8b1cf9900dd67086cac4ae6f92f5a9738a369a2a5d1b05c9f464"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ProdutoEstoqueConcurrencyIntegrationTest.java",
+    "sha256Lf": "abbda781b305a48d49d31ffd99afa7e1718ec2db75846cd42eb62c773bfad51b"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ProdutoServiceTest.java",
+    "sha256Lf": "3f5764338741b8f88aba5c88efa7c893607b00e19f6258585267ba5120b0e59b"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/RefreshTokenConcurrencyIntegrationTest.java",
+    "sha256Lf": "fff1f9f0a0c92a61b758b016c8527728ec505fe6bc14c2c5b98877de1b115ddd"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/RelatorioRegressionIntegrationTest.java",
+    "sha256Lf": "42668941f9a48c9d5ccc248877f04ed54195d819fa8a0f9075c11208a199c2c7"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/RelatorioServiceTest.java",
+    "sha256Lf": "df18e887e0200ce6aa65daeb3d950fe028b46f70024edbe46fd705b2095cc0e5"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/ReleaseSmokeTest.java",
+    "sha256Lf": "d3d6fc4a9f98e45e447697552bdd85a90611240a8ad838ff262fe8559ba76848"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/service/TwoFactorConcurrencyIntegrationTest.java",
+    "sha256Lf": "01e422c1810c7935ea53888d7e354e3780fea56b7fc4b4eda1dc91bb13b5a4e7"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/CsrfMockMvc.java",
+    "sha256Lf": "0efd3cdc9172644d530294d7fd0999d8446f6bcbcd81187069e580eb66bf9f0e"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/SyntheticMigrations.java",
+    "sha256Lf": "caefc6eb3758a54e7b64d618a5d4e7d01e8552adc851cda77fc8def1c2984aa9"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/SyntheticMigrationsTest.java",
+    "sha256Lf": "e3b5bf982e7ea07fda2325a0010d2028213028b0551d492202a7524a5157a2dc"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/TestDatabaseSafetyAutoConfiguration.java",
+    "sha256Lf": "e976eda83cbfbe48edab4a4026c5666ca98b2d6c7bacd305a458882464b6029b"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/TestDatabaseSafetyAutoConfigurationTest.java",
+    "sha256Lf": "4140ad5bda895de7823a36465f5c573df286dd0c9562733171357b541cf77d04"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/TestDatabaseSafetyGuard.java",
+    "sha256Lf": "e07f30e6e67832a9b5180e24ccf2b91bf6fa7c151fb7780010672e76adbe94a8"
+  },
+  {
+    "file": "backend/src/test/java/com/oficinagestao/testsupport/TestDatabaseSafetyGuardTest.java",
+    "sha256Lf": "47cf0973a7b9ec347aeefb66fd7e7dd89bd47886de9da8d035e6eacbe137ed8b"
+  },
+  {
+    "file": "backend/src/test/resources/application-test.properties",
+    "sha256Lf": "490c219b2bff5b8a346a955ee74896fb7586782fe006661145e4153187785d81"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V10__add_composite_foreign_key_os_maquina_cliente.sql",
+    "sha256Lf": "66f6b199aaec6a29f7604cc818a956e2fb88e3de0c8a3a6e72e70bf1b79ae09b"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V11__create_configuracao_oficina.sql",
+    "sha256Lf": "c65ea148fbe4a3923faf323031fd0142ebcbb4062144168ecc668cb05c8be046"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V12__update_admin_and_config_defaults.sql",
+    "sha256Lf": "36fc8318b9b84f0edd28f5ea6541f398a89d99e3aee5d2a7eb651cebfbf5db4a"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V13__create_fiscal_dps_and_tomador_ibge.sql",
+    "sha256Lf": "5bb1ba826299a543bd08524dcf4654077174ad9c772a501a30bb99a925eb23f0"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V14__remove_unused_fiscal_structures.sql",
+    "sha256Lf": "a1861947ed63e834f08bb07d06e8d4410c197d8bce0699b718b22b34276f3627"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V15__remove_cliente_codigo_ibge.sql",
+    "sha256Lf": "0d90f4c0280730b0bdab262112380560c0005909424b953487a28f84870562f2"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V16__refactor_produto_codigo_and_link_compra.sql",
+    "sha256Lf": "535da882d367fa24f2b1ba40b2b79eecdc0bb1339048afd294e8a8c995aca31c"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V17__add_remember_me_to_refresh_tokens.sql",
+    "sha256Lf": "e5221cbc7c4da905e45c853ed82fed6be6309683bc8998cc70a2e8cadef32958"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V18__create_two_factor_challenges.sql",
+    "sha256Lf": "29e2021912288abd45e6b244170e60a62a6fe0151ca09118edd38ad33341bd35"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V19__create_notificacoes.sql",
+    "sha256Lf": "cd3fbee2cad635f32a450741756e0c5e77794e8fd8a24f5bab8d25163b64a903"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V1__create_initial_schema.sql",
+    "sha256Lf": "cfbccd4df3f9818760c9b99d1552caabc23dcfa4a0143ae150f5135a29d82e95"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V20__add_token_version_to_usuarios.sql",
+    "sha256Lf": "6044f8f269236b3aa22e084ab901ac9beb5e58a7aa45d07577d55226a321dc1a"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V21__hash_refresh_tokens.sql",
+    "sha256Lf": "0629268c8dff48061e54604a1dd945e8eec3b42a94318808fa50a6e32bb2fd4f"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V22__expand_produto_margem_lucro.sql",
+    "sha256Lf": "00944c71c3fda9b2e2a8fe0a8bfac6664e9f965f4fbe95be1306e481132fe981"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V23__shared_security_rate_limits.sql",
+    "sha256Lf": "49f3ac18db347dc52a07fae9167c25b333c6579539598c1ec832c91d97450853"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V24__rate_limit_key_generation.sql",
+    "sha256Lf": "5961a2859c59b8ae9651a35572abca804237257249a2ddc199bb7c2950b18c88"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V2__simplify_initial_roles.sql",
+    "sha256Lf": "8b9abfc69843263ef127d9c671c800df22856ef1ed3c8c87aaacf1e14be49174"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V3__add_refresh_tokens.sql",
+    "sha256Lf": "ea743ccd763a1124f7be3c3ef7ed91746c844de3c5a00f76ae7150ce410e9a64"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V4__correct_equipment_domain.sql",
+    "sha256Lf": "e1abd4dda156d562904930631498051ed700ee8003a8cf3eb88f8cc55bd8668c"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V5__align_service_order_domain.sql",
+    "sha256Lf": "9d3ada21bebd8693d938e07746bcd13e45d48475b14fb641c7d438095a41d98c"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V6__maquinas_tipo_check_and_adjustments.sql",
+    "sha256Lf": "e4e15aa9d757d31d173fcf4465ae97926566e6493eefedfa4a7325fd43ff99f3"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V7__add_stock_constraints_and_indices.sql",
+    "sha256Lf": "c3d1d549ed8ad9b8dd2cfe36098d7c7ce8e343fe476e16247d54e03052609749"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V8__add_ordem_servico_sequence.sql",
+    "sha256Lf": "028933acae5cc61cad74f105c92805e39af0713526b2e665998e4d3d13ecc535"
+  },
+  {
+    "file": "backend/src/test/resources/db/synthetic-migration/V9__add_produto_marca_and_seed_categorias.sql",
+    "sha256Lf": "a8b0aaa88b3f7627dc453f2dd45a1d83d92aa47f07e03f501cdcf98854432145"
+  },
+  {
+    "file": "backend/src/test/resources/synthetic-migrations.sha256",
+    "sha256Lf": "91ac03c47a5befcad501ca7b1c8cb8a30447bdaa1d2a167b254441225695bbc5"
+  },
+  {
+    "file": "frontend/e2e/a01-a06-regression.spec.ts",
+    "sha256Lf": "578199003ad9d12acdeb31eb8aaeaf4c30bf490c48d075be2f20fd3bed4a4ddf"
+  },
+  {
+    "file": "frontend/e2e/csp-errors.spec.ts",
+    "sha256Lf": "eda2b0179d09175dbfc52ac8a33267779090e5bfa56f666cafbc48a35b6cfb4f"
+  },
+  {
+    "file": "frontend/e2e/forms-b02-b07.spec.ts",
+    "sha256Lf": "1a48f1cc431d69e40bbfe57ae6ccf659d499fc586ab0c3c9b75c6714e716f6af"
+  },
+  {
+    "file": "frontend/e2e/integration-real.spec.ts",
+    "sha256Lf": "adea26f256ddf81d61e0bfd75b576472a511ca6d6a0bc047058b67dbf539678f"
+  },
+  {
+    "file": "frontend/e2e/login.spec.ts",
+    "sha256Lf": "44426b9deeea1f766c0fbe38099ec1659cd5ec22014052879c04d65265aedaa2"
+  },
+  {
+    "file": "frontend/e2e/logout.config.ts",
+    "sha256Lf": "7d427fbde0e6086a299661801dc33b530b6e17b7d63e18e581ebe3806eeeba14"
+  },
+  {
+    "file": "frontend/e2e/logout.spec.ts",
+    "sha256Lf": "adebd1e0f855d735c6849dead39e9eca4d114a2b0afd0dcfa10fa5596005cee0"
+  },
+  {
+    "file": "frontend/e2e/print-config-b11.spec.ts",
+    "sha256Lf": "362ed00426653775f42ced970fc14d97b251caedf69a36e94f5fa462f3fca650"
+  },
+  {
+    "file": "frontend/e2e/produto-modal.spec.ts",
+    "sha256Lf": "5f8927386f506fd69b07a14e4898e010f5a4c2a5b5e3d88fee4bc8dcab4f693c"
+  },
+  {
+    "file": "frontend/e2e/pwa-install.spec.ts",
+    "sha256Lf": "ae00d376fb58a6251a08b3c516d2430d261f6a7422a237d95e7953f4ff79b168"
+  },
+  {
+    "file": "frontend/e2e/session-recovery.spec.ts",
+    "sha256Lf": "49761ca355147d5303f009c0a9e57daee6cd4f667c6e15d8f06779101a3fc40b"
+  },
+  {
+    "file": "frontend/e2e/strict-csp.spec.ts",
+    "sha256Lf": "d87318ab123ba154e3d0c70e1e825fc7beaf71192415c190e68fb4ad175c2145"
+  },
+  {
+    "file": "frontend/e2e/visual-fixtures.ts",
+    "sha256Lf": "f9385d32314d3866d7e8aaa9b7217c147188336d55c09389d40e345f5aa91277"
+  },
+  {
+    "file": "frontend/e2e/visual-interactions.spec.ts",
+    "sha256Lf": "6b886000eeca2e59fd5e65af540744ceb2603ad916505d509e269fb2e4b47f63"
+  },
+  {
+    "file": "frontend/e2e/visual-refinement.spec.ts",
+    "sha256Lf": "6fff065f985a2d8b38550fd5ac3b71e613b7a3ca691446293edbd23e1d7a6cbf"
+  },
+  {
+    "file": "frontend/e2e/visual-review.spec.ts",
+    "sha256Lf": "2695a3cb0c60e84d3029243d283164e02fd2dd40bb6cd2e7bce5f7f0f650929b"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/clientes/[id]/page.tsx",
+    "sha256Lf": "d9b1c709b14fecd84917fe058a4eb68d93e2a8b45124a268608b9a430ca991a0"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/clientes/page.tsx",
+    "sha256Lf": "8f01f24850a713a1fb45b1441318581b67125db3fd5389e00b8608ba2ca3fb6e"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/configuracoes/page.tsx",
+    "sha256Lf": "5469d8518c8cb7e921aa22d681b128496f06268e81327acb2361a7cf78ba3424"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/dashboard/page.tsx",
+    "sha256Lf": "c5adfcddfb1a381aa85e79a25f59acad97802fd15962000909f2fc0bb6cf989d"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/estoque/movimentacoes/page.tsx",
+    "sha256Lf": "0b54207fb5467651b8ef501e673710720d653c5f6579a9c6919101d53de3ee67"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/estoque/page.tsx",
+    "sha256Lf": "d9bd07b353792f41c677074220f40bcf89ce8b211d454a1f4fcd525eea56a2c8"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/layout.tsx",
+    "sha256Lf": "ce3efd5f236203f35ea123f27d4e0ed68a28d7f19b98f9d6a27ab1926525df7f"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/maquinas/[id]/page.tsx",
+    "sha256Lf": "6ea253d8702dd66be09a16ed29275a3e0ae4847145c016e9b8d8aca7f800d378"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/maquinas/page.tsx",
+    "sha256Lf": "614e8c087cc7724e0ee74dd3609b5ae8ab731622933cf0a5d8d672e626cd3980"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/ordens-servico/[id]/page.tsx",
+    "sha256Lf": "83a6c07b92abec30c951f53c79f20178a9a96a2841cc18b44d4baa7c1e357d3c"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/ordens-servico/nova/page.tsx",
+    "sha256Lf": "2a44d834c473c4e804267367cb32f0f407c344df3beb4aa388aebf69bb13d928"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/ordens-servico/page.tsx",
+    "sha256Lf": "82dc40dd80cd084c502d684814355c350cbad7f4d3ab211cb27b551c71a47f85"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/produtos/page.tsx",
+    "sha256Lf": "eb20143871bb4d90674a9029fdb37d0681893403cc2c84695a45d08ba87ba6f5"
+  },
+  {
+    "file": "frontend/src/app/(authenticated)/relatorios/page.tsx",
+    "sha256Lf": "e1b382f6f2410afa3e280a8b2ac80067b08cff9950598b2c174cbfd7613c583c"
+  },
+  {
+    "file": "frontend/src/app/api/[...path]/route.ts",
+    "sha256Lf": "01340024baa9de3dc8806629efa33c2ce4695a6224134be8cb26dc6078757413"
+  },
+  {
+    "file": "frontend/src/app/layout.tsx",
+    "sha256Lf": "0c8618bf857cd2c2ba56568339fa07116c267cf9f9849d953eea79ca794c3a05"
+  },
+  {
+    "file": "frontend/src/app/login/page.tsx",
+    "sha256Lf": "abd2155b6cca0e9f03a655a7f52faee1c03de564948dd219696d1fba127aeaa9"
+  },
+  {
+    "file": "frontend/src/app/manifest.ts",
+    "sha256Lf": "0a0550e68ecd2b235c182731af3955a29d44f0b1378803468e30d80bc70c7886"
+  },
+  {
+    "file": "frontend/src/app/page.tsx",
+    "sha256Lf": "9f34fe2329df2cb356b6024ff6a7aedd786f94c6ed44048d3e6e2f78c75c35b2"
+  },
+  {
+    "file": "frontend/src/app/pwa/icon-192.png/route.tsx",
+    "sha256Lf": "3185b725e860ac6bc5fff7d2a5112363f40051b670b9db6abf254c2146e7ba3a"
+  },
+  {
+    "file": "frontend/src/app/pwa/icon-512.png/route.tsx",
+    "sha256Lf": "128735e299476031b1a44fdff608efb50845b982726add8a5b06bb80a4f695c3"
+  },
+  {
+    "file": "frontend/src/components/BuscaRapidaModal.tsx",
+    "sha256Lf": "55bb2454ca02e4919f7cd27d0ac05bd0194a21de7b49a86ce8b246d4fd405314"
+  },
+  {
+    "file": "frontend/src/components/ClienteModal.tsx",
+    "sha256Lf": "997d33fcdbe2b2e819e8aad93c684ca4ad30067ac95a03941301b24d1efb6dad"
+  },
+  {
+    "file": "frontend/src/components/CompatibilidadeModal.tsx",
+    "sha256Lf": "aca27093947c6929052f8142f701a0d8ff19bccb32848915821760dc44d7a945"
+  },
+  {
+    "file": "frontend/src/components/ConfirmModal.tsx",
+    "sha256Lf": "8c50d688dd350c33d0da91e58e32aef43768c91c310150932e895bbd1820ff72"
+  },
+  {
+    "file": "frontend/src/components/EmptyState.tsx",
+    "sha256Lf": "2e88c2a5ebe77696b8a1542809f74eb869c1c9a465d97aa9dd15f6b873cbd2ee"
+  },
+  {
+    "file": "frontend/src/components/Header.tsx",
+    "sha256Lf": "9907a9481179adb1e90a878401a6c6aa4236c71eeb47bf97f9985be4de1dbabe"
+  },
+  {
+    "file": "frontend/src/components/InstallAppButton.tsx",
+    "sha256Lf": "faa1caa8c8afb85657ee70554604419ff6abde1d1ba982b73cd284878bcc0979"
+  },
+  {
+    "file": "frontend/src/components/MaquinaModal.tsx",
+    "sha256Lf": "e51d56bfd74fe8a9dc5452556510c68c30783369c53c3eeab274ab096ebac992"
+  },
+  {
+    "file": "frontend/src/components/MovimentacaoEstoqueModal.tsx",
+    "sha256Lf": "c86d0b01fe8324326c07d34c9d900e69f7eb42768a9ea0b8784a963d46b03024"
+  },
+  {
+    "file": "frontend/src/components/OrdemServicoImpressao.tsx",
+    "sha256Lf": "8823fb980bb2976b8134668cee71fa286d17ef5412641c0b0e1cf6bc6bb848b6"
+  },
+  {
+    "file": "frontend/src/components/ProdutoModal.tsx",
+    "sha256Lf": "6860713748d81ed24b0357e04881dc7c6b1ffb0dddeb68f10e0c8f61712aa0b3"
+  },
+  {
+    "file": "frontend/src/components/PwaInstallProvider.tsx",
+    "sha256Lf": "484a4977119d5baaceef07b5fd4b5cac84f47e4f8a568e78823cb7fad5eb2731"
+  },
+  {
+    "file": "frontend/src/components/ui/DialogFocus.tsx",
+    "sha256Lf": "f3c1bc070b28631bfa0eaed27d7d864b69b0a022c231892eafd47a699aa9cdd1"
+  },
+  {
+    "file": "frontend/src/components/ui/DomainIcon.tsx",
+    "sha256Lf": "e44f573846008d0f5ec750b5f78ccb7cf877db1d7167812471525553aeee9dbe"
+  },
+  {
+    "file": "frontend/src/components/ui/FeedbackNotice.tsx",
+    "sha256Lf": "238e57d27f9e0330ccf5a5c5717a715963088fdb7f98bb0ba3f92aa4c33c390f"
+  },
+  {
+    "file": "frontend/src/components/ui/MetricCard.tsx",
+    "sha256Lf": "02d4937ff210a02f54e3ba4e4c22a223912fc72237b14b67b95326e2f731f016"
+  },
+  {
+    "file": "frontend/src/lib/api.ts",
+    "sha256Lf": "26ca3d7f7709c1545ad3436e6837fe3f1ecfd865889d2326443cb76de808cede"
+  },
+  {
+    "file": "frontend/src/lib/authRecovery.test.ts",
+    "sha256Lf": "efcea4256fa32269972b06174c79f941f94507f019da81c05a7c41658a2fac1a"
+  },
+  {
+    "file": "frontend/src/lib/backendProxy.test.ts",
+    "sha256Lf": "1c349fee5381eccdaaa1a19b2a90a2fbcfba2917816bd4d837c1942394524fd1"
+  },
+  {
+    "file": "frontend/src/lib/backendProxyAudit.test.ts",
+    "sha256Lf": "a47adba3748c9b725635e5a2ce8b10a4a88fa65e456d04659701fda18f0e9403"
+  },
+  {
+    "file": "frontend/src/lib/backendUrl.test.ts",
+    "sha256Lf": "07aecd8333a2fe302282d8e58c4f7f3c9db0b8bb2f59ba4230596ffb0fe3c5c6"
+  },
+  {
+    "file": "frontend/src/lib/backendUrl.ts",
+    "sha256Lf": "0e6f43e866f18d2599225be6b531d1a71170e43f30c52febb97b53df5af82325"
+  },
+  {
+    "file": "frontend/src/lib/brand.ts",
+    "sha256Lf": "972fffbb41f113d3d8bebf68e842fd11ec8170656a1a051a53914859634936f7"
+  },
+  {
+    "file": "frontend/src/lib/clientesOperacional.test.ts",
+    "sha256Lf": "ad9cf6df06937a5d7d1c4400935245fd5645463c133854818ac2d4880d1d0824"
+  },
+  {
+    "file": "frontend/src/lib/confirmModal.test.ts",
+    "sha256Lf": "f8a5e3592a0718ad0ccc7a8d7c96fcefbb3cad7bd3df6b8f3a4fb0fab2f674f8"
+  },
+  {
+    "file": "frontend/src/lib/csrf.test.ts",
+    "sha256Lf": "908b51a6928b3d20ddb4ef4207f93890bb69758f59afd165068f1daa39911a4c"
+  },
+  {
+    "file": "frontend/src/lib/csvExportHelper.test.ts",
+    "sha256Lf": "acf1ba3493f90615ad2d89120a497a195f97213552f0010d6d93be71e3621386"
+  },
+  {
+    "file": "frontend/src/lib/csvExportHelper.ts",
+    "sha256Lf": "4323cc4a844eb5f23d09de5cd2dd1439df73a9298ff4ac26036694e2c95cf7a8"
+  },
+  {
+    "file": "frontend/src/lib/csvHelper.test.ts",
+    "sha256Lf": "c3e522c280e01c7c843a0b050f96f338c65547379f3c44b7d69758a8212c0818"
+  },
+  {
+    "file": "frontend/src/lib/csvHelper.ts",
+    "sha256Lf": "0a2fa5dd79a51e1334bd46b7014bf5a06afe3c694999ab86cd4656512cc7f6d1"
+  },
+  {
+    "file": "frontend/src/lib/csvLimits.test.ts",
+    "sha256Lf": "c2ec64f802274875bad7dfc8ec189bb300f8dfc1e4d131913ffdc58319e48773"
+  },
+  {
+    "file": "frontend/src/lib/csvSecurityAudit.test.ts",
+    "sha256Lf": "05c1ef6cf70b6c901fcf2cea0472b3934aea9c3f5b14aba814f97a668ecdce5a"
+  },
+  {
+    "file": "frontend/src/lib/dashboardOperacional.test.ts",
+    "sha256Lf": "5462d5b20e98f96940d72d3909bcab75ba2e7751bc5cd98115b245833dcc5196"
+  },
+  {
+    "file": "frontend/src/lib/designSystem.test.ts",
+    "sha256Lf": "5f8dd3f2df45e2720ccf8c694ccf68a395a28119e93e42f2ef5b5b308099a96d"
+  },
+  {
+    "file": "frontend/src/lib/loginErrorHelper.test.ts",
+    "sha256Lf": "dcdf8d15f8469f9e03b88c15b184f59e5d74ebb1512760b9d39a71750828827b"
+  },
+  {
+    "file": "frontend/src/lib/maquinasHistoricoContrato.test.ts",
+    "sha256Lf": "57964c735a3137a5b8d4c904b6c99105c4121870ee8fdd308218dd11bc8bbdc6"
+  },
+  {
+    "file": "frontend/src/lib/maquinasOperacional.test.ts",
+    "sha256Lf": "4830c060f0ff8d74b51ad1e902f050ec98621bb6d415c0d707771c2e4e38acca"
+  },
+  {
+    "file": "frontend/src/lib/notificacoesOperacional.test.ts",
+    "sha256Lf": "2cb4dd806b7ab17262035115cfd2b5ed1e6267cabfef31cf925ae2e630af3509"
+  },
+  {
+    "file": "frontend/src/lib/oficina.ts",
+    "sha256Lf": "b96e9f38f8b011b1b521856b9da1989b184f793c5236e9cfa77490885d85895b"
+  },
+  {
+    "file": "frontend/src/lib/ordemServicoImpressaoHelper.ts",
+    "sha256Lf": "3849343933dfddafb9768e97887d0d0582b5f09e3d0e826e1ef49097a900307b"
+  },
+  {
+    "file": "frontend/src/lib/ordensServicoCockpit.test.ts",
+    "sha256Lf": "9dca4716cc34cf35566a5631e61ca6fff56b717c90ec1943fade1168a6d25277"
+  },
+  {
+    "file": "frontend/src/lib/ordensServicoImpressao.test.ts",
+    "sha256Lf": "94ff9f39e7427c1c654db79b5c676d79e3ddd9a5cfcf1acbe7a3ccf137ebd1cb"
+  },
+  {
+    "file": "frontend/src/lib/ordensServicoLista.test.ts",
+    "sha256Lf": "a1e5947a97c77d93bb102b2481894c781ac711843cfb6f6c04d19edeb0139b2f"
+  },
+  {
+    "file": "frontend/src/lib/produtosOperacional.test.ts",
+    "sha256Lf": "4a2d47642914670f87f4b8da088768a3f5445da9921fb3d5808d8aaf531e2e7d"
+  },
+  {
+    "file": "frontend/src/lib/pwaIcon.tsx",
+    "sha256Lf": "e4f5b04c3c044861dcf35e2c390030ae39ad195adc5deb758cdb73f454b52567"
+  },
+  {
+    "file": "frontend/src/lib/relatorioDateHelper.test.ts",
+    "sha256Lf": "15b966febc845c32e2d91bd53f72045ff73dbb66cb49e565061adb2a92257452"
+  },
+  {
+    "file": "frontend/src/lib/relatorioDateHelper.ts",
+    "sha256Lf": "4f3fe4b499d0c2100517cd3b1a33073b38f8ef35519aa0b88669ed5b3a4bd874"
+  },
+  {
+    "file": "frontend/src/lib/relatorios.test.ts",
+    "sha256Lf": "afe44cd1e4e0bb8e967ce31c599e5e84d0310bd006fe95fcddf0f94cdbb3901e"
+  },
+  {
+    "file": "frontend/src/lib/securityHeaders.test.ts",
+    "sha256Lf": "b4c825e334b47f9f49b71f96ef33a120f73f572f9c376554d4f30c65255a3995"
+  },
+  {
+    "file": "frontend/src/lib/securityHeaders.ts",
+    "sha256Lf": "15d0bfcdb959b92e1dec33b27736d20ed4f178e065bb8c3d1fd72cbd8abf1856"
+  },
+  {
+    "file": "frontend/src/lib/sessionResilience.test.ts",
+    "sha256Lf": "39bb6facde0262c8e9953c3b8db69214c3c90f8647397c3393b77bf98ed9e64e"
+  },
+  {
+    "file": "frontend/src/lib/types.ts",
+    "sha256Lf": "dafb0a97daa82a76db79a2c6ba17c6edb31889100a4772e7999f88762525a491"
+  },
+  {
+    "file": "frontend/src/lib/whatsappHelper.test.ts",
+    "sha256Lf": "5392f952f3e964b0c7bd3478c1f25d33f12fa488940aa0b9e529a751974b9cbd"
+  },
+  {
+    "file": "frontend/src/lib/whatsappHelper.ts",
+    "sha256Lf": "68b2235d25042d5d1935a79ab2e65401e03e3c06074e30587b35d30937afa76b"
+  },
+  {
+    "file": "frontend/src/proxy.ts",
+    "sha256Lf": "f3edb074584a0121dce1e6b402a4cac81307528e338349782257eb838e63de63"
+  },
+  {
+    "file": "frontend/src/server/backendProxy.ts",
+    "sha256Lf": "648f8c8a9f774d032e1c44b9b038b1899de1945efec17e6ecc7a58cc78f7c7f7"
+  },
+  {
+    "file": "scripts/audit-http-parser.mjs",
+    "sha256Lf": "49e9b39ad36a1c2f36759f8a111ff33e7c59503c6eae25846ddf33a2373cc73b"
+  },
+  {
+    "file": "scripts/audit-proxy-fixture.mjs",
+    "sha256Lf": "bb79f2df1620722b89115df9b645d77b119f671d0da404b077a04753283ad6e8"
+  },
+  {
+    "file": "scripts/audit-proxy-transport.mjs",
+    "sha256Lf": "dc9e4d81ed7964ac8c73a56456e7a42b53572bfc12ecda7fbe78780e826369d6"
+  },
+  {
+    "file": "scripts/audit-route-inventory.mjs",
+    "sha256Lf": "e93071efdbe484020cc805dc2f9db97015f85e750ce93ef07d5c260d62e31275"
+  },
+  {
+    "file": "scripts/audit-vscode-prints.mjs",
+    "sha256Lf": "d991ef3631fa961d7b96d7609e2ea30ae1fc99a31c9f4754826dcb1ca1e74c82"
+  },
+  {
+    "file": "scripts/collect-independent-audit.mjs",
+    "sha256Lf": "fa3bc7647ebee2f9e5eb73f7fdc2a4ec7b3fb968d89d8180cccb4f277870d86a"
+  },
+  {
+    "file": "scripts/homologation/CheckNeonTls.java",
+    "sha256Lf": "d5d2c3633aa25bb18e73184494c12816cfdf263f3c3d273b0c199f783d3cb226"
+  },
+  {
+    "file": "scripts/homologation/check-cloud-run.mjs",
+    "sha256Lf": "bfcbe8588d39f5914b3060a2cd06830a28ab0d7f221d0f56a3e2fa69f7c19e1a"
+  },
+  {
+    "file": "scripts/homologation/check-smtp.mjs",
+    "sha256Lf": "284d702bc479fd623c2672f098fa4a035aef2075240c838020cc65c3706365ad"
+  },
+  {
+    "file": "scripts/homologation/smtp.mjs",
+    "sha256Lf": "b9b5dbea6f30f57d5dc4534178b79ae5bd5e1a93af09a2e92af8f7f83603299d"
+  },
+  {
+    "file": "scripts/homologation/tls-isolated.test.mjs",
+    "sha256Lf": "4510e46ac2044cfa6fc32f3446750ee37a3e90fdc8f71fce0bb92ca9e69214c4"
+  },
+  {
+    "file": "scripts/test-proxy-runtime.mjs",
+    "sha256Lf": "35580eaa52ac30ba187326d2540b7308a9948e8982fd50ba95a17603382de8eb"
+  },
+  {
+    "file": "scripts/test-real-stack-local.mjs",
+    "sha256Lf": "a9f0407f03551eba23f8228efef0ddf98f65cb3ebb30ed5de9f83b801607a7d5"
+  }
+]
