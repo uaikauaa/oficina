@@ -55,6 +55,8 @@ O [inventário inicial por arquivo](inventario-inicial.csv) registra caminho, by
 
 **Economia por exclusões:** 64.217 bytes no checkout atual; o histórico Git permanece intacto. O README e o guia Cloud Run foram reescritos por estarem desatualizados. Os modelos de ambiente foram separados em desenvolvimento, homologação e produção, com `verify-full` para Neon externo. Arquivos `.env`, testes, caches e resíduos adicionais foram reforçados nos ignores. Nenhum log, artefato de build ou cache estava versionado no inventário inicial.
 
+O verificador `scripts/check-doc-links.mjs` conferiu os links relativos dos **81 arquivos Markdown versionados** após as exclusões: zero destinos ausentes. Links `file://` de relatórios históricos apontam para a antiga estação do autor e foram excluídos dessa checagem.
+
 **Preservados:** migrations oficiais V1–V24 e cópias sintéticas de teste (necessárias ao guard de banco); `rotas-api.json` e `matriz-rotas.md` em ambos os relatórios (referências históricas e teste de cobertura usam caminhos próprios); SBOM/Trivy de execuções distintas, cujos hashes não são iguais; capturas restantes em `docs/visual/` e `docs/auditoria/prints/` (evidência visual e diagnósticos VS Code); assets de login, favicon, PWA e dashboard usados pelo frontend; `nginx/`, `ops/`, `docker-compose.yml`, scripts de backup e workflow Oracle (ainda referenciados e sem substituto operacional de backup Cloud Run comprovado).
 
 ## Testes e segurança

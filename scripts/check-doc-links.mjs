@@ -9,9 +9,11 @@ if (!files.length) {
 let broken = 0;
 for (const file of files) {
   const markdown = readFileSync(file, 'utf8');
-  for (const match of markdown.matchAll(/\]\(([^)]+)\)/g)) {
+  // A path may contain a balanced directory such as app/(authenticated)/page.tsx.
+  for (const match of markdown.matchAll(/\]\(((?:[^()]|\([^()]*\))*)\)/g)) {
     const raw = match[1].split('#')[0].trim();
-    if (!raw || /^(?:https?:|mailto:|data:)/i.test(raw)) continue;
+    // file:// links in historical reports point to the author's old workstation.
+    if (!raw || /^(?:https?:|mailto:|data:|file:)/i.test(raw)) continue;
     const path = resolve(dirname(file), decodeURIComponent(raw.replace(/^<|>$/g, '')));
     if (!existsSync(path)) {
       console.error(`${file}: missing ${raw}`);
