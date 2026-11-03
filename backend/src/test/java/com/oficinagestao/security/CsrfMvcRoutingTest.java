@@ -157,7 +157,7 @@ class CsrfMvcRoutingTest {
     }
 
     @Test void safeRequestsRemainUsable() throws Exception {
-        mvc.perform(get("/api/auth/csrf")).andExpect(status().isOk()).andExpect(header().string("Cache-Control", "no-store"));
+        mvc.perform(get("/api/auth/csrf")).andExpect(status().isOk()).andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("no-store")));
         mvc.perform(options("/api/auth/login").header("Origin", "http://localhost:3000")
                         .header("Access-Control-Request-Method", "POST")
                         .header("Access-Control-Request-Headers", "X-XSRF-TOKEN"))

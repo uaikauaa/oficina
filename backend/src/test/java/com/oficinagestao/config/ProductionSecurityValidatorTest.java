@@ -33,6 +33,8 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
         when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.required")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.ssl.checkserveridentity")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
         when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("25000");
         when(environment.getProperty("spring.mail.properties.mail.smtp.writetimeout")).thenReturn("25000");
@@ -238,6 +240,8 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
         when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.required")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.ssl.checkserveridentity")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("0");
 
         ProductionSecurityValidator validator = new ProductionSecurityValidator(environment);
@@ -260,6 +264,8 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
         when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.required")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.ssl.checkserveridentity")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
         when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("500");
 
@@ -283,6 +289,8 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("app.mail.from")).thenReturn("mailer@example.invalid");
         when(environment.getProperty("spring.mail.properties.mail.smtp.auth")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.enable")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.starttls.required")).thenReturn("true");
+        org.mockito.Mockito.lenient().when(environment.getProperty("spring.mail.properties.mail.smtp.ssl.checkserveridentity")).thenReturn("true");
         when(environment.getProperty("spring.mail.properties.mail.smtp.connectiontimeout")).thenReturn("15000");
         when(environment.getProperty("spring.mail.properties.mail.smtp.timeout")).thenReturn("25000");
         when(environment.getProperty("spring.mail.properties.mail.smtp.writetimeout")).thenReturn("invalid-text");

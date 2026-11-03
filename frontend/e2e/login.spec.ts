@@ -26,6 +26,15 @@ test.describe('Autenticação e Login E2E', () => {
   test('2. Tentativa de login com credenciais inválidas deve usar Same-Origin e exibir erro tratado', async ({
     page,
   }) => {
+    // Keep the UI test deterministic; the isolated real-stack suite exercises Spring and SMTP.
+    await page.route('**/api/auth/csrf', route => route.fulfill({
+      status: 200, json: { token: 'login-ui-csrf' },
+    }));
+    await page.route('**/api/auth/login', route => {
+      expect(route.request().method()).toBe('POST');
+      expect(route.request().headers()['x-xsrf-token']).toBe('login-ui-csrf');
+      return route.fulfill({ status: 401, json: { message: 'Credenciais inválidas.' } });
+    });
     await page.goto('/login');
 
     let apiRequestUrl = '';

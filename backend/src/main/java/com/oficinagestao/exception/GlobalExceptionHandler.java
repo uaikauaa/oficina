@@ -25,6 +25,13 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<ApiErrorResponse> handleRateLimit(RateLimitException ex, HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", "60")
+                .body(ApiErrorResponse.of(429, "RATE_LIMITED", ex.getMessage(), request.getRequestURI()));
+    }
+
     @ExceptionHandler(ConfiguracaoOficinaIndisponivelException.class)
     public ResponseEntity<ApiErrorResponse> handleConfiguracaoOficinaIndisponivel(
             ConfiguracaoOficinaIndisponivelException ex, HttpServletRequest request) {
@@ -81,7 +88,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ApiErrorResponse> handleDataIntegrity(org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
-        log.warn("Violação de integridade de dados na rota {}: {}", request.getRequestURI(), ex.getMessage());
+        log.warn("Conflito de integridade de dados; tipo={}", ex.getClass().getSimpleName());
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ApiErrorResponse.of(HttpStatus.CONFLICT.value(), "CONFLICT", "Conflito de integridade de dados ou registro duplicado.", request.getRequestURI()));
@@ -150,7 +157,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex, HttpServletRequest request) {
-        log.error("Erro interno não tratado na rota {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        log.error("Erro interno; tipo={}; origem={}", ex.getClass().getSimpleName(),
+                ex.getStackTrace().length > 0 ? ex.getStackTrace()[0] : "indisponivel");
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "INTERNAL_ERROR", "Ocorreu um erro interno no servidor.", request.getRequestURI()));

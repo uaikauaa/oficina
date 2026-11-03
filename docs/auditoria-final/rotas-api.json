@@ -1,0 +1,1284 @@
+[
+  {
+    "method": "DELETE",
+    "route": "/api/ordens-servico/{id}/itens/{itemId}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 316,
+    "handler": "OrdemServicoController#removerItem",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "DELETE",
+    "route": "/api/produtos/{id}/compatibilidades/{maquinaId}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 163,
+    "handler": "ProdutoController#removerCompatibilidade",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "DELETE",
+    "route": "/api/produtos/{id}/maquinas/{maquinaId}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 163,
+    "handler": "ProdutoController#removerCompatibilidade",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/auth/csrf",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CsrfController.java",
+    "line": 14,
+    "handler": "CsrfController#token",
+    "auth": "PUBLIC",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "token CSRF (sem JWT)",
+    "risk": "baixo",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/auth/me",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 132,
+    "handler": "AuthController#me",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/busca/rapida",
+    "file": "backend/src/main/java/com/oficinagestao/controller/BuscaController.java",
+    "line": 36,
+    "handler": "BuscaController#buscarRapida",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "termo:String"
+    ],
+    "data": "clientes, maquinas, OS e produtos",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/categorias",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 68,
+    "handler": "CategoriaController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, ativo:Boolean"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/categorias/ativas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 79,
+    "handler": "CategoriaController#listarAtivas",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/categorias/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 89,
+    "handler": "CategoriaController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 97,
+    "handler": "ClienteController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, tipoPessoa:TipoPessoa, ativo:Boolean"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/contadores-status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 121,
+    "handler": "ClienteController#obterContadoresStatus",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/{clienteId}/maquinas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 192,
+    "handler": "MaquinaController#listarPorCliente",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, tipoEquipamento:TipoEquipamento, ativo:Boolean"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/{clienteId}/ordens-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 253,
+    "handler": "OrdemServicoController#listarPorCliente",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "status:StatusOrdemServico"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 133,
+    "handler": "ClienteController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/{id}/historico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 156,
+    "handler": "ClienteController#obterHistorico",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "status:StatusOrdemServico"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/clientes/{id}/resumo",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 145,
+    "handler": "ClienteController#obterResumo",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/configuracao-oficina",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ConfiguracaoOficinaController.java",
+    "line": 52,
+    "handler": "ConfiguracaoOficinaController#obter",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "identidade comercial e contatos",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/estoque/movimentacoes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 146,
+    "handler": "EstoqueController#listarMovimentacoes",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "produtoId:Long, tipo:TipoMovimentacaoEstoque, dataInicio:OffsetDateTime, dataFim:OffsetDateTime, numeroOs:String, termo:String"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/estoque/resumo",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 51,
+    "handler": "EstoqueController#obterResumo",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/fornecedores",
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "line": 66,
+    "handler": "FornecedorController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, ativo:Boolean"
+    ],
+    "data": "cadastro de fornecedores",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; FornecedorServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/fornecedores/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "line": 81,
+    "handler": "FornecedorController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cadastro de fornecedores",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; FornecedorServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/health",
+    "file": "backend/src/main/java/com/oficinagestao/controller/HealthController.java",
+    "line": 39,
+    "handler": "HealthController#health",
+    "auth": "PUBLIC",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "estado de conectividade",
+    "risk": "baixo",
+    "evidence": "RouteAuthorizationAuditTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/maquinas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 88,
+    "handler": "MaquinaController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, tipoEquipamento:TipoEquipamento, ativo:Boolean"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/maquinas/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 111,
+    "handler": "MaquinaController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/maquinas/{id}/historico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 133,
+    "handler": "MaquinaController#obterHistorico",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/maquinas/{id}/resumo",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 122,
+    "handler": "MaquinaController#obterResumo",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/maquinas/{maquinaId}/ordens-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 269,
+    "handler": "OrdemServicoController#listarPorMaquina",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/notificacoes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "line": 33,
+    "handler": "NotificacaoController#listarRecentes",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "alertas operacionais compartilhados",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; NotificacaoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 103,
+    "handler": "OrdemServicoController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, status:StatusOrdemServico, dataInicio:OffsetDateTime, dataFim:OffsetDateTime"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/contadores-dashboard",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 126,
+    "handler": "OrdemServicoController#obterContadoresDashboard",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/contadores-status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 132,
+    "handler": "OrdemServicoController#obterContadoresStatus",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 143,
+    "handler": "OrdemServicoController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/{id}/documento-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 174,
+    "handler": "OrdemServicoController#gerarDocumentoServico",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/{id}/itens",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 287,
+    "handler": "OrdemServicoController#listarItens",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/{id}/pdf",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 155,
+    "handler": "OrdemServicoController#gerarPdf",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/ordens-servico/{id}/recibo",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 193,
+    "handler": "OrdemServicoController#gerarRecibo",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/produtos",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 72,
+    "handler": "ProdutoController#listar",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "termo:String, tipo:TipoProduto, categoriaId:Long, fornecedorId:Long, ativo:Boolean, estoqueBaixo:Boolean"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/produtos/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 91,
+    "handler": "ProdutoController#buscarPorId",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/produtos/{id}/compatibilidades",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 135,
+    "handler": "ProdutoController#listarCompatibilidades",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/produtos/{id}/maquinas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 135,
+    "handler": "ProdutoController#listarCompatibilidades",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/clientes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 111,
+    "handler": "RelatorioController#relatorioClientes",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/equipamentos",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 121,
+    "handler": "RelatorioController#relatorioEquipamentos",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/estoque",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 63,
+    "handler": "RelatorioController#relatorioEstoque",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "categoriaId:Long, fornecedorId:Long, estoqueBaixo:Boolean, zerado:Boolean"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/movimentacoes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 81,
+    "handler": "RelatorioController#relatorioMovimentacoes",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "dataInicio:OffsetDateTime, dataFim:OffsetDateTime, produtoId:Long, tipo:TipoMovimentacaoEstoque, numeroOs:String"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/ordens-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 45,
+    "handler": "RelatorioController#relatorioOs",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres",
+      "dataInicio:OffsetDateTime, dataFim:OffsetDateTime, status:StatusOrdemServico, incluirResumo:Boolean"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/relatorios/pecas-mais-utilizadas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/RelatorioController.java",
+    "line": 101,
+    "handler": "RelatorioController#relatorioPecasMaisUtilizadas",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "Pageable (max size 2000); sort finito, <=3 campos/64 caracteres"
+    ],
+    "data": "dados pessoais e financeiros agregados",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; RelatorioServiceTest"
+  },
+  {
+    "method": "GET",
+    "route": "/api/system/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/SystemController.java",
+    "line": 40,
+    "handler": "SystemController#status",
+    "auth": "ADMIN",
+    "csrf": "L",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "ambiente e usuario autenticado",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/categorias/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 117,
+    "handler": "CategoriaController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "StatusUpdateDTO @Valid: NotNull"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/clientes/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 195,
+    "handler": "ClienteController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "StatusUpdateDTO @Valid: NotNull"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/fornecedores/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "line": 108,
+    "handler": "FornecedorController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "StatusUpdateDTO @Valid: NotNull"
+    ],
+    "data": "cadastro de fornecedores",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; FornecedorServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/maquinas/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 167,
+    "handler": "MaquinaController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "StatusUpdateDTO @Valid: NotNull"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/notificacoes/ler-todas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "line": 52,
+    "handler": "NotificacaoController#marcarTodasComoLidas",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "alertas operacionais compartilhados",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; NotificacaoServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/notificacoes/{id}/ler",
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "line": 43,
+    "handler": "NotificacaoController#marcarComoLida",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "alertas operacionais compartilhados",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; NotificacaoServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/ordens-servico/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 231,
+    "handler": "OrdemServicoController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "OrdemServicoStatusDTO @Valid: NotNull"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "PATCH",
+    "route": "/api/produtos/{id}/status",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 119,
+    "handler": "ProdutoController#alterarStatus",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "StatusUpdateDTO @Valid: NotNull"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/auth/2fa/resend",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 93,
+    "handler": "AuthController#resendTwoFactor",
+    "auth": "PUBLIC",
+    "csrf": "A",
+    "validation": [
+      "TwoFactorResendRequest @Valid: NotBlank",
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/auth/2fa/verify",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 71,
+    "handler": "AuthController#verifyTwoFactor",
+    "auth": "PUBLIC",
+    "csrf": "A",
+    "validation": [
+      "TwoFactorVerifyRequest @Valid: NotBlank, Pattern",
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/auth/login",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 56,
+    "handler": "AuthController#login",
+    "auth": "PUBLIC",
+    "csrf": "A",
+    "validation": [
+      "LoginRequest @Valid: NotBlank, Email",
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/auth/logout",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 143,
+    "handler": "AuthController#logout",
+    "auth": "PUBLIC",
+    "csrf": "A",
+    "validation": [
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/auth/refresh",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 107,
+    "handler": "AuthController#refresh",
+    "auth": "PUBLIC",
+    "csrf": "A",
+    "validation": [
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/categorias",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 56,
+    "handler": "CategoriaController#cadastrar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "CategoriaCreateDTO @Valid: NotBlank, Size"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/clientes",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 79,
+    "handler": "ClienteController#criar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "ClienteCreateDTO @Valid: NotNull, NotBlank, Size, Email, Valid"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/estoque/ajuste",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 127,
+    "handler": "EstoqueController#registrarAjuste",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "EstoqueAjusteDTO @Valid: NotNull, DecimalMin, NotBlank, Size"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/estoque/entrada",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 79,
+    "handler": "EstoqueController#registrarEntrada",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "EstoqueEntradaDTO @Valid: NotNull, DecimalMin, NotBlank, Size"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/estoque/movimentar",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 62,
+    "handler": "EstoqueController#movimentar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "MovimentacaoManualDTO @Valid: NotNull, DecimalMin, NotBlank, Size"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/estoque/saida",
+    "file": "backend/src/main/java/com/oficinagestao/controller/EstoqueController.java",
+    "line": 103,
+    "handler": "EstoqueController#registrarSaida",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "EstoqueSaidaDTO @Valid: NotNull, DecimalMin, NotBlank, Size"
+    ],
+    "data": "saldos e movimentacoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; EstoqueServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/fornecedores",
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "line": 54,
+    "handler": "FornecedorController#cadastrar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "FornecedorCreateDTO @Valid: NotBlank, Size"
+    ],
+    "data": "cadastro de fornecedores",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; FornecedorServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/maquinas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 71,
+    "handler": "MaquinaController#criar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "MaquinaCreateDTO @Valid: NotNull, NotBlank, Size, Min, Max"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/ordens-servico",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 86,
+    "handler": "OrdemServicoController#criar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "OrdemServicoCreateDTO @Valid: NotNull, Size, NotBlank"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/ordens-servico/{id}/itens",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 298,
+    "handler": "OrdemServicoController#adicionarPeca",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "OrdemServicoItemCreateDTO @Valid: NotNull, DecimalMin, Size"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/produtos",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 60,
+    "handler": "ProdutoController#cadastrar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "ProdutoCreateDTO @Valid: Size, Pattern, NotBlank, NotNull, DecimalMin"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/produtos/{id}/compatibilidades",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 146,
+    "handler": "ProdutoController#adicionarCompatibilidade",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "ProdutoCompatibilidadeDTO @Valid: NotNull, Size"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "POST",
+    "route": "/api/produtos/{id}/maquinas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 146,
+    "handler": "ProdutoController#adicionarCompatibilidade",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "ProdutoCompatibilidadeDTO @Valid: NotNull, Size"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/auth/alterar-senha",
+    "file": "backend/src/main/java/com/oficinagestao/controller/AuthController.java",
+    "line": 184,
+    "handler": "AuthController#alterarSenha",
+    "auth": "ADMIN",
+    "csrf": "A",
+    "validation": [
+      "AlterarSenhaRequest @Valid: NotBlank",
+      "regras AuthService, token/challenge/cookies conforme operacao"
+    ],
+    "data": "credenciais, desafios 2FA, sessoes",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; CsrfAndCorsSecurityTest; AuthLifecycleAuditIntegrationTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/categorias/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/CategoriaController.java",
+    "line": 101,
+    "handler": "CategoriaController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "CategoriaUpdateDTO @Valid: NotBlank, Size"
+    ],
+    "data": "categorias",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; CategoriaServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/clientes/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ClienteController.java",
+    "line": 174,
+    "handler": "ClienteController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "ClienteUpdateDTO @Valid: NotNull, NotBlank, Size, Email, Valid"
+    ],
+    "data": "dados pessoais e historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; ClienteServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/configuracao-oficina",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ConfiguracaoOficinaController.java",
+    "line": 72,
+    "handler": "ConfiguracaoOficinaController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "ConfiguracaoOficinaUpdateDTO @Valid: NotBlank, Size, Email"
+    ],
+    "data": "identidade comercial e contatos",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/fornecedores/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/FornecedorController.java",
+    "line": 92,
+    "handler": "FornecedorController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "FornecedorUpdateDTO @Valid: NotBlank, Size"
+    ],
+    "data": "cadastro de fornecedores",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; FornecedorServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/maquinas/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/MaquinaController.java",
+    "line": 148,
+    "handler": "MaquinaController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "MaquinaUpdateDTO @Valid: NotNull, NotBlank, Size, Min, Max"
+    ],
+    "data": "equipamentos, proprietario, historico",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; MaquinaServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/notificacoes/ler-todas",
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "line": 52,
+    "handler": "NotificacaoController#marcarTodasComoLidas",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "sem body; service/seguranca central"
+    ],
+    "data": "alertas operacionais compartilhados",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; NotificacaoServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/notificacoes/{id}/ler",
+    "file": "backend/src/main/java/com/oficinagestao/controller/NotificacaoController.java",
+    "line": 43,
+    "handler": "NotificacaoController#marcarComoLida",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404"
+    ],
+    "data": "alertas operacionais compartilhados",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; NotificacaoServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/ordens-servico/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/OrdemServicoController.java",
+    "line": 212,
+    "handler": "OrdemServicoController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "OrdemServicoUpdateDTO @Valid: DecimalMin"
+    ],
+    "data": "cliente, equipamento, itens e valores da OS",
+    "risk": "alto",
+    "evidence": "RouteAuthorizationAuditTest; OrdemServicoServiceTest"
+  },
+  {
+    "method": "PUT",
+    "route": "/api/produtos/{id}",
+    "file": "backend/src/main/java/com/oficinagestao/controller/ProdutoController.java",
+    "line": 103,
+    "handler": "ProdutoController#atualizar",
+    "auth": "ADMIN",
+    "csrf": "C",
+    "validation": [
+      "IDs Long; conversao 400, inexistente 404",
+      "ProdutoUpdateDTO @Valid: Size, Pattern, NotBlank, NotNull, DecimalMin"
+    ],
+    "data": "catalogo, custos e compatibilidade",
+    "risk": "medio",
+    "evidence": "RouteAuthorizationAuditTest; ProdutoServiceTest"
+  }
+]

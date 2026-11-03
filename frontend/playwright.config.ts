@@ -3,7 +3,12 @@ import { defineConfig, devices } from '@playwright/test';
 // Permite validar o build de produção sem interromper o servidor de desenvolvimento.
 const port = Number(process.env.PLAYWRIGHT_PORT || 3000);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PLAYWRIGHT_PORT inválida');
-const baseURL = `http://localhost:${port}`;
+const baseURL = process.env.E2E_BASE_URL || `http://localhost:${port}`;
+const target = new URL(baseURL);
+if (target.protocol !== 'http:' || !['localhost', '127.0.0.1'].includes(target.hostname)
+  || target.pathname !== '/' || target.search || target.hash || target.username || target.password) {
+  throw new Error('Playwright requer destino local isolado.');
+}
 
 export default defineConfig({
   testDir: './e2e',
@@ -16,8 +21,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  webServer: {
-    command: `npm run start -- --hostname localhost --port ${port}`,
+  webServer: process.env.E2E_EXTERNAL_SERVER === 'true' ? undefined : {
+    command: `npm run start -- --hostname localhost --port ${target.port || port}`,
     url: `${baseURL}/login`,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

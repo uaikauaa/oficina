@@ -26,6 +26,8 @@ class ProductionSmtpConfigurationTest {
         properties.put("app.mail.from", "mailer@example.invalid");
         properties.put("spring.mail.properties.mail.smtp.auth", "true");
         properties.put("spring.mail.properties.mail.smtp.starttls.enable", "true");
+        properties.put("spring.mail.properties.mail.smtp.starttls.required", "true");
+        properties.put("spring.mail.properties.mail.smtp.ssl.checkserveridentity", "true");
         properties.put("spring.mail.properties.mail.smtp.connectiontimeout", "15000");
         properties.put("spring.mail.properties.mail.smtp.timeout", "25000");
         properties.put("spring.mail.properties.mail.smtp.writetimeout", "25000");
@@ -135,6 +137,15 @@ class ProductionSmtpConfigurationTest {
                 "spring.mail.properties.mail.smtp.timeout", "35000",
                 "spring.mail.properties.mail.smtp.writetimeout", "30000"
         )).run(context -> assertThat(context).hasNotFailed());
+    }
+
+    @Test
+    void shouldRejectTlsDowngradeAndUnverifiedServerIdentity() {
+        for (String key : java.util.List.of("spring.mail.properties.mail.smtp.starttls.required",
+                "spring.mail.properties.mail.smtp.ssl.checkserveridentity")) {
+            assertStartupFailure(Map.of(key, "false"), key.replace("spring.mail.properties.", ""));
+            assertStartupFailure(Map.of(key, ""), key.replace("spring.mail.properties.", ""));
+        }
     }
 
     private void assertStartupFailure(Map<String, String> overrides, String expectedProperty) {

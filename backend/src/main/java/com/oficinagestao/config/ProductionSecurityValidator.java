@@ -68,6 +68,8 @@ public class ProductionSecurityValidator {
             requireNonBlank("MAIL_FROM", "app.mail.from");
             requireTrue("MAIL_SMTP_AUTH", "spring.mail.properties.mail.smtp.auth");
             requireTrue("MAIL_SMTP_STARTTLS", "spring.mail.properties.mail.smtp.starttls.enable");
+            requireTrue("mail.smtp.starttls.required", "spring.mail.properties.mail.smtp.starttls.required");
+            requireTrue("mail.smtp.ssl.checkserveridentity", "spring.mail.properties.mail.smtp.ssl.checkserveridentity");
             requirePositiveTimeout("MAIL_CONNECTION_TIMEOUT", "spring.mail.properties.mail.smtp.connectiontimeout");
             requirePositiveTimeout("MAIL_READ_TIMEOUT", "spring.mail.properties.mail.smtp.timeout");
             requirePositiveTimeout("MAIL_WRITE_TIMEOUT", "spring.mail.properties.mail.smtp.writetimeout");
