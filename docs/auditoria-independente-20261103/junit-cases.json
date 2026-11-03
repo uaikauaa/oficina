@@ -1,0 +1,1578 @@
+{
+  "totals": {
+    "tests": 830,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "name": "com.oficinagestao.config.ActuatorSecurityTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "testActuatorShutdownNotExposed",
+        "testActuatorHeapdumpNotExposed",
+        "testActuatorHealthIsAvailable",
+        "testActuatorThreaddumpNotExposed",
+        "testActuatorMappingsNotExposed",
+        "testActuatorEnvNotExposed",
+        "testActuatorBeansNotExposed",
+        "testActuatorLoggersNotExposed",
+        "testActuatorMetricsNotExposed",
+        "testActuatorInfoNotExposed",
+        "testActuatorConfigurationIsStrictlyHealth"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.AdminAccountBootstrapTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldNotProvisionWhenUsersAlreadyExist",
+        "shouldNotProvisionWhenCredentialsAreBlank",
+        "shouldThrowExceptionWhenInitialPasswordIsWeak",
+        "shouldNotMigrateWhenMultipleUsersExist",
+        "shouldNotOverwriteExistingAccountWhenConfiguredEmailDiffers",
+        "shouldProvisionAdminAccountWhenNoUsersExist",
+        "shouldThrowExceptionWhenInitialPasswordIsTooShort"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ConfiguracaoOficinaBootstrapTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "validatesCardinalityWithoutWritingOrStoppingStartup(long, String, String)[1]",
+        "validatesCardinalityWithoutWritingOrStoppingStartup(long, String, String)[2]",
+        "validatesCardinalityWithoutWritingOrStoppingStartup(long, String, String)[3]"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.DotenvEnvironmentPostProcessorTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "doesNotLoadDotenvForTheDedicatedTestProfile"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.FlywayConfigTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "startupStrategyMigratesWithoutAutomaticRepair"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.FlywayEmptySchemaIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "emptySchemaMigratesFromV1ToV24WithoutBaseline",
+        "existingV21SchemaMigratesToV24"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ForwardedHeadersSecurityValidatorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rejectsNative",
+        "acceptsNone",
+        "rejectsFramework"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.OpenApiDocumentationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldAccessSwaggerUi",
+        "shouldReturnOpenApiDocumentation"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionOpenApiSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldBlockSwaggerUiWhenDisabled",
+        "shouldBlockOpenApiDocsWhenDisabled",
+        "shouldBlockSwaggerUiInProdProfile",
+        "shouldBlockOpenApiDocsInProdProfile"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionSecurityValidatorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldSucceedInProductionWithValidConfigurations",
+        "shouldSucceedInProductionWhenCookieSecurePropertyIsAbsent",
+        "shouldFailInProductionWhenTimeoutIsZero",
+        "shouldFailInProductionWhenDefaultSecretIsUsed",
+        "shouldRejectEffectiveFalseFromHigherPrecedencePropertySources",
+        "shouldFailInProductionWhenCorsIsLocalhost",
+        "shouldFailInProductionWhenCookieSecureIsFalse",
+        "shouldAllowDefaultSecretInDevelopment",
+        "shouldFailInProductionWhenCorsIsWildcard",
+        "shouldFailInProductionWhenSecretIsMissing",
+        "shouldAbortProductionSpringContextWhenCookieSecureIsFalse",
+        "shouldFailInProductionWhenTimeoutIsNonNumeric",
+        "shouldFailInProductionWhenTimeoutIsTooLow",
+        "shouldAllowCookieSecureFalseOutsideProduction",
+        "shouldFailInProductionWhenSecretIsTooShort"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionSmtpConfigurationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldRejectBlankPassword",
+        "shouldAcceptCustomValidTimeouts",
+        "shouldAcceptSecureProductionSmtp",
+        "shouldRejectZeroConnectionTimeout",
+        "shouldRejectDisabledStartTls",
+        "shouldRejectBlankFrom",
+        "shouldRejectBlankHost",
+        "shouldRejectBlankUsername",
+        "shouldPreserveDevelopmentBehavior",
+        "shouldRejectNegativeReadTimeout",
+        "shouldRejectNonNumericWriteTimeout",
+        "shouldRejectTooLowTimeout",
+        "shouldRejectTlsDowngradeAndUnverifiedServerIdentity",
+        "shouldRejectDisabledAuthentication"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.RefreshTokenCleanupSchedulerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldInvokePurgeSuccessfully",
+        "shouldHandleExceptionGracefully"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.ResourceLimitsFailureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "invalidServiceContextCannotFallBackToUntrustedForwardedHeaders",
+        "limiterOutageFailsClosedWithoutLeakingDatabaseDetails"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.SmtpConfigurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldAllowOverridingTimeoutsViaEnvironmentProperties",
+        "shouldResolveTimeoutsInProdProfileWithDefaults",
+        "shouldAllowOverridingTimeoutsInProdProfile",
+        "shouldUseDefaultTimeoutsWhenPropertiesNotProvided"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.config.SmtpDowngradeAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "productionRequiresTlsEvenWhenSmtpServerOmitsStarttls"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.AuthControllerTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldReturn400WhenCurrentPasswordIsIncorrect",
+        "shouldReturn401WhenRefreshTokenMissing",
+        "shouldSetSessionCookiesOnTwoFactorVerificationWhenRememberMeIsFalse",
+        "shouldReturn200AndClearBothCookiesOnLogout",
+        "shouldReturn200OnSuccessfulAlterarSenha",
+        "shouldReturn401WhenResendingWithRevokedOrExpiredChallenge",
+        "shouldSetSecureAuthenticationCookiesWhenProductionConfigurationIsEnabled",
+        "shouldReturn200WhenAuthenticated",
+        "shouldDefaultRememberMeToFalseWhenFieldIsOmitted",
+        "shouldReturn401WhenRefreshTokenIsInvalid",
+        "shouldReturn401WhenNotAuthenticated",
+        "shouldReturn401OnInvalidLogin",
+        "shouldReturn200AndChallengeWithoutAnyCookiesOrTokensOnLogin",
+        "shouldRotateWithPersistentCookiesWhenRefreshSessionIsPersistent",
+        "shouldResendTwoFactorCodeSuccessfully",
+        "shouldReturn401WhenNotAuthenticatedOnAlterarSenha",
+        "shouldReturn401OnInvalidTwoFactorCode",
+        "shouldRotateWithSessionCookiesWhenRefreshSessionIsTemporary",
+        "shouldSetPersistentCookiesOnSuccessfulTwoFactorVerification",
+        "shouldReturn400WhenResendingDuringCooldown",
+        "shouldReturn200AndRotateCookiesOnSuccessfulRefresh"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.ClienteControllerTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRetornar401QuandoNaoAutenticado",
+        "deveRetornar409QuandoCnpjDuplicado",
+        "deveListarClientesComPaginacaoEBusca",
+        "deveRetornar404QuandoClienteInexistente",
+        "deveRetornar409QuandoCpfDuplicado",
+        "deveRetornar409QuandoTelefoneDuplicado",
+        "deveCriarClientePessoaFisicaComSucesso",
+        "deveRejeitarCpfDuplicadoMesmoComMascaraDiferente",
+        "deveInativarEAtivarCliente",
+        "deveEditarClienteComSucesso",
+        "deveRejeitarCpfComTodosDigitosIguais",
+        "deveRejeitarCpfComTamanhoInvalido",
+        "deveCriarClientePessoaJuridicaComSucesso",
+        "deveRetornar400QuandoCamposObrigatoriosAusentes",
+        "deveBuscarClientePorIdComSucesso"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.ConfiguracaoOficinaControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveAtualizarDadosDaOficina",
+        "deveRetornarDadosDaOficinaComSucesso"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.ConfiguracaoOficinaHttpIsolationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "duplicateRecordReturnsDistinctIntegrityError",
+        "missingGetReturnsSanitized503WithoutCreatingData",
+        "missingPutReturns503WithoutCreatingData",
+        "handlerDoesNotExposeInternalCauseOrQueryParameters"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.HealthControllerTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldReturnStatusUp"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.HealthControllerUnitTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "concurrentProbesDoNotCreateADatabaseConnectionStampede",
+        "shouldReturnDownWhenConnectionInvalid",
+        "shouldReturnUpWhenDatabaseHealthy",
+        "shouldReturnDownWhenDatabaseFails"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.NotificacaoControllerTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveMarcarTodasComoLidasViaPut",
+        "deveMarcarTodasComoLidasViaPatch",
+        "deveRetornar200ComResumoQuandoAutenticado",
+        "deveRetornar404AoMarcarInexistente",
+        "deveMarcarComoLidaViaPut",
+        "deveMarcarComoLidaViaPatch",
+        "deveRetornar401SemAutenticacao"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.OrdemServicoControllerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveCriarOrdemServicoComSucesso",
+        "deveRetornar401QuandoNaoAutenticado",
+        "gerarRecibo_semAutenticacao_deveRetornar401",
+        "gerarRecibo_comSucesso",
+        "deveListarOrdensServico",
+        "deveBuscarOrdemPorId",
+        "deveAtualizarOrdemServico",
+        "gerarRecibo_osInexistente_deveRetornar404",
+        "naoDevePermitirOSComEquipamentoDeOutroCliente",
+        "naoDeveCriarOrdemServicoComClienteInativo",
+        "deveAvançarStatusParaProntaComTestes",
+        "naoDeveCriarOrdemServicoComMaquinaInativa",
+        "deveListarHistoricoPorMaquina",
+        "deveListarHistoricoPorCliente"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.ProdutoControllerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRetornar400QuandoIdNaoNumerico",
+        "deveRetornar401QuandoNaoAutenticado",
+        "deveReativarProdutoComSucesso",
+        "deveRetornar400QuandoPatchStatusSemCorpo",
+        "deveRetornar400QuandoEnumInvalidoNaUrl",
+        "deveInativarProdutoComSucesso"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.controller.SystemControllerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldReturn401WhenUnauthenticated",
+        "shouldReturn403WhenInsufficientPermissions",
+        "shouldReturnSystemStatusWhenAuthenticatedAsAdmin"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.DatabaseConnectionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldValidateEquipmentDomainSchema",
+        "shouldConnectToDatabase",
+        "shouldValidateSingleAdminRoleAndNoUsers",
+        "shouldLoadDataSource",
+        "shouldValidateFlywayMigrationsAndTables"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.entity.UsuarioTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "instanciaDeveSerIgualASiMesma",
+        "instanciasComMesmoIdDevemSerIguais",
+        "instanciasComIdNuloNaoDevemSerIguais",
+        "instanciasComIdsDiferentesNaoDevemSerIguais"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.exception.GlobalExceptionHandlerTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldReturn400OnIllegalArgument",
+        "shouldReturn409OnDataIntegrityViolation",
+        "shouldReturn404OnResourceNotFound",
+        "shouldReturn400OnBusinessException",
+        "shouldReturn400OnProdutosEndpointWithInvalidEnum",
+        "shouldReturn400ValidationDetails",
+        "shouldReturn400OnMalformedJson",
+        "shouldReturn500WithoutStackTrace",
+        "shouldReturn400OnTypeMismatchEnum",
+        "shouldReturn409OnConflict"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.OficinaGestaoApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "contextLoads"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.AuthLifecycleAuditIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "loginKeepsSecondFactorSecretOutOfResponseAndDatabase",
+        "loginCannotBypassEmailCooldown",
+        "inactiveAccountCannotCompleteSecondFactor",
+        "refreshRacingLogoutCannotLeaveAnActiveRefreshToken",
+        "logoutWithOldCookieRevokesRotatedDescendant",
+        "passwordChangeRevokesPendingSecondFactor",
+        "hourlyEmailBudgetIncludesAlreadyRevokedChallenges"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfAndCorsSecurityTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldRejectMutatingEndpointsWithoutAuthentication",
+        "shouldClearCookiesOnLogoutWithPreservedSecurityAttributes",
+        "shouldRejectCrossSiteFormPostWithUntrustedOrigin",
+        "shouldAcceptAuthorizationBearerToken",
+        "shouldRejectUntrustedOriginInCorsPreflight",
+        "shouldRejectCrossSitePutWithUntrustedOrigin",
+        "shouldAcceptAllowedOriginInCorsPreflight",
+        "shouldNeverUseWildcardOriginWhenCredentialsAreAllowed",
+        "shouldSetProperSecurityAttributesOnAuthenticationCookies",
+        "shouldAllowPutAndPostInPreflightForAllowedOrigin",
+        "shouldProtectPrivateGetEndpoints",
+        "shouldAcceptCookieAccessTokenAuthentication",
+        "shouldRejectCrossSiteDeleteWithUntrustedOrigin"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfIsolationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "corsRejectsMaliciousAndSameSiteOriginsBeforeTheyReachBusinessCode",
+        "authenticationRoutesRequireHeaderIncludingLoginRefreshAndLogout",
+        "bearerOnlyIsExemptButBearerWithCookieIsProtected",
+        "tokenEndpointDisablesCaching",
+        "cookieMutationsRequireValidHeaderWithoutBusinessEffectsOnRejection"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfMvcRoutingTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "firewallRejectionIsDistinctFromCsrfAndNeverReachesController",
+        "authenticationMutationsWithoutHeaderNeverReachService(String)[1]",
+        "authenticationMutationsWithoutHeaderNeverReachService(String)[2]",
+        "authenticationMutationsWithoutHeaderNeverReachService(String)[3]",
+        "authenticationMutationsWithoutHeaderNeverReachService(String)[4]",
+        "validCsrfDoesNotGrantAdministrativeAuthority",
+        "mvcRecognizedRoutesRequireCsrfBeforeController(String)[1]",
+        "mvcRecognizedRoutesRequireCsrfBeforeController(String)[2]",
+        "mvcRecognizedRoutesRequireCsrfBeforeController(String)[3]",
+        "mvcRecognizedRoutesRequireCsrfBeforeController(String)[4]",
+        "contextPathDoesNotChangeProtectionOrMvcRouting",
+        "bearerOnlyBusinessWorksButCookiesCannotBypassCsrf",
+        "safeRequestsRemainUsable",
+        "servletPrefixAndMalformedPathsFailClosedInMatcher",
+        "invalidHeaderAndFormParameterAreRejected"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.ForwardedHeadersSpringIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "springChainAllowsConfiguredProxyToSupplyClientIp",
+        "springChainPreservesSocketPeerAndIgnoresSpoofedForwardedHeaders"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.IndependentRouteAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shadowEndpointsDangerousMethodsHostAndCrLfDoNotOpenAnotherSurface",
+        "enumerateAndExerciseEveryDocumentedRouteWithRealJwtIdentities"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.IpAddressResolverTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "xForwardedForMultiplosIpsExtraiCliente",
+        "headerInvalidoFallbackRemoteAddrDeProxy",
+        "requestNuloRetornaDefault",
+        "xRealIpAceitoDeProxyConfiavel",
+        "ipv6ValidoPreservado",
+        "regressaoForwardedHeaderFilterPreservaSocketPeer",
+        "cfConnectingIpAceitoDeProxyConfiavel",
+        "ipComPortaRemovida",
+        "semHeadersRetornaRemoteAddr",
+        "loopbackIpv6Normalizado",
+        "xForwardedForUnicoDeProxyConfiavel",
+        "clienteDiretoFalsificaXRealIpDeveSerIgnorado",
+        "proxyNaoRegistradoNaoHabilitaHeaders",
+        "ipv4ValidoViaProxy",
+        "clienteDiretoFalsificaXffDeveSerIgnorado",
+        "proxyConfivelComCfConnectingIpInvalido",
+        "xffMultiplosValoresExtraiClienteReal",
+        "semNenhumHeaderUsaRemoteAddr",
+        "todosFalsificadosClienteDiretoDeveUsarRemoteAddr",
+        "clienteDiretoFalsificaCfConnectingIpDeveSerIgnorado",
+        "proxyConfivelComCfConnectingIpValido",
+        "ipv6ValidoViaProxy",
+        "ipv6Valido",
+        "listaVaziaNuncaConfiavel",
+        "unknownENullInvalidos",
+        "ipv4Valido",
+        "apenasIpsDaListaSaoConfiáveis",
+        "nullEBlankInvalidos"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.JwtBoundaryAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rejectsUnsignedTamperedFutureExpiredAndWrongAlgorithmTokens"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.JwtServiceTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "caso8_desenvolvimento_devePermitirSecretPadrao",
+        "sec01_profileAusenteComDefaultSecret_deveRejeitar",
+        "rejectsSignedTokenWithoutExpectedIssuerAndAudience",
+        "sec01_profileAusenteComSecretVazioOuEspacos_deveRejeitar",
+        "sec01_profileAusenteComSecretValido_deveAceitar",
+        "sec01_profileAusenteComSecretAusente_deveRejeitar",
+        "caso4_secretInvalidoOuFracoEmProducao_deveRejeitar",
+        "caso6_jwtAssinadoComSecretDiferente_deveSerInvalido",
+        "caso5_secretValido_gerarEValidarMesmoJwt_deveSerValido",
+        "sec01_profileDevEProdConjuntamente_devePriorizarProdERejeitarDefaultSecret",
+        "caso2_secretAusenteEmProducao_deveRejeitar",
+        "caso3_secretVazioEmProducao_deveRejeitar",
+        "generatedTokenHasBoundedAudienceAndNoDisplayName",
+        "sec01_profileAusenteComSecretCurto_deveRejeitar",
+        "caso1_secretValidoEmAmbienteValido_deveAceitar",
+        "caso7_secretInvalido_naoDeveSerExpostoEmMensagemDeErro",
+        "rejectsSignedTokenWithoutExpiration"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.LoginAttemptServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cincoTentativasDevemBloquear",
+        "atacanteAlterandoEmailDeveContinuarBloqueadoPorIp",
+        "quatroTentativasNaoDevemBloquear",
+        "devePrevenirCrescimentoIlimitadoDeMemoria",
+        "restartPreservesState",
+        "scheduledCleanupDeveRemoverEntradasExpiradas",
+        "concorrenciaDeveSerThreadSafe",
+        "estadoExpiradoDeixaDeBloquear",
+        "primeiraTentativaInvalidaNaoDeveBloquear",
+        "loginBemSucedidoDeveResetarContador",
+        "tentativasDeIpAtacanteNaoDevemBloquearUsuarioLegitimoEmOutroIp",
+        "multiplosIpsNaoCompartilhamOMesmoContador",
+        "tentativaDuranteBloqueioDevePermanecerBloqueado"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.PasswordPolicyValidatorTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldAcceptValidPassword",
+        "shouldRejectPasswordWithoutLetter",
+        "shouldRejectPasswordWithoutNumber",
+        "shouldRejectPasswordShorterThan12Characters(String)[1]",
+        "shouldRejectPasswordShorterThan12Characters(String)[2]",
+        "shouldRejectPasswordShorterThan12Characters(String)[3]",
+        "shouldRejectObviousWeakPasswords(String)[1]",
+        "shouldRejectObviousWeakPasswords(String)[2]",
+        "shouldRejectObviousWeakPasswords(String)[3]",
+        "shouldRejectObviousWeakPasswords(String)[4]",
+        "shouldRejectObviousWeakPasswords(String)[5]",
+        "shouldRejectObviousWeakPasswords(String)[6]",
+        "shouldRejectObviousWeakPasswords(String)[7]",
+        "shouldRejectObviousWeakPasswords(String)[8]",
+        "shouldRejectPasswordWithoutSpecialCharacter",
+        "shouldRejectNullOrBlankPassword"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.ProxyClientContextVerifierTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rejectsExpiredFutureAndMissingContexts",
+        "rejectsTamperedSignatureMethodAndPath",
+        "cloudRunRequiresASeparateStrongServiceSecret",
+        "serviceContextRotationRejectsOldSignaturesAndRequiresCoordinatedRollout",
+        "acceptsAuthenticatedContextAndIgnoresUnsignedXff"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.RateKeyRotationAuditTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "aRateKeyChangeFailsClosedUntilTheActiveWindowsExpire",
+        "concurrentMismatchedGenerationsCannotSplitOneBudget",
+        "jwtRotationMustNotResetAnActiveRateBudget",
+        "legacyUnclassifiedActiveBucketsCannotBeDiscardedAtBootstrap",
+        "jwtRotationRevokesOldSignaturesWhileTheRateBudgetSurvives",
+        "absentWeakOrReusedSecretsAreRejectedWithoutPrintingThem"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.RefreshReusePersistenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "purgeRetainsEveryTokenThroughSevenDaysAfterExpiration",
+        "rejectedReuseCommitsFamilyRevocationWithoutAffectingAnotherUser(boolean)[1]",
+        "rejectedReuseCommitsFamilyRevocationWithoutAffectingAnotherUser(boolean)[2]"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.RefreshTokenHashSecurityTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldMaintainRememberMeDurationsWithHashedTokens",
+        "shouldReturn401ForExpiredToken",
+        "shouldRevokeAllTokensAndIncrementTokenVersionOnPasswordChange",
+        "shouldReturn401ForInvalidOrNonexistentToken",
+        "shouldPerformRefreshUsingRawTokenViaSha256Lookup",
+        "shouldValidatePostgresSchemaAndDeterministicMigration",
+        "shouldReturn401AndTriggerReuseDetectionForRevokedToken",
+        "shouldStoreOnlySha256HashAndNeverPlainTextToken",
+        "shouldRevokeRefreshTokenOnLogoutUsingHash",
+        "shouldRotateTokenAndPreventReuseWithHashedTokens"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.ResourceLimitsIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "capsBothContentLengthAndChunkedPayloadBeforeDeserialization",
+        "costlyRoutesAndMutationsSharePersistentBudgetsBeforeBusinessLogic",
+        "boundsPagesAndRejectsParameterPollution",
+        "preAuthenticationBudgetCountsRejectedCsrfAndIgnoresForgedClientIps",
+        "searchAndReportQuotasCannotBeBypassedWithSpoofedForwardedHeaders"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.RouteAuthorizationAuditTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "boundedSortRejectsRecursiveUnknownAndPollutedPathsBeforeDataParsing",
+        "controlledInjectionAndMalformedIdsDoNotExposeInternals",
+        "everyRegisteredApiRouteHasAuthorizationAndCookieCsrf"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.SecurityUtilsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRetornarNullQuandoPrincipalNaoForAuthenticatedUser",
+        "deveRetornarNullQuandoAuthenticationNula",
+        "deveExtrairUserIdQuandoPrincipalForAuthenticatedUser",
+        "deveRetornarNullQuandoPrincipalForString"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.SensitiveOutputAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "upstreamExceptionsCannotLeakCodesPasswordsOrDatabaseRows(CapturedOutput)",
+        "storedOrderNumberCannotInjectPdfDispositionParametersOrHeaders"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.SharedRateLimitIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "aRejectedBusinessTransactionCannotEraseTheCounter",
+        "storedKeysDoNotContainAccountOrIpAndDistributedSubjectsStillHitGlobalBudget",
+        "databaseExpiryRestoresBudgetAndCleanupDoesNotDeleteActiveBuckets",
+        "replicasAndRestartShareExactlyOneAtomicBudget"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.TokenHashUtilTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldGenerateDifferentHashesForDifferentTokens",
+        "shouldThrowExceptionForNullOrBlankToken",
+        "shouldGenerateDeterministicSha256InLowercaseHex"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.security.TokenVersionSecurityTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldRespectRefreshTokenRevocation",
+        "shouldRejectJwtWithOldTokenVersion",
+        "shouldRejectExpiredTokenEvenWithCorrectTokenVersion",
+        "shouldRejectTokenWithInvalidSignature",
+        "shouldInvalidateAccessTokenOnLogout",
+        "shouldAcceptNewlyIssuedJwtTokenWithCurrentTokenVersion",
+        "shouldMaintain2FaFlowAndIssueTokenWithProperVersionAndRememberMe",
+        "shouldAllowAuthenticatedUserToAccessProtectedEndpoints",
+        "shouldRejectOldTokenAndAcceptNewTokenAfterPasswordChange"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.AuditoriaIpSecurityTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "directClientCannotForgeAuditIpWithForwardedHeaders"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.AuthServiceTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldRejectPasswordChangeWhenNewPasswordViolatesPolicy",
+        "shouldResendTwoFactorCodeSuccessfullyAndInvalidateOldCode",
+        "shouldThrowAndRevokeAllTokensWhenRefreshTokenIsRevoked",
+        "shouldThrowWhenRefreshTokenIsBlank",
+        "purgeQueryUsesOnlyStrictExpirationCutoff",
+        "shouldReturnCurrentUser",
+        "shouldStartTwoFactorWhenCredentialsAreValid",
+        "shouldRotateRefreshTokenSuccessfully",
+        "shouldChangePasswordSuccessfully",
+        "shouldThrowWhenUserIsInactiveOnRefresh",
+        "shouldRejectResendWhenChallengeIsRevoked",
+        "shouldRevokeRefreshTokenAndAuditLogout",
+        "shouldThrowBadCredentialsWhenUserIsInactive",
+        "shouldRejectVerifyWhenChallengeIsRevoked",
+        "shouldBlockResendDuringCooldown",
+        "shouldDefaultToTemporarySessionWhenRememberMeIsNull",
+        "shouldRejectResendWhenChallengeDoesNotExist",
+        "shouldThrowBadCredentialsWhenPasswordIsInvalid",
+        "shouldRejectPasswordChangeWhenNewPasswordIsSameAsCurrent",
+        "shouldThrowWhenRefreshTokenIsExpired",
+        "shouldRateLimitBySocketPeerDespiteSpoofedForwardedHeaders",
+        "shouldLockoutAndRevokeChallengeAfter5FailedAttempts",
+        "shouldPurgeExpiredOrRevokedRefreshTokens",
+        "shouldLoginSuccessfullyWithValidCredentials",
+        "shouldRejectPasswordChangeWhenUserIsInactive",
+        "shouldCreatePersistentSessionWhenRememberMeIsTrue",
+        "shouldPreventDuplicateSessionEmissionOnSimulatedConcurrentConsumption",
+        "shouldNotAllowClientToDictateSessionExpirationDuration",
+        "shouldPreventAccountLockoutDosForLegitimateUserFromDifferentIp",
+        "shouldRejectInvalidTwoFactorCodeAndIncrementAttempts",
+        "purgeReturnsZeroWhenRepositoryDeletesNothing",
+        "shouldRejectCorrectCodeIfChallengeWasRevokedByMaxAttempts",
+        "shouldRejectResendWhenChallengeIsExpired",
+        "shouldRejectLoginWhenEmailExistsAndWrongPassword",
+        "shouldThrowBadCredentialsWhenUserDoesNotExist",
+        "shouldExecuteDummyBCryptWhenUserDoesNotExist",
+        "shouldRejectExpiredTwoFactorCode",
+        "shouldEnforceRateLimitingForExistentEmailWithWrongPassword",
+        "shouldRejectLoginWhenEmailDoesNotExistWithoutLeakingInfo",
+        "shouldCreateTemporarySessionWhenRememberMeIsFalse",
+        "shouldPreserveRememberMeTrueOnRotation",
+        "shouldThrowWhenRefreshTokenNotFound",
+        "shouldRejectAlreadyUsedTwoFactorCode",
+        "shouldBlockLoginAfterMaxAttempts",
+        "shouldPreserveRememberMeFalseOnRotation",
+        "shouldRejectPasswordChangeWhenConfirmationDoesNotMatch",
+        "shouldEnsureIdenticalResponseBetweenNonExistentUserAndWrongPassword",
+        "shouldRejectPasswordChangeWhenCurrentPasswordIsIncorrect",
+        "shouldRejectResendUsingOldTokenAfterResendSucceeded",
+        "shouldRejectResendWhenChallengeIsUsed"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.CategoriaServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveLancarExcecaoAoBuscarInexistente",
+        "deveLancarConflitoAoCadastrarNomeDuplicado",
+        "deveBuscarPorIdComSucesso",
+        "deveAtualizarCategoriaComSucesso",
+        "deveLancarConflitoAoAtualizarNomeDuplicado",
+        "deveAlterarStatusCategoria",
+        "deveCadastrarCategoriaComSucesso",
+        "deveListarCategoriasAtivas"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ClienteServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveListarClientesFiltrandoPorStatusAtivoOuInativo",
+        "deveTestarApenasDigitos",
+        "deveObterContadoresStatusComSucesso",
+        "deveBuscarPorNomeSemDigitos",
+        "deveNormalizarTelefoneComMascaraNaBusca",
+        "deveListarMultiplosClientesEliminandoNPlus1",
+        "deveNormalizarCpfComMascaraNaBusca",
+        "deveRetornarPaginaVaziaSemExecutarQueriesLote"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ConfiguracaoOficinaServiceIntegrityTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "updateStillClearsExplicitlyBlankOptionalFields",
+        "duplicateRecordsAreNotSilentlySelectedOrUpdated",
+        "missingRecordFailsWithoutRecreation",
+        "existingCustomizedRecordIsReturnedWithoutWriteOrOverwrite",
+        "missingRecordCannotBeCreatedByUpdate",
+        "updateUsesTheExistingRecordAndPreservesOmittedFields",
+        "readsDeclareReadOnlyTransactionsWhileUpdateRemainsWritable",
+        "concurrentMissingReadsBothFailWithoutAnyWrite",
+        "missingRecordCannotBeRecreatedByGet"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.EstoqueServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRejeitarSaidaSeEstoqueInsuficiente",
+        "deveRetornarResumoEstoque",
+        "deveRegistrarSaidaManualComSucesso",
+        "deveRejeitarMovimentacaoProdutoInativo",
+        "deveRegistrarEntradaManualComSucesso",
+        "deveRejeitarAjusteNegativoSeInsuficiente"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.FinanceRegressionIntegrationTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "pdfEApiExibemMesmoTotalPersistido",
+        "margemGrandeComumEAtualizacaoPersistemCorretamente",
+        "updatesParciaisCombinadosECompletosUsamEstadoEfetivo",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[1]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[2]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[3]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[4]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[5]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[6]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[7]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[8]",
+        "valoresValidosFechamAposReleitura(String, String, String, String)[9]",
+        "subcentavosEmPecasOuDescontoTambemSaoRejeitados",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[1]",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[2]",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[3]",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[4]",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[5]",
+        "subcentavosSaoRejeitadosSemAlterarPersistencia(String)[6]",
+        "createComSubcentavosNaoPersiste",
+        "descontoParcialPreservaMaoDeObraERejeitaExcesso"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.FormClearIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "enderecoAlteradoPersisteENenhumEnderecoContinuaValido",
+        "enderecoOmitidoPreservaValorPersistido",
+        "enderecoExplicitamenteRemovidoExcluiOrfao",
+        "laudoOmitidoPreservaTodosOsCampos",
+        "laudoVazioLimpaTodosOsCamposNoBanco",
+        "configuracaoOmitidaPreservaLimpezaRemoveEValorNovoPersiste",
+        "clientePersistidoPodeReceberMaquinaSemNovoCliente"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.FornecedorServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRejeitarCadastroComCnpjDuplicado",
+        "deveInativarFornecedor",
+        "deveCadastrarFornecedorComSucesso",
+        "deveAtualizarFornecedorComSucesso",
+        "deveLancar404AoBuscarInexistente"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.HistoricoBuscaTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "testRegressaoPrincipalIsolamentoMaquinas",
+        "testEquipamentoSemHistorico",
+        "testRegraValorAcumuladoApenasConcluidas",
+        "testResumoCliente",
+        "testBuscaRapidaGlobal",
+        "testBuscaRapidaTermoVazio",
+        "testIsolamentoClienteEquipamento"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ImpressaoConfigPdfIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "pdfLeConfiguracaoPersistidaAtualEnaoReutilizaCnpjRemovido"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.IntegracaoEstoqueOSTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cenarioCriticoCompletoIntegracaoEstoqueOS"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.MaquinaServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveRejeitarHorimetroInvalidoEmMaquinas(String)[1]",
+        "deveRejeitarHorimetroInvalidoEmMaquinas(String)[2]",
+        "deveRejeitarHorimetroInvalidoEmMaquinas(String)[3]",
+        "deveRejeitarHorimetroInvalidoEmMaquinas(String)[4]",
+        "deveRejeitarHorimetroInvalidoEmMaquinas(String)[5]",
+        "deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String)[1]",
+        "deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String)[2]",
+        "deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String)[3]",
+        "deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String)[4]",
+        "deveAceitarHorimetroValidoComEspacosEVirgulaEmMaquinas(String)[5]",
+        "deveRejeitarCriacaoComHorimetroNaoNumerico",
+        "deveRejeitarCriacaoComHorimetroNegativo",
+        "deveAceitarCriacaoComHorimetroValido"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.NotificacaoConcurrencyIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "concorrenciaCriacaoNotificacao_chaveUnica_geraExatamenteUmRegistro"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.NotificacaoServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveCriarNotificacaoOsAguardandoAprovacao",
+        "deveCriarNotificacaoQuandoEstoqueBaixo",
+        "deveListarRecentesComResumo",
+        "deveMarcarComoLidaComSucesso",
+        "deveResolverNotificacaoInativando",
+        "deveResolverNotificacaoQuandoEstoqueForNormalizado",
+        "deveCriarNotificacaoComSucesso",
+        "deveCriarNotificacaoOsPronta",
+        "deveLancarExceptionAoMarcarInexistenteComoLida",
+        "deveMarcarTodasComoLidas"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoConcurrencyIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cancelamentosComMultiplosProdutosUsamOrdemDeLockSemDeadlock",
+        "duasRemocoesDoMesmoItemDevolvemUmaVez",
+        "cancelarEAdicionarMantemOsEEstoqueConsistentes",
+        "conclusaoEAdicaoNuncaInseremItemDepoisDoEstadoTerminal",
+        "duasAdicoesNoEstoqueLimiteNuncaDeixamSaldoNegativo",
+        "cancelarERemoverMesmoItemDevolvemEstoqueUmaVez"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoFinanceiroTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "caso3_composicaoItem(String, String, String, String)[1]",
+        "caso3_composicaoItem(String, String, String, String)[2]",
+        "caso3_composicaoItem(String, String, String, String)[3]",
+        "caso3_composicaoItem(String, String, String, String)[4]",
+        "caso3_composicaoItem(String, String, String, String)[5]",
+        "extra3_percentualDesconto(String, String, String)[1]",
+        "extra3_percentualDesconto(String, String, String)[2]",
+        "extra3_percentualDesconto(String, String, String)[3]",
+        "extra3_percentualDesconto(String, String, String)[4]",
+        "caso2_totalNuncaNegativo(String, String, String, String)[1]",
+        "caso2_totalNuncaNegativo(String, String, String, String)[2]",
+        "caso2_totalNuncaNegativo(String, String, String, String)[3]",
+        "caso2_totalNuncaNegativo(String, String, String, String)[4]",
+        "extra2_totalEhBigDecimal",
+        "caso1_totalDaOS(String, String, String, String)[1]",
+        "caso1_totalDaOS(String, String, String, String)[2]",
+        "caso1_totalDaOS(String, String, String, String)[3]",
+        "caso1_totalDaOS(String, String, String, String)[4]",
+        "caso1_totalDaOS(String, String, String, String)[5]",
+        "caso7_custoZeroRetornaMargem0(String, String)[1]",
+        "caso7_custoZeroRetornaMargem0(String, String)[2]",
+        "extra1_recalcularTotalComNulls",
+        "caso4_quantidadeEscala3(String)[1]",
+        "caso4_quantidadeEscala3(String)[2]",
+        "caso4_quantidadeEscala3(String)[3]",
+        "caso4_quantidadeEscala3(String)[4]",
+        "caso4_quantidadeEscala3(String)[5]",
+        "caso5_margemLucroHalfUp(String, String, String)[1]",
+        "caso5_margemLucroHalfUp(String, String, String)[2]",
+        "caso5_margemLucroHalfUp(String, String, String)[3]",
+        "caso5_margemLucroHalfUp(String, String, String)[4]",
+        "caso5_margemLucroHalfUp(String, String, String)[5]",
+        "caso6_congelamentoDePrecoDaOS"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoItemServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "reajustarPrecoProdutoNaoAlteraItemDaOs",
+        "deveAdicionarPecaComSucesso",
+        "deveRejeitarAdicaoPecaEmOsConcluida",
+        "deveRejeitarAdicaoPecaSeEstoqueInsuficiente",
+        "deveRemoverPecaComSucesso",
+        "deveRejeitarAdicaoPecaEmOsCancelada",
+        "simulacaoConcorrenciaSaldoNuncaFicaNegativo"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoPdfTest",
+      "tests": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "cenarioB_OsComVariasPecas",
+        "cenarioF_OsComMuitasInformacoes_QuebraDePagina",
+        "testeCancelamentoComPecasPreservaHistorico",
+        "recibo_deveGerarPdfValidoParaOsValidaComPecas",
+        "deveGerarDocumentoServicoPdfValidoParaOrdemServicoComPecas",
+        "deveGerarPdfValidoParaOrdemServicoSemPecas",
+        "recibo_deveSerDocumentoComercialSemTermosBancarios",
+        "cenarioD_ClientePessoaFisica",
+        "pdfRefleteConfiguracaoAtualESupressaoDeCamposOpcionais",
+        "recibo_deveUtilizarDadosDaConfiguracaoOficina",
+        "recibo_deveGerarPdfValidoParaOsSemPecas",
+        "cenarioC_OsComTextosLongos",
+        "deveGerarPdfParaOrdemServicoConcluida",
+        "deveGerarDocumentoServicoPdfValidoParaOrdemServicoSemPecas",
+        "testeIntegridadePrecoHistoricoPrecoCongeladoNoPdf",
+        "cenarioA_OsSimples",
+        "cenarioE_ClientePessoaJuridica",
+        "deveGerarPdfValidoParaOrdemServicoComPecas",
+        "recibo_devePreservarValoresOficiaisDaOS"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoServiceTest",
+      "tests": 42,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveCancelarOrdemServicoComSucesso",
+        "naoDeveCriarOSSeClienteEstiverInativo",
+        "deveCriarOrdemServicoComSucesso",
+        "naoDeveCriarOSSeEquipamentoEstiverInativo",
+        "naoDeveAceitarHorimetroNegativo",
+        "naoDevePermitirDescontoMaiorQueSubtotal",
+        "deveListarOrdensPorCliente",
+        "naoDeveAtualizarComValoresNegativos",
+        "deveEstornarPecasParaEstoqueAoCancelarOrdemServico",
+        "deveAceitarHorimetroValidoComEspacosEVirgula(String)[1]",
+        "deveAceitarHorimetroValidoComEspacosEVirgula(String)[2]",
+        "deveAceitarHorimetroValidoComEspacosEVirgula(String)[3]",
+        "deveAceitarHorimetroValidoComEspacosEVirgula(String)[4]",
+        "deveAceitarHorimetroValidoComEspacosEVirgula(String)[5]",
+        "deveObterContadoresStatusCorretamente",
+        "deveConcluirOrdemServicoERegistrarDataConclusao",
+        "naoDeveCriarOSSeEquipamentoPertencerAOutroCliente",
+        "deveRejeitarHorimetroInvalido(String)[1]",
+        "deveRejeitarHorimetroInvalido(String)[2]",
+        "deveRejeitarHorimetroInvalido(String)[3]",
+        "deveRejeitarHorimetroInvalido(String)[4]",
+        "deveRejeitarHorimetroInvalido(String)[5]",
+        "naoDevePermitirAlterarValorPecasManualmenteQuandoOsPossuiItens",
+        "deveTransicionarParaProntaComTestesTecnicos",
+        "naoDeveAtualizarOrdemServicoConcluida",
+        "deveBuscarOrdemServicoPorId",
+        "devePermitirTransicaoParaProntaComTestes",
+        "naoDeveTransicionarParaProntaComTestesMuitoCurtos",
+        "naoDeveCriarOSSeEquipamentoNaoExistir",
+        "naoDeveCriarOSSeClienteEEquipamentoEstiveremInativos",
+        "deveListarOrdensPorMaquinaEPreservarHistorico",
+        "naoDeveBuscarOSInexistente",
+        "deveAtualizarDadosTecnicosEValoresComSucesso",
+        "naoDeveAlterarStatusDeOrdemConcluida",
+        "deveRejeitarTransicaoParaProntaSemTestes",
+        "deveObterContadoresDashboardCorretamente",
+        "naoDeveCriarOSSeNumeroOsJaExistir",
+        "naoDeveAtualizarOrdemServicoCancelada",
+        "deveCriarOrdemServicoComNumeroCustomizado",
+        "naoDeveTransicionarParaProntaSemTestesTecnicos",
+        "deveTransicionarStatusComSucesso",
+        "naoDeveCriarOSSeClienteNaoExistir"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.PdfConfiguracaoOficinaIsolationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "missingConfigurationStopsBeforeReadingDocumentData(String)[1]",
+        "missingConfigurationStopsBeforeReadingDocumentData(String)[2]",
+        "missingConfigurationStopsBeforeReadingDocumentData(String)[3]",
+        "documentEndpointReturnsJson503EvenWhenClientAcceptsPdfWithoutPriorWrites(String)[1]",
+        "documentEndpointReturnsJson503EvenWhenClientAcceptsPdfWithoutPriorWrites(String)[2]",
+        "documentEndpointReturnsJson503EvenWhenClientAcceptsPdfWithoutPriorWrites(String)[3]"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ProdutoEstoqueConcurrencyIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "edicaoComLeituraObsoletaPreservaMovimentacaoConcluida(TipoMovimentacaoEstoque)[1]",
+        "edicaoComLeituraObsoletaPreservaMovimentacaoConcluida(TipoMovimentacaoEstoque)[2]",
+        "edicaoComLeituraObsoletaPreservaMovimentacaoConcluida(TipoMovimentacaoEstoque)[3]",
+        "edicaoComLeituraObsoletaPreservaMovimentacaoConcluida(TipoMovimentacaoEstoque)[4]",
+        "movimentacaoAposEdicaoTambemPreservaSaldoENome",
+        "cadastroAindaRegistraEstoqueInicial",
+        "alteracaoDeStatusObsoletaNaoRestauraEstoque"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ProdutoServiceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveIgnorarCodigoClienteEGerarSequencial",
+        "deveCadastrarProdutoComEstoqueInicial",
+        "deveRemoverCompatibilidadeComSucesso",
+        "deveAtualizarProdutoComSucesso",
+        "deveInativarProduto",
+        "deveRejeitarLinksCompraInvalidos",
+        "deveValidarLinksCompraValidos",
+        "deveRejeitarCadastroComCategoriaInexistente",
+        "deveListarProdutosComPaginacao",
+        "deveAdicionarCompatibilidadeComSucesso",
+        "deveCadastrarProdutoComSucesso",
+        "deveRejeitarCompatibilidadeDuplicada"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.RefreshTokenConcurrencyIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldRevokeTokenOnLogout",
+        "shouldRejectReuseOfAlreadyRotatedTokenAndNotGenerateNewToken",
+        "shouldRejectExpiredRefreshToken",
+        "shouldRejectNonexistentRefreshToken",
+        "shouldPreventConcurrentRefreshFromConsumingSameToken",
+        "shouldHandleSequentialRotationsSuccessfully",
+        "shouldEnforceSingleRotationUnderConcurrencyWithoutRememberMe"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.RelatorioRegressionIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "aReceberRespeitaStatusEPeriodoComoAListagem",
+        "produtoSomenteEmOsCanceladaNaoApareceNoRanking",
+        "rankingIgnoraOsCanceladaMasPreservaSeuItemHistorico"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.RelatorioServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "deveGerarRelatorioOsPorPeriodo",
+        "deveRetornarRelatorioEquipamentos",
+        "deveRetornarRankingPecasMaisUtilizadas",
+        "quandoStatusForConcluidaValorTotalAReceberDeveSerZero",
+        "deveClassificarStatusEstoqueCorretamente",
+        "deveRetornarRelatorioClientes",
+        "deveGerarRelatorioOsSemCalcularResumoQuandoSolicitado"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.ReleaseSmokeTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "smokeTestFluxoCompletoRelease100"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.service.TwoFactorConcurrencyIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "shouldPreventDuplicateConsumptionWhenConcurrentValidRequestsArrive",
+        "shouldExecuteRealBCryptAndRejectNonExistentUserWithoutError",
+        "shouldRejectSubsequentAttemptsAfterChallengeIsUsed",
+        "shouldPreventDuplicateResendWhenConcurrentRequestsArriveWithSameToken",
+        "shouldStrictlyEnforceMax5AttemptsUnderConcurrency",
+        "shouldHandleMixedConcurrentRequestsConsistently"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.testsupport.SyntheticMigrationsTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "acceptsAnEffectiveFlywayBeanUsingTheApprovedLocationWithoutConnecting",
+        "acceptsOnlyTheApprovedSyntheticBytes",
+        "rejectsSpringOverrideBeforeConnectionBeansExist",
+        "rejectsOfficialMigrationsEvenThoughNamesAndVersionsMatch",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[1]",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[2]",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[3]",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[4]",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[5]",
+        "rejectsMissingRelativeMixedAndClasspathLocations(String)[6]",
+        "rejectsAnEffectiveFlywayBeanPointingToTheOfficialClasspath"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.testsupport.TestDatabaseSafetyAutoConfigurationTest",
+      "tests": 66,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rejectsPersistenceUnitManagerBeforeItsFactoryRuns",
+        "rejectsIndeterminateFactoryWithoutConstructingIt",
+        "requiresEarlyInitializerRatherThanSilentlyOfferingOnlyLateProtection",
+        "acceptsStandardFlywayAndJpaDefinitionsWithoutInstantiatingConnectionConsumers",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[1]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[2]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[3]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[4]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[5]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[6]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[7]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[8]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[9]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[10]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[11]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[12]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[13]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[14]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[15]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[16]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[17]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[18]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[19]",
+        "rejectsUnsafeInnerFactoriesBeforeConstruction(Class, Reason, String)[20]",
+        "permitsRealSpringSecurityFilterAndEnforcesSecurityWithoutDatabase",
+        "rejectsAncestorDataSourceFactoryBeforeConstruction",
+        "rejectsTypedFactoryEvenWhenGetObjectTypeWouldReturnNull",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[1]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[2]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[3]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[4]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[5]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[6]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[7]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[8]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[9]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[10]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[11]",
+        "rejectsCustomConnectionBeansBeforeTheirFactoryCanConnect(Class)[12]",
+        "permitsInnerStringFactoryWithoutLookingUpItsSyntheticName",
+        "rejectsNamedDataSourceFactoryBeforeConstruction",
+        "demonstratesBootBuilderAcceptsExternalPersistenceUnitWithoutOpeningConnections",
+        "rejectsPriorityOrderedRegistryProcessorBeforeConnectionConstruction",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[1]",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[2]",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[3]",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[4]",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[5]",
+        "failsBeforeAnyPoolFlywayOrHibernateInstantiation(String)[6]",
+        "permitsInnerFilterFactoryWithoutConstructingItForInspection",
+        "rejectsParentDatasourceWithoutInvokingItsFactory",
+        "reproducesBootHikariBindingOverrideWithoutStartingThePool",
+        "discoversInitializerThroughSpringApplicationAndAcceptsOfficialMetadata(String)[1]",
+        "discoversInitializerThroughSpringApplicationAndAcceptsOfficialMetadata(String)[2]",
+        "discoversInitializerThroughSpringApplicationAndAcceptsOfficialMetadata(String)[3]",
+        "rejectsEarlyPostprocessorBeforeDatasourceFactoryRuns",
+        "rejectsIndeterminateFactoryInParentWithoutInstantiatingIt",
+        "rejectsDefinitionRegisteredByPostprocessorAfterTheAudit",
+        "revalidatesActualPoolBeforeFlywayCanBeConstructed",
+        "permitsOrdinaryTypedFactoryAndAnUnrelatedParent",
+        "permitsOnlyTheStandardBootPoolWithoutOpeningIt(String)[1]",
+        "permitsOnlyTheStandardBootPoolWithoutOpeningIt(String)[2]",
+        "safetyAutoConfigurationIsRegisteredOnTheTestClasspath",
+        "rejectsManagerThatWouldSupplyAlternativeDatasourceBeforeConstructionOrUse",
+        "invalidEnvironmentStopsBeforeEvenTheEarlyRegistryProcessor",
+        "revalidatesEnvironmentChangedByPostprocessorAfterTheAudit"
+      ]
+    },
+    {
+      "name": "com.oficinagestao.testsupport.TestDatabaseSafetyGuardTest",
+      "tests": 107,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "rejectsMaskedForbiddenPropertyEvenWhenHigherPriorityValueIsBlank",
+        "acceptsExplicitLocalAndCiIdentity(String)[1]",
+        "acceptsExplicitLocalAndCiIdentity(String)[2]",
+        "acceptsExplicitLocalAndCiIdentity(String)[3]",
+        "acceptsExplicitLocalAndCiIdentity(String)[4]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[1]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[2]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[3]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[4]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[5]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[6]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[7]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[8]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[9]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[10]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[11]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[12]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[13]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[14]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[15]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[16]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[17]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[18]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[19]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[20]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[21]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[22]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[23]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[24]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[25]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[26]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[27]",
+        "rejectsAnyUnprovenJdbcIdentity(String)[28]",
+        "urlRejectionsNeverRetainCredentialsOrParserCauses(String)[1]",
+        "urlRejectionsNeverRetainCredentialsOrParserCauses(String)[2]",
+        "urlRejectionsNeverRetainCredentialsOrParserCauses(String)[3]",
+        "rejectsAlternativeConnectionSettings(String)[1]",
+        "rejectsAlternativeConnectionSettings(String)[2]",
+        "rejectsAlternativeConnectionSettings(String)[3]",
+        "rejectsAlternativeConnectionSettings(String)[4]",
+        "rejectsAlternativeConnectionSettings(String)[5]",
+        "rejectsAlternativeConnectionSettings(String)[6]",
+        "rejectsAlternativeConnectionSettings(String)[7]",
+        "rejectsAlternativeConnectionSettings(String)[8]",
+        "rejectsAlternativeConnectionSettings(String)[9]",
+        "rejectsAlternativeConnectionSettings(String)[10]",
+        "rejectsAlternativeConnectionSettings(String)[11]",
+        "rejectsAlternativeConnectionSettings(String)[12]",
+        "rejectsAlternativeConnectionSettings(String)[13]",
+        "rejectsAlternativeConnectionSettings(String)[14]",
+        "rejectsAlternativeConnectionSettings(String)[15]",
+        "rejectsAlternativeConnectionSettings(String)[16]",
+        "rejectsAlternativeConnectionSettings(String)[17]",
+        "rejectsAlternativeConnectionSettings(String)[18]",
+        "rejectsAlternativeConnectionSettings(String)[19]",
+        "rejectsAlternativeConnectionSettings(String)[20]",
+        "rejectsAlternativeConnectionSettings(String)[21]",
+        "rejectsAlternativeConnectionSettings(String)[22]",
+        "rejectsAlternativeConnectionSettings(String)[23]",
+        "rejectsAlternativeConnectionSettings(String)[24]",
+        "rejectsAlternativeConnectionSettings(String)[25]",
+        "rejectsAlternativeConnectionSettings(String)[26]",
+        "rejectsAlternativeConnectionSettings(String)[27]",
+        "rejectsAlternativeConnectionSettings(String)[28]",
+        "doesNotIncludeSecretsOrNestedBindingErrorsInRejections",
+        "rejectsSourcesThatCouldHideConnectionOverridesFromEnumeration",
+        "rejectsMissingPositiveTestIdentification(String)[1]",
+        "rejectsMissingPositiveTestIdentification(String)[2]",
+        "genericCiFlagCannotAuthorizeAPort",
+        "rejectsInvalidExpectedPort(String)[1]",
+        "rejectsInvalidExpectedPort(String)[2]",
+        "rejectsInvalidExpectedPort(String)[3]",
+        "rejectsInvalidExpectedPort(String)[4]",
+        "rejectsInvalidExpectedPort(String)[5]",
+        "rejectsInvalidExpectedPort(String)[6]",
+        "rejectsHigherPrecedenceRemoteDatasource",
+        "rejectsEveryHikariUrlOverrideIncludingMatchingOrBlank(String)[1]",
+        "rejectsEveryHikariUrlOverrideIncludingMatchingOrBlank(String)[2]",
+        "rejectsEveryHikariUrlOverrideIncludingMatchingOrBlank(String)[3]",
+        "rejectsEveryHikariUrlOverrideIncludingMatchingOrBlank(String)[4]",
+        "rejectsOperationalCredentialOverrides(String)[1]",
+        "rejectsOperationalCredentialOverrides(String)[2]",
+        "missingDedicatedSettingsNeverFallBackToOperationalConfiguration(String)[1]",
+        "missingDedicatedSettingsNeverFallBackToOperationalConfiguration(String)[2]",
+        "missingDedicatedSettingsNeverFallBackToOperationalConfiguration(String)[3]",
+        "missingDedicatedSettingsNeverFallBackToOperationalConfiguration(String)[4]",
+        "missingDedicatedSettingsNeverFallBackToOperationalConfiguration(String)[5]",
+        "rejectsAlternativeDriverOrPool(String)[1]",
+        "rejectsAlternativeDriverOrPool(String)[2]",
+        "rejectsAlternativeConnectionsFromRealEnvironmentStyleSource(String)[1]",
+        "rejectsAlternativeConnectionsFromRealEnvironmentStyleSource(String)[2]",
+        "rejectsAlternativeConnectionsFromRealEnvironmentStyleSource(String)[3]",
+        "rejectsAlternativeConnectionsFromRealEnvironmentStyleSource(String)[4]",
+        "rejectsAlternativeConnectionsFromRealEnvironmentStyleSource(String)[5]",
+        "retainsExistingTestProfileCombinations(String)[1]",
+        "retainsExistingTestProfileCombinations(String)[2]",
+        "retainsExistingTestProfileCombinations(String)[3]",
+        "rejectsTrulyAbsentCredentialsOrPort(String)[1]",
+        "rejectsTrulyAbsentCredentialsOrPort(String)[2]",
+        "rejectsTrulyAbsentCredentialsOrPort(String)[3]",
+        "acceptsNormalPoolAndFlywaySettings",
+        "rejectsTrulyAbsentTestUrlEvenWhenEffectiveUrlIsLocal",
+        "requiresExactTestProfile(String)[1]",
+        "requiresExactTestProfile(String)[2]",
+        "requiresExactTestProfile(String)[3]",
+        "requiresExactTestProfile(String)[4]",
+        "requiresExactTestProfile(String)[5]"
+      ]
+    }
+  ]
+}

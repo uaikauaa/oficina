@@ -202,7 +202,9 @@ function LoginForm() {
     }
   };
 
-  const voltarParaLogin = () => {
+  const voltarParaLogin = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // A troca síncrona dos formulários não pode submeter o formulário de login.
+    event.preventDefault();
     setTwoFactorStep(false);
     setChallengeToken(null);
     setTwoFactorCode('');

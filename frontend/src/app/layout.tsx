@@ -3,6 +3,7 @@ import PwaInstallProvider from "@/components/PwaInstallProvider";
 import { BRAND_BACKGROUND } from "@/lib/brand";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { connection } from 'next/server';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,11 +27,12 @@ export const viewport: Viewport = {
   themeColor: BRAND_BACKGROUND,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await connection();
   return (
     <html
       lang="pt-BR"

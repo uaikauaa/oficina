@@ -28,7 +28,11 @@ import com.oficinagestao.security.LoginAttemptService;
 import com.oficinagestao.security.TokenHashUtil;
 
 @ExtendWith(MockitoExtension.class)
+@org.springframework.boot.test.context.SpringBootTest
+@org.springframework.test.context.ActiveProfiles("test")
 class AuthServiceTest {
+    @org.springframework.beans.factory.annotation.Autowired com.oficinagestao.security.SharedRateLimitService limiter;
+    @org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
 
     @Mock
     private UsuarioRepository usuarioRepository;
@@ -77,7 +81,8 @@ class AuthServiceTest {
         });
         lenient().when(usuarioRepository.findByIdForUpdate(anyLong())).thenAnswer(inv ->
                 Optional.ofNullable(lockedUsers.get(inv.getArgument(0))));
-        loginAttemptService = new LoginAttemptService(5, 15);
+        jdbc.update("DELETE FROM security_rate_limits");
+        loginAttemptService = new LoginAttemptService(limiter, 5, 15);
         authService = new AuthService(
                 usuarioRepository,
                 passwordEncoder,

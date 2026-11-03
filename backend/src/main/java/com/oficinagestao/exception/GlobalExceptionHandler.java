@@ -28,8 +28,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RateLimitException.class)
     public ResponseEntity<ApiErrorResponse> handleRateLimit(RateLimitException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                .header("Retry-After", "60")
+                .header("Retry-After", Long.toString(ex.getRetryAfterSeconds()))
                 .body(ApiErrorResponse.of(429, "RATE_LIMITED", ex.getMessage(), request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleDatabaseUnavailable(org.springframework.dao.DataAccessException ex, HttpServletRequest request) {
+        log.error("Persistencia indisponivel; tipo={}", ex.getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Retry-After", "5")
+                .body(ApiErrorResponse.of(503, "SERVICE_UNAVAILABLE", "Servico temporariamente indisponivel.", request.getRequestURI()));
     }
 
     @ExceptionHandler(ConfiguracaoOficinaIndisponivelException.class)

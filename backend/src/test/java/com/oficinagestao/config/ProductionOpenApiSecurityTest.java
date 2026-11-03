@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -38,6 +38,7 @@ class ProductionOpenApiSecurityTest {
     @SpringBootTest(properties = {
             "CORS_ALLOWED_ORIGINS=https://app.oficinagestao.com.br",
             "JWT_SECRET=chave-secreta-sintetica-de-testes-com-mais-de-32-caracteres-para-ci",
+            "RATE_LIMIT_SECRET=chave-sintetica-independente-do-limitador-com-32-caracteres",
             "MAIL_HOST=localhost",
             "MAIL_PORT=587",
             "MAIL_USERNAME=ci-test@oficinagestao.local",

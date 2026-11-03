@@ -26,6 +26,8 @@ public class JwtService {
 
     public static final String DEFAULT_DEV_SECRET = "default-secret-key-oficina-gestao-dev-environment-2026-secure-token";
     public static final int MIN_SECRET_LENGTH = 32;
+    public static final String ISSUER = "oficina-gestao";
+    public static final String AUDIENCE = "oficina-gestao-api";
 
     private final SecretKey secretKey;
     private final long expirationMs;
@@ -109,22 +111,20 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(usuario.getEmail())
+                .issuer(ISSUER)
+                .audience().add(AUDIENCE).and()
                 .claim("userId", usuario.getId())
-                .claim("nome", usuario.getNome())
                 .claim("roles", roles)
                 .claim("tokenVersion", tokenVersion)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(secretKey)
+                .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
+            extractClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
@@ -164,20 +164,20 @@ public class JwtService {
     }
 
     public Claims extractClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        var parsed = parser().parseSignedClaims(token);
+        Claims claims = parsed.getPayload();
+        if (!Jwts.SIG.HS256.getId().equals(parsed.getHeader().getAlgorithm())
+                || claims.getExpiration() == null
+                || claims.getIssuedAt() == null
+                || claims.getIssuedAt().after(new Date())) {
+            throw new JwtException("JWT fora da política de assinatura ou validade");
+        }
+        return claims;
     }
 
     public boolean isTokenExpired(String token) {
         try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+            Claims claims = extractClaims(token);
             return claims.getExpiration().before(new Date());
         } catch (io.jsonwebtoken.ExpiredJwtException e) {
             return true;
@@ -188,5 +188,13 @@ public class JwtService {
 
     public long getExpirationMs() {
         return expirationMs;
+    }
+
+    private io.jsonwebtoken.JwtParser parser() {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .requireIssuer(ISSUER)
+                .requireAudience(AUDIENCE)
+                .build();
     }
 }

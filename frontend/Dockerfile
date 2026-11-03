@@ -8,8 +8,8 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-# Next.js resolve rewrites() no build. O alvo /api precisa ser informado
-# durante o build em Cloud Run; o default preserva Docker Compose local.
+# Optional build environment for local checks. The server handler reads the
+# real backend origin at runtime; no rewrite or origin is compiled into client JS.
 ARG INTERNAL_BACKEND_URL=http://backend:8080
 ENV INTERNAL_BACKEND_URL=${INTERNAL_BACKEND_URL}
 COPY --from=deps /app/node_modules ./node_modules
@@ -23,6 +23,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
+ENV INTERNAL_BACKEND_URL=http://backend:8080
 
 RUN addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs \

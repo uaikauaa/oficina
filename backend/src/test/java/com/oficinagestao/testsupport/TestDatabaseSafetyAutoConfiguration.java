@@ -10,12 +10,12 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
-import org.springframework.boot.autoconfigure.flyway.FlywayConnectionDetails;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
-import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer;
+import org.springframework.boot.flyway.autoconfigure.FlywayConnectionDetails;
+import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails;
+import org.springframework.boot.jpa.autoconfigure.EntityManagerFactoryBuilderCustomizer;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
+import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,12 +46,12 @@ import static com.oficinagestao.testsupport.TestDatabaseSafetyGuard.rejected;
 @AutoConfiguration
 public class TestDatabaseSafetyAutoConfiguration {
     private static final String LIFECYCLE = TestDatabaseSafetyAutoConfiguration.class.getName() + ".lifecycle";
-    private static final String JPA = "org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration";
-    private static final String FLYWAY = "org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration$FlywayConfiguration";
+    private static final String JPA = "org.springframework.boot.jpa.autoconfigure.JpaBaseConfiguration";
+    private static final String FLYWAY = "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$FlywayConfiguration";
     private record BootFactory(String owner, String method) { }
     private static final Map<Class<?>, BootFactory> BOOT_FACTORIES = Map.of(
-            DataSource.class, new BootFactory("org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari", "dataSource"),
-            JdbcConnectionDetails.class, new BootFactory("org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration$PooledDataSourceConfiguration", "jdbcConnectionDetails"),
+            DataSource.class, new BootFactory("org.springframework.boot.jdbc.autoconfigure.DataSourceConfiguration$Hikari", "dataSource"),
+            JdbcConnectionDetails.class, new BootFactory("org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration$PooledDataSourceConfiguration", "jdbcConnectionDetails"),
             FlywayConnectionDetails.class, new BootFactory(FLYWAY, "flywayConnectionDetails"),
             Flyway.class, new BootFactory(FLYWAY, "flyway"),
             EntityManagerFactory.class, new BootFactory(JPA, "entityManagerFactory"),

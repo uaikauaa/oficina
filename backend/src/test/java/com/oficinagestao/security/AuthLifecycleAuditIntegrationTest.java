@@ -41,7 +41,7 @@ class AuthLifecycleAuditIntegrationTest {
     final String password = "AuditOnly#2026Original!";
 
     @BeforeEach void setup() {
-        attempts.resetAll();
+        jdbc.update("DELETE FROM security_rate_limits");
         user = new Usuario("Audit synthetic", "audit-" + UUID.randomUUID() + "@oficina.invalid",
                 encoder.encode(password), true);
         user.addRole(roles.findByNome("ROLE_ADMIN").orElseThrow());
@@ -53,7 +53,7 @@ class AuthLifecycleAuditIntegrationTest {
         jdbc.update("DELETE FROM refresh_tokens WHERE usuario_id = ?", user.getId());
         jdbc.update("DELETE FROM two_factor_challenges WHERE usuario_id = ?", user.getId());
         users.deleteById(user.getId());
-        attempts.resetAll();
+        jdbc.update("DELETE FROM security_rate_limits");
     }
 
     String challenge() {
@@ -92,6 +92,22 @@ class AuthLifecycleAuditIntegrationTest {
         auth.login(login, request);
         assertThrows(com.oficinagestao.exception.RateLimitException.class, () -> auth.login(login, request));
         verify(mail, times(1)).sendTwoFactorCode(eq(user.getEmail()), anyString());
+    }
+
+    @Test void loginKeepsSecondFactorSecretOutOfResponseAndDatabase() {
+        LoginChallengeResponse response = auth.login(new LoginRequest(user.getEmail(), password, false), request);
+        var code = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(mail).sendTwoFactorCode(eq(user.getEmail()), code.capture());
+        assertTrue(code.getValue().matches("[0-9]{6}"));
+        assertFalse(response.toString().contains(code.getValue()));
+        String storedHash = jdbc.queryForObject(
+                "SELECT codigo_hash FROM two_factor_challenges WHERE challenge_token = ?",
+                String.class, response.challengeToken());
+        assertNotEquals(code.getValue(), storedHash);
+        assertTrue(encoder.matches(code.getValue(), storedHash));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM refresh_tokens WHERE usuario_id = ?",
+                Integer.class, user.getId()));
+        assertFalse(response.toString().contains("accessToken"));
     }
 
     @Test void hourlyEmailBudgetIncludesAlreadyRevokedChallenges() {

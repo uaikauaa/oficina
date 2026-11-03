@@ -4,7 +4,7 @@ import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,12 +24,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc(printOnlyOnFailure = false, print = org.springframework.boot.test.autoconfigure.web.servlet.MockMvcPrint.NONE)
+@AutoConfigureMockMvc(printOnlyOnFailure = false, print = org.springframework.boot.webmvc.test.autoconfigure.MockMvcPrint.NONE)
 class RouteAuthorizationAuditTest {
     @Autowired MockMvc mvc;
     @Autowired @Qualifier("requestMappingHandlerMapping") RequestMappingHandlerMapping mappings;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @org.junit.jupiter.api.BeforeEach void resetBudgets() { jdbc.update("DELETE FROM security_rate_limits"); }
 
     @Test void everyRegisteredApiRouteHasAuthorizationAndCookieCsrf() throws Exception {
+        var csrf = com.oficinagestao.testsupport.CsrfMockMvc.obtain(mvc);
         List<String> inventory = new ArrayList<>();
         int tested = 0;
         for (var entry : mappings.getHandlerMethods().entrySet()) {
@@ -46,8 +49,8 @@ class RouteAuthorizationAuditTest {
                     inventory.add(method + "\t" + path + "\t" + entry.getValue().getBeanType().getSimpleName() + "#"
                             + entry.getValue().getMethod().getName() + "\t" + (publicRoute ? "PUBLIC" : "ADMIN"));
                     if (!publicRoute) {
-                        mvc.perform(withCsrf(mvc, request(HttpMethod.valueOf(method.name()), url))).andExpect(status().isUnauthorized());
-                        mvc.perform(withCsrf(mvc, request(HttpMethod.valueOf(method.name()), url).with(user("audit").roles("USER"))))
+                        mvc.perform(csrf.apply(request(HttpMethod.valueOf(method.name()), url))).andExpect(status().isUnauthorized());
+                        mvc.perform(csrf.apply(request(HttpMethod.valueOf(method.name()), url).with(user("audit").roles("USER"))))
                                 .andExpect(status().isForbidden());
                         if (method == RequestMethod.GET) {
                             mvc.perform(head(url)).andExpect(status().isUnauthorized());

@@ -17,12 +17,17 @@ export async function fetchTodosRegistrosRelatorio<T>(
   fetchPage: PageFetcher<T>,
   pageSize = 100
 ): Promise<T[]> {
+  if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 200) throw new Error('Tamanho de pagina invalido.');
   const todos: T[] = [];
   let currentPage = 0;
   let totalPages = 1;
 
   while (currentPage < totalPages) {
     const pageData = await fetchPage(currentPage, pageSize);
+
+    if ((pageData?.totalElements ?? 0) > 10000 || todos.length + (pageData?.content?.length ?? 0) > 10000 || currentPage >= 100) {
+      throw new Error('Exportacao limitada a 10.000 registros. Refine os filtros e tente novamente.');
+    }
 
     if (!pageData || !Array.isArray(pageData.content) || pageData.content.length === 0) {
       break;

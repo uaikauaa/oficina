@@ -1,0 +1,28 @@
+[ {
+  "probe" : "/api/graphql",
+  "status" : 404
+}, {
+  "probe" : "/graphql",
+  "status" : 404
+}, {
+  "probe" : "/api/upload",
+  "status" : 404
+}, {
+  "probe" : "/ws",
+  "status" : 404
+}, {
+  "probe" : "/api/unknown-shadow-api",
+  "status" : 404
+}, {
+  "probe" : "TRACE",
+  "status" : 400
+}, {
+  "probe" : "CONNECT",
+  "status" : 400
+}, {
+  "probe" : "PROPFIND",
+  "status" : 400
+}, {
+  "probe" : "Host/forwarded host/CRLF query",
+  "status" : 200
+} ]

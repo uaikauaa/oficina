@@ -20,21 +20,21 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.boot.data.jpa.autoconfigure.DataJpaRepositoriesAutoConfiguration;
+import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.annotation.ImportCandidates;
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer;
-import org.springframework.boot.autoconfigure.flyway.FlywayConnectionDetails;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.JdbcConnectionDetails;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
-import org.springframework.boot.autoconfigure.orm.jpa.EntityManagerFactoryBuilderCustomizer;
+import org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration;
+import org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer;
+import org.springframework.boot.flyway.autoconfigure.FlywayConnectionDetails;
+import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
+import org.springframework.boot.jdbc.autoconfigure.JdbcConnectionDetails;
+import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
+import org.springframework.boot.jpa.autoconfigure.EntityManagerFactoryBuilderCustomizer;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
@@ -181,7 +181,7 @@ class TestDatabaseSafetyAutoConfigurationTest {
     }
 
     @Test
-    void permitsRealSpringSecurityInnerFilterAndEnforcesSecurityWithoutDatabase() {
+    void permitsRealSpringSecurityFilterAndEnforcesSecurityWithoutDatabase() {
         var tracking = new InnerFactoryTracking();
         AtomicInteger connectionConsumers = new AtomicInteger();
         new WebApplicationContextRunner(() -> {
@@ -199,9 +199,9 @@ class TestDatabaseSafetyAutoConfigurationTest {
                 .withUserConfiguration(SecurityOnlyConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasNotFailed();
-                    assertThat(tracking.types).extracting(Class::getName).containsExactly(
-                            "org.springframework.security.config.annotation.web.configuration."
-                                    + "WebMvcSecurityConfiguration$HandlerMappingIntrospectorCacheFilterFactoryBean");
+                    // Security 7 removed the internal HandlerMappingIntrospector factory;
+                    // no FactoryBean product should be probed in this context.
+                    assertThat(tracking.types).isEmpty();
                     assertEquals(0, tracking.invalidLookups.get());
                     assertEquals(0, connectionConsumers.get());
                     assertThat(context).doesNotHaveBean(DataSource.class).doesNotHaveBean(Flyway.class)
@@ -718,7 +718,7 @@ class TestDatabaseSafetyAutoConfigurationTest {
     @Configuration(proxyBeanMethods = false)
     @AutoConfigurationPackage(basePackages = "com.oficinagestao")
     @ImportAutoConfiguration({DataSourceAutoConfiguration.class, FlywayAutoConfiguration.class,
-            HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class,
+            HibernateJpaAutoConfiguration.class, DataJpaRepositoriesAutoConfiguration.class,
             TestDatabaseSafetyAutoConfiguration.class})
     static class MetadataOnlyConfiguration { }
 

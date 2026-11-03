@@ -1,20 +1,25 @@
-import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
-/** Rewrites are compiled by next build; runtime overrides must never silently diverge. */
-export function assertProxyTarget(manifest, runtimeOrigin) {
-  const rewrites = Array.isArray(manifest.rewrites) ? manifest.rewrites
-    : Object.values(manifest.rewrites ?? {}).flat();
-  const target = rewrites.find(rule => rule.source === '/api/:path*')?.destination;
-  if (!target || !target.endsWith('/api/:path*')) throw new Error('Proxy /api ausente na imagem.');
-  const compiled = target.slice(0, -'/api/:path*'.length);
-  if (runtimeOrigin && runtimeOrigin.replace(/\/$/, '') !== compiled) {
-    throw new Error('INTERNAL_BACKEND_URL diverge do build. Reconstrua a imagem com o destino correto.');
+/** The handler reads this runtime target; no backend origin or token enters a browser bundle.
+ * @param {unknown} _manifest
+ * @param {string | undefined} runtimeOrigin
+ * @param {Record<string, string | undefined>} env
+ */
+export function assertProxyTarget(_manifest, runtimeOrigin, env = process.env) {
+  let target;
+  try { target = new URL(runtimeOrigin); } catch { throw new Error('INTERNAL_BACKEND_URL obrigatoria.'); }
+  if (!['http:', 'https:'].includes(target.protocol) || target.username || target.password || target.pathname !== '/' || target.search || target.hash) {
+    throw new Error('Origem backend invalida.');
   }
+  if (env.K_SERVICE && env.CLOUD_RUN_IAM === 'false') throw new Error('Cloud Run requer identidade de servico.');
+  if ((env.K_SERVICE || env.CLOUD_RUN_IAM === 'true') && target.protocol !== 'https:') throw new Error('Backend Cloud Run requer HTTPS.');
+  if (env.K_SERVICE && (!(Number(env.TRUSTED_PROXY_HOPS) >= 1 && Number(env.TRUSTED_PROXY_HOPS) <= 5)
+      || !Number.isInteger(Number(env.TRUSTED_PROXY_HOPS)) || !env.SERVICE_PROXY_SECRET || env.SERVICE_PROXY_SECRET.length < 32)) {
+    throw new Error('Cloud Run requer cadeia de proxies validada e SERVICE_PROXY_SECRET.');
+  }
+  if (target.protocol === 'http:' && !['localhost', '127.0.0.1', 'backend', '[::1]'].includes(target.hostname)) throw new Error('HTTP somente local.');
 }
-
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  assertProxyTarget(JSON.parse(readFileSync(new URL('./.next/routes-manifest.json', import.meta.url), 'utf8')),
-    process.env.INTERNAL_BACKEND_URL);
+  assertProxyTarget(null, process.env.INTERNAL_BACKEND_URL);
   await import('./server.js');
 }

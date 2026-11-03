@@ -14,6 +14,16 @@ public final class CsrfMockMvc {
 
     public static MockHttpServletRequestBuilder withCsrf(MockMvc mvc, MockHttpServletRequestBuilder request)
             throws Exception {
+        return obtain(mvc).apply(request);
+    }
+
+    public record Pair(Cookie cookie, String token) {
+        public MockHttpServletRequestBuilder apply(MockHttpServletRequestBuilder request) {
+            return request.cookie(cookie).header("X-XSRF-TOKEN", token);
+        }
+    }
+
+    public static Pair obtain(MockMvc mvc) throws Exception {
         MvcResult tokenResponse = mvc.perform(get("/api/auth/csrf")).andReturn();
         if (tokenResponse.getResponse().getStatus() != 200) {
             throw new IllegalStateException("CSRF token endpoint failed in test");
@@ -27,6 +37,6 @@ public final class CsrfMockMvc {
         if (token.isBlank()) {
             throw new IllegalStateException("CSRF token missing in test");
         }
-        return request.cookie(cookie).header("X-XSRF-TOKEN", token);
+        return new Pair(cookie, token);
     }
 }

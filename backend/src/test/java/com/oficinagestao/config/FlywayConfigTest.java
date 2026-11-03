@@ -2,7 +2,7 @@ package com.oficinagestao.config;
 
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
+import org.springframework.boot.flyway.autoconfigure.FlywayMigrationStrategy;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;

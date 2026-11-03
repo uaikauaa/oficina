@@ -39,7 +39,7 @@ public final class SyntheticMigrations {
             Map<String, String> expected = expectedHashes();
             try (var entries = Files.list(directory)) {
                 Set<String> actual = entries.map(p -> p.getFileName().toString()).collect(Collectors.toSet());
-                require(actual.equals(expected.keySet()), "exactly the 22 approved files required");
+                require(actual.equals(expected.keySet()), "exactly the 24 approved files required");
             }
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             for (var entry : expected.entrySet()) {
@@ -65,7 +65,7 @@ public final class SyntheticMigrations {
                 require(name.startsWith("V" + (hashes.size() + 1) + "__"), "continuous versions required");
                 hashes.put(name, line.substring(0, 64));
             }
-            require(hashes.size() == 22, "22 trusted checksums required");
+            require(hashes.size() == 24, "24 trusted checksums required");
             return hashes;
         }
     }

@@ -25,6 +25,8 @@ public class HealthController {
     private static final Logger log = LoggerFactory.getLogger(HealthController.class);
 
     private final DataSource dataSource;
+    private ResponseEntity<Map<String, String>> cachedHealth;
+    private long sampledAt;
 
     public HealthController(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -36,7 +38,8 @@ public class HealthController {
             @ApiResponse(responseCode = "200", description = "Aplicação e banco de dados saudáveis"),
             @ApiResponse(responseCode = "503", description = "Banco de dados inacessível ou falha de conectividade")
     })
-    public ResponseEntity<Map<String, String>> health() {
+    public synchronized ResponseEntity<Map<String, String>> health() {
+        if (cachedHealth != null && System.nanoTime() - sampledAt < java.time.Duration.ofSeconds(3).toNanos()) return cachedHealth;
         Map<String, String> status = new LinkedHashMap<>();
         status.put("status", "UP");
 
@@ -49,12 +52,18 @@ public class HealthController {
 
         if (dbUp) {
             status.put("database", "UP");
-            return ResponseEntity.ok(status);
+            return cache(ResponseEntity.ok(Map.copyOf(status)));
         } else {
             status.put("status", "DOWN");
             status.put("database", "DOWN");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(status);
+            return cache(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.copyOf(status)));
         }
+    }
+
+    private ResponseEntity<Map<String, String>> cache(ResponseEntity<Map<String, String>> response) {
+        cachedHealth = response;
+        sampledAt = System.nanoTime();
+        return response;
     }
 }
 

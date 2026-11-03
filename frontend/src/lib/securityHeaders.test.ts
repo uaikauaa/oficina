@@ -14,7 +14,10 @@ describe('SEC-002: Security Headers & CSP (PSQ-SaaS-001)', () => {
 
     it('PRODUÇÃO: deve permitir script-src self e unsafe-inline SEM unsafe-eval', () => {
       const csp = buildContentSecurityPolicy(true);
-      assert.ok(csp.includes("script-src 'self' 'unsafe-inline'"));
+      assert.ok(csp.includes("script-src 'none'"));
+      const noncePolicy = buildContentSecurityPolicy(true, 'syntheticNonceForTests1234');
+      assert.ok(noncePolicy.includes("'nonce-syntheticNonceForTests1234' 'strict-dynamic'"));
+      assert.ok(!noncePolicy.split(';').find(value => value.trim().startsWith('script-src'))?.includes('unsafe-inline'));
       assert.strictEqual(csp.includes("'unsafe-eval'"), false, 'Produção NUNCA deve conter unsafe-eval');
     });
 
@@ -36,8 +39,8 @@ describe('SEC-002: Security Headers & CSP (PSQ-SaaS-001)', () => {
     });
 
     it('deve permitir style-src self e unsafe-inline para Tailwind CSS', () => {
-      assert.ok(buildContentSecurityPolicy(true).includes("style-src 'self' 'unsafe-inline'"));
-      assert.ok(buildContentSecurityPolicy(false).includes("style-src 'self' 'unsafe-inline'"));
+      assert.ok(buildContentSecurityPolicy(true).includes("style-src 'self'"));
+      assert.ok(buildContentSecurityPolicy(false).includes("style-src-attr 'unsafe-inline'"));
     });
 
     it('deve permitir img-src self, data: e blob:', () => {
