@@ -16,7 +16,7 @@ Os jobs do commit `be12cc0` não foram confundidos com sucesso: [CI #96](https:/
 
 ## B. VS Code
 
-O relato de aproximadamente 540 itens não veio acompanhado de exportação individual dos diagnósticos. [Investigação do editor](vscode.md): Maven/Java 21 compila e testa; logs do JDT LS mostram conflito de bundles, reinicializações e erro interno, mas **não identificam arquivo/linha/código dos 540 itens**. Não é correto converter 142 eventos de log em 142 diagnósticos, nem declarar que os 540 desapareceram. A classificação individual e a nova captura do painel continuam obrigatórias antes do merge.
+As [capturas fornecidas](../auditoria/prints/README.md) exibem **540 itens no painel** e contagens por arquivo, sem detalhes individuais. [Investigação do editor](vscode.md): Maven/Java 21 recompilou 159 fontes principais e 79 de teste e passou nos 800 testes em 03/11/2026; o classpath de teste resolveu 125 JARs. Logs do JDT LS mostram conflito de bundles, reinicializações e erro interno, mas **não identificam mensagem/linha/código dos 540 itens**. Não é correto converter eventos de log em diagnósticos nem declarar que os 540 desapareceram. A classificação individual continua obrigatória antes do merge.
 
 ## C. Segurança
 
