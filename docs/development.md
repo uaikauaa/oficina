@@ -1,5 +1,7 @@
 # Guia de Desenvolvimento — Oficina Gestão
 
+> **Guia histórico.** Versões e comandos de banco abaixo podem refletir a fase Spring Boot 3. Use o [README principal](../README.md) e os modelos de ambiente atuais para novas instalações.
+
 Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local do projeto **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda, geradores de energia, compressores e equipamentos industriais/elétricos).
 
 ---

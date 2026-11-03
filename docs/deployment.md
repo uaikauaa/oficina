@@ -1,5 +1,7 @@
 # Guia de Implantação em Produção — Oficina Gestão
 
+> **Arquivo histórico.** A estratégia Vercel/Railway/Neon e os comandos abaixo não representam o plano atual nem autorizam deploy. Consulte [Google Cloud Run](deployment-google-cloud-run.md) e o [estado da release](release-pre-homologacao/README.md). Produção: NO-GO.
+
 Este documento descreve a estratégia oficial, os requisitos e os procedimentos passo a passo para a implantação em ambiente de produção da aplicação **Oficina Gestão** (Fase de Homologação / Pré-Produção).
 
 ---

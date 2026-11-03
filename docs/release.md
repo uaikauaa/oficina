@@ -1,4 +1,6 @@
 # Guia de Release e Homologação — Release 1.0.0
+
+> **Registro histórico da release 1.0.0.** O status GO abaixo se refere ao piloto daquela fase e não aprova a versão atual. Consulte o [estado da pré-homologação](release-pre-homologacao/README.md); produção atual: NO-GO.
 ## Oficina Gestão (Soldas & Geradores)
 
 Este documento registra o status oficial de homologação, os metadados de infraestrutura, o changelog consolidado e as instruções operacionais para a versão **Release 1.0.0** da aplicação **Oficina Gestão**.
