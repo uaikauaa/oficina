@@ -10,6 +10,54 @@ permissions:
   contents: read
 
 jobs:
+  image-audit:
+    name: Imagens backend/frontend, Trivy, SBOM e segredos
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sem credenciais persistentes
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Instalar Trivy 0.74.0 com checksum verificado
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          base=https://github.com/aquasecurity/trivy/releases/download/v0.74.0
+          curl --fail --location --silent --show-error --retry 3 -O "$base/trivy_0.74.0_checksums.txt"
+          curl --fail --location --silent --show-error --retry 3 -O "$base/trivy_0.74.0_Linux-64bit.tar.gz"
+          grep ' trivy_0.74.0_Linux-64bit.tar.gz$' trivy_0.74.0_checksums.txt | sha256sum --check
+          tar -xzf trivy_0.74.0_Linux-64bit.tar.gz trivy
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: Construir imagens finais
+        run: |
+          set -euo pipefail
+          docker build --pull -t oficina-backend:pr ./backend
+          docker build --pull -t oficina-frontend:pr ./frontend
+      - name: Verificar vulnerabilidades e segredos das imagens
+        run: |
+          set -euo pipefail
+          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" oficina-backend:pr
+          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" oficina-frontend:pr
+          trivy fs --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
+      - name: Gerar SBOM das duas imagens
+        run: |
+          set -euo pipefail
+          trivy image --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json" oficina-backend:pr
+          trivy image --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json" oficina-frontend:pr
+      - name: Preservar relatórios do SHA
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: image-audit-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/trivy-backend.json
+            ${{ runner.temp }}/trivy-frontend.json
+            ${{ runner.temp }}/trivy-files.json
+            ${{ runner.temp }}/sbom-backend.json
+            ${{ runner.temp }}/sbom-frontend.json
+          if-no-files-found: ignore
+          retention-days: 7
   flyway-real:
     name: Flyway real em PostgreSQL descartavel
     runs-on: ubuntu-24.04
