@@ -41,16 +41,21 @@ jobs:
       - name: Gerar SBOM das duas imagens
         run: |
           set -euo pipefail
-          trivy image --input "$RUNNER_TEMP/release-images/backend-1.oci.tar" --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json"
-          trivy image --input "$RUNNER_TEMP/release-images/frontend-1.oci.tar" --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json"
+          # Trivy accepts an OCI layout directory, not an OCI tar archive.
+          # Extract the exact compared archives; this does not convert/rebuild layers.
+          for service in backend frontend; do
+            mkdir "$RUNNER_TEMP/oci-$service"
+            tar -xf "$RUNNER_TEMP/release-images/$service-1.oci.tar" -C "$RUNNER_TEMP/oci-$service"
+            trivy image --input "$RUNNER_TEMP/oci-$service" --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-$service.json"
+          done
       - name: Verificar vulnerabilidades nos SBOMs e segredos nas imagens
         run: |
           set -euo pipefail
           # SBOM scan avoids Maven Central POM enrichment, which returned HTTP 429 on shared runners.
           trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" "$RUNNER_TEMP/sbom-backend.json"
           trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" "$RUNNER_TEMP/sbom-frontend.json"
-          trivy image --input "$RUNNER_TEMP/release-images/backend-1.oci.tar" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend-secrets.json"
-          trivy image --input "$RUNNER_TEMP/release-images/frontend-1.oci.tar" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend-secrets.json"
+          trivy image --input "$RUNNER_TEMP/oci-backend" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend-secrets.json"
+          trivy image --input "$RUNNER_TEMP/oci-frontend" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend-secrets.json"
           trivy fs --offline-scan --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
       - name: Preservar relatórios do SHA
         if: always()
