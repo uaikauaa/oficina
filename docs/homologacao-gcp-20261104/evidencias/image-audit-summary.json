@@ -1,0 +1,77 @@
+﻿{
+    "sourceSha":  "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+    "artifactSha256":  "E304964ACFCDB1382FBA0BB0A889EE3D8E09BD738261263A46B563C8BE04E193",
+    "files":  [
+                  {
+                      "components":  191,
+                      "imageId":  null,
+                      "secrets":  0,
+                      "sha256":  "8C223346D9EF3F986827B4A686FAFFDF34A497FFDB52C7E449609E63AF4FE28F",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "sbom-backend.json"
+                  },
+                  {
+                      "components":  43,
+                      "imageId":  null,
+                      "secrets":  0,
+                      "sha256":  "60F9730E2D962E61BEF013148E791ABE90DF249DC259880C556D563966CD7869",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "sbom-frontend.json"
+                  },
+                  {
+                      "components":  0,
+                      "imageId":  "sha256:de73c8550ee2e2c1960033b7cc444d594d444cb63b04d4b99066d864dfd94ce7",
+                      "secrets":  0,
+                      "sha256":  "5D08DB4CA7746031040739365737A2667ACCC4C8102A883F1BD6E2BA4579DCD9",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "trivy-backend-secrets.json"
+                  },
+                  {
+                      "components":  0,
+                      "imageId":  "sha256:de73c8550ee2e2c1960033b7cc444d594d444cb63b04d4b99066d864dfd94ce7",
+                      "secrets":  0,
+                      "sha256":  "9AF70C3DD4A58ACF9F1D5AEE60DD76A5ACB0E3DAE0B2E949E0465AE178F5A5F7",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "trivy-backend.json"
+                  },
+                  {
+                      "components":  0,
+                      "imageId":  null,
+                      "secrets":  0,
+                      "sha256":  "193938B06D27F908683CCBBCA2173ADD824444B6C88C29F11A434F91351CF556",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "trivy-files.json"
+                  },
+                  {
+                      "components":  0,
+                      "imageId":  "sha256:fbf7d01bbaad22a995d47b9761b7cb2e8d40558af1e03f52ecbcefcf47c74247",
+                      "secrets":  0,
+                      "sha256":  "F57F24A382F5CCBF30F200AAFD96B6C989327CF959B4626658409E0355AB3046",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "trivy-frontend-secrets.json"
+                  },
+                  {
+                      "components":  0,
+                      "imageId":  "sha256:fbf7d01bbaad22a995d47b9761b7cb2e8d40558af1e03f52ecbcefcf47c74247",
+                      "secrets":  0,
+                      "sha256":  "DC7DD8FE2C38CD301B9F43D91474EE5EB0490070FAEE69E405602A511AD63F1E",
+                      "repoDigests":  null,
+                      "vulnerabilities":  0,
+                      "file":  "trivy-frontend.json"
+                  }
+              ],
+    "vulnerabilitySeverityFilter":  [
+                                        "HIGH",
+                                        "CRITICAL"
+                                    ],
+    "expiresAt":  "2026-11-11T01:19:05Z",
+    "offlineScan":  true,
+    "runId":  41752904392,
+    "artifactId":  13286202741
+}

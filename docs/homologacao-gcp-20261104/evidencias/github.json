@@ -1,0 +1,93 @@
+{
+  "applicableRules": [],
+  "requiredContexts": [],
+  "runs": [
+    {
+      "id": 41752904531,
+      "name": "Oracle Readiness - TLS e Backup",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 126322047670,
+          "name": "Oracle Nginx TLS e scripts - validacao isolada",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "head_sha": "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+      "event": "push",
+      "url": "https://github.com/uaikauaa/oficina/actions/runs/41752904531"
+    },
+    {
+      "id": 41752904542,
+      "name": "CI Pipeline",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 126322048192,
+          "name": "Backend — Testes & Validação",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 126322048782,
+          "name": "Frontend — Lint & Build",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "head_sha": "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+      "event": "push",
+      "url": "https://github.com/uaikauaa/oficina/actions/runs/41752904542"
+    },
+    {
+      "id": 41752904392,
+      "name": "Validacao Complementar - Flyway Real e E2E",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 126322047458,
+          "name": "Playwright - fluxos com API mockada",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 126322047717,
+          "name": "Imagens backend/frontend, Trivy, SBOM e segredos",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 126322047754,
+          "name": "Flyway real em PostgreSQL descartavel",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "head_sha": "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+      "event": "push",
+      "url": "https://github.com/uaikauaa/oficina/actions/runs/41752904392"
+    },
+    {
+      "id": 41752904398,
+      "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 126322047538,
+          "name": "Stack real - Login 2FA Estoque OS e limitador distribuido",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "head_sha": "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+      "event": "push",
+      "url": "https://github.com/uaikauaa/oficina/actions/runs/41752904398"
+    }
+  ],
+  "protected": false,
+  "checkedAt": "2026-11-04T18:57:37.3853421Z",
+  "rulesets": [],
+  "protectionEndpoint": "401 unauthenticated; detailed administrative policy not accessible",
+  "mainSha": "d54087d440243610a7e281e594a5e6e3b6ae6c18"
+}
