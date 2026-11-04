@@ -6,26 +6,29 @@
 
 | Critério | Estado |
 | --- | --- |
-| INTEGRAÇÃO NA MAIN | **CONCLUÍDA** para o PR #13 em `03901a09388cf680df7a6d119e78cf453afb2fd0`; limpeza ainda em PR separado |
-| LIMPEZA DO REPOSITÓRIO | **PARCIAL** até os checks e o merge do PR de limpeza |
-| TESTES DA MAIN | **APROVADOS** no SHA `03901a0` pelos quatro workflows; a limpeza requer nova execução |
+| INTEGRAÇÃO NA MAIN | **CONCLUÍDA**: PR #13 em `03901a0` e PR #14 em `77ccd95a24354250d5353efce675a151681d9090` |
+| LIMPEZA DO REPOSITÓRIO | **CONCLUÍDA** no escopo comprovado pelo inventário e PR #14 |
+| TESTES DA MAIN | **APROVADOS** no SHA de conteúdo `77ccd95` pelos quatro workflows, inclusive auditoria de imagens |
 | SEGURANÇA DO CÓDIGO | **APROVADA NO ESCOPO TESTADO** do PR #13; ambiente real e varredura histórica completa pendentes |
 | HOMOLOGAÇÃO GOOGLE CLOUD | **PENDENTE** |
 | PRODUÇÃO | **NO-GO** |
 
 ## Main e PRs
 
-A `main` foi buscada novamente após o merge do [PR #13](https://github.com/uaikauaa/oficina/pull/13): HEAD `03901a09388cf680df7a6d119e78cf453afb2fd0`. O merge commit conserva os quatro commits `75e70ad`, `b968f5e`, `6566c3a` e `bdb4d04`; sua árvore é idêntica à árvore do head do PR. Os PRs [#1–#10](https://github.com/uaikauaa/oficina/pulls?q=is%3Apr+is%3Amerged), [#12](https://github.com/uaikauaa/oficina/pull/12) e [#13](https://github.com/uaikauaa/oficina/pull/13) estão mesclados. O [#11](https://github.com/uaikauaa/oficina/pull/11) foi encerrado sem merge após comentário: sua branch tem zero commits exclusivos e o conteúdo foi absorvido pelo #12. O histórico foi preservado.
+A `main` foi buscada novamente após o merge dos [PR #13](https://github.com/uaikauaa/oficina/pull/13) e [#14](https://github.com/uaikauaa/oficina/pull/14): HEAD de código/limpeza `77ccd95a24354250d5353efce675a151681d9090`. O merge #13 em `03901a0` conserva os quatro commits `75e70ad`, `b968f5e`, `6566c3a` e `bdb4d04`; o merge #14 conserva os commits da limpeza; ambas as árvores de merge são idênticas às dos respectivos heads dos PRs. Os PRs [#1–#10](https://github.com/uaikauaa/oficina/pulls?q=is%3Apr+is%3Amerged), [#12](https://github.com/uaikauaa/oficina/pull/12), [#13](https://github.com/uaikauaa/oficina/pull/13) e [#14](https://github.com/uaikauaa/oficina/pull/14) estão mesclados. O [#11](https://github.com/uaikauaa/oficina/pull/11) foi encerrado sem merge após comentário: sua branch tem zero commits exclusivos e o conteúdo foi absorvido pelo #12. O histórico foi preservado. O [link dinâmico da main](https://github.com/uaikauaa/oficina/commits/main) mostra o HEAD após este complemento documental.
 
 Os quatro workflows de `push` no SHA efetivamente integrado `03901a0` terminaram com sucesso: [CI](https://github.com/uaikauaa/oficina/actions/runs/41740095213), [Flyway/E2E](https://github.com/uaikauaa/oficina/actions/runs/41740095256), [integração real](https://github.com/uaikauaa/oficina/actions/runs/41740095189) e [Oracle Readiness](https://github.com/uaikauaa/oficina/actions/runs/41740095194). Os quatro também estavam verdes no head exato `bdb4d04` do PR #13. Não houve bypass de checks.
 
-## Inventário de branches após o PR #13
+No head final `0e36a41` do PR #14 e no merge `77ccd95`, os quatro workflows passaram novamente. Evidências no SHA da `main`: [CI](https://github.com/uaikauaa/oficina/actions/runs/41751924061), [Flyway, Playwright e imagens/Trivy/SBOM](https://github.com/uaikauaa/oficina/actions/runs/41751923975), [integração real](https://github.com/uaikauaa/oficina/actions/runs/41751924001) e [Oracle Readiness](https://github.com/uaikauaa/oficina/actions/runs/41751923931). O teste de imagem foi concluído por análise de SBOM e varredura de segredos, com a limitação Maven Central descrita abaixo.
+
+## Inventário de branches após o PR #14
 
 Comparação de commits: `git rev-list origin/main..branch`. A recomendação de exclusão é **somente para avaliação do proprietário**; nenhuma branch remota foi apagada. Branches atrás da main mantêm arquivos históricos diferentes, mas não contêm commits exclusivos. A branch visual foi mesclada por squash: seus oito commits parecem exclusivos no grafo, porém a árvore de `2344e16` é **idêntica** à árvore do merge do PR #9 em `a52457e`; reaplicá-los reintroduziria código antigo.
 
 | Branch remota | SHA | Estado / PR | Commits não integrados | Recomendação e justificativa |
 | --- | --- | --- | ---: | --- |
-| `main` | `03901a09388cf680df7a6d119e78cf453afb2fd0` | atual | 0 | Manter; referência de integração. |
+| `main` | `77ccd95a24354250d5353efce675a151681d9090` | atual no fechamento do PR #14 | 0 | Manter; referência de integração da limpeza. |
+| `chore/limpeza-pre-homologacao-20261103` | `0e36a41959a8507f5e21890e2e9f5d615b5fd0d7` | #14 mesclado | 0 | Elegível após aprovação; merge conserva o inventário. |
 | `audit/seguranca-cloud-run-20261030` | `5c1a7628c0bd48ec6e3e95fecbd49268ad0b1c20` | #11 fechado | 0 | Elegível após aprovação; absorvida pelo #12. |
 | `ci/auditoria-pos-pr1-20261023` | `814358dde12b37c2ca313d52f7b8d11040a8d405` | #2 mesclado | 0 | Elegível após aprovação; ancestral. |
 | `ci/integracao-real-postgres-2fa-estoque-os-20261023` | `a377bd1d92eb73b03601880b53b009c58a61f026` | #4 mesclado | 0 | Elegível após aprovação; ancestral. |
@@ -41,7 +44,7 @@ Comparação de commits: `git rev-list origin/main..branch`. A recomendação de
 | `release/oracle-tls-backup-readiness-20261026` | `e3aed38dc22ff8cd6313eccffe7ec696854186df` | #6 mesclado | 0 | Elegível após aprovação; ancestral. |
 | `security/hardening-production-20261103` | `bdb4d04ed179cf4fe549e763f4d12f8b85d5122a` | #13 mesclado | 0 | Elegível após aprovação; merge commit preserva a origem. |
 
-A branch local de trabalho `chore/limpeza-pre-homologacao-20261103` foi criada **a partir de `03901a0`** para esta limpeza e terá PR próprio.
+A branch de limpeza foi criada **a partir de `03901a0`** e mesclada pelo PR #14. Nenhuma branch remota histórica foi apagada.
 
 ## Inventário de arquivos e decisões
 
@@ -65,7 +68,7 @@ No head do PR #13: **830 JUnit** e Flyway real V1–V24 aprovados na CI; **376 u
 
 As imagens documentadas no PR #13 foram varridas por Trivy: zero CVEs conhecidas e zero segredos no escopo examinado. `npm audit` completo ainda mostra **16 alertas moderados** em ferramentas de desenvolvimento, zero altos/críticos; runtime sem alertas naquela execução. Nesta limpeza não houve novo scan de imagem local porque o daemon Docker está indisponível. Uma busca dirigida no histórico por blocos de chave privada, prefixos de tokens GitHub, chaves AWS e prefixos de chaves de API retornou zero commits; ela **não substitui um secret scanner histórico completo**. Nenhum segredo real foi confirmado ou reproduzido aqui.
 
-O job `image-audit` foi acrescentado à validação complementar da branch de limpeza: reconstrói as duas imagens, gera SBOM CycloneDX, verifica vulnerabilidades altas/críticas nos SBOMs e segredos nas imagens e arquivos com Trivy 0.74.0, guardando relatórios por SHA. Duas tentativas de análise direta dos JARs foram interrompidas por HTTP 429 do Maven Central, sem veredito. A análise de SBOM evita a consulta remota; POMs transitivos ausentes podem reduzir o inventário, portanto o scan online anterior do PR #13 permanece como evidência complementar. O resultado final deve ser confirmado no head do PR e no merge da `main`.
+O job `image-audit` reconstruiu as duas imagens, gerou SBOM CycloneDX, verificou vulnerabilidades altas/críticas nos SBOMs e segredos nas imagens e arquivos com Trivy 0.74.0, guardando relatórios por SHA. Passou no head do PR #14 e no merge da `main`. Duas tentativas anteriores de análise direta dos JARs foram interrompidas por HTTP 429 do Maven Central, sem veredito. A análise de SBOM evita a consulta remota; POMs transitivos ausentes podem reduzir o inventário, portanto o scan online anterior do PR #13 permanece como evidência complementar.
 
 A `main` está **sem proteção de branch** na API pública (`protected=false`). O proprietário deve habilitar regra para `main`: exigir PR e ao menos uma revisão humana, exigir os jobs dos quatro workflows CI/validação/integração real/Oracle (incluindo `image-audit`) no SHA atual, exigir resolução de conversas, bloquear force push e exclusão, limitar bypass a administradores necessários e verificar a regra após salvar. A integração GitHub disponível não expõe escrita de regras; nenhuma proteção foi alterada. O repositório continua público.
 
