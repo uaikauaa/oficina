@@ -1,5 +1,7 @@
 # Diretrizes de Banco de Dados — Oficina Gestão
 
+> **Atualização de 03/11/2026:** o schema atual usa Flyway V1–V24 e Spring Boot 4. Exemplos antigos neste documento com `sslmode=require` não devem ser usados no Neon de homologação/produção; exija `sslmode=verify-full`, CA confiável e hostname validado. Consulte o [README atual](../README.md).
+
 ## 1. Banco de Dados Oficial
 
 - **Motor**: PostgreSQL (versão 16+)

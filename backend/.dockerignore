@@ -1,5 +1,8 @@
 target
 src/test
+**/surefire-reports
+**/*.tmp
+**/*.bak
 .env
 .env.*
 *.log
