@@ -34,19 +34,20 @@ jobs:
           set -euo pipefail
           docker build --pull -t oficina-backend:pr ./backend
           docker build --pull -t oficina-frontend:pr ./frontend
-      - name: Verificar vulnerabilidades e segredos das imagens
-        run: |
-          set -euo pipefail
-          # Java DB is downloaded, but remote Maven POM lookups are rate limited on shared runners.
-          trivy image --offline-scan --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" oficina-backend:pr
-          trivy image --offline-scan --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" oficina-frontend:pr
-          trivy fs --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
       - name: Gerar SBOM das duas imagens
-        if: success() || failure()
         run: |
           set -euo pipefail
           trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json" oficina-backend:pr
           trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json" oficina-frontend:pr
+      - name: Verificar vulnerabilidades nos SBOMs e segredos nas imagens
+        run: |
+          set -euo pipefail
+          # SBOM scan avoids Maven Central POM enrichment, which returned HTTP 429 on shared runners.
+          trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" "$RUNNER_TEMP/sbom-backend.json"
+          trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" "$RUNNER_TEMP/sbom-frontend.json"
+          trivy image --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend-secrets.json" oficina-backend:pr
+          trivy image --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend-secrets.json" oficina-frontend:pr
+          trivy fs --offline-scan --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
       - name: Preservar relatórios do SHA
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -55,6 +56,8 @@ jobs:
           path: |
             ${{ runner.temp }}/trivy-backend.json
             ${{ runner.temp }}/trivy-frontend.json
+            ${{ runner.temp }}/trivy-backend-secrets.json
+            ${{ runner.temp }}/trivy-frontend-secrets.json
             ${{ runner.temp }}/trivy-files.json
             ${{ runner.temp }}/sbom-backend.json
             ${{ runner.temp }}/sbom-frontend.json
