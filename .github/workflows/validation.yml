@@ -37,14 +37,16 @@ jobs:
       - name: Verificar vulnerabilidades e segredos das imagens
         run: |
           set -euo pipefail
-          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" oficina-backend:pr
-          trivy image --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" oficina-frontend:pr
+          # Java DB is downloaded, but remote Maven POM lookups are rate limited on shared runners.
+          trivy image --offline-scan --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" oficina-backend:pr
+          trivy image --offline-scan --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" oficina-frontend:pr
           trivy fs --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
       - name: Gerar SBOM das duas imagens
+        if: success() || failure()
         run: |
           set -euo pipefail
-          trivy image --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json" oficina-backend:pr
-          trivy image --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json" oficina-frontend:pr
+          trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json" oficina-backend:pr
+          trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json" oficina-frontend:pr
       - name: Preservar relatórios do SHA
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
