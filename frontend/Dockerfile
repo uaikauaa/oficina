@@ -17,8 +17,7 @@ ENV INTERNAL_BACKEND_URL=${INTERNAL_BACKEND_URL}
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN --mount=type=secret,id=next_actions_key \
-    if [ -s /run/secrets/next_actions_key ]; then export NEXT_SERVER_ACTIONS_ENCRYPTION_KEY="$(cat /run/secrets/next_actions_key)"; fi; \
-    npm run build
+    node scripts/build-container.mjs
 
 FROM node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS runner
 

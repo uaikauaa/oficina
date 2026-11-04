@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-04T19:25:51.179Z",
+  "checkedAt": "2026-11-04T19:36:52.988Z",
   "repository": "uaikauaa/oficina",
   "branch": "main",
   "status": 200,
@@ -20,5 +20,39 @@
   "requireLastPushApproval": true,
   "allowForcePushes": false,
   "allowDeletions": false,
-  "conversationResolution": true
+  "conversationResolution": true,
+  "requiredChecks": [
+    {
+      "context": "Oracle Nginx TLS e scripts - validacao isolada",
+      "app_id": 15368
+    },
+    {
+      "context": "Backend — Testes & Validação",
+      "app_id": 15368
+    },
+    {
+      "context": "Frontend — Lint & Build",
+      "app_id": 15368
+    },
+    {
+      "context": "Playwright - fluxos com API mockada",
+      "app_id": 15368
+    },
+    {
+      "context": "Imagens backend/frontend, Trivy, SBOM e segredos",
+      "app_id": 15368
+    },
+    {
+      "context": "Flyway real em PostgreSQL descartavel",
+      "app_id": 15368
+    },
+    {
+      "context": "Stack real - Login 2FA Estoque OS e limitador distribuido",
+      "app_id": 15368
+    },
+    {
+      "context": "Segredos historicos - Gitleaks",
+      "app_id": 15368
+    }
+  ]
 }

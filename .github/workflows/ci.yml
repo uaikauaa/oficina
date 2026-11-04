@@ -158,6 +158,7 @@ jobs:
         run: |
           cd frontend
           npm test
+          node --test scripts/release-build-keys.test.mjs
 
       - name: Executar Linter (ESLint)
         run: |

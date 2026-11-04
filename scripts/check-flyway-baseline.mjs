@@ -29,6 +29,7 @@ for (const { file, sha256 } of manifest) {
   baseline += `-- Schema/reference data from V${version}; V11 has a neutral singleton.\n${sql}\n\n`;
 }
 assert.equal(manifest.length, 24);
+baseline = baseline.trimEnd() + '\n';
 const file = path.join(directory, 'B24__neutral_initial_schema.sql');
 if (process.argv.includes('--write')) writeFileSync(file, baseline);
 else assert.equal(normalized(file), baseline, 'B24 drifted from its reviewed schema/reference data');

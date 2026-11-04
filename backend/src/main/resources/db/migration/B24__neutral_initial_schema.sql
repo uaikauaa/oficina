@@ -605,4 +605,3 @@ CREATE TABLE security_rate_key_state (
     singleton SMALLINT PRIMARY KEY CHECK (singleton = 1),
     key_fingerprint CHAR(64) NOT NULL
 );
-
