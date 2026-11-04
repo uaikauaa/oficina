@@ -101,13 +101,10 @@ export default function Header({ user }: HeaderProps) {
   const notificacoesRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
-  const userName =
-    user?.nome && user.nome.trim() !== 'Proprietária Oficina'
-      ? user.nome
-      : (OFICINA.responsavel || 'Geisa');
+  const userName = user?.nome?.trim() || 'Usuário';
 
   const firstName = useMemo(() => {
-    return userName.trim().split(/\s+/)[0] || 'Geisa';
+    return userName.trim().split(/\s+/)[0] || 'Usuário';
   }, [userName]);
 
   const userInitials = useMemo(() => {
@@ -284,12 +281,12 @@ export default function Header({ user }: HeaderProps) {
               <Link
                 href="/dashboard"
                 className="flex items-center gap-2 sm:gap-2.5 min-w-0 group transition-all"
-                title={`${OFICINA.nomeFantasia} - Painel`}
+                title={`${OFICINA.nomeSistema} - Painel`}
               >
                 <div className="relative w-8 h-8 rounded-lg bg-surface border border-line group-hover:border-control flex items-center justify-center p-1 transition-colors shrink-0">
                   <Image
                     src="/logo-icone.png"
-                    alt={OFICINA.nomeFantasia}
+                    alt={OFICINA.nomeSistema}
                     width={26}
                     height={26}
                     priority
@@ -298,7 +295,7 @@ export default function Header({ user }: HeaderProps) {
                 </div>
                 <div className="hidden sm:flex flex-col min-w-0">
                   <span className="text-xs sm:text-sm font-semibold text-ink tracking-wide group-hover:text-accent transition-colors leading-none whitespace-nowrap">
-                    {OFICINA.nomeFantasia}
+                    {OFICINA.nomeSistema}
                   </span>
                   <span className="text-xs text-muted leading-none mt-1 hidden sm:inline">
                     Oficina Especializada

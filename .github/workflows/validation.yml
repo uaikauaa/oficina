@@ -18,6 +18,7 @@ jobs:
       - name: Checkout sem credenciais persistentes
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Instalar Trivy 0.74.0 com checksum verificado
         run: |
@@ -29,24 +30,27 @@ jobs:
           grep ' trivy_0.74.0_Linux-64bit.tar.gz$' trivy_0.74.0_checksums.txt | sha256sum --check
           tar -xzf trivy_0.74.0_Linux-64bit.tar.gz trivy
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
-      - name: Construir imagens finais
+      - name: Construir duas vezes sem cache e comparar digests OCI
+        env:
+          OFICINA_ACTIONS_KEY_FILE: ${{ runner.temp }}/next-actions-build-key
+          OFICINA_BUILD_OUTPUT: ${{ runner.temp }}/release-images
         run: |
           set -euo pipefail
-          docker build --pull -t oficina-backend:pr ./backend
-          docker build --pull -t oficina-frontend:pr ./frontend
+          node -e 'require("fs").writeFileSync(process.env.OFICINA_ACTIONS_KEY_FILE, require("crypto").randomBytes(32).toString("base64"), {mode: 0o600})'
+          node scripts/build-release-images.mjs --verify-reproducible
       - name: Gerar SBOM das duas imagens
         run: |
           set -euo pipefail
-          trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json" oficina-backend:pr
-          trivy image --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json" oficina-frontend:pr
+          trivy image --input "$RUNNER_TEMP/release-images/backend-1.oci.tar" --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-backend.json"
+          trivy image --input "$RUNNER_TEMP/release-images/frontend-1.oci.tar" --offline-scan --format cyclonedx --output "$RUNNER_TEMP/sbom-frontend.json"
       - name: Verificar vulnerabilidades nos SBOMs e segredos nas imagens
         run: |
           set -euo pipefail
           # SBOM scan avoids Maven Central POM enrichment, which returned HTTP 429 on shared runners.
           trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend.json" "$RUNNER_TEMP/sbom-backend.json"
           trivy sbom --offline-scan --scanners vuln --severity HIGH,CRITICAL --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend.json" "$RUNNER_TEMP/sbom-frontend.json"
-          trivy image --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend-secrets.json" oficina-backend:pr
-          trivy image --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend-secrets.json" oficina-frontend:pr
+          trivy image --input "$RUNNER_TEMP/release-images/backend-1.oci.tar" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-backend-secrets.json"
+          trivy image --input "$RUNNER_TEMP/release-images/frontend-1.oci.tar" --offline-scan --scanners secret --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-frontend-secrets.json"
           trivy fs --offline-scan --scanners secret --skip-dirs .git --skip-dirs frontend/node_modules --skip-dirs frontend/.next --skip-dirs backend/target --exit-code 1 --format json --output "$RUNNER_TEMP/trivy-files.json" .
       - name: Preservar relatórios do SHA
         if: always()
@@ -61,8 +65,12 @@ jobs:
             ${{ runner.temp }}/trivy-files.json
             ${{ runner.temp }}/sbom-backend.json
             ${{ runner.temp }}/sbom-frontend.json
+            ${{ runner.temp }}/release-images/release-manifest.json
           if-no-files-found: ignore
           retention-days: 7
+      - name: Remover chave efemera de build
+        if: always()
+        run: rm -f "$RUNNER_TEMP/next-actions-build-key"
   flyway-real:
     name: Flyway real em PostgreSQL descartavel
     runs-on: ubuntu-24.04
@@ -85,6 +93,7 @@ jobs:
       - name: Checkout sem credenciais persistentes
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Aplicar as migrations REAIS do projeto
         shell: bash
@@ -93,7 +102,7 @@ jobs:
           test -d backend/src/main/resources/db/migration
           docker run --rm --network host \
             -v "$GITHUB_WORKSPACE/backend/src/main/resources/db/migration:/flyway/sql:ro" \
-            flyway/flyway:11 \
+            flyway/flyway:11.14.1@sha256:ba032dc3fc4510694e1d096e2491ef562e42170ed91eec66ee5377b1124913d8 \
             -url=jdbc:postgresql://127.0.0.1:5432/oficina_migrations_ci \
             -user=ci_isolado -password=senha-sintetica-ci \
             -connectRetries=15 -locations=filesystem:/flyway/sql migrate
@@ -101,16 +110,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          expected=$(find backend/src/main/resources/db/migration -maxdepth 1 -type f -name 'V*__*.sql' | wc -l)
-          test "$expected" -gt 0
+          node scripts/check-flyway-baseline.mjs
           actual=$(docker run --rm --network host -e PGPASSWORD=senha-sintetica-ci postgres:16-alpine \
             psql -h 127.0.0.1 -U ci_isolado -d oficina_migrations_ci -Atc \
-            "SELECT count(*) FROM flyway_schema_history WHERE success = true AND version IS NOT NULL;")
-          echo "Migrations versionadas: $expected; aplicadas: $actual"
-          test "$actual" -eq "$expected"
+            "SELECT count(*) FROM flyway_schema_history WHERE success AND version='24' AND type='SQL_BASELINE' AND script='B24__neutral_initial_schema.sql';")
+          test "$actual" -eq 1
+          clean=$(docker run --rm --network host -e PGPASSWORD=senha-sintetica-ci postgres:16-alpine \
+            psql -h 127.0.0.1 -U ci_isolado -d oficina_migrations_ci -Atc \
+            "SELECT (SELECT count(*)=0 FROM usuarios) AND (SELECT count(*)=1 FROM configuracao_oficina WHERE nome_fantasia='Oficina não configurada' AND cnpj IS NULL AND email IS NULL AND responsavel IS NULL);")
+          test "$clean" = t
           docker run --rm --network host \
             -v "$GITHUB_WORKSPACE/backend/src/main/resources/db/migration:/flyway/sql:ro" \
-            flyway/flyway:11 \
+            flyway/flyway:11.14.1@sha256:ba032dc3fc4510694e1d096e2491ef562e42170ed91eec66ee5377b1124913d8 \
             -url=jdbc:postgresql://127.0.0.1:5432/oficina_migrations_ci \
             -user=ci_isolado -password=senha-sintetica-ci \
             -locations=filesystem:/flyway/sql validate
@@ -126,6 +137,7 @@ jobs:
       - name: Checkout sem credenciais persistentes
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Node 22
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7

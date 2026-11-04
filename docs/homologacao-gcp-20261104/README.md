@@ -1,5 +1,7 @@
 # Pré-verificação e plano de homologação Google Cloud
 
+> Snapshot da pré-verificação em `d54087d`. A correção posterior dos bloqueadores está em [remediacao.md](remediacao.md), com [triagem Gitleaks](gitleaks-triagem.md). O planejamento abaixo não autoriza provisionamento; homologação e produção continuam bloqueadas até nova revisão.
+
 Data: **04/11/2026**, America/Sao_Paulo. Escopo executado: **FASE 1 e planejamento da FASE 2**. Nenhum projeto, conta, segredo, banco, serviço, orçamento ou faturamento foi criado/alterado na nuvem. Nenhum teste foi dirigido à produção. Este documento não é uma aprovação de deploy.
 
 **Resultado:** código integrado com quatro workflows verdes, mas **implantação bloqueada** pela presença de dados reais nos seeds/padrões, ausência de imagens publicadas por digest e pré-requisitos operacionais ainda pendentes. A aprovação de custos não dispensa a resolução desses bloqueios.

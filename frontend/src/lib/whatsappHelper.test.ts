@@ -299,8 +299,7 @@ describe('Melhoria Completa: Mensagens Automáticas do WhatsApp', () => {
       assert.ok(msg.includes('OS-2026-100'));
       assert.ok(msg.includes('pronta para retirada'));
       assert.ok(msg.includes('R$ 850,00'));
-      assert.ok(msg.includes('Esta é uma mensagem automática da Bruno Soldas.'));
-      assert.ok(msg.includes('Bruno Soldas'));
+      assert.ok(msg.includes('Esta é uma mensagem automática da Oficina não configurada.'));
     });
 
     it('10. Mensagem de OS em DIAGNÓSTICO', () => {

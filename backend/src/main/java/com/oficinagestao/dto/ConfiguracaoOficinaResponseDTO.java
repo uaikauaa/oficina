@@ -12,13 +12,13 @@ public record ConfiguracaoOficinaResponseDTO(
         /** Nome do sistema. Ex: "Oficina Gestão" */
         String nomeSistema,
 
-        /** Nome fantasia / comercial. Ex: "Bruno Soldas" */
+        /** Nome fantasia / comercial. Ex: "Oficina cadastrada" */
         String nomeFantasia,
 
         /** Nome empresarial / razão social conforme cadastro fiscal */
         String nomeEmpresarial,
 
-        /** CNPJ. Ex: "45.076.507/0001-67" */
+        /** CNPJ. Ex: "CNPJ cadastrado" */
         String cnpj,
 
         /** Nome do responsável/proprietário (dado administrativo) */

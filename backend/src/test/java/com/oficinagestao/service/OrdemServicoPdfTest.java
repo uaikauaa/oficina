@@ -24,6 +24,28 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrdemServicoPdfTest {
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"os", "documento", "recibo"})
+    void neutralConfigurationGeneratesDocumentsWithoutInventingBusinessContact(String kind) throws Exception {
+        var neutral = new ConfiguracaoOficina();
+        neutral.setNomeSistema("Oficina Gestão");
+        neutral.setNomeFantasia("Oficina não configurada");
+        when(configuracaoOficinaService.obterEntidade()).thenReturn(neutral);
+        byte[] bytes = switch (kind) {
+            case "os" -> pdfService.gerarOrdemServicoPdf(os, List.of());
+            case "documento" -> pdfService.gerarDocumentoServicoPdf(os, List.of());
+            default -> pdfService.gerarReciboOsPdf(os, List.of());
+        };
+        try (var reader = new PdfReader(bytes)) {
+            var extractor = new PdfTextExtractor(reader);
+            String text = "";
+            for (int page = 1; page <= reader.getNumberOfPages(); page++) text += extractor.getTextFromPage(page);
+            assertTrue(text.contains("Oficina não configurada"));
+            assertFalse(text.contains("oficina@example.invalid"), "A previous configured contact must not become a fallback");
+            assertFalse(text.contains("null"));
+        }
+    }
+
     @Mock
     private ConfiguracaoOficinaService configuracaoOficinaService;
 

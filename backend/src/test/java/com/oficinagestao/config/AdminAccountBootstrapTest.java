@@ -22,6 +22,19 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AdminAccountBootstrapTest {
 
+    @Test
+    void missingNameUsesNeutralLabelAndNeverInventsBusinessIdentity() {
+        ReflectionTestUtils.setField(bootstrap, "adminName", " ");
+        ReflectionTestUtils.setField(bootstrap, "adminEmail", "bootstrap@example.invalid");
+        ReflectionTestUtils.setField(bootstrap, "adminPassword", "SyntheticBootstrap#2026!");
+        when(usuarioRepository.count()).thenReturn(0L);
+        when(roleRepository.findByNome("ROLE_ADMIN")).thenReturn(Optional.of(new Role("ROLE_ADMIN", "Admin")));
+        when(passwordEncoder.encode(any())).thenReturn("synthetic-unused-hash");
+        bootstrap.run(new DefaultApplicationArguments());
+        verify(usuarioRepository).save(argThat(user -> user.getNome().equals("Administrador")
+                && user.getEmail().equals("bootstrap@example.invalid")));
+    }
+
     @Mock
     private UsuarioRepository usuarioRepository;
 

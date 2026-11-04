@@ -5,11 +5,14 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { once } from 'node:events';
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const docker = args => execFileSync('docker', args, { encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
-const names = ['oficina-hml-postgres-20261103', 'oficina-hml-mailpit-20261103'];
+// Every run starts with a genuinely empty database; never reuse a prior seeded volume.
+const runId = randomUUID().slice(0, 8);
+const names = ['oficina-hml-postgres-' + runId, 'oficina-hml-mailpit-' + runId];
 const owned = name => {
-  try { return JSON.parse(docker(['inspect', name]))[0].Config.Labels?.['oficina.security-hml'] === '20261103'; }
+  try { return JSON.parse(docker(['inspect', name]))[0].Config.Labels?.['oficina.security-hml'] === runId; }
   catch { return false; }
 };
 let backend;
@@ -33,7 +36,7 @@ try {
     try { docker(['inspect', name]); exists = true; } catch {}
     if (exists && !owned(name)) throw new Error('Container is not task-owned');
     if (exists) docker(['start', name]);
-    else docker(['run', '-d', '--name', name, '--label', 'oficina.security-hml=20261103',
+    else docker(['run', '-d', '--name', name, '--label', 'oficina.security-hml=' + runId,
       ...(name.includes('postgres') ? ['-p', '127.0.0.1:15433:5432', '-e', 'POSTGRES_DB=oficina_integracao_ci',
         '-e', 'POSTGRES_USER=ci_isolado', '-e', 'POSTGRES_PASSWORD=ci-integration-db-only', 'postgres:16-alpine']
         : ['-p', '127.0.0.1:1025:1025', '-p', '127.0.0.1:8025:8025', 'axllent/mailpit:latest'])]);
@@ -84,5 +87,5 @@ try {
 } finally {
   await stop(backend); await stop(replica);
   closeSync(log);
-  for (const name of names) if (owned(name)) docker(['stop', name]);
+  for (const name of names) if (owned(name)) docker(['rm', '-f', '-v', name]);
 }

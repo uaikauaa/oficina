@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-11-04T19:25:51.179Z",
+  "repository": "uaikauaa/oficina",
+  "branch": "main",
+  "status": 200,
+  "strictChecks": true,
+  "contexts": [
+    "Oracle Nginx TLS e scripts - validacao isolada",
+    "Backend — Testes & Validação",
+    "Frontend — Lint & Build",
+    "Playwright - fluxos com API mockada",
+    "Imagens backend/frontend, Trivy, SBOM e segredos",
+    "Flyway real em PostgreSQL descartavel",
+    "Stack real - Login 2FA Estoque OS e limitador distribuido",
+    "Segredos historicos - Gitleaks"
+  ],
+  "enforceAdmins": true,
+  "requiredReviews": 1,
+  "dismissStaleReviews": true,
+  "requireLastPushApproval": true,
+  "allowForcePushes": false,
+  "allowDeletions": false,
+  "conversationResolution": true
+}

@@ -165,7 +165,7 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [carregarContadoresOs, carregarEstoque, carregarOrdensRecentes]);
 
-  const nomeExibicao = user?.nome ? user.nome.split(' ')[0] : 'Geisa';
+  const nomeExibicao = user?.nome?.trim().split(/\s+/)[0] || 'Usuário';
 
   return (
     <main className="ui-page flex-1 space-y-7">

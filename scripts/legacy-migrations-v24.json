@@ -1,0 +1,98 @@
+[
+  {
+    "file": "V1__create_initial_schema.sql",
+    "sha256": "cfbccd4df3f9818760c9b99d1552caabc23dcfa4a0143ae150f5135a29d82e95"
+  },
+  {
+    "file": "V2__simplify_initial_roles.sql",
+    "sha256": "8b9abfc69843263ef127d9c671c800df22856ef1ed3c8c87aaacf1e14be49174"
+  },
+  {
+    "file": "V3__add_refresh_tokens.sql",
+    "sha256": "ea743ccd763a1124f7be3c3ef7ed91746c844de3c5a00f76ae7150ce410e9a64"
+  },
+  {
+    "file": "V4__correct_equipment_domain.sql",
+    "sha256": "e1abd4dda156d562904930631498051ed700ee8003a8cf3eb88f8cc55bd8668c"
+  },
+  {
+    "file": "V5__align_service_order_domain.sql",
+    "sha256": "9d3ada21bebd8693d938e07746bcd13e45d48475b14fb641c7d438095a41d98c"
+  },
+  {
+    "file": "V6__maquinas_tipo_check_and_adjustments.sql",
+    "sha256": "e4e15aa9d757d31d173fcf4465ae97926566e6493eefedfa4a7325fd43ff99f3"
+  },
+  {
+    "file": "V7__add_stock_constraints_and_indices.sql",
+    "sha256": "c3d1d549ed8ad9b8dd2cfe36098d7c7ce8e343fe476e16247d54e03052609749"
+  },
+  {
+    "file": "V8__add_ordem_servico_sequence.sql",
+    "sha256": "028933acae5cc61cad74f105c92805e39af0713526b2e665998e4d3d13ecc535"
+  },
+  {
+    "file": "V9__add_produto_marca_and_seed_categorias.sql",
+    "sha256": "a8b0aaa88b3f7627dc453f2dd45a1d83d92aa47f07e03f501cdcf98854432145"
+  },
+  {
+    "file": "V10__add_composite_foreign_key_os_maquina_cliente.sql",
+    "sha256": "66f6b199aaec6a29f7604cc818a956e2fb88e3de0c8a3a6e72e70bf1b79ae09b"
+  },
+  {
+    "file": "V11__create_configuracao_oficina.sql",
+    "sha256": "87d857d1214921a16cfde1df0318219350c7e2b1fb76d0d77cfbbaaecddd9d23"
+  },
+  {
+    "file": "V12__update_admin_and_config_defaults.sql",
+    "sha256": "4afffe1745abcbb25b22f30d8abe5f35431ec8fc0f7a2e00c912f1a431468ac7"
+  },
+  {
+    "file": "V13__create_fiscal_dps_and_tomador_ibge.sql",
+    "sha256": "16044b51c9848c98b7fbed710059d7bab351911e1c978643c5f45058c2d8d773"
+  },
+  {
+    "file": "V14__remove_unused_fiscal_structures.sql",
+    "sha256": "4f1185a74a32519ef9a9279f15e0f01c4967494c196b3ef27e4ae89c03f03efd"
+  },
+  {
+    "file": "V15__remove_cliente_codigo_ibge.sql",
+    "sha256": "0d90f4c0280730b0bdab262112380560c0005909424b953487a28f84870562f2"
+  },
+  {
+    "file": "V16__refactor_produto_codigo_and_link_compra.sql",
+    "sha256": "535da882d367fa24f2b1ba40b2b79eecdc0bb1339048afd294e8a8c995aca31c"
+  },
+  {
+    "file": "V17__add_remember_me_to_refresh_tokens.sql",
+    "sha256": "e5221cbc7c4da905e45c853ed82fed6be6309683bc8998cc70a2e8cadef32958"
+  },
+  {
+    "file": "V18__create_two_factor_challenges.sql",
+    "sha256": "29e2021912288abd45e6b244170e60a62a6fe0151ca09118edd38ad33341bd35"
+  },
+  {
+    "file": "V19__create_notificacoes.sql",
+    "sha256": "cd3fbee2cad635f32a450741756e0c5e77794e8fd8a24f5bab8d25163b64a903"
+  },
+  {
+    "file": "V20__add_token_version_to_usuarios.sql",
+    "sha256": "6044f8f269236b3aa22e084ab901ac9beb5e58a7aa45d07577d55226a321dc1a"
+  },
+  {
+    "file": "V21__hash_refresh_tokens.sql",
+    "sha256": "0629268c8dff48061e54604a1dd945e8eec3b42a94318808fa50a6e32bb2fd4f"
+  },
+  {
+    "file": "V22__expand_produto_margem_lucro.sql",
+    "sha256": "00944c71c3fda9b2e2a8fe0a8bfac6664e9f965f4fbe95be1306e481132fe981"
+  },
+  {
+    "file": "V23__shared_security_rate_limits.sql",
+    "sha256": "49f3ac18db347dc52a07fae9167c25b333c6579539598c1ec832c91d97450853"
+  },
+  {
+    "file": "V24__rate_limit_key_generation.sql",
+    "sha256": "5961a2859c59b8ae9651a35572abca804237257249a2ddc199bb7c2950b18c88"
+  }
+]

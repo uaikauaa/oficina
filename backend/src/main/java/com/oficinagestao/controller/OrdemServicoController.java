@@ -184,7 +184,7 @@ public class OrdemServicoController {
 
     @GetMapping(value = "/api/ordens-servico/{id}/recibo", produces = "application/pdf")
     @Operation(summary = "Gerar Recibo de Prestação de Serviços (comprovante comercial da OS)",
-            description = "Gera o Recibo comercial oficial da Bruno Soldas em formato PDF vetorial A4 para entrega ao cliente, sem valor fiscal.")
+            description = "Gera o Recibo comercial oficial da Oficina cadastrada em formato PDF vetorial A4 para entrega ao cliente, sem valor fiscal.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Recibo gerado com sucesso"),
             @ApiResponse(responseCode = "401", description = "Não autenticado"),

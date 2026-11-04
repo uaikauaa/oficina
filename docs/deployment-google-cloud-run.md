@@ -10,7 +10,7 @@ O backend usa PostgreSQL **Neon de homologação isolado**. A URL JDBC deve usar
 
 ## Antes de publicar uma revisão de homologação
 
-1. Confirmar os quatro workflows verdes no SHA exato da `main`; conferir o inventário de migrations V1–V24 e o resultado de `clean verify`.
+1. Confirmar os quatro workflows verdes no SHA exato aprovado; conferir V1–V24 preservadas, a baseline neutra B24 para bancos novos e `clean verify`. Seguir a [remediação e publicação por digest](homologacao-gcp-20261104/remediacao.md); não aplicar os seeds históricos V11/V12 em um banco novo de homologação.
 2. Criar projeto, faturamento, orçamento e alertas; limitar instâncias e conexões PostgreSQL de acordo com a capacidade medida. Alertas não interrompem cobrança.
 3. Criar banco Neon e SMTP exclusivos para homologação. Planejar backup, restauração e rollback em ambiente isolado; não conectar à branch de produção.
 4. Definir identidade do frontend com `roles/run.invoker` no backend. Testar negação de invocação anônima e por identidade sem permissão. Não tornar o backend público para contornar um 401.
