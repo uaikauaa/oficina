@@ -11,7 +11,7 @@ FROM eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8
 
 # The pinned upstream image predates Alpine's libexpat security update.
 # Pin only the corrected package; a missing version must fail the build.
-RUN apk add --no-cache 'libexpat=2.10.0-r0'
+RUN apk add --no-cache 'libexpat=2.10.0-r0' && rm -f /var/log/apk.log
 
 ARG SOURCE_REVISION=development
 LABEL org.opencontainers.image.source="https://github.com/uaikauaa/oficina" \
