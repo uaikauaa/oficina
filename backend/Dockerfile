@@ -9,6 +9,10 @@ RUN mvn -B -ntp package -Dmaven.test.skip=true -Dproject.build.outputTimestamp=$
 
 FROM eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372 AS runtime
 
+# The pinned upstream image predates Alpine's libexpat security update.
+# Pin only the corrected package; a missing version must fail the build.
+RUN apk add --no-cache 'libexpat=2.10.0-r0'
+
 ARG SOURCE_REVISION=development
 LABEL org.opencontainers.image.source="https://github.com/uaikauaa/oficina" \
       org.opencontainers.image.revision=${SOURCE_REVISION}
