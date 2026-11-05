@@ -317,7 +317,7 @@ test('B05: formulário envia intenção explícita ao apagar endereço existente
 
 test('B06: configurações envia strings vazias para limpar nome empresarial e CNPJ', async ({ page }) => {
   await baseMocks(page);
-  const config = { id: 1, nomeSistema: 'Oficina Gestão', nomeFantasia: 'Oficina Teste', nomeEmpresarial: 'Empresa Teste', cnpj: '45076507000167', responsavel: null, telefone: null, email: null, logradouro: null, numero: null, bairro: null, cep: null, municipio: null, uf: null };
+  const config = { id: 1, nomeSistema: 'Oficina Gestão', nomeFantasia: 'Oficina Teste', nomeEmpresarial: 'Empresa Teste', cnpj: '00000000000000', responsavel: null, telefone: null, email: null, logradouro: null, numero: null, bairro: null, cep: null, municipio: null, uf: null };
   let payload: Record<string, unknown> | null = null;
   await page.route('**/api/configuracao-oficina', route => {
     if (route.request().method() === 'PUT') {
@@ -328,8 +328,8 @@ test('B06: configurações envia strings vazias para limpar nome empresarial e C
   });
   await page.goto('/configuracoes');
   await page.getByRole('button', { name: 'Editar' }).click();
-  await page.getByPlaceholder('Ex: 45.076.507 BRUNO SOARES RODRIGUES').fill('');
-  await page.getByPlaceholder('Ex: 45.076.507/0001-67').fill('');
+  await page.getByLabel('Nome Empresarial / Razão Social', { exact: true }).fill('');
+  await page.getByLabel('CNPJ', { exact: true }).fill('');
   await page.getByRole('button', { name: 'Salvar Configuração' }).click();
   await expect(page.getByText('Configuração salva com sucesso!')).toBeVisible();
   expect(payload).toEqual(expect.objectContaining({ nomeEmpresarial: '', cnpj: '' }));

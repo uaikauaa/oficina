@@ -22,7 +22,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${INITIAL_ADMIN_NAME:Geisa}")
+    @Value("${INITIAL_ADMIN_NAME:Administrador}")
     private String adminName;
 
     @Value("${INITIAL_ADMIN_EMAIL:}")
@@ -76,7 +76,7 @@ public class AdminAccountBootstrap implements ApplicationRunner {
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_ADMIN", "Administrador com acesso irrestrito ao sistema")));
 
         Usuario admin = new Usuario(
-                adminName != null && !adminName.isBlank() ? adminName.trim() : "Geisa",
+                adminName != null && !adminName.isBlank() ? adminName.trim() : "Administrador",
                 adminEmail.trim().toLowerCase(),
                 passwordEncoder.encode(adminPassword),
                 true

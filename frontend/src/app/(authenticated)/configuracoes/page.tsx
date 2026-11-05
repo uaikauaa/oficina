@@ -244,7 +244,7 @@ export default function ConfiguracoesPage() {
                 className={inputClass}
                 value={form.nomeFantasia}
                 onChange={e => setForm(f => ({ ...f, nomeFantasia: e.target.value }))}
-                placeholder="Ex: Bruno Soldas"
+                placeholder="Ex: Oficina cadastrada"
               />
             </div>
             <div>
@@ -253,7 +253,7 @@ export default function ConfiguracoesPage() {
                 className={inputClass}
                 value={form.nomeEmpresarial}
                 onChange={e => setForm(f => ({ ...f, nomeEmpresarial: e.target.value }))}
-                placeholder="Ex: 45.076.507 BRUNO SOARES RODRIGUES"
+                placeholder="Ex: Razão social cadastrada"
               />
             </div>
             <div>
@@ -271,7 +271,7 @@ export default function ConfiguracoesPage() {
                 className={inputClass}
                 value={form.cnpj}
                 onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))}
-                placeholder="Ex: 45.076.507/0001-67"
+                placeholder="Ex: CNPJ cadastrado"
               />
             </div>
           </div>
@@ -300,7 +300,7 @@ export default function ConfiguracoesPage() {
                 className={inputClass}
                 value={form.telefone}
                 onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
-                placeholder="Ex: (14) 9886-7223"
+                placeholder="Ex: Telefone cadastrado"
               />
             </div>
             <div>
@@ -345,7 +345,7 @@ export default function ConfiguracoesPage() {
             </div>
             <div>
               <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-10" className="block text-xs text-muted mb-1.5 font-medium">CEP</label>
-              <input id="field-src-app-authenticated-configuracoes-page-tsx-10" className={inputClass} value={form.cep} onChange={e => setForm(f => ({ ...f, cep: e.target.value }))} placeholder="Ex: 19.914-080" />
+              <input id="field-src-app-authenticated-configuracoes-page-tsx-10" className={inputClass} value={form.cep} onChange={e => setForm(f => ({ ...f, cep: e.target.value }))} placeholder="Ex: CEP cadastrado" />
             </div>
             <div>
               <label htmlFor="field-src-app-authenticated-configuracoes-page-tsx-11" className="block text-xs text-muted mb-1.5 font-medium">Município</label>

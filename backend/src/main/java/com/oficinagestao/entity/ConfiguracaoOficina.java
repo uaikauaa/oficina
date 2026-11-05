@@ -32,27 +32,27 @@ public class ConfiguracaoOficina {
     @Column(name = "nome_sistema", nullable = false, length = 100)
     private String nomeSistema;
 
-    /** Nome fantasia / comercial da oficina. Ex: "Bruno Soldas" */
+    /** Nome fantasia / comercial da oficina. Ex: "Oficina cadastrada" */
     @Column(name = "nome_fantasia", nullable = false, length = 200)
     private String nomeFantasia;
 
-    /** Nome empresarial / razão social conforme cadastro fiscal. Ex: "45.076.507 BRUNO SOARES RODRIGUES" */
+    /** Nome empresarial / razão social conforme cadastro fiscal. Ex: "Razão social cadastrada" */
     @Column(name = "nome_empresarial", length = 200)
     private String nomeEmpresarial;
 
-    /** CNPJ da oficina. Ex: "45.076.507/0001-67" */
+    /** CNPJ da oficina. Ex: "CNPJ cadastrado" */
     @Column(name = "cnpj", length = 20)
     private String cnpj;
 
-    /** Nome do responsável/proprietário da oficina (dado administrativo). Ex: "Geisa" */
+    /** Nome do responsável/proprietário da oficina (dado administrativo). Ex: "Responsável cadastrado" */
     @Column(name = "responsavel", length = 200)
     private String responsavel;
 
-    /** Telefone de contato. Ex: "(14) 9886-7223" */
+    /** Telefone de contato. Ex: "Telefone cadastrado" */
     @Column(name = "telefone", length = 30)
     private String telefone;
 
-    /** E-mail de contato. Ex: "INDUTECSERVICE@HOTMAIL.COM" */
+    /** E-mail de contato. Ex: "contato@example.invalid" */
     @Column(name = "email", length = 200)
     private String email;
 
@@ -68,11 +68,11 @@ public class ConfiguracaoOficina {
     @Column(name = "bairro", length = 100)
     private String bairro;
 
-    /** CEP. Ex: "19.914-080" */
+    /** CEP. Ex: "CEP cadastrado" */
     @Column(name = "cep", length = 20)
     private String cep;
 
-    /** Município. Ex: "Ourinhos" */
+    /** Município. Ex: "Município cadastrado" */
     @Column(name = "municipio", length = 100)
     private String municipio;
 

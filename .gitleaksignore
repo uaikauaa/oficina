@@ -1,0 +1,10 @@
+# Reviewed synthetic/example findings only; see docs/homologacao-gcp-20261104/gitleaks-triagem.md
+e578fd5485316b916871f4ccca2135864bbe4ae6:.env.example:generic-api-key:27
+bdb4d04ed179cf4fe549e763f4d12f8b85d5122a:.env.example:generic-api-key:26
+bdb4d04ed179cf4fe549e763f4d12f8b85d5122a:.github/workflows/oracle-readiness.yml:generic-api-key:35
+b5c6037833a3a973f6a5b91aaa19d5bc803058b7:backend/src/test/java/com/oficinagestao/security/TokenHashUtilTest.java:generic-api-key:15
+b5c6037833a3a973f6a5b91aaa19d5bc803058b7:frontend/src/lib/sessionResilience.test.ts:generic-api-key:434
+b5c6037833a3a973f6a5b91aaa19d5bc803058b7:frontend/src/lib/sessionResilience.test.ts:generic-api-key:453
+b5c6037833a3a973f6a5b91aaa19d5bc803058b7:backend/src/test/java/com/oficinagestao/security/RefreshTokenHashSecurityTest.java:generic-api-key:334
+eda78c2a9cb4e7ef6f613abbef363244c68e958d:backend/src/test/java/com/oficinagestao/security/JwtServiceTest.java:generic-api-key:128
+f9926a8f218022dfdae09e38f3d12a4f28fec97e:docs/api.md:generic-api-key:59

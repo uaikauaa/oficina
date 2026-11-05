@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
  */
 public record ConfiguracaoOficinaUpdateDTO(
 
-        /** Nome fantasia/comercial. Ex: "Bruno Soldas" */
+        /** Nome fantasia/comercial. Ex: "Oficina cadastrada" */
         @NotBlank(message = "Nome fantasia é obrigatório.")
         @Size(max = 200, message = "Nome fantasia deve ter no máximo 200 caracteres.")
         String nomeFantasia,

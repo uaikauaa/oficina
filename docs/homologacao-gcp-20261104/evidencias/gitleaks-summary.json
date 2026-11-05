@@ -1,0 +1,66 @@
+﻿{
+    "triage":  "Examples, tests and documentation contexts; no live secret confirmed; final triage pending. Values omitted.",
+    "reachableLocalCommits":  187,
+    "version":  "8.30.1",
+    "command":  "gitleaks git --redact=100 --log-opts=--all --report-format=json",
+    "findings":  [
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  ".env.example",
+                         "StartLine":  27,
+                         "Commit":  "e578fd5485316b916871f4ccca2135864bbe4ae6"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  ".env.example",
+                         "StartLine":  26,
+                         "Commit":  "bdb4d04ed179cf4fe549e763f4d12f8b85d5122a"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  ".github/workflows/oracle-readiness.yml",
+                         "StartLine":  35,
+                         "Commit":  "bdb4d04ed179cf4fe549e763f4d12f8b85d5122a"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "backend/src/test/java/com/oficinagestao/security/TokenHashUtilTest.java",
+                         "StartLine":  15,
+                         "Commit":  "b5c6037833a3a973f6a5b91aaa19d5bc803058b7"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "frontend/src/lib/sessionResilience.test.ts",
+                         "StartLine":  434,
+                         "Commit":  "b5c6037833a3a973f6a5b91aaa19d5bc803058b7"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "frontend/src/lib/sessionResilience.test.ts",
+                         "StartLine":  453,
+                         "Commit":  "b5c6037833a3a973f6a5b91aaa19d5bc803058b7"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "backend/src/test/java/com/oficinagestao/security/RefreshTokenHashSecurityTest.java",
+                         "StartLine":  334,
+                         "Commit":  "b5c6037833a3a973f6a5b91aaa19d5bc803058b7"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "backend/src/test/java/com/oficinagestao/security/JwtServiceTest.java",
+                         "StartLine":  128,
+                         "Commit":  "eda78c2a9cb4e7ef6f613abbef363244c68e958d"
+                     },
+                     {
+                         "RuleID":  "generic-api-key",
+                         "File":  "docs/api.md",
+                         "StartLine":  59,
+                         "Commit":  "f9926a8f218022dfdae09e38f3d12a4f28fec97e"
+                     }
+                 ],
+    "binaryArchiveSha256":  "D29144DEFF3A68AA93CED33DDDF84B7FDC26070ADD4AA0F4513094C8332AFC4E",
+    "shallow":  false,
+    "exitCode":  1,
+    "reportedCommitsScanned":  169
+}

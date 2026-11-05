@@ -36,6 +36,6 @@ Para o fluxo 2FA completo, usar um destinatário sintético no sandbox e registr
 
 - `node --test scripts/homologation/tls-isolated.test.mjs`: OpenSSL gera chave/certificado efêmeros no diretório temporário; testa CA e hostname negativos e STARTTLS obrigatório; apaga os arquivos ao terminar.
 - Após Maven package e build Next: `node scripts/test-proxy-runtime.mjs` inicia fixture local e standalone, valida transporte e encerra ambos.
-- `node scripts/test-real-stack-local.mjs` cria/reutiliza apenas containers com label própria, aplica migrations reais num banco local descartável e executa Playwright real. Depois testa duas JVMs, tentativas concorrentes e reinicialização. Encerra seus processos/containers. Usa portas locais 15433, 1025, 8025, 8080, 8082 e 3000; não modifica containers operacionais.
+- `node scripts/test-real-stack-local.mjs` cria containers novos com label exclusiva por execução, aplica o caminho oficial B24 neutro num banco vazio e executa Playwright real. Depois testa duas JVMs, tentativas concorrentes e reinicialização. Remove somente seus containers/volumes ao terminar. Usa portas locais 15433, 1025, 8025, 8080, 8082 e 3000; não modifica containers operacionais.
 
 Não há aprovação automática de criptografia de backup, Secret Manager, ingress, WAF ou orçamento de custos. Registrar os resultados desses controles no ambiente isolado antes de solicitar retirada do draft ou liberação de produção.

@@ -3,6 +3,7 @@ import { getSecurityHeaders } from "./src/lib/securityHeaders.ts";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  generateBuildId: async () => process.env.OFICINA_BUILD_ID || null,
   async headers() {
     return [
       {

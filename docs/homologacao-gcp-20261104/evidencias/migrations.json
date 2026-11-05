@@ -1,0 +1,122 @@
+﻿[
+    {
+        "version":  1,
+        "file":  "V1__create_initial_schema.sql",
+        "sha256":  "10BA136256F4E4560B805C3E85EBEAB2EB986FC7025493589E33721A7D4E6291"
+    },
+    {
+        "version":  2,
+        "file":  "V2__simplify_initial_roles.sql",
+        "sha256":  "1AC1D1DC6251AD40ACC272E99CFEF30DD1C28367EB6D04468D60AC9CFC0445D2"
+    },
+    {
+        "version":  3,
+        "file":  "V3__add_refresh_tokens.sql",
+        "sha256":  "22C9A82B4F497C09DC0C1595C89A9A0CE729130D3EF1EE36DF982177A0649FD9"
+    },
+    {
+        "version":  4,
+        "file":  "V4__correct_equipment_domain.sql",
+        "sha256":  "82532F20982D3C060CC1FA162EC387F52E9FB3700889470D41EA2A14EFDD6D25"
+    },
+    {
+        "version":  5,
+        "file":  "V5__align_service_order_domain.sql",
+        "sha256":  "B7451C2BC8CEA209D483A84353349E2793EA51DB3D1351C7C98E4CC4974717A7"
+    },
+    {
+        "version":  6,
+        "file":  "V6__maquinas_tipo_check_and_adjustments.sql",
+        "sha256":  "B28C08E501A0DCD36A0DB6F8B4BFEBB2A46FE89F86AE85221B19762E9C855187"
+    },
+    {
+        "version":  7,
+        "file":  "V7__add_stock_constraints_and_indices.sql",
+        "sha256":  "EAE0EABEDDB9E951EE5A098A96671F5B5437FD58DDCDB8B829634E21FD669AA5"
+    },
+    {
+        "version":  8,
+        "file":  "V8__add_ordem_servico_sequence.sql",
+        "sha256":  "96AEEF53CB78394654153A646525212902AE1C23AB6CF3796A6F6D17D7D8CC5D"
+    },
+    {
+        "version":  9,
+        "file":  "V9__add_produto_marca_and_seed_categorias.sql",
+        "sha256":  "EB5B4D3E8A1C141FEEB5737AB9B25DC7EDE8FDC2CCC1C513F86FDD7FE7630A0D"
+    },
+    {
+        "version":  10,
+        "file":  "V10__add_composite_foreign_key_os_maquina_cliente.sql",
+        "sha256":  "AA17ABC34DFF1C86E61415197ED7680B78A5DFA86E7E5A759890A8CD5BAFB502"
+    },
+    {
+        "version":  11,
+        "file":  "V11__create_configuracao_oficina.sql",
+        "sha256":  "B950C4DDC401E44700F627B79DFB41B2672CC459668DAADD08D3AF326BA6806D"
+    },
+    {
+        "version":  12,
+        "file":  "V12__update_admin_and_config_defaults.sql",
+        "sha256":  "32F733F5ABAE9688184D3896427408D018E624E41EC01ECBBEB1B2BBD043A1B5"
+    },
+    {
+        "version":  13,
+        "file":  "V13__create_fiscal_dps_and_tomador_ibge.sql",
+        "sha256":  "36B0153B6FFFCD2850BCDC2280B2A404C1B60C53A8A8618FDC4E3B271518F23E"
+    },
+    {
+        "version":  14,
+        "file":  "V14__remove_unused_fiscal_structures.sql",
+        "sha256":  "D7EBDF2F5EA7654F3B50E946337DDCC82CF5EE266547F166ECF7A14BF7A53E19"
+    },
+    {
+        "version":  15,
+        "file":  "V15__remove_cliente_codigo_ibge.sql",
+        "sha256":  "64E2409930CE6E162544CD484590E9BEAB65FEB528E3439B2B26CB3855D410CB"
+    },
+    {
+        "version":  16,
+        "file":  "V16__refactor_produto_codigo_and_link_compra.sql",
+        "sha256":  "A840F60AAB5352EF7D916C5231E05746ED4012A3049F7046E273579C4F527CD2"
+    },
+    {
+        "version":  17,
+        "file":  "V17__add_remember_me_to_refresh_tokens.sql",
+        "sha256":  "7DF340B040A82028FFE40D4C0C82409B8C5AE95C0CC8DC999BE1BE1A32286C45"
+    },
+    {
+        "version":  18,
+        "file":  "V18__create_two_factor_challenges.sql",
+        "sha256":  "67A08CBBB12B27C40178C51B38DDA2969C3194AC5F4380C42F29F06E52D4DCC7"
+    },
+    {
+        "version":  19,
+        "file":  "V19__create_notificacoes.sql",
+        "sha256":  "31C2FB30BA64D58A792150B52E298C643155C80017FD1C162F7D29FD2B0F74D4"
+    },
+    {
+        "version":  20,
+        "file":  "V20__add_token_version_to_usuarios.sql",
+        "sha256":  "B65A8D6B59D51284B3B435C735B79C0D54C292FC050FEB34AE17244D5AD428A5"
+    },
+    {
+        "version":  21,
+        "file":  "V21__hash_refresh_tokens.sql",
+        "sha256":  "C93AF2E026C553C12D6551FA72081ABEC8AA3C04D1D30342D89B34942A43FE10"
+    },
+    {
+        "version":  22,
+        "file":  "V22__expand_produto_margem_lucro.sql",
+        "sha256":  "6F8E356B4207D999A8264BFDF950C7551D68B88EEEAFB6E63FE5CF62E7C7B950"
+    },
+    {
+        "version":  23,
+        "file":  "V23__shared_security_rate_limits.sql",
+        "sha256":  "E6DCA9A786260CFE24C00718AC87DE8E3556AB1A34A3C1FB1BB2BB0E7CD8CB94"
+    },
+    {
+        "version":  24,
+        "file":  "V24__rate_limit_key_generation.sql",
+        "sha256":  "62A6C4C070E15F7BA643EB12D513EB290A2DF75BC56EF1BBA2C56B897B8120E4"
+    }
+]

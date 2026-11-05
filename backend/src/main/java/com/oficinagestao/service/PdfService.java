@@ -501,7 +501,7 @@ public class PdfService {
     private static final Font DS_FONT_AVISO        = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 7, new Color(180, 83, 9));
 
     /**
-     * Gera o Recibo de Prestação de Serviços — comprovante comercial oficial da Bruno Soldas referente à Ordem de Serviço.
+     * Gera o Recibo de Prestação de Serviços — comprovante comercial oficial da Oficina cadastrada referente à Ordem de Serviço.
      * Este documento NÃO possui validade fiscal e NÃO substitui a NFS-e.
      */
     public byte[] gerarReciboOsPdf(OrdemServico os, List<OrdemServicoItem> itens) {

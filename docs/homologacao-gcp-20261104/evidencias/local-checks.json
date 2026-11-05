@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-04",
+  "timezone": "America/Sao_Paulo",
+  "sourceSha": "d54087d440243610a7e281e594a5e6e3b6ae6c18",
+  "node": "24.21.0",
+  "npm": "11.19.0",
+  "tlsCommand": "node --test scripts/homologation/tls-isolated.test.mjs",
+  "tlsTests": [
+    {
+      "name": "TLS accepts the trusted hostname and rejects unknown CA or mismatched hostname",
+      "result": "pass"
+    },
+    {
+      "name": "SMTP sends credentials only after authenticated TLS and rejects missing STARTTLS",
+      "result": "pass"
+    }
+  ],
+  "mavenDependencyTree": "pass after quoting the outputFile argument for PowerShell",
+  "dockerDaemon": "unavailable: dockerDesktopLinuxEngine named pipe not found",
+  "gcloud": "not found on PATH",
+  "githubCli": "not authenticated",
+  "externalCloudChecks": "not executed; provisioning not authorized",
+  "cloudResourcesCreated": false,
+  "productionApproved": false
+}
