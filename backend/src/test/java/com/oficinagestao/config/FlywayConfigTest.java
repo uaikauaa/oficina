@@ -13,7 +13,7 @@ class FlywayConfigTest {
     @Test
     void startupStrategyMigratesWithoutAutomaticRepair() {
         Flyway flyway = mock(Flyway.class);
-        FlywayMigrationStrategy strategy = new FlywayConfig().flywayMigrationStrategy();
+        FlywayMigrationStrategy strategy = new FlywayConfig().flywayMigrationStrategy(new org.springframework.mock.env.MockEnvironment());
 
         strategy.migrate(flyway);
 
