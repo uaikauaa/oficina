@@ -9,7 +9,6 @@
 .env.test
 .env.production
 .env.homolog
-.env.homolog.local
 *.pem
 *.key
 *.p12

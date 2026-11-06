@@ -46,7 +46,7 @@ class FlywayEmptySchemaIntegrationTest {
                     .validateOnMigrate(true)
                     .load();
 
-            new FlywayConfig().flywayMigrationStrategy(environment).migrate(flyway);
+            new FlywayConfig().flywayMigrationStrategy().migrate(flyway);
 
             assertEquals("24", flyway.info().current().getVersion().getVersion());
             assertFalse(environment.getProperty("spring.flyway.baseline-on-migrate", Boolean.class, true));
