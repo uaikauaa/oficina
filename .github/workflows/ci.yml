@@ -89,6 +89,7 @@ jobs:
           node scripts/check-flyway-baseline.mjs
           node scripts/check-neutral-defaults.mjs
           node --test scripts/homologation/neon-hml.test.mjs
+          node --test scripts/homologation/cloud-target.test.mjs
 
       - name: Conferir migrations sintéticas antes de iniciar Spring
         shell: bash

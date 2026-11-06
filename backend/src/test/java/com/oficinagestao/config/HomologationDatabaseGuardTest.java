@@ -57,6 +57,10 @@ class HomologationDatabaseGuardTest {
     @Test void developmentProfileCannotAuthorizeRemoteHomologation() {
         var env = settings(); env.setActiveProfiles("dev");
         assertThrows(IllegalStateException.class, () -> HomologationDatabaseGuard.validateSettings(env));
+        for (String host : new String[]{"ep-synthetic-pooler.sa-east-1.aws.neon.tech", "ep-synthetic.us-east-1.aws.neon.tech"}) {
+            var wrong = settings().withProperty("HML_DB_HOST", host);
+            assertThrows(IllegalStateException.class, () -> HomologationDatabaseGuard.validateSettings(wrong));
+        }
     }
 
     @Test void approvedEmptyDatabaseChecksTlsAndIdentityBeforeMigration() throws Exception {

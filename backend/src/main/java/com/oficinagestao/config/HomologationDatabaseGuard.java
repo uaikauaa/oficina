@@ -79,6 +79,7 @@ final class HomologationDatabaseGuard {
         String host = env.getProperty("HML_DB_HOST", ""), database = env.getProperty("HML_DB_NAME", "");
         String user = env.getProperty("HML_DB_USER", "");
         if (!host.matches("ep-[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.neon\\.tech")
+                || host.contains("-pooler") || !host.endsWith(".sa-east-1.aws.neon.tech")
                 || !database.matches("[a-z][a-z0-9_]*_security_test")
                 || (!database.equals("oficina_security_test") && !database.equals(env.getProperty("HML_APPROVED_DATABASE")))
                 || !user.matches("[a-z0-9_]*security_test[a-z0-9_]*")

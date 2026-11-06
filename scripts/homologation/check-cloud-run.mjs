@@ -2,14 +2,13 @@
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
+import { assertApprovedTarget, assertProjectMetadata, assertServiceMetadata, accounts } from './cloud-target.mjs';
 
+try {
 const env = process.env;
 const project = env.HML_PROJECT;
-assert.equal(env.HML_ISOLATED, 'true', 'Explicit isolated-environment declaration required');
-assert.notEqual(env.NODE_TLS_REJECT_UNAUTHORIZED, '0', 'TLS verification cannot be disabled');
-assert.match(project || '', /^[a-z][a-z0-9-]+-security-test$/, 'A dedicated *-security-test project is required');
+assertApprovedTarget(env);
 const region = env.HML_REGION;
-assert.match(region || '', /^[a-z]+-[a-z]+\d$/);
 const call = args => {
   try {
     // Identifiers and URL arguments are constrained below; no credential is passed as an argument.
@@ -21,17 +20,21 @@ const call = args => {
 const describe = name => {
   assert.match(name || '', /^[a-z][a-z0-9-]+$/);
   const data = JSON.parse(call(['run', 'services', 'describe', name, '--project', project, '--region', region, '--format=json']));
-  assert.equal(data.metadata?.labels?.environment, 'security-test', 'Service must have the isolated label');
   const url = data.status?.url;
   assert.match(url || '', /^https:\/\/[a-z0-9.-]+\.run\.app$/);
   return { url, data };
 };
+assertProjectMetadata(JSON.parse(call(['projects', 'describe', project, '--format=json'])));
 const backendService = describe(env.HML_BACKEND_SERVICE);
 const frontendService = describe(env.HML_FRONTEND_SERVICE);
+assertServiceMetadata(backendService.data, 'backend');
+assertServiceMetadata(frontendService.data, 'frontend');
 const backend = backendService.url;
 const frontend = frontendService.url;
 const account = env.HML_FRONTEND_SERVICE_ACCOUNT;
 const denied = env.HML_DENIED_SERVICE_ACCOUNT;
+assert.equal(account, accounts.frontend);
+assert.equal(denied, accounts.denied);
 for (const value of [account, denied]) assert.match(value || '', new RegExp(`^[a-z0-9-]+@${project}\\.iam\\.gserviceaccount\\.com$`));
 assert.equal(frontendService.data.spec?.template?.spec?.serviceAccountName, account, 'Frontend service identity must match the tested caller');
 const variables = service => service.data.spec?.template?.spec?.containers?.[0]?.env || [];
@@ -51,6 +54,7 @@ const invokers = policy.bindings?.filter(b => b.role === 'roles/run.invoker').fl
 assert.ok(invokers.includes('serviceAccount:' + account));
 assert.ok(!invokers.includes('allUsers') && !invokers.includes('allAuthenticatedUsers'));
 assert.ok(!invokers.includes('serviceAccount:' + denied));
+assert.deepEqual(new Set(invokers), new Set(['serviceAccount:' + account]), 'Backend invoker must be restricted to the frontend identity');
 const identity = (caller, audience) => call(['auth', 'print-identity-token', '--impersonate-service-account=' + caller, '--audiences=' + audience, '--include-email']);
 const invoke = (url, token) => fetch(url + '/api/health', { redirect: 'error', signal: AbortSignal.timeout(15000),
   headers: token ? { 'X-Serverless-Authorization': 'Bearer ' + token } : {} });
@@ -72,3 +76,7 @@ const output = { executedAt: new Date().toISOString(), environment: 'isolated-go
 }, productionApproved: false };
 writeFileSync('docs/security-hardening/cloud-run-homologation.json', JSON.stringify(output, null, 2) + '\n');
 console.log('PASS: isolated Cloud Run IAM, audience and frontend proxy; tokens omitted.');
+} catch {
+  console.error('FAIL: Cloud Run homologation verification failed; private values and tokens omitted. No deployment or IAM changes performed.');
+  process.exitCode = 1;
+}

@@ -13,6 +13,7 @@ class CheckNeonTls {
             if (!"true".equals(required("HML_NEON_ISOLATED"))) throw new IllegalArgumentException();
             String host = required("HML_DB_HOST"), database = required("HML_DB_NAME"), user = required("HML_DB_USER");
             if (!host.matches("ep-[a-z0-9-]+(?:\\.[a-z0-9-]+)*\\.neon\\.tech")
+                    || host.contains("-pooler") || !host.endsWith(".sa-east-1.aws.neon.tech")
                     || !host.equals(required("HML_EXPECTED_HOST")) || !database.matches("[a-z][a-z0-9_]*_security_test")
                     || (!database.equals("oficina_security_test") && !database.equals(required("HML_APPROVED_DATABASE")))
                     || !user.matches("[a-z0-9_]*security_test[a-z0-9_]*")) throw new IllegalArgumentException();

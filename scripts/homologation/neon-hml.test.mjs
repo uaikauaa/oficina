@@ -10,6 +10,7 @@ import { parseNeonUrl, loadPrivateConfiguration, jdbcEnvironment } from './neon-
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const host = 'ep-synthetic.sa-east-1.aws.neon.tech';
 const settings = { NEON_HML_EXPECTED_HOST: host, NEON_HML_ISOLATED: 'true' };
+const declarations = '\nNEON_HML_CREDENTIAL_ROTATED=true\nNEON_HML_PROJECT=oficina-homologacao\nNEON_HML_BRANCH=production\nNEON_HML_PROJECT_ISOLATED=true\n';
 const raw = (password = 'synthetic-only', database = 'oficina_security_test', hostname = host, query = 'sslmode=verify-full&channel_binding=require') =>
   `postgresql://hml_security_test:${encodeURIComponent(password)}@${hostname}/${database}?${query}`;
 const fixture = fn => {
@@ -52,7 +53,7 @@ test('TLS downgrades, unsafe factories, routing overrides and duplicate paramete
   for (const query of ['sslmode=disable', 'sslmode=allow', 'sslmode=prefer', 'sslmode=require', 'sslmode=verify-ca',
     '', 'sslmode=verify-full&sslmode=require', 'sslmode=verify-full&sslfactory=NonValidatingFactory',
     'sslmode=verify-full&host=other', 'sslmode=verify-full&user=other', 'sslmode=verify-full&password=hidden',
-    'sslmode=verify-full&channel_binding=disable', 'sslmode=verify-full&options=unsafe']) {
+    'sslmode=verify-full&channel_binding=disable', 'sslmode=verify-full', 'sslmode=verify-full&options=unsafe']) {
     assert.throws(() => parseNeonUrl(raw('unused', 'oficina_security_test', host, query), settings));
   }
 });
@@ -72,7 +73,7 @@ test('errors never include raw URL, decoded password or URL parser causes', () =
 test('private file required even with env set; development settings never used as fallback', () => fixture(directory => {
   writeFileSync(path.join(directory, '.env'), `DB_URL=jdbc:postgresql://${host}/operational\nDB_PASSWORD=PRIVATE-sentinel`);
   assert.throws(() => loadPrivateConfiguration(directory), /Crie .env.homolog.local/);
-  writeFileSync(path.join(directory, '.env.homolog.local'), `NEON_HML_URL=${raw()}\nNEON_HML_EXPECTED_HOST=${host}\nNEON_HML_ISOLATED=true`);
+  writeFileSync(path.join(directory, '.env.homolog.local'), `NEON_HML_URL=${raw()}\nNEON_HML_EXPECTED_HOST=${host}\nNEON_HML_ISOLATED=true` + declarations);
   assert.throws(() => loadPrivateConfiguration(directory), /operacional/);
 }));
 
@@ -97,7 +98,7 @@ test('JDBC process receives password only through environment and blocks JVM ove
 
 test('example contains placeholders only and private paths are ignored by Git and Docker contexts', () => {
   const example = readFileSync(path.join(root, '.env.homolog.local.example'), 'utf8');
-  assert.match(example, /NEON_HML_URL=postgresql:\/\/CHANGE_ME_security_test:CHANGE_ME_PASSWORD@/);
+  assert.match(example, /NEON_HML_URL=postgresql:\/\/oficina_security_test_owner:CHANGE_ME_NEW_PASSWORD@/);
   const homolog = readFileSync(path.join(root, '.env.homolog.example'), 'utf8');
   assert.match(homolog, /^APP_ENVIRONMENT=homologation$/m);
   assert.match(homolog, /^HML_MIGRATIONS_APPROVED=false$/m);
@@ -117,7 +118,7 @@ test('CLI rejects private malformed input with sanitized stderr, no shell histor
   mkdirSync(path.join(directory, 'scripts/homologation'), { recursive: true });
   for (const name of ['configure-neon-hml.mjs', 'neon-hml.mjs'])
     writeFileSync(path.join(directory, 'scripts/homologation', name), readFileSync(path.join(root, 'scripts/homologation', name)));
-  writeFileSync(path.join(directory, '.env.homolog.local'), 'NEON_HML_URL=PRIVATE-sentinel-not-a-url');
+  writeFileSync(path.join(directory, '.env.homolog.local'), 'NEON_HML_URL=PRIVATE-sentinel-not-a-url' + declarations);
   const child = spawnSync(process.execPath, [path.join(directory, 'scripts/homologation/configure-neon-hml.mjs'), '--inspect'], { encoding: 'utf8', windowsHide: true });
   assert.equal(child.status, 1);
   assert.ok(!child.stderr.includes('PRIVATE-sentinel'));
@@ -134,7 +135,7 @@ test('CLI checks and prepares an isolated config without secrets, overwrite or m
   cpSync(path.join(root, 'backend/src/main/resources/db/migration'), path.join(directory, 'backend/src/main/resources/db/migration'), { recursive: true });
   writeFileSync(path.join(directory, '.gitignore'), '.env*.local\n');
   const privateFile = path.join(directory, '.env.homolog.local');
-  writeFileSync(privateFile, `NEON_HML_URL=${raw('PRIVATE-prepare-sentinel')}\nNEON_HML_EXPECTED_HOST=${host}\nNEON_HML_ISOLATED=true\n`);
+  writeFileSync(privateFile, `NEON_HML_URL=${raw('PRIVATE-prepare-sentinel').replace('hml_security_test', 'oficina_security_test_owner')}\nNEON_HML_EXPECTED_HOST=${host}\nNEON_HML_ISOLATED=true\n` + declarations);
   execFileSync('git', ['init', '--quiet'], { cwd: directory, windowsHide: true });
   const run = mode => spawnSync(process.execPath, ['--env-file=.env.homolog.local', 'scripts/homologation/configure-neon-hml.mjs', mode], { cwd: directory, encoding: 'utf8', windowsHide: true });
   const check = run('--check');
@@ -149,4 +150,16 @@ test('CLI checks and prepares an isolated config without secrets, overwrite or m
   assert.equal(run('--prepare').status, 1);
   assert.equal(readFileSync(path.join(directory, '.env.homolog.backend.local'), 'utf8'), content);
   assert.match(readFileSync(privateFile, 'utf8'), /PRIVATE-prepare-sentinel/);
+}));
+
+test('rotated credential, audited project and exact role are required without using image credentials', () => fixture(directory => {
+  const file = path.join(directory, '.env.homolog.local');
+  const content = `NEON_HML_URL=${raw().replace('hml_security_test', 'oficina_security_test_owner')}\nNEON_HML_EXPECTED_HOST=${host}\nNEON_HML_ISOLATED=true` + declarations;
+  for (const [before, after] of [['NEON_HML_CREDENTIAL_ROTATED=true', 'NEON_HML_CREDENTIAL_ROTATED=false'],
+    ['NEON_HML_PROJECT_ISOLATED=true', 'NEON_HML_PROJECT_ISOLATED=false'], ['oficina_security_test_owner:', 'hml_security_test:']]) {
+    writeFileSync(file, content.replace(before, after)); assert.throws(() => loadPrivateConfiguration(directory));
+  }
+  writeFileSync(file, content); assert.equal(loadPrivateConfiguration(directory).config.user, 'oficina_security_test_owner');
+  for (const badHost of [host.replace('ep-synthetic.', 'ep-synthetic-pooler.'), host.replace('sa-east-1', 'us-east-1')])
+    assert.throws(() => parseNeonUrl(raw('unused', 'oficina_security_test', badHost), { ...settings, NEON_HML_EXPECTED_HOST: badHost }));
 }));

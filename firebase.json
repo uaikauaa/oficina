@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "firebase-public",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "headers": [{ "source": "**", "headers": [
+      { "key": "Cache-Control", "value": "private, no-store" },
+      { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
+      { "key": "X-Content-Type-Options", "value": "nosniff" }
+    ] }],
+    "rewrites": [{ "source": "**", "run": {
+      "serviceId": "oficina-frontend-hml", "region": "us-central1", "pinTag": true
+    } }],
+    "predeploy": ["node scripts/homologation/hosting-predeploy.mjs"]
+  }
+}

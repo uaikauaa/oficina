@@ -5,6 +5,8 @@ Projeto alvo: `oficinagestao-homologacao`. Não há criação de recursos cloud,
 
 ## Estado
 
+Continuação desta etapa: [homologação GCP/Firebase/domínio](homologacao-final-gcp-firebase.md). O projeto Neon existente será reutilizado somente após rotação e auditoria de isolamento; não é necessário criar outro projeto. O verificador GCP atual aceita exclusivamente o ID/número aprovados nessa continuação.
+
 | Verificação | Resultado |
 | --- | --- |
 | CONEXÃO NEON | NÃO TESTADA — aguarda preenchimento do arquivo privado com destino elegível |

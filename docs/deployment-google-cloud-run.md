@@ -2,6 +2,8 @@
 
 **Estado:** somente planejamento; nenhum deploy realizado. Produção NO-GO. Use este documento com o [roteiro de homologação de segurança](security-hardening/homologacao.md) e o [registro da release](release-pre-homologacao/README.md).
 
+Para a etapa com Firebase Hosting e domínio, consulte o [relatório e procedimento atualizado](homologacao-final-gcp-firebase.md): sessão `__session`, bloqueios reais, custos e plano sem execução.
+
 ## Arquitetura atual
 
 O monorepo produz duas imagens. O serviço **frontend** (Next.js 16, Node 22, porta 3000) pode ser público em HTTPS. O serviço **backend** (Spring Boot 4, Java 21, porta 8080) deve exigir IAM; conceda `roles/run.invoker` apenas à identidade de execução do frontend. O navegador chama `/api/*` na origem do frontend. O route handler Next obtém um ID token do metadata server com audience da URL do backend e o envia em `X-Serverless-Authorization`. O JWT da aplicação, cookies, CSRF e streaming PDF/CSV passam separadamente. O navegador não recebe o token IAM nem acessa o Neon diretamente.

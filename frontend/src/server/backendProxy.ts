@@ -1,8 +1,9 @@
 import { validateBackendOrigin } from '../lib/backendUrl.ts';
 import { createHmac } from 'node:crypto';
 import { isIP } from 'node:net';
+import { firebaseSessionConfig, readFirebaseSession, firebaseBackendCookies, updateFirebaseSession, type FirebaseSessionConfig } from './firebaseSession.ts';
 
-export type ProxyConfig = { origin: string; iam: boolean; clientContext?: { secret: string; hops: number } };
+export type ProxyConfig = { origin: string; iam: boolean; clientContext?: { secret: string; hops: number }; firebaseSession?: FirebaseSessionConfig };
 export function proxyConfig(env: Record<string, string | undefined> = process.env): ProxyConfig {
   const origin = validateBackendOrigin(env.INTERNAL_BACKEND_URL || (env.NODE_ENV !== 'production' ? 'http://localhost:8080' : ''));
   const iam = Boolean(env.K_SERVICE) || env.CLOUD_RUN_IAM === 'true';
@@ -19,7 +20,7 @@ export function proxyConfig(env: Record<string, string | undefined> = process.en
     }
     clientContext = { secret: env.SERVICE_PROXY_SECRET, hops };
   }
-  return { origin, iam, clientContext };
+  return { origin, iam, clientContext, firebaseSession: firebaseSessionConfig(env) };
 }
 
 type Fetcher = typeof fetch;
@@ -63,6 +64,19 @@ export async function proxyRequest(request: Request, config: ProxyConfig = proxy
   if (request.headers.has('content-encoding') && request.headers.get('content-encoding') !== 'identity') return error(415, 'UNSUPPORTED_ENCODING');
   const headers = new Headers();
   for (const name of requestHeaders) { const value = request.headers.get(name); if (value !== null) headers.set(name, value); }
+  let session: ReturnType<typeof readFirebaseSession> = [];
+  if (config.firebaseSession) {
+    try {
+      session = readFirebaseSession(request.headers.get('cookie'), config.firebaseSession);
+      headers.delete('cookie');
+      const cookies = firebaseBackendCookies(session, incoming.pathname);
+      if (cookies) headers.set('cookie', cookies);
+    } catch {
+      const response = error(401, 'INVALID_HOSTING_SESSION');
+      response.headers.set('set-cookie', '__session=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0');
+      return response;
+    }
+  }
   // Forwarded/Host/Google identity headers supplied by the browser are never trusted.
   headers.set('accept-encoding', 'identity');
   let body: Uint8Array | undefined;
@@ -111,7 +125,11 @@ export async function proxyRequest(request: Request, config: ProxyConfig = proxy
     });
     const output = new Headers({ 'Cache-Control': 'no-store' });
     for (const name of responseHeaders) { const value = upstream.headers.get(name); if (value !== null) output.set(name, value); }
-    for (const cookie of upstream.headers.getSetCookie()) output.append('set-cookie', cookie);
+    if (config.firebaseSession) {
+      const cookie = updateFirebaseSession(session, upstream.headers.getSetCookie(), config.firebaseSession);
+      if (cookie) output.append('set-cookie', cookie);
+      output.set('Vary', 'Cookie, Authorization');
+    } else for (const cookie of upstream.headers.getSetCookie()) output.append('set-cookie', cookie);
     const location = upstream.headers.get('location');
     if (location) {
       const redirect = new URL(location, config.origin);

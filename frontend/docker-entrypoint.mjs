@@ -18,6 +18,9 @@ export function assertProxyTarget(_manifest, runtimeOrigin, env = process.env) {
     throw new Error('Cloud Run requer cadeia de proxies validada e SERVICE_PROXY_SECRET.');
   }
   if (target.protocol === 'http:' && !['localhost', '127.0.0.1', 'backend', '[::1]'].includes(target.hostname)) throw new Error('HTTP somente local.');
+  if (env.FIREBASE_HOSTING_MODE && env.FIREBASE_HOSTING_MODE !== 'false'
+      && (env.FIREBASE_HOSTING_MODE !== 'true' || !/^[A-Za-z0-9+/]{43}=$/.test(env.FIREBASE_SESSION_SECRET || '')
+        || env.FIREBASE_SESSION_SECRET === env.SERVICE_PROXY_SECRET)) throw new Error('Firebase Hosting requer segredo de sessão independente válido.');
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   assertProxyTarget(null, process.env.INTERNAL_BACKEND_URL);
