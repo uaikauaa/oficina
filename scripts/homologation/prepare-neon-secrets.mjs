@@ -14,7 +14,7 @@ try {
   });
   const project = 'oficinagestao-homologacao';
   const secrets = JSON.parse(call(['secrets', 'list', '--project=' + project, '--format=json']));
-  for (const name of ['DB_PASSWORD', 'MAIL_PASSWORD', 'INITIAL_ADMIN_PASSWORD']) {
+  for (const name of ['DB_PASSWORD', 'MAIL_PASSWORD', 'FIREBASE_SESSION_SECRET', 'INITIAL_ADMIN_PASSWORD']) {
     const exists = secrets.some(secret => secret.name?.split('/').at(-1) === name);
     let versions = [];
     if (exists) versions = JSON.parse(call(['secrets', 'versions', 'list', name, '--project=' + project, '--format=json']));
@@ -22,6 +22,7 @@ try {
   }
   console.log('PLANO: DB_PASSWORD recebe somente a senha extraída; envio futuro por stdin (--data-file=-), nunca por argv.');
   console.log('PLANO IAM: Secret Accessor no DB_PASSWORD somente para oficina-backend-hml@oficinagestao-homologacao.iam.gserviceaccount.com; auditar também permissões herdadas.');
+  console.log('PLANO IAM: FIREBASE_SESSION_SECRET é independente (32 bytes aleatórios em base64), somente frontend; SERVICE_PROXY_SECRET permanece compartilhado somente entre frontend/backend.');
   console.log('Nenhuma criação, nova versão, alteração IAM ou implantação executada. Aprovação separada necessária para operações com cobrança.');
 } catch (error) {
   console.error(error instanceof ConfigurationError ? error.message : 'Plano Google Cloud não verificado. Verifique gcloud, login e permissões de leitura; detalhes privados omitidos. Nenhum recurso alterado.');

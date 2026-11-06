@@ -50,6 +50,8 @@ jobs:
         run: npm run build
       - name: Stack sintetica completa e duas JVMs com reinicializacao
         run: node scripts/test-real-stack-local.mjs
+      - name: Sessao Firebase com Next Spring PostgreSQL e SMTP reais locais
+        run: node scripts/homologation/test-firebase-session-local.mjs
       - name: Salvar diagnosticos em caso de falha
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -59,4 +61,5 @@ jobs:
             frontend/test-results/
             frontend/playwright-report/
             audit-hardening-real-backend.log
+            logs/homologation/firebase-local.log
           if-no-files-found: ignore
