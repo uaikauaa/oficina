@@ -16,7 +16,7 @@ Validar a cadeia de proxies antes de aprovar TRUSTED_PROXY_HOPS: gerar tráfego 
 
 ## Neon PostgreSQL de teste
 
-Preparar projeto/branch Neon descartável, banco com sufixo `_security_test` e usuário de teste contendo `security_test` no nome. Não informar URL nem credenciais operacionais. Configurar somente na sessão local HML_NEON_ISOLATED=true, HML_DB_HOST (hostname `.neon.tech` isolado), HML_DB_NAME, HML_DB_USER e HML_DB_PASSWORD. Esses valores não devem ser colocados em arquivos versionados nem em argumentos de comando.
+Preparar projeto/branch Neon descartável, banco vazio com sufixo `_security_test` e usuário de teste contendo `security_test` no nome. O fluxo recomendado de arquivo privado, checks offline e inspeção está em [Neon exclusivo de homologação](../neon-homologacao-segura.md). Não informar URL nem credenciais operacionais. Para invocação direta do Java, configurar somente na sessão local HML_NEON_ISOLATED=true, HML_DB_HOST (hostname `ep-*.neon.tech` isolado), HML_EXPECTED_HOST (confirmação independente do hostname), HML_DB_NAME, HML_DB_USER e HML_DB_PASSWORD. Se o banco não for `oficina_security_test`, aprovar seu nome exato em HML_APPROVED_DATABASE. Esses valores não devem ser colocados em arquivos versionados nem em argumentos de comando.
 
 Executar com Java 21 e o driver PostgreSQL já resolvido pelo Maven:
 
@@ -24,7 +24,7 @@ Executar com Java 21 e o driver PostgreSQL já resolvido pelo Maven:
 java --class-path "$env:USERPROFILE/.m2/repository/org/postgresql/postgresql/42.7.12/postgresql-42.7.12.jar" scripts/homologation/CheckNeonTls.java
 ```
 
-O programa abre conexão read-only com `sslmode=verify-full`, usa a trust store Java, exige TLS 1.2/1.3 e consulta somente o estado TLS da própria conexão em `pg_stat_ssl`. Não lê tabelas de negócio, não executa Flyway nem cria dados. Falhas não imprimem a URL ou senha. Em seguida ensaiar CA/hostname inválidos no ambiente descartável e confirmar rejeição. Os testes locais com certificados efêmeros comprovam o mecanismo do cliente, sem substituir a conexão real Neon.
+O programa abre transação read-only com `sslmode=verify-full` e channel binding obrigatório, usa a trust store Java, exige TLS 1.2/1.3 e consulta o estado TLS da própria conexão em `pg_stat_ssl`, a identidade SQL e catálogos para comprovar banco vazio. Não lê tabelas de negócio, não executa Flyway nem cria dados. Um banco já inicializado é recusado por este preflight. Falhas não imprimem a URL ou senha. Em seguida ensaiar CA/hostname inválidos no ambiente descartável e confirmar rejeição. Os testes locais com certificados efêmeros comprovam o mecanismo do cliente, sem substituir a conexão real Neon.
 
 ## SMTP sandbox
 

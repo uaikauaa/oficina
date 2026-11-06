@@ -79,10 +79,16 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Node 22 para validações locais do Neon
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+
       - name: Conferir baseline neutra e defaults
         run: |
           node scripts/check-flyway-baseline.mjs
           node scripts/check-neutral-defaults.mjs
+          node --test scripts/homologation/neon-hml.test.mjs
 
       - name: Conferir migrations sintéticas antes de iniciar Spring
         shell: bash
