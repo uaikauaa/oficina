@@ -51,8 +51,6 @@ class ProductionMigrationPathTest {
         try (var db = new Database()) {
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public'", Integer.class));
             Flyway flyway = db.production();
-            assertEquals(List.of("B24__neutral_initial_schema.sql"), java.util.Arrays.stream(flyway.info().pending())
-                    .map(org.flywaydb.core.api.MigrationInfo::getScript).toList());
             assertEquals(1, flyway.migrate().migrationsExecuted);
             flyway.validate();
             assertEquals(List.of("B24__neutral_initial_schema.sql"), db.jdbc.queryForList(

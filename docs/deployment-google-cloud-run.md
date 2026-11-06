@@ -8,8 +8,6 @@ O monorepo produz duas imagens. O serviço **frontend** (Next.js 16, Node 22, po
 
 O backend usa PostgreSQL **Neon de homologação isolado**. A URL JDBC deve usar `sslmode=verify-full` com CA confiável e hostname validado. O 2FA exige SMTP de homologação. Segredos devem existir como referências separadas no Secret Manager: `JWT_SECRET`, `RATE_LIMIT_SECRET`, `SERVICE_PROXY_SECRET`, `DB_PASSWORD` e `MAIL_PASSWORD`.
 
-Para preparar o novo banco sem acessar o atual, siga [Neon exclusivo de homologação](neon-homologacao-segura.md). O fluxo fornece campo privado, inspeção JDBC somente leitura e trava de migrations com autorização separada.
-
 ## Antes de publicar uma revisão de homologação
 
 1. Confirmar os quatro workflows verdes no SHA exato aprovado; conferir V1–V24 preservadas, a baseline neutra B24 para bancos novos e `clean verify`. Seguir a [remediação e publicação por digest](homologacao-gcp-20261104/remediacao.md); não aplicar os seeds históricos V11/V12 em um banco novo de homologação.

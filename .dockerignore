@@ -7,9 +7,6 @@
 .env.*
 !.env.example
 !.env.production.example
-# Arquivos privados também em subdiretórios, incluindo o Neon de homologação.
-**/.env
-**/.env.*
 **/*.pem
 **/*.key
 **/secrets
