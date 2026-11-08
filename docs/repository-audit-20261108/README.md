@@ -54,29 +54,33 @@ Nenhuma exclusão de risco médio/alto foi realizada. Não houve evidência sufi
 
 ## Comparação de validações
 
-Baseline executada no checkout restaurado antes das quatro exclusões. Revalidação posterior: **em andamento neste primeiro commit; consultar a atualização final e os checks do PR antes de aprovar**. Comandos, hashes dos logs e ambiente: [validation.json](validation.json). Logs brutos, imagens OCI e capturas geradas ficam no diretório temporário desta tarefa, fora dos commits.
+Baseline executada no checkout restaurado antes das quatro exclusões. **Revalidação posterior concluída, sem regressões**: 21 verificações documentadas após a limpeza, incluindo suítes completas, imagens reproduzíveis e scans. Comandos, hashes dos logs e ambiente: [validation.json](validation.json). Logs brutos, imagens OCI e capturas geradas ficam no diretório temporário desta tarefa, fora dos commits.
 
 | Verificação | Antes | Depois |
 | --- | --- | --- |
-| Maven `clean verify`, PostgreSQL sintético, Java 21 | 839 testes; 0 falhas/erros/ignorados; JAR gerado | PENDENTE |
-| Frontend `npm test` | 378 aprovados; 0 ignorados | PENDENTE |
-| Chaves efêmeras de build | 3 testes aprovados | PENDENTE |
-| ESLint; TypeScript app e E2E; build Next | Todos aprovados | PENDENTE |
-| Playwright Chromium, sessão/logout/CSP/responsividade | 119 aprovados | PENDENTE |
-| Proxy standalone e parser HTTP/1 | Cookies/CSRF/JWT/PDF/CSV/limites e negativos aprovados | PENDENTE |
-| Integração real Next → Spring → PostgreSQL/SMTP | 1 cenário aprovado; duas JVMs e reinício aprovados | PENDENTE |
-| Flyway oficial em PostgreSQL novo | `migrate`/`validate`; B24 SQL_BASELINE; zero usuários e singleton neutro | PENDENTE |
-| V1–V24/checksums, equivalência B24 e defaults neutros | Aprovados | PENDENTE |
-| TLS/SMTP com certificados efêmeros | 2 testes aprovados | PENDENTE |
-| Compose sintético, `bash -n`, sintaxe MJS | Aprovados; 23 scripts MJS | PENDENTE |
-| Nginx build/configuração/handshake TLS real local | Aprovado, TLS 1.3 | PENDENTE |
-| Imagens backend/frontend, dois builds independentes sem cache | Digests idênticos por serviço | PENDENTE |
-| Trivy 0.74.0, SBOM das imagens e segredos | 0 HIGH/CRITICAL; nenhum segredo detectado | PENDENTE |
-| Gitleaks 8.30.1 histórico alcançável | Sem achados, com exclusões exatas existentes | PENDENTE |
-| npm audit completo / runtime | 8 moderadas em desenvolvimento; 0 altas/críticas; runtime 0 | PENDENTE |
-| Links Markdown locais | 84 documentos; 0 ausentes | PENDENTE |
+| Maven `clean verify`, PostgreSQL sintético, Java 21 | 839 testes; 0 falhas/erros/ignorados; JAR gerado | Mesmo resultado: 839 aprovados |
+| Frontend `npm test` | 378 aprovados; 0 ignorados | Mesmo resultado: 378 aprovados |
+| Chaves efêmeras de build | 3 testes aprovados | 3 aprovados |
+| ESLint; TypeScript app e E2E; build Next | Todos aprovados | Todos aprovados |
+| Playwright Chromium, sessão/logout/CSP/responsividade | 119 aprovados | 119 aprovados |
+| Proxy standalone e parser HTTP/1 | Cookies/CSRF/JWT/PDF/CSV/limites e negativos aprovados | Mesmo resultado aprovado |
+| Integração real Next → Spring → PostgreSQL/SMTP | 1 cenário aprovado; duas JVMs e reinício aprovados | Mesmo cenário e duas JVMs aprovados |
+| Flyway oficial em PostgreSQL novo | `migrate`/`validate`; B24 SQL_BASELINE; zero usuários e singleton neutro | Mesmo resultado, em outro banco descartável |
+| V1–V24/checksums, equivalência B24 e defaults neutros | Aprovados | Aprovados; nenhuma migration alterada |
+| TLS/SMTP com certificados efêmeros | 2 testes aprovados | 2 aprovados |
+| Compose sintético, `bash -n`, sintaxe MJS | Aprovados; 23 scripts MJS | Mesmo resultado aprovado |
+| Nginx build/configuração/handshake TLS real local | Aprovado, TLS 1.3 | Aprovado, TLS 1.3 |
+| Imagens backend/frontend, dois builds independentes sem cache | Digests idênticos por serviço | Digests idênticos por serviço |
+| Trivy 0.74.0, SBOM das imagens e segredos | 0 HIGH/CRITICAL; nenhum segredo detectado | Mesmo resultado nos seis scans |
+| Gitleaks 8.30.1 histórico alcançável | Sem achados, com exclusões exatas existentes | Sem achados; exclusões inalteradas |
+| npm audit completo / runtime | 8 moderadas em desenvolvimento; 0 altas/críticas; runtime 0 | Mesmo resultado; pendência preservada |
+| Links Markdown locais | 84 documentos; 0 ausentes | 85 documentos; 0 ausentes |
 
 Ambiente local: Java 21.0.12.1, Node 24.21.0/npm 11.19.0 e Docker 29.8.0. A CI e as imagens frontend usam Node 22; essa diferença é registrada, não substitui os checks de CI. Imagens locais foram construídas sem autenticação, publicação ou deploy.
+
+As suítes e imagens posteriores foram executadas no commit de limpeza `c5d26bcde682eb4cf36384c006d8d85c6fe8761c`. O complemento final altera somente o relatório, suas evidências e a codificação descritiva do inventário; caminhos, referências e hashes do snapshot permanecem iguais. A comparação de reprodutibilidade é interna a cada SHA: revisão OCI e build ID podem variar entre o commit base e o de limpeza.
+
+Os quatro workflows também passaram no commit de limpeza: [CI](https://github.com/uaikauaa/oficina/actions/runs/42494612010), [Flyway/E2E/imagens](https://github.com/uaikauaa/oficina/actions/runs/42494612037), [integração real](https://github.com/uaikauaa/oficina/actions/runs/42494611992) e [Oracle/Nginx](https://github.com/uaikauaa/oficina/actions/runs/42494611990). O [PR #20](https://github.com/uaikauaa/oficina/pull/20) contém os checks do SHA final, incluindo o complemento de evidências; conferir esse head antes de aprovar, sem aceitar checks de outro SHA.
 
 Ocorrências de execução foram corrigidas sem alterar código ou reduzir testes: propriedade Maven inicialmente sem aspas no PowerShell; porta Playwright sem `E2E_BASE_URL` correspondente; uma colisão de trace entre suítes concorrentes que compartilham `test-results`; caminho OCI absoluto do Windows incompatível com Trivy. A execução completa sequencial final de baseline passou 119/119, e os seis scans de imagem passaram com caminhos relativos. As capturas históricas versionadas regravadas pelos testes foram restauradas a partir do HEAD limpo; as capturas transitórias foram preservadas fora do repositório.
 
@@ -102,6 +106,21 @@ IAM Google Cloud, SMTP externo, restauração/PITR, custos, domínio e HTTPS rem
 4. Conferir DNS no Registro.br e propriedade de `oficinabrunosoldas.com.br`, preservar MX/TXT, obter destinos oficiais do provedor e validar HTTPS/certificado. Nenhuma alteração DNS nesta tarefa.
 5. Reavaliar dependências moderadas sem regressão de versões, executar os oito checks no SHA final e obter aprovação humana. Homologação remota pendente; **produção NO-GO até validação real**.
 
-## Veredito de acompanhamento
+## Veredito da limpeza
 
-Restauração confirmada e integridade do código original preservada. As exclusões de baixo risco e a consolidação documental foram aplicadas; a conclusão depende da comparação posterior e da CI do PR. Não haverá merge automático.
+| Critério | Resultado |
+| --- | --- |
+| RESTAURAÇÃO DA MAIN | CONFIRMADA |
+| INTEGRIDADE DO CÓDIGO ORIGINAL | PRESERVADA; diff restrito aos 12 caminhos documentais/marcadores autorizados |
+| LIMPEZA DO REPOSITÓRIO | CONCLUÍDA no escopo comprovadamente seguro |
+| BACKEND | APROVADO nos testes locais e CI do commit de limpeza |
+| FRONTEND | APROVADO nos testes locais e CI do commit de limpeza |
+| BANCO NEON ORIGINAL | NÃO TESTADO |
+| FLYWAY | APROVADO em PostgreSQL descartável; estado remoto não testado |
+| SEGURANÇA | PENDÊNCIAS: oito avisos npm moderados e gates remotos; proteções preservadas |
+| CI | Quatro workflows aprovados em `c5d26bc`; checks do SHA final no PR |
+| PR DE LIMPEZA | [#20](https://github.com/uaikauaa/oficina/pull/20), base `62e8f62`, commit de limpeza `c5d26bc` e complemento de evidências no histórico do PR |
+| HOMOLOGAÇÃO REMOTA | PENDENTE |
+| PRODUÇÃO | NO-GO ATÉ VALIDAÇÃO REAL |
+
+Nenhuma exclusão adicional sem evidência de obsolescência. Nenhum merge ou deploy automático.

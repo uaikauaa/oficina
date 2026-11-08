@@ -157,7 +157,136 @@
     }
   ],
   "after": {
-    "result": "PENDING"
+    "result": "PASS",
+    "executedOnCommit": "c5d26bcde682eb4cf36384c006d8d85c6fe8761c",
+    "checks": [
+      {
+        "command": "backend/mvnw.cmd -B -ntp clean verify -Djunit.jupiter.execution.parallel.enabled=false",
+        "result": "PASS",
+        "log": "after-backend.log",
+        "sha256": "2beb20a9d09b44b1782c4552b2d75b064d1f10dc6e7b2bfc048630030f6b8a17"
+      },
+      {
+        "command": "npm test",
+        "result": "PASS",
+        "log": "after-unit.log",
+        "sha256": "94ca11f80bbd730ba0ccea2adae0c0d5669471cd0d3f363cb8af8a94fe0e8c90"
+      },
+      {
+        "command": "node --test scripts/release-build-keys.test.mjs",
+        "result": "PASS",
+        "log": "after-build-keys.log",
+        "sha256": "a3972cd359e38a2f50b98874801936871a181516ab8c417ad3d55c53db5c0f16"
+      },
+      {
+        "command": "npm run lint",
+        "result": "PASS",
+        "log": "after-lint.log",
+        "sha256": "1fab52d0ac089f94c4f67e4832298abdbb06382ba5033aefa09d34d1a6711727"
+      },
+      {
+        "command": "npx tsc --noEmit",
+        "result": "PASS",
+        "log": "after-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "npx tsc -p e2e/tsconfig.json --noEmit",
+        "result": "PASS",
+        "log": "after-e2e-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "command": "npm run build",
+        "result": "PASS",
+        "log": "after-build.log",
+        "sha256": "19243190fe3b27e2c03185b1c52551f48b5770977ebc428cf6b9f8176fd9f992"
+      },
+      {
+        "command": "npm audit --audit-level=high",
+        "result": "PASS",
+        "log": "after-npm-audit.log",
+        "sha256": "1f3ab7e07c5b84df7d4ca1816c0111b3146204fb2aaa5789bf2b4b78ee464374"
+      },
+      {
+        "command": "CI=true PLAYWRIGHT_PORT=3108 E2E_BASE_URL=http://localhost:3108 npx playwright test --project=chromium",
+        "result": "PASS",
+        "log": "after-playwright.log",
+        "sha256": "d7f5714968692f5a5eb6b309c09ef250fa3e21adfcbefcdc5091516adcd81f94"
+      },
+      {
+        "command": "node scripts/test-proxy-runtime.mjs",
+        "result": "PASS",
+        "log": "after-proxy.log",
+        "sha256": "4ce9940cf4cf43634781d43bc9fc26ab9c711aadfebb42b9fac3fd77ae3957ee"
+      },
+      {
+        "command": "CI=true node scripts/test-real-stack-local.mjs",
+        "result": "PASS",
+        "log": "after-real-stack.log",
+        "sha256": "8e95fd3e7fed464327754fe2ad03ceb383ee6aa7f7e08f53a302264b93e9007f"
+      },
+      {
+        "command": "Flyway 11.14.1 migrate validate; official migrations, disposable PostgreSQL",
+        "result": "PASS",
+        "log": "after-flyway.log",
+        "sha256": "ae3b29e765cd489d67271ceb6bdbc05eb3303ae728c6cc26ae6b80e2ccf5ffd3"
+      },
+      {
+        "command": "Nginx Docker build, nginx -t, trusted local TLS",
+        "result": "PASS",
+        "log": "after-nginx.log",
+        "sha256": "8769d1a3216ef0ad45386fe0c982a740d6a462b2f33754279a83207bd28dc2da"
+      },
+      {
+        "command": "node scripts/build-release-images.mjs --verify-reproducible",
+        "result": "PASS",
+        "log": "after-images.log",
+        "sha256": "2a164c3dcf7044dca7adbb12a363a8238ded1808f0f90664f5a8070b90c0dc9c"
+      },
+      {
+        "command": "Trivy 0.74.0: two SBOMs, HIGH/CRITICAL vulnerabilities and secrets",
+        "result": "PASS",
+        "log": "after-scans.log",
+        "sha256": "aaae514b8679d8a3cec5cfb4cd7e9bf4b253138d6ed2e14b10ec37d6fee57d23"
+      },
+      {
+        "command": "gitleaks 8.30.1 git --redact=100 --log-opts=--all",
+        "result": "PASS",
+        "log": "after-gitleaks.log",
+        "sha256": "d346c5295ce08f2cd69091ea2f7ae4146453da3a01165488ae79d414e31fab2c"
+      },
+      {
+        "command": "node scripts/check-flyway-baseline.mjs",
+        "result": "PASS",
+        "log": "after-baseline.log",
+        "sha256": "63bbea301c5bef9f3a20dac0eda19b2f2587a8d647ae03842ea92509d145803b"
+      },
+      {
+        "command": "node scripts/check-neutral-defaults.mjs --bundle",
+        "result": "PASS",
+        "log": "after-defaults.log",
+        "sha256": "97f9e218aab51175b1849b24768e657d5f57272c837783c2a747d43acbd416f5"
+      },
+      {
+        "command": "node --test scripts/homologation/tls-isolated.test.mjs",
+        "result": "PASS",
+        "log": "after-tls.log",
+        "sha256": "3495123053d69aa153f0b75f5f60fb9a1cb0395b045445f16bc6c415f4ee44b4"
+      },
+      {
+        "command": "node scripts/check-doc-links.mjs [all tracked Markdown]",
+        "result": "PASS",
+        "log": "after-doclinks.log",
+        "sha256": "22d28d2cdc47017927426f627791f7539a2ab5daba6b86ac56a08dd6bdad17e9"
+      },
+      {
+        "command": "node --check (23 MJS); bash -n (2 scripts); docker compose config --quiet (synthetic)",
+        "result": "PASS",
+        "log": "after-static.json",
+        "sha256": "804f482744a4e776a0d4fa3396a338dd7a525228a1c569c5d9c947f489e91ff9"
+      }
+    ]
   },
   "beforeImages": {
     "sourceSha": "62e8f62d4166f5f9695c49e6588897e31777b038",
@@ -198,5 +327,75 @@
     "Concurrent mock and real Playwright runs shared output directory and lost one trace; full sequential rerun passed 119/119.",
     "Trivy OCI input requires relative paths on Windows; corrected helper passed all scans."
   ],
-  "rawLogs": "Task temporary directory only; raw logs and generated visual artifacts are not committed."
+  "rawLogs": "Task temporary directory only; raw logs and generated visual artifacts are not committed.",
+  "afterImages": {
+    "sourceSha": "c5d26bcde682eb4cf36384c006d8d85c6fe8761c",
+    "sourceDateEpoch": 1794151347,
+    "inputs": {
+      "platform": "linux/amd64",
+      "buildkit": "moby/buildkit:buildx-stable-1@sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe",
+      "maven": "maven:3.9.11-eclipse-temurin-21-alpine@sha256:922927df2c662cdd47ddb116443d6bec4696cfae3de1a0ddac8fcc7b87ce61ae",
+      "java": "eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372",
+      "node": "node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914"
+    },
+    "reproduced": true,
+    "images": {
+      "backend": {
+        "digest": "sha256:a8e7c612ed9b279badef82cc063b691137f775cbb28b09fb73427759340dac85",
+        "comparedDigests": [
+          "sha256:a8e7c612ed9b279badef82cc063b691137f775cbb28b09fb73427759340dac85",
+          "sha256:a8e7c612ed9b279badef82cc063b691137f775cbb28b09fb73427759340dac85"
+        ],
+        "archive": "backend-1.oci.tar"
+      },
+      "frontend": {
+        "digest": "sha256:6166fa9412ef96db3bd94a157d7fcac0a7180f049163d89a08c88ed00a72faf1",
+        "comparedDigests": [
+          "sha256:6166fa9412ef96db3bd94a157d7fcac0a7180f049163d89a08c88ed00a72faf1",
+          "sha256:6166fa9412ef96db3bd94a157d7fcac0a7180f049163d89a08c88ed00a72faf1"
+        ],
+        "archive": "frontend-1.oci.tar"
+      }
+    },
+    "published": false
+  },
+  "codeIntegrity": {
+    "result": "PRESERVED",
+    "method": "git diff against restored base restricted to 12 explicitly allowed documentation/marker paths; all other versioned blobs unchanged",
+    "removed": [
+      ".github/workflows/.gitkeep",
+      "docs/homologacao-gcp-20261104/evidencias/dependency-tree.txt",
+      "docs/homologacao-gcp-20261104/evidencias/npm-audit-runtime.json",
+      "scripts/.gitkeep"
+    ],
+    "originalMigrations": "V1-V24 and B24 unchanged",
+    "remoteData": "No access"
+  },
+  "beforeAdditional": {
+    "flywayChecksums": "PASS",
+    "neutralDefaults": "PASS",
+    "localTlsSmtp": {
+      "passed": 2
+    },
+    "staticSyntax": {
+      "mjs": 23,
+      "shell": 2,
+      "compose": "PASS"
+    },
+    "markdownLinks": {
+      "files": 84,
+      "missing": 0
+    },
+    "source": "Recorded tool outputs during baseline; no raw log hash claimed for these additional checks"
+  },
+  "afterNpmRuntime": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "pullRequest": "https://github.com/uaikauaa/oficina/pull/20",
+  "ci": "Consult PR #20 checks on its final head; tests in this JSON ran on the code/documentation commit above, before the evidence-only follow-up."
 }
