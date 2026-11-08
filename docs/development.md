@@ -1,182 +1,75 @@
-# Guia de Desenvolvimento — Oficina Gestão
+# Desenvolvimento e testes — Oficina Gestão
 
-> **Guia histórico.** Versões e comandos de banco abaixo podem refletir a fase Spring Boot 3. Use o [README principal](../README.md) e os modelos de ambiente atuais para novas instalações.
+Guia atualizado em 08/11/2026 para a base restaurada pelo PR #19. Veja a [visão geral e estrutura](../README.md), a [arquitetura](architecture.md) e as [diretrizes de banco](database.md).
 
-Este documento descreve os pré-requisitos e os passos para configurar o ambiente de desenvolvimento local do projeto **Oficina Gestão** (oficina técnica especializada em conserto, manutenção e reparo de máquinas de solda, geradores de energia, compressores e equipamentos industriais/elétricos).
+## Preparação local
 
----
+Requer Java 21, Node.js 22, npm e Git. O Maven Wrapper acompanha o backend. Docker com engine Linux é necessário para os ensaios descartáveis descritos abaixo. As versões das bibliotecas estão em `backend/pom.xml` e `frontend/package-lock.json`.
 
-## 1. Pré-Requisitos
+Na raiz, copie `.env.example` para `.env`, ignorado pelo Git. Configure `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, SMTP de teste e segredos JWT/rate/proxy distintos. Use somente banco de desenvolvimento com identidade confirmada. Nunca substitua o banco original pelo projeto temporário `oficina-homologacao` nem reutilize senhas expostas.
 
-- **Java JDK**: Versão 21 (LTS — Eclipse Adoptium Temurin recomendado) instalada e configurada no PATH (`JAVA_HOME`).
-- **Node.js**: Versão >= 20.x (LTS) e npm >= 10.x.
-- **Git**: Versão recente.
-- **Banco de Dados**: Conta e projeto no **Neon** (PostgreSQL Serverless).
-- **Docker & Docker Compose**: Opcional, reservado para execução de Testcontainers em testes isolados. **O banco de desenvolvimento principal conecta-se diretamente ao Neon.**
+O banco oficial está no Neon. Para conexão externa, a URL JDBC deve exigir `sslmode=verify-full` e uma CA confiável, com verificação do hostname. A configuração remota exige conferência da identidade do banco e do usuário; um exemplo versionado não comprova que a conexão funciona. Os modelos de homologação e produção têm requisitos próprios e continuam preservados.
 
----
+O backend carrega `.env` a partir do diretório corrente, do pai ou de `backend/`. O frontend pode receber `INTERNAL_BACKEND_URL` pelo ambiente. DB/JWT/SMTP não devem ser distribuídos ao frontend. O bootstrap `INITIAL_ADMIN_*` só cria a conta inicial em banco vazio; não redefine senha de conta existente. Remova a senha de bootstrap do ambiente após criar a conta.
 
-## 2. Estrutura do Workspace
-
-```text
-oficina/
-├── frontend/             # Next.js 16 (App Router, React 19, Tailwind CSS 4)
-├── backend/              # Spring Boot 3.4 (Java 21, JPA, Flyway, Maven Wrapper)
-│   ├── src/main/java/com/oficinagestao/
-│   │   ├── config/       # Swagger, OpenAPI, bootstrap, validadores
-│   │   ├── controller/   # Endpoints REST (HTTP)
-│   │   ├── dto/          # Records imutáveis de entrada e saída
-│   │   ├── entity/       # Entidades JPA
-│   │   ├── exception/    # Exceções e handler global
-│   │   ├── repository/   # Repositórios Spring Data JPA
-│   │   ├── security/     # JWT, 2FA, filtros e rate limiting
-│   │   └── service/      # Regras de negócio, transações e e-mail
-│   └── src/main/resources/
-│       ├── application.properties
-│       ├── application-dev.properties
-│       ├── application-prod.properties
-│       └── db/migration/ # 21 Migrations Flyway
-├── docs/                 # Documentação técnica e arquitetura
-├── .env.example          # Modelo oficial de variáveis de ambiente
-└── .env                  # Variáveis locais com credenciais (ignorado no Git)
-```
-
----
-
-## 3. Configuração do Banco de Dados (Neon) e Variáveis Locais
-
-1. Crie ou acesse seu projeto no [Neon](https://neon.tech).
-2. Obtenha a connection string do banco de desenvolvimento (SSL mode obrigatório: `sslmode=require`).
-3. Copie o arquivo `.env.example` para `.env` na raiz do projeto:
-   ```bash
-   cp .env.example .env
-   # No Windows PowerShell: Copy-Item .env.example .env
-   ```
-4. Preencha as variáveis com suas credenciais de desenvolvimento (utilize placeholders seguros):
-   ```env
-   # Banco de Dados Neon
-   DB_URL=jdbc:postgresql://<seu-endpoint-neon>.sa-east-1.aws.neon.tech/neondb?sslmode=require
-   DB_USERNAME=neondb_owner
-   DB_PASSWORD=sua_senha_neon
-   SERVER_PORT=8080
-
-   # Segurança JWT
-   JWT_SECRET=chave_secreta_jwt_de_pelo_menos_32_caracteres_aleatorios_123
-
-   # Configuração de CORS
-   CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-
-   # Configuração SMTP para 2FA (Gmail)
-   MAIL_HOST=smtp.gmail.com
-   MAIL_PORT=587
-   MAIL_SMTP_AUTH=true
-   MAIL_SMTP_STARTTLS=true
-   MAIL_USERNAME=seu_email@gmail.com
-   MAIL_PASSWORD=sua_app_password_google
-   MAIL_FROM=seu_email@gmail.com
-
-   # Bootstrap da Proprietária (executado apenas se a tabela usuarios estiver vazia)
-   INITIAL_ADMIN_NAME=Proprietária Oficina
-   INITIAL_ADMIN_EMAIL=seu_email@exemplo.com
-   INITIAL_ADMIN_PASSWORD=sua_senha_segura_123
-   ```
-   > **Atenção:** O arquivo `.env` nunca deve ser versionado no Git. `INITIAL_ADMIN_PASSWORD` é somente o seed do primeiro provisionamento; alterar essa variável não redefine a senha de uma conta existente.
-
-### Banco exclusivo para testes
-
-Os testes de integração usam PostgreSQL real e exigem um banco local exclusivo cujo nome termine em `_test`. Eles nunca reutilizam `DB_URL`, `DB_USERNAME` ou `DB_PASSWORD`.
+Em um terminal, na raiz:
 
 ```powershell
-docker run --name oficina-postgres-test -e POSTGRES_DB=oficina_gestao_test -e POSTGRES_USER=oficina_test -e POSTGRES_PASSWORD=oficina_test -p 5432:5432 -d postgres:16-alpine
-$env:TEST_DB_URL='jdbc:postgresql://localhost:5432/oficina_gestao_test'
-$env:TEST_DB_USERNAME='oficina_test'
-$env:TEST_DB_PASSWORD='oficina_test'
 cd backend
-.\mvnw.cmd clean test
+.\mvnw.cmd spring-boot:run
 ```
 
-Se `TEST_DB_URL` estiver ausente, apontar para Neon/host remoto ou usar um banco sem o sufixo `_test`, a suíte aborta antes de inicializar o datasource.
+Em outro terminal:
 
----
+```powershell
+cd frontend
+npm ci
+$env:INTERNAL_BACKEND_URL='http://127.0.0.1:8080'
+npm run dev
+```
 
-## 4. Executando o Backend (Spring Boot)
+Interface: `http://localhost:3000`; API: `http://localhost:8080`. O backend executa Flyway `migrate()` ao iniciar e Hibernate `validate`. Não inicie a aplicação no banco original para realizar uma checagem somente leitura.
 
-1. Acesse o diretório do backend:
-   ```bash
-   cd backend
-   ```
-2. Inicie o servidor da aplicação via Maven Wrapper:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-   *(No Windows PowerShell: `.\mvnw.cmd spring-boot:run`)*
-3. A API estará acessível em `http://localhost:8080`.
-   - Endpoint de saúde pública: `http://localhost:8080/api/health`
-   - Documentação interativa Swagger UI (dev): `http://localhost:8080/swagger-ui/index.html`
-   - Especificação OpenAPI (JSON): `http://localhost:8080/v3/api-docs`
-4. Na inicialização, o Flyway aplica automaticamente todas as 21 migrations pendentes localizadas em `src/main/resources/db/migration/` e o Hibernate valida o schema (`ddl-auto=validate`).
+## Backend com PostgreSQL descartável
 
----
+Na raiz, use um container novo de testes e uma porta local livre. O guard aceita apenas o banco `oficina_gestao_test` em loopback, nas portas 5432 ou 5433. Não reutilize container nem volume operacional. Os valores abaixo são exclusivamente sintéticos:
 
-## 5. Executando o Frontend (Next.js)
+```powershell
+docker run --name oficina-dev-tests --label oficina.purpose=local-tests -e POSTGRES_DB=oficina_gestao_test -e POSTGRES_USER=oficina_test -e POSTGRES_PASSWORD=synthetic-local-tests-only -p 127.0.0.1:5433:5432 -d postgres:16-alpine
+$env:TEST_DB_URL='jdbc:postgresql://127.0.0.1:5433/oficina_gestao_test'
+$env:TEST_DB_EXPECTED_PORT='5433'
+$env:TEST_DB_USERNAME='oficina_test'
+$env:TEST_DB_PASSWORD='synthetic-local-tests-only'
+$migrationsPath=(Resolve-Path 'backend/src/test/resources/db/synthetic-migration').Path.Replace('\','/')
+$env:TEST_FLYWAY_LOCATION="filesystem:$migrationsPath"
+cd backend
+.\mvnw.cmd -B -ntp clean verify '-Djunit.jupiter.execution.parallel.enabled=false'
+```
 
-1. Abra um segundo terminal e acesse o diretório do frontend:
-   ```bash
-   cd frontend
-   ```
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
-3. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-4. A interface web estará acessível em `http://localhost:3000`.
-   > O Next.js possui rewrite configurado para redirecionar `/api/*` para `http://localhost:8080/api/*`.
+O argumento Maven com pontos deve ficar entre aspas no PowerShell. O perfil de teste não carrega `.env` e não faz fallback para `DB_*`. O diretório de migrations sintéticas e seu manifesto são conferidos antes da conexão. Não altere o guard para aceitar outro destino.
 
----
+De volta à raiz, confira também:
 
-## 6. Padrões de Qualidade e Testes Automatizados
+```powershell
+node scripts/check-flyway-baseline.mjs
+node scripts/check-neutral-defaults.mjs
+```
 
-O projeto mantém rigoroso padrão de qualidade assegurado por testes automatizados contínuos:
+As migrations oficiais V1–V24 e a B24 ficam em `backend/src/main/resources/db/migration/`. Não altere checksums, não execute `repair` para ocultar divergências e não use as cópias sintéticas para inicializar o banco original. O workflow `validation.yml` aplica e valida as migrations oficiais em outro PostgreSQL descartável.
 
-- **Testes Automatizados do Backend**:
-  ```bash
-  cd backend
-  .\mvnw.cmd clean test
-  # No Linux/macOS: ./mvnw clean test
-  ```
-  Executa a suíte de **477 testes** unitários, de segurança e de integração com PostgreSQL Neon (0 falhas, 0 erros, 0 ignorados).
+## Frontend e integração completa
 
-- **Testes Automatizados do Frontend**:
-  ```bash
-  cd frontend
-  npm test
-  ```
-  Executa a suíte de **306 testes** em 122 suites via Node.js Native Test Runner (`node:test` e `node:assert/strict` sobre `src/lib/*.test.ts`) com 0 falhas.
+O [guia do frontend](../frontend/README.md) reúne instalação, testes unitários, lint, TypeScript, build e Playwright. Use o build de produção antes dos testes de navegador. As suítes visuais geram capturas; não substitua evidências históricas versionadas sem revisão.
 
-- **Verificação de Tipagem TypeScript**:
-  ```bash
-  cd frontend
-  npx tsc --noEmit
-  ```
-  Valida strict mode sem erros de compilação (0 erros).
+Depois de compilar backend e frontend, na raiz:
 
-- **Linter de Código**:
-  ```bash
-  cd frontend
-  npm run lint
-  ```
-  Garante 0 erros e 0 warnings no ESLint.
+```powershell
+node --test scripts/homologation/tls-isolated.test.mjs
+node scripts/test-proxy-runtime.mjs
+$env:CI='true'
+node scripts/test-real-stack-local.mjs
+```
 
-- **Build de Produção do Frontend**:
-  ```bash
-  cd frontend
-  npm run build
-  ```
-  Compilação e otimização das 15 rotas estáticas e dinâmicas da aplicação.
+Execute a suíte Playwright padrão e a integração real em sequência, pois compartilham o diretório de resultados. O último script cria PostgreSQL e SMTP sintéticos e exige portas locais livres 15433, 1025, 8025, 8080, 8082 e 3000; ele remove apenas os containers identificados como seus. Valida 2FA, persistência, estoque/OS e limitador entre duas JVMs. Não exige credenciais Neon nem serviços remotos.
 
-- **Boas Práticas de versionamento:**
-  - Nunca commite arquivos `.env`, credenciais ou chaves privadas.
-  - O DBeaver pode ser utilizado para inspecionar o banco de dados Neon, mas alterações estruturais devem ser feitas exclusivamente via migrations Flyway versionadas.
+Os quatro workflows em `.github/workflows/` complementam essas verificações com imagens reproduzíveis, SBOM/Trivy, Gitleaks histórico e Nginx/TLS. Passar localmente não aprova o Neon original, IAM, DNS, SMTP real ou HTTPS externo. Consulte a [comparação antes/depois](repository-audit-20261108/README.md) e o [plano de homologação](deployment-google-cloud-run.md). Nenhum deploy é realizado por estes comandos de teste.

@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend — Oficina Gestão
 
-## Getting Started
+Next.js 16 (App Router), React 19, TypeScript e Tailwind CSS. O navegador usa `/api/*` na mesma origem; o proxy do Next encaminha as requisições ao Spring Boot. Somente o backend acessa o banco.
 
-First, run the development server:
+A partir deste diretório, com Node.js 22 e npm:
 
-```bash
+```powershell
+npm ci
+$env:INTERNAL_BACKEND_URL='http://127.0.0.1:8080'
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra `http://localhost:3000`. Configure banco, SMTP e conta inicial no backend seguindo o [guia de desenvolvimento](../docs/development.md). Credenciais de banco, JWT e SMTP pertencem somente ao backend; nunca use variáveis públicas para esses valores.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```powershell
+npm test
+node --test scripts/release-build-keys.test.mjs
+npm run lint
+npx tsc --noEmit
+npx tsc -p e2e/tsconfig.json --noEmit
+npm run build
+$env:CI='true'
+npx playwright test --project=chromium
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Instale o navegador com `npx playwright install chromium` antes do primeiro E2E. A suíte padrão usa APIs simuladas; a integração real com Spring, PostgreSQL e SMTP roda separadamente, conforme o [guia de testes](../docs/development.md). Execute as suítes em sequência para evitar conflito nos artefatos Playwright. Em porta alternativa, ajuste tanto `PLAYWRIGHT_PORT` quanto `E2E_BASE_URL`.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+O build também gera a saída standalone usada pelo Dockerfile. Build local aprovado não comprova publicação: consulte o [README principal](../README.md), o [plano Cloud Run](../docs/deployment-google-cloud-run.md) e a [auditoria do repositório restaurado](../docs/repository-audit-20261108/README.md). Homologação remota pendente; produção NO-GO.
