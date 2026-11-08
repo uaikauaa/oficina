@@ -11,7 +11,7 @@ Data: 08/11/2026. Base: `main` em `62e8f62d4166f5f9695c49e6588897e31777b038`.
 
 ## Inventário e limpeza
 
-O [inventário anterior às exclusões](inventory.csv) registra os 697 arquivos versionados, tamanho, SHA-256, função por categoria e risco inicial de remoção. A classificação é uma triagem reproduzível por caminho; não substitui a análise de uso de cada arquivo. O tamanho somado dos blobs da árvore inicial é 23.984.606 bytes; após a limpeza e a inclusão deste inventário e relatório, 24.121.255 bytes. O aumento vem da documentação de auditoria. Os diretórios de maior risco são backend, frontend, CI, migrations, infraestrutura e backup. As 25 migrations de produção (V1–V24 e B24) e suas cópias sintéticas de teste foram preservadas.
+O [inventário anterior às exclusões](inventory.csv) registra os 697 arquivos versionados, tamanho, SHA-256, função por categoria e risco inicial de remoção. A classificação é uma triagem reproduzível por caminho; não substitui a análise de uso de cada arquivo. O tamanho somado dos blobs da árvore inicial é 23.984.606 bytes; após a limpeza e a inclusão deste inventário e relatório, 24.121.312 bytes. O aumento vem da documentação de auditoria. Os diretórios de maior risco são backend, frontend, CI, migrations, infraestrutura e backup. As 25 migrations de produção (V1–V24 e B24) e suas cópias sintéticas de teste foram preservadas.
 
 Exclusões realizadas:
 
@@ -59,4 +59,4 @@ Descrição proposta: `Sistema web de gestão de oficinas com ordens de serviço
 
 Topics: `oficina-gestao`, `ordens-de-servico`, `controle-de-estoque`, `nextjs`, `spring-boot`, `postgresql`, `java`, `typescript`.
 
-Website: deixar vazio até comprovar publicação HTTPS. A integração GitHub disponível não expõe edição de descrição/topics; o CLI local não está autenticado. Estes campos dependem de edição manual em **Settings → General → About** ou de uma conexão com permissão de escrita para metadados.
+Descrição e oito topics foram atualizados no About pela API do GitHub em 08/11/2026 e conferidos por leitura posterior. O website permanece vazio até comprovar publicação HTTPS. A visibilidade pública do repositório não foi alterada.
