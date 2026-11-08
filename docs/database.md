@@ -1,6 +1,6 @@
 # Diretrizes de Banco de Dados — Oficina Gestão
 
-> **Atualização de 03/11/2026:** o schema atual usa Flyway V1–V24 e Spring Boot 4. Exemplos antigos neste documento com `sslmode=require` não devem ser usados no Neon de homologação/produção; exija `sslmode=verify-full`, CA confiável e hostname validado. Consulte o [README atual](../README.md).
+> **Atualização de 08/11/2026:** Spring Boot 4, Flyway V1–V24 imutáveis e baseline neutra B24 para bancos novos. Em Neon, exija `sslmode=verify-full`, CA confiável e hostname validado. A identidade e a conexão do banco original não foram validadas remotamente nesta auditoria. Consulte o [README atual](../README.md) e o [relatório da restauração](repository-audit-20261108/README.md).
 
 ## 1. Banco de Dados Oficial
 
@@ -9,7 +9,7 @@
   - **Desenvolvimento**: Neon Development Database
   - **Produção**: Neon Production Database
 - **Acesso**: Exclusivo pelo Backend (Spring Boot via Spring Data JPA / Hibernate)
-- **Regra de Infraestrutura**: O banco principal de desenvolvimento é o **Neon**, e **NÃO** um container PostgreSQL local. O Docker Desktop é reservado para Testcontainers e serviços auxiliares futuros.
+- **Separação de ambientes**: O banco original hospedado no Neon é preservado. Testes automatizados usam PostgreSQL descartável local, com identidade e variáveis `TEST_DB_*` próprias; nunca apontam ao banco original. Veja o [guia de desenvolvimento](development.md).
 
 ---
 
@@ -21,7 +21,7 @@ A conexão com o Neon é configurada estritamente via variáveis de ambiente ou 
 
 | Variável | Descrição | Exemplo |
 | :--- | :--- | :--- |
-| `DB_URL` | URL JDBC de conexão com o banco Neon | `jdbc:postgresql://<neon-host>/neondb?sslmode=require` |
+| `DB_URL` | URL JDBC de conexão com o banco Neon | `jdbc:postgresql://HOST.example.invalid/DB_NAME?sslmode=verify-full` |
 | `DB_USERNAME` | Usuário do banco de dados | `neondb_owner` |
 | `DB_PASSWORD` | Senha de acesso ao banco | `sua_senha_secreta` |
 
@@ -38,6 +38,8 @@ A conexão com o Neon é configurada estritamente via variáveis de ambiente ou 
    ```
 4. Os arquivos de migration residem exclusivamente no backend em:
    - `backend/src/main/resources/db/migration/`
+
+A B24 (`B24__neutral_initial_schema.sql`) fornece o schema inicial neutro em bancos novos. Históricos existentes continuam usando as migrations versionadas; não remova V1–V24 nem altere seus checksums. `node scripts/check-flyway-baseline.mjs` confere o manifesto histórico e a equivalência da baseline. O backend executa `migrate()` ao iniciar; por isso, iniciar a aplicação contra o banco original não é uma verificação somente leitura. Hibernate usa `ddl-auto=validate`, e não há `repair` automático.
 
 ---
 

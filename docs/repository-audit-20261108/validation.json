@@ -1,0 +1,202 @@
+{
+  "date": "2026-11-08",
+  "timezone": "America/Sao_Paulo",
+  "base": "62e8f62d4166f5f9695c49e6588897e31777b038",
+  "baseTree": "56c61a479f478c28b1b9e36d2f79804784723eac",
+  "inventory": {
+    "files": 697,
+    "checkoutBytes": 24120198,
+    "file": "inventory.csv",
+    "method": "Tracked files, checkout SHA-256, textual references and explicit convention consumers; no ignored files inventoried or removed."
+  },
+  "environment": {
+    "java": "21.0.12.1",
+    "nodeLocal": "24.21.0",
+    "npmLocal": "11.19.0",
+    "nodeCiAndImages": "22",
+    "postgres": "16-alpine",
+    "docker": "29.8.0"
+  },
+  "restoration": {
+    "pr": 19,
+    "merged": true,
+    "mainProtected": true,
+    "requiredChecks": 8,
+    "pr18Merged": false,
+    "workflows": [
+      42174782216,
+      42174782229,
+      42174782157,
+      42174782198
+    ],
+    "allRestorationJobs": "success"
+  },
+  "canonicalEvidence": [
+    {
+      "path": "docs/auditoria-independente-20261103/dependency-tree.txt",
+      "bytes": 10590,
+      "sha256": "c0c89f184fe1483a1fa3c1a984adf6643816939caedf392e6032ca461723774f"
+    },
+    {
+      "path": "docs/auditoria-independente-20261103/npm-audit-runtime.json",
+      "bytes": 389,
+      "sha256": "e78f7c5ab200d2b29aa1ccdcfe93e72ddcf3f8dd558b14b26b1ea2d50de42b8b"
+    }
+  ],
+  "npm": {
+    "full": {
+      "moderate": 8,
+      "high": 0,
+      "critical": 0
+    },
+    "runtime": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "before": [
+    {
+      "command": "backend/mvnw.cmd -B -ntp clean verify -Djunit.jupiter.execution.parallel.enabled=false",
+      "result": "PASS",
+      "log": "before-backend.log",
+      "sha256": "37301095dc285c866a0c45a9eb14254039efea3a643bfdeae312866c80c9c4ef"
+    },
+    {
+      "command": "npm test",
+      "result": "PASS",
+      "log": "before-unit.log",
+      "sha256": "f08baca7914dc41570bc5ddb6ff121001019d7a186bf1c054cc4a9b867db38c2"
+    },
+    {
+      "command": "node --test scripts/release-build-keys.test.mjs",
+      "result": "PASS",
+      "log": "before-build-keys.log",
+      "sha256": "56335bd9cfc4774a7e316d1d20c1a418a9925f4196a17d1676341761c7bf09e4"
+    },
+    {
+      "command": "npm run lint",
+      "result": "PASS",
+      "log": "before-lint.log",
+      "sha256": "1fab52d0ac089f94c4f67e4832298abdbb06382ba5033aefa09d34d1a6711727"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "result": "PASS",
+      "log": "before-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "npx tsc -p e2e/tsconfig.json --noEmit",
+      "result": "PASS",
+      "log": "before-e2e-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "command": "npm run build",
+      "result": "PASS",
+      "log": "before-build.log",
+      "sha256": "431ac43189c3587a1069ba35956bbad97716d07efc0f9e538eda2904798d87a8"
+    },
+    {
+      "command": "npm audit --audit-level=high",
+      "result": "PASS",
+      "log": "before-npm-audit.log",
+      "sha256": "1f3ab7e07c5b84df7d4ca1816c0111b3146204fb2aaa5789bf2b4b78ee464374"
+    },
+    {
+      "command": "CI=true PLAYWRIGHT_PORT=3108 E2E_BASE_URL=http://localhost:3108 npx playwright test --project=chromium",
+      "result": "PASS",
+      "log": "before-playwright-final.log",
+      "sha256": "9fead0a32b2c61258a1079f8f4e346757c3f175892d5b5f62ac810218401a828"
+    },
+    {
+      "command": "node scripts/test-proxy-runtime.mjs",
+      "result": "PASS",
+      "log": "before-proxy.log",
+      "sha256": "4ce9940cf4cf43634781d43bc9fc26ab9c711aadfebb42b9fac3fd77ae3957ee"
+    },
+    {
+      "command": "CI=true node scripts/test-real-stack-local.mjs",
+      "result": "PASS",
+      "log": "before-real-stack.log",
+      "sha256": "3e3063ca4c4cf63fc271da6e9f966fac3b16dd070c194fa6e14e229f06d8b910"
+    },
+    {
+      "command": "Flyway 11.14.1 migrate validate; official migrations, disposable PostgreSQL",
+      "result": "PASS",
+      "log": "before-flyway.log",
+      "sha256": "385604dc2eaa5e67136a14421f6da1722f733e57596434929c6879adc42681ef"
+    },
+    {
+      "command": "Nginx Docker build, nginx -t, trusted local TLS",
+      "result": "PASS",
+      "log": "before-nginx.log",
+      "sha256": "8769d1a3216ef0ad45386fe0c982a740d6a462b2f33754279a83207bd28dc2da"
+    },
+    {
+      "command": "node scripts/build-release-images.mjs --verify-reproducible",
+      "result": "PASS",
+      "log": "before-images.log",
+      "sha256": "bcd05a50eb1be0ef6e6f32da2f9c487f31d331217627a4e1f365c847a8a4adc5"
+    },
+    {
+      "command": "Trivy 0.74.0: two SBOMs, HIGH/CRITICAL vulnerabilities and secrets",
+      "result": "PASS",
+      "log": "before-scans.log",
+      "sha256": "612c44f027a500acc970a4307baee6ade3188cba8f1bf8f1fd3f8df311c1efd7"
+    },
+    {
+      "command": "gitleaks 8.30.1 git --redact=100 --log-opts=--all",
+      "result": "PASS",
+      "log": "before-gitleaks.log",
+      "sha256": "c5943fcfa7c62384cb3c1a81bc30595f593942f89502887ba2024f1f579000ea"
+    }
+  ],
+  "after": {
+    "result": "PENDING"
+  },
+  "beforeImages": {
+    "sourceSha": "62e8f62d4166f5f9695c49e6588897e31777b038",
+    "sourceDateEpoch": 1793947104,
+    "inputs": {
+      "platform": "linux/amd64",
+      "buildkit": "moby/buildkit:buildx-stable-1@sha256:c5f8862f52499773af85bc07695b2379ef08e8002352b0df2c4864c91d78dabe",
+      "maven": "maven:3.9.11-eclipse-temurin-21-alpine@sha256:922927df2c662cdd47ddb116443d6bec4696cfae3de1a0ddac8fcc7b87ce61ae",
+      "java": "eclipse-temurin:21-jre-alpine@sha256:82cf3d9ccbe1ed46252008d51b2f2329e6b9e8a2f4394c4bebefc3ea7f4b1372",
+      "node": "node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914"
+    },
+    "reproduced": true,
+    "images": {
+      "backend": {
+        "digest": "sha256:f3081f927a3daecbe929e6ebf6cfb5c642e2132b6f0d01398e003b70a29146a8",
+        "comparedDigests": [
+          "sha256:f3081f927a3daecbe929e6ebf6cfb5c642e2132b6f0d01398e003b70a29146a8",
+          "sha256:f3081f927a3daecbe929e6ebf6cfb5c642e2132b6f0d01398e003b70a29146a8"
+        ],
+        "archive": "backend-1.oci.tar"
+      },
+      "frontend": {
+        "digest": "sha256:63c109c49697bb5e558afe3843158f34cff3cd6b587abb1493757063ea9fa18f",
+        "comparedDigests": [
+          "sha256:63c109c49697bb5e558afe3843158f34cff3cd6b587abb1493757063ea9fa18f",
+          "sha256:63c109c49697bb5e558afe3843158f34cff3cd6b587abb1493757063ea9fa18f"
+        ],
+        "archive": "frontend-1.oci.tar"
+      }
+    },
+    "published": false
+  },
+  "remoteNeon": "NOT_TESTED: no confirmed original identity or rotated credentials in isolated worktree",
+  "dataChanges": "Only task-owned disposable local databases; no remote database connections",
+  "baselineInvocationIssues": [
+    "Unquoted Maven -D property was parsed by PowerShell; rerun quoted passed.",
+    "Alternative Playwright port initially lacked matching E2E_BASE_URL; corrected.",
+    "Concurrent mock and real Playwright runs shared output directory and lost one trace; full sequential rerun passed 119/119.",
+    "Trivy OCI input requires relative paths on Windows; corrected helper passed all scans."
+  ],
+  "rawLogs": "Task temporary directory only; raw logs and generated visual artifacts are not committed."
+}

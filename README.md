@@ -6,11 +6,27 @@ WebApp para operação de oficina técnica. O navegador acessa o frontend Next.j
 
 - Frontend: Next.js 16.4.1 (App Router), React 19, TypeScript, Tailwind CSS, React Hook Form e Zod. Node.js 22 para build.
 - Backend: Java 21, Spring Boot 4.0.9, Spring Security, Spring Data JPA, Flyway, Jakarta Validation e OpenAPI. Maven Wrapper incluído.
-- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelas migrations Flyway V1–V24.
+- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelo Flyway. V1–V24 preservam o histórico; bancos novos usam a baseline neutra B24 do PR #16.
 - Homologação planejada: dois serviços Google Cloud Run. O frontend é público; o backend deve ser **privado por IAM** e aceitar somente a identidade de serviço do frontend. O proxy do Next.js obtém o ID token no servidor, preservando cookies, CSRF e downloads PDF/CSV.
 - 2FA: envio de código por SMTP configurado no backend. Use um remetente e banco isolados para homologação.
 
 Nenhum deploy ou conexão com serviços de produção está implícito neste estado do repositório. **Homologação Google Cloud pendente; produção NO-GO.**
+
+## Estado da restauração e estrutura
+
+Em 08/11/2026, o [PR #19](https://github.com/uaikauaa/oficina/pull/19) está integrado. A base desta auditoria é `62e8f62d4166f5f9695c49e6588897e31777b038`, com árvore `56c61a479f478c28b1b9e36d2f79804784723eac`, idêntica ao estado anterior ao PR #17. O PR #18 permanece separado. O [relatório de auditoria e limpeza](docs/repository-audit-20261108/README.md) registra inventário, exclusões e testes. A conexão com o Neon original ainda precisa de validação remota.
+
+```text
+backend/    API Spring Boot, migrations Flyway e testes Maven
+frontend/   Next.js, componentes React, testes unitários e Playwright
+scripts/    Validação, build, auditoria e backup
+.github/    Workflows de CI, segurança e integração isolada
+docs/       Arquitetura, operação e evidências datadas
+nginx/      Proxy TLS para infraestrutura VPS/contingência
+ops/        Unidades systemd de backup
+```
+
+Dockerfiles ficam nos serviços; `docker-compose.yml` atende a infraestrutura VPS/contingência. O [guia de desenvolvimento](docs/development.md) detalha instalação e configuração do banco descartável para testes.
 
 ## Configuração
 
@@ -71,6 +87,7 @@ A integração real de navegador, PostgreSQL, Flyway e SMTP sintético roda pelo
 
 ## Documentação vigente
 
+- [Auditoria do repositório restaurado, inventário e comparação dos testes](docs/repository-audit-20261108/README.md)
 - [Preparação para homologação e estado da release](docs/release-pre-homologacao/README.md)
 - [Auditoria independente de segurança e limites](docs/auditoria-independente-20261103/README.md)
 - [Roteiro de homologação isolada](docs/security-hardening/homologacao.md)
