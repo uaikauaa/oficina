@@ -1,6 +1,15 @@
 # Oficina Gestão
 
+Sistema web para organizar o atendimento e a operação de uma oficina técnica. Reúne clientes, equipamentos, ordens de serviço, produtos, estoque, usuários e relatórios em uma interface responsiva.
+
 WebApp para operação de oficina técnica. O navegador acessa o frontend Next.js pela mesma origem; o frontend encaminha `/api/*` ao backend Spring Boot por REST/JSON; somente o backend acessa o PostgreSQL no Neon. Regras de negócio, autenticação, 2FA, validações e migrations permanecem no backend.
+
+## Funcionalidades
+
+- Cadastro e consulta de clientes, máquinas e produtos.
+- Abertura e acompanhamento de ordens de serviço, movimentações de estoque e relatórios com exportação PDF/CSV.
+- Gestão de usuários e permissões; autenticação com JWT, segundo fator por e-mail, proteção CSRF e limitação de requisições.
+- Interface responsiva com instalação PWA opcional.
 
 ## Stack e arquitetura
 
@@ -12,9 +21,20 @@ WebApp para operação de oficina técnica. O navegador acessa o frontend Next.j
 
 Nenhum deploy ou conexão com serviços de produção está implícito neste estado do repositório. **Homologação Google Cloud pendente; produção NO-GO.**
 
+## Estrutura do repositório
+
+| Diretório | Conteúdo |
+| --- | --- |
+| `backend/` | API Spring Boot, regras de negócio, testes e migrations Flyway |
+| `frontend/` | Aplicação Next.js, componentes, testes unitários e Playwright |
+| `docs/` | Guias de arquitetura, instalação, segurança e registros históricos |
+| `scripts/` | Verificações, build de imagens e rotinas operacionais |
+| `.github/workflows/` | CI, integração real e verificações de release |
+| `nginx/`, `ops/` | Configuração de proxy e backup |
+
 ## Configuração
 
-Os modelos são [desenvolvimento](.env.example), [homologação](.env.homolog.example) e [produção](.env.production.example). Copie o modelo apropriado para um arquivo `.env` local ignorado pelo Git ou configure as variáveis no serviço; nunca versione credenciais. Em Cloud Run, use referências distintas do Secret Manager.
+Os modelos são [desenvolvimento](.env.example), [homologação](.env.homolog.example) e [produção](.env.production.example). Copie o modelo apropriado para um arquivo `.env` local ignorado pelo Git ou configure as variáveis no serviço; nunca versione credenciais. Todos os arquivos `.env.*` sem sufixo `.example` são ignorados pelo Git. Em Cloud Run, use referências distintas do Secret Manager.
 
 | Variável | Destino | Finalidade |
 | --- | --- | --- |
@@ -68,6 +88,8 @@ npx playwright test --project=chromium
 ```
 
 A integração real de navegador, PostgreSQL, Flyway e SMTP sintético roda pelo workflow dedicado e por `node scripts/test-real-stack-local.mjs` em ambiente isolado.
+
+Para contribuir, abra uma branch a partir de `main`, mantenha mudanças de código e migrations em PRs revisáveis e execute os testes afetados. Não use dados do Neon operacional em testes. A CI verifica builds, testes, Flyway, Playwright e segredos no histórico. A branch principal exige revisão e verificações; confirme as regras atuais no GitHub antes de fazer merge.
 
 ## Documentação vigente
 

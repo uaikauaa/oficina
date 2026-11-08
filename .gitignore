@@ -4,6 +4,8 @@
 
 # Ambientes e Segredos (NUNCA commitados)
 .env
+.env.*
+!.env.*.example
 .env*.local
 .env.development
 .env.test
