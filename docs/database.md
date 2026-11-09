@@ -1,6 +1,6 @@
 # Diretrizes de Banco de Dados — Oficina Gestão
 
-> **Atualização de 03/11/2026:** o schema atual usa Flyway V1–V24 e Spring Boot 4. Exemplos antigos neste documento com `sslmode=require` não devem ser usados no Neon de homologação/produção; exija `sslmode=verify-full`, CA confiável e hostname validado. Consulte o [README atual](../README.md).
+> **Estado atual:** Spring Boot 4, migrations imutáveis V1–V24 e baseline B24 para bancos novos. No Neon, exija `sslmode=verify-full`, CA confiável e hostname validado. O catálogo de migrations abaixo preserva a evolução do schema. Consulte o [README](../README.md) e o [guia de testes isolados](development.md).
 
 ## 1. Banco de Dados Oficial
 
@@ -9,7 +9,7 @@
   - **Desenvolvimento**: Neon Development Database
   - **Produção**: Neon Production Database
 - **Acesso**: Exclusivo pelo Backend (Spring Boot via Spring Data JPA / Hibernate)
-- **Regra de Infraestrutura**: O banco principal de desenvolvimento é o **Neon**, e **NÃO** um container PostgreSQL local. O Docker Desktop é reservado para Testcontainers e serviços auxiliares futuros.
+- **Isolamento**: O Neon operacional é acessado exclusivamente pelo backend. Testes automatizados usam PostgreSQL descartável local; desenvolvimento pode usar um banco dedicado configurado no backend, sem reutilizar dados operacionais.
 
 ---
 
@@ -21,13 +21,15 @@ A conexão com o Neon é configurada estritamente via variáveis de ambiente ou 
 
 | Variável | Descrição | Exemplo |
 | :--- | :--- | :--- |
-| `DB_URL` | URL JDBC de conexão com o banco Neon | `jdbc:postgresql://<neon-host>/neondb?sslmode=require` |
+| `DB_URL` | URL JDBC de conexão com o banco Neon | `jdbc:postgresql://<neon-host>/<banco>?sslmode=verify-full` |
 | `DB_USERNAME` | Usuário do banco de dados | `neondb_owner` |
 | `DB_PASSWORD` | Senha de acesso ao banco | `sua_senha_secreta` |
 
 ---
 
 ## 3. Versionamento e Migrations (Flyway)
+
+A `B24__neutral_initial_schema.sql` é uma baseline migration para bancos vazios: cria o schema equivalente à cadeia V1–V24, sem cadastrar identidade empresarial ou credenciais reais. Um banco existente com histórico Flyway continua usando suas migrations versionadas; a B24 não substitui seus checksums. `node scripts/check-flyway-baseline.mjs` confere a imutabilidade das 24 migrations e a equivalência da baseline. Consultar o histórico de um banco remoto não autoriza executar `migrate` ou `repair` nele.
 
 1. Todas as alterações estruturais (DDL) e cargas iniciais (DML) são controladas exclusivamente pelo **Flyway**.
 2. O Hibernate está configurado com `ddl-auto=validate`, garantindo que **nunca** altere ou crie schemas automaticamente.

@@ -8,7 +8,7 @@
 
 ## Escopo e evidências
 
-- [Matriz das 83 combinações de método e rota](matriz-rotas.md), [inventário estruturado](rotas-api.json), com autenticação, autorização, CSRF, entrada e dados processados. A matriz testa a fronteira HTTP com Spring Test; não prova cada regra de negócio para todo corpo JSON.
+- [Matriz das 83 combinações de método e rota](../auditoria-independente-20261103/matriz-rotas.md), [inventário estruturado](rotas-api.json), com autenticação, autorização, CSRF, entrada e dados processados. A matriz testa a fronteira HTTP com Spring Test; não prova cada regra de negócio para todo corpo JSON. A cópia Markdown idêntica foi consolidada; o JSON local permanece porque é entrada do teste `IndependentRouteAuditTest`.
 - [SBOM CycloneDX do backend](sbom-backend.json), [Trivy backend](trivy-backend.json) e [Trivy frontend](trivy-frontend.json). As duas varreduras finais de imagem retornaram **0 CVEs** de severidade baixa a crítica. Isso descreve o banco de advisories e as imagens examinadas, não ausência de falhas desconhecidas.
 - `npm audit --omit=dev`: 0 alertas de runtime. O audit completo mantém 16 moderados em ferramentas de desenvolvimento, já registrados no [relatório anterior](../integracao-final/cves.md).
 - Java 21.0.12.1; `backend/./mvnw.cmd -B -ntp clean verify -Djunit.jupiter.execution.parallel.enabled=false` com PostgreSQL 16 descartável, `TEST_DB_*` explícitos e migrations sintéticas verificadas. Resultado final: ver seção **Testes**.

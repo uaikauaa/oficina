@@ -1,5 +1,7 @@
 # Auditoria de Segurança — Oficina Gestão
 
+> Registro histórico de 26/09/2026. Os achados descrevem o código daquela data; não representam o estado atual. Para decisões de segurança, consulte a [auditoria independente posterior](docs/auditoria-independente-20261103/README.md) e a [revisão do PR #21](docs/repository-audit/README.md).
+
 **Data:** 26 de setembro de 2026  
 **Escopo:** código original do WebApp, sem considerar Docker nem a configuração local de PostgreSQL.
 

@@ -15,7 +15,7 @@ WebApp para operação de oficina técnica. O navegador acessa o frontend Next.j
 
 - Frontend: Next.js 16.4.1 (App Router), React 19, TypeScript, Tailwind CSS, React Hook Form e Zod. Node.js 22 para build.
 - Backend: Java 21, Spring Boot 4.0.9, Spring Security, Spring Data JPA, Flyway, Jakarta Validation e OpenAPI. Maven Wrapper incluído.
-- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelas migrations Flyway V1–V24.
+- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelo Flyway. As migrations históricas V1–V24 permanecem imutáveis; a baseline B24 inicializa bancos novos com schema equivalente e dados iniciais neutros. Bancos existentes mantêm seu histórico versionado.
 - Homologação planejada: dois serviços Google Cloud Run. O frontend é público; o backend deve ser **privado por IAM** e aceitar somente a identidade de serviço do frontend. O proxy do Next.js obtém o ID token no servidor, preservando cookies, CSRF e downloads PDF/CSV.
 - 2FA: envio de código por SMTP configurado no backend. Use um remetente e banco isolados para homologação.
 
@@ -71,9 +71,11 @@ A interface fica em `http://localhost:3000`; a API local fica em `http://localho
 
 O `clean verify` exige PostgreSQL **descartável** em loopback, banco `oficina_gestao_test`, variáveis `TEST_DB_URL`, `TEST_DB_EXPECTED_PORT`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD` e `TEST_FLYWAY_LOCATION` apontando para `backend/src/test/resources/db/synthetic-migration`. O guard de testes rejeita fallback para `DB_URL` operacional. A CI executa essa configuração e também aplica as migrations reais em outro job isolado.
 
+Configure primeiro o banco descartável e exporte as variáveis conforme o [guia de desenvolvimento e testes](docs/development.md). O profile `test` não carrega o `.env` local; apenas copiar o modelo não configura a suíte.
+
 ```powershell
 cd backend
-.\mvnw.cmd -B -ntp clean verify
+.\mvnw.cmd -B -ntp clean verify '-Djunit.jupiter.execution.parallel.enabled=false'
 ```
 
 ```powershell

@@ -1,5 +1,7 @@
 # Triagem dos nove achados históricos
 
+Revisão do PR #21 em 08/11/2026: os nove fingerprints foram reabertos nos commits de origem. Os dois valores de `.env.example` são instruções textuais para gerar segredos; o valor de CI é usado apenas para interpolação de Compose com destinos `.invalid`; as fixtures entram em funções de hash, respostas mockadas ou asserções; a chave fraca é entrada de um teste que exige rejeição; o exemplo da API é truncado. As nove classificações abaixo permanecem válidas. Não foram ampliadas as exclusões do scanner e nenhum valor foi testado em um serviço externo.
+
 Data: 04/11/2026. Regra: `generic-api-key`, Gitleaks 8.30.1. Nenhum valor de chave/token foi reproduzido. Revisão do conteúdo e do uso no commit de origem, não apenas do nome do arquivo.
 
 | # | Origem | Classificação e evidência de uso | Ação |
