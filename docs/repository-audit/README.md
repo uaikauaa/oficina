@@ -26,9 +26,9 @@ Total: cinco exclusões de baixo risco e 52.516 bytes redundantes retirados da �
 | --- | ---: | ---: |
 | Main restaurada | 697 | 23.984.606 |
 | PR #21 antes desta revisão | 698 | 24.121.312 |
-| PR #21 revisado | 693 | 23.947.220 |
+| PR #21 revisado | 693 | 23.947.236 |
 
-Redução líquida: 37.386 bytes em relação à main e 174.092 bytes em relação ao head anterior do PR. A medição usa `git ls-tree -r -l` e não inclui `.git`, dependências instaladas, logs, arquivos privados ou backups. A exclusão na árvore atual não reduz os blobs já preservados no histórico Git.
+Redução líquida: 37.370 bytes em relação à main e 174.076 bytes em relação ao head anterior do PR. A medição usa `git ls-tree -r -l` e não inclui `.git`, dependências instaladas, logs, arquivos privados ou backups. A exclusão na árvore atual não reduz os blobs já preservados no histórico Git.
 
 O conteúdo de `docs/development.md` foi consolidado em um guia atual, com configuração completa do guard de banco e comandos PowerShell testados. O README e `docs/database.md` descrevem V1–V24 e B24 corretamente. Relatórios anteriores foram identificados como históricos. A regra de `.gitignore` foi corrigida para preservar `.env.example` e proteger também arquivos como `backup.env`.
 

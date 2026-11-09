@@ -8,7 +8,7 @@ Copie `.env.example` para `.env` na raiz e configure um PostgreSQL de desenvolvi
 
 O bootstrap `INITIAL_ADMIN_*` cria a conta apenas quando ainda não existem usuários. Alterar sua senha no ambiente não redefine a senha de uma conta existente. Remova as variáveis de bootstrap após o provisionamento.
 
-Inicie o backend com `backend/mvnw.cmd spring-boot:run` e, em outro terminal dentro de `frontend/`, execute `npm ci` e `npm run dev`. Abra `http://localhost:3000`. O proxy `/api/*` encaminha ao Spring em `http://localhost:8080`, sem acesso do navegador ao PostgreSQL.
+Em um terminal dentro de `backend/`, execute `.\mvnw.cmd spring-boot:run`. Em outro terminal dentro de `frontend/`, execute `npm ci` e `npm run dev`. Abra `http://localhost:3000`. O proxy `/api/*` encaminha ao Spring em `http://localhost:8080`, sem acesso do navegador ao PostgreSQL.
 
 ## Backend com PostgreSQL descartável
 
