@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oficinagestao.dto.*;
@@ -45,7 +46,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Criar cliente Pessoa Física com sucesso deve retornar 201 Created")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveCriarClientePessoaFisicaComSucesso() throws Exception {
         EnderecoDTO endereco = new EnderecoDTO(
                 null,
@@ -89,7 +90,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Criar cliente Pessoa Jurídica com sucesso deve retornar 201 Created")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveCriarClientePessoaJuridicaComSucesso() throws Exception {
         EnderecoDTO endereco = new EnderecoDTO(
                 null,
@@ -131,7 +132,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Criar cliente com CPF duplicado deve retornar 409 Conflict")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar409QuandoCpfDuplicado() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.FISICA,
@@ -169,7 +170,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Criar cliente com CNPJ duplicado deve retornar 409 Conflict")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar409QuandoCnpjDuplicado() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.JURIDICA,
@@ -207,7 +208,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Criar cliente com telefone duplicado deve retornar 409 Conflict")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar409QuandoTelefoneDuplicado() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.FISICA,
@@ -245,7 +246,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Validação de campos obrigatórios ao criar cliente deve retornar 400 Bad Request")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar400QuandoCamposObrigatoriosAusentes() throws Exception {
         ClienteCreateDTO invalido = new ClienteCreateDTO(
                 null, // Tipo obrigatório
@@ -270,7 +271,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Buscar cliente por ID inexistente deve retornar 404 Not Found")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar404QuandoClienteInexistente() throws Exception {
         mockMvc.perform(get("/api/clientes/{id}", 999999L))
                 .andExpect(status().isNotFound())
@@ -280,7 +281,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Buscar cliente por ID existente deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveBuscarClientePorIdComSucesso() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.FISICA,
@@ -304,7 +305,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Listar clientes com busca e paginação deve retornar 200 OK e PageResponse")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveListarClientesComPaginacaoEBusca() throws Exception {
         Cliente c1 = new Cliente(TipoPessoa.FISICA, "Bruno Soldador", null, "10101010101", null, "31911112222", null, "bruno@email.com", null);
         Cliente c2 = new Cliente(TipoPessoa.JURIDICA, "Eletro Mecânica Bruno LTDA", "Bruno Eletro", "20202020000120", null, "31922223333", null, "contato@brunoeletro.com", null);
@@ -324,7 +325,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Editar cliente com sucesso deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveEditarClienteComSucesso() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.FISICA,
@@ -366,7 +367,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("Inativar e ativar cliente via PATCH deve alterar status com sucesso")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveInativarEAtivarCliente() throws Exception {
         Cliente cliente = new Cliente(
                 TipoPessoa.FISICA,
@@ -398,7 +399,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("BUG-003: Deve rejeitar cliente com CPF duplicado mesmo que um esteja formatado e outro apenas números")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRejeitarCpfDuplicadoMesmoComMascaraDiferente() throws Exception {
         ClienteCreateDTO cliente1 = new ClienteCreateDTO(
                 TipoPessoa.FISICA,
@@ -440,7 +441,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("BUG-003: Deve rejeitar CPF com todos os dígitos iguais")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRejeitarCpfComTodosDigitosIguais() throws Exception {
         ClienteCreateDTO cliente = new ClienteCreateDTO(
                 TipoPessoa.FISICA,
@@ -464,7 +465,7 @@ class ClienteControllerTest {
 
     @Test
     @DisplayName("BUG-003: Deve rejeitar CPF com quantidade de dígitos incorreta")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRejeitarCpfComTamanhoInvalido() throws Exception {
         ClienteCreateDTO cliente = new ClienteCreateDTO(
                 TipoPessoa.FISICA,

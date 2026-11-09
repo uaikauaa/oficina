@@ -1,4 +1,5 @@
 package com.oficinagestao.exception;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class GlobalExceptionHandlerTest {
     @TestConfiguration
     static class ExceptionTestEndpointsConfig {
         @RestController
-        @RequestMapping("/api/test-exceptions")
+        @RequestMapping("/test-exceptions")
         static class TestExceptionController {
             @GetMapping("/not-found")
             public void throwNotFound() {
@@ -98,21 +99,21 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Deve retornar 404 NOT_FOUND para ResourceNotFoundException")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn404OnResourceNotFound() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/not-found"))
+        mockMvc.perform(get("/test-exceptions/not-found"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.message").value("Cliente com ID 42 não localizado."))
-                .andExpect(jsonPath("$.path").value("/api/test-exceptions/not-found"));
+                .andExpect(jsonPath("$.path").value("/test-exceptions/not-found"));
     }
 
     @Test
     @DisplayName("Deve retornar 409 CONFLICT para ConflictException")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn409OnConflict() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/conflict"))
+        mockMvc.perform(get("/test-exceptions/conflict"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("CONFLICT"))
@@ -121,9 +122,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Deve retornar 400 BUSINESS_ERROR para BusinessException")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn400OnBusinessException() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/business"))
+        mockMvc.perform(get("/test-exceptions/business"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("BUSINESS_ERROR"))
@@ -132,9 +133,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Deve retornar 500 INTERNAL_ERROR genérico sem expor stack trace em erros inesperados")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn500WithoutStackTrace() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/internal"))
+        mockMvc.perform(get("/test-exceptions/internal"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.status").value(500))
                 .andExpect(jsonPath("$.error").value("INTERNAL_ERROR"))
@@ -145,9 +146,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("RISK-002: Deve retornar 409 CONFLICT para DataIntegrityViolationException")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn409OnDataIntegrityViolation() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/data-integrity"))
+        mockMvc.perform(get("/test-exceptions/data-integrity"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("CONFLICT"))
@@ -156,21 +157,21 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST para MethodArgumentTypeMismatchException (enum inválido em query param)")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn400OnTypeMismatchEnum() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/enum-param").param("tipo", "INVALIDO"))
+        mockMvc.perform(get("/test-exceptions/enum-param").param("tipo", "INVALIDO"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Parâmetro 'tipo' com valor inválido: 'INVALIDO'")))
-                .andExpect(jsonPath("$.path").value("/api/test-exceptions/enum-param"));
+                .andExpect(jsonPath("$.path").value("/test-exceptions/enum-param"));
     }
 
     @Test
     @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST para IllegalArgumentException")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn400OnIllegalArgument() throws Exception {
-        mockMvc.perform(get("/api/test-exceptions/illegal-argument"))
+        mockMvc.perform(get("/test-exceptions/illegal-argument"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.error").value("BAD_REQUEST"))
@@ -179,7 +180,7 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("UX-006: Deve retornar 400 BAD_REQUEST em endpoint real /api/produtos com enum inválido")
-    @WithMockUser(authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn400OnProdutosEndpointWithInvalidEnum() throws Exception {
         mockMvc.perform(get("/api/produtos").param("tipo", "TIPO_INEXISTENTE"))
                 .andExpect(status().isBadRequest())

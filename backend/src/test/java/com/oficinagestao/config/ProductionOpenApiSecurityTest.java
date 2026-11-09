@@ -44,7 +44,8 @@ class ProductionOpenApiSecurityTest {
             "MAIL_USERNAME=ci-test@oficinagestao.local",
             "MAIL_PASSWORD=ci-test-fake-password",
             "MAIL_SMTP_AUTH=true",
-            "MAIL_SMTP_STARTTLS=true"
+            "MAIL_SMTP_STARTTLS=true",
+            "APP_PUBLIC_URL=https://app.oficinagestao.com.br"
     })
     @AutoConfigureMockMvc
     @ActiveProfiles("prod")

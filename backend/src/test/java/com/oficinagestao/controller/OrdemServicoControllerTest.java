@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oficinagestao.dto.*;
@@ -96,7 +97,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Criar OS com sucesso deve retornar 201 Created")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveCriarOrdemServicoComSucesso() throws Exception {
         OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
                 cliente1.getId(),
@@ -126,7 +127,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Tentar criar OS vinculando equipamento de outro cliente deve retornar 400 Bad Request com mensagem explicativa")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void naoDevePermitirOSComEquipamentoDeOutroCliente() throws Exception {
         // Tentativa inválida: cliente1 com maquinaCliente2 (pertence ao cliente2)
         OrdemServicoCreateDTO dto = new OrdemServicoCreateDTO(
@@ -150,7 +151,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("ISSUE-001: Criar OS com cliente inativo deve retornar 400 Bad Request")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void naoDeveCriarOrdemServicoComClienteInativo() throws Exception {
         cliente1.setAtivo(false);
         clienteRepository.save(cliente1);
@@ -176,7 +177,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("ISSUE-001: Criar OS com máquina inativa deve retornar 400 Bad Request")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void naoDeveCriarOrdemServicoComMaquinaInativa() throws Exception {
         maquinaCliente1.setAtivo(false);
         maquinaRepository.save(maquinaCliente1);
@@ -202,7 +203,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Listar Ordens de Serviço autenticado deve retornar 200 OK e PageResponse")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveListarOrdensServico() throws Exception {
         // Cria uma OS prévia
         OrdemServico os = new OrdemServico();
@@ -222,7 +223,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Buscar OS por ID existente deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveBuscarOrdemPorId() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-TEST-002");
@@ -240,7 +241,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Atualizar OS existente deve retornar 200 OK com valores recalculados")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveAtualizarOrdemServico() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-TEST-003");
@@ -276,7 +277,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Avançar status da OS para PRONTA com testes técnicos deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveAvançarStatusParaProntaComTestes() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-TEST-004");
@@ -302,7 +303,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Consultar histórico de OS por cliente deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveListarHistoricoPorCliente() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-CLI-001");
@@ -320,7 +321,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Consultar histórico de OS por equipamento deve retornar 200 OK")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveListarHistoricoPorMaquina() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-MAQ-001");
@@ -342,7 +343,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Fase 6.4.1 - Teste 12 e 13: GET /api/ordens-servico/{id}/recibo com autenticação gera PDF com filename RECIBO-OS-... e Content-Type application/pdf")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void gerarRecibo_comSucesso() throws Exception {
         OrdemServico os = new OrdemServico();
         os.setNumeroOs("OS-REC-001");
@@ -364,7 +365,7 @@ class OrdemServicoControllerTest {
 
     @Test
     @DisplayName("Fase 6.4.1 - Teste 3: GET /api/ordens-servico/{id}/recibo para OS inexistente retorna 404 Not Found")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void gerarRecibo_osInexistente_deveRetornar404() throws Exception {
         mockMvc.perform(get("/api/ordens-servico/{id}/recibo", 999999L))
                 .andExpect(status().isNotFound());

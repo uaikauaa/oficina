@@ -51,26 +51,26 @@ class ProductionMigrationPathTest {
         try (var db = new Database()) {
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public'", Integer.class));
             Flyway flyway = db.production();
-            assertEquals(1, flyway.migrate().migrationsExecuted);
+            assertEquals(2, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals(List.of("B24__neutral_initial_schema.sql"), db.jdbc.queryForList(
+            assertEquals(List.of("B24__neutral_initial_schema.sql", "V25__admin_rbac.sql"), db.jdbc.queryForList(
                     "SELECT script FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank", String.class));
             assertEquals("SQL_BASELINE", db.jdbc.queryForObject("SELECT type FROM flyway_schema_history WHERE version='24'", String.class));
-            assertEquals("24", flyway.info().current().getVersion().getVersion());
+            assertEquals("25", flyway.info().current().getVersion().getVersion());
             assertNeutralDatabase(db);
             var before = businessData(db);
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals(before, businessData(db));
 
             // Prove that B24 does not prevent future versioned migrations from running normally.
-            Path future = directory.resolve("V25__synthetic_future_probe.sql");
+            Path future = directory.resolve("V26__synthetic_future_probe.sql");
             Files.writeString(future, "CREATE TABLE synthetic_future_probe (id integer PRIMARY KEY);\n");
             Flyway next = Flyway.configure().dataSource(db.source)
                     .locations("classpath:db/migration", "filesystem:" + directory.toAbsolutePath())
                     .baselineOnMigrate(false).load();
             assertEquals(1, next.migrate().migrationsExecuted);
             next.validate();
-            assertEquals("25", next.info().current().getVersion().getVersion());
+            assertEquals("26", next.info().current().getVersion().getVersion());
         }
     }
 
@@ -78,7 +78,7 @@ class ProductionMigrationPathTest {
     void productionBaselineHasTheSameSchemaAsTheFullHistoricalChain() throws Exception {
         try (var fresh = new Database(); var legacy = new Database()) {
             fresh.production().migrate();
-            legacy.synthetic("24").migrate();
+            legacy.synthetic("25").migrate();
             assertEquals(schema(legacy), schema(fresh), "Columns, defaults, constraints, indexes, sequences, functions and triggers must match");
             assertEquals(legacy.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"), fresh.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"));
             assertEquals(legacy.jdbc.queryForList("SELECT nome, descricao, ativo FROM categorias ORDER BY nome"),
@@ -92,14 +92,14 @@ class ProductionMigrationPathTest {
             legacyFixture(db, resolver, "21");
             var before = businessData(db);
             Flyway flyway = db.production();
-            assertEquals(3, flyway.migrate().migrationsExecuted);
+            assertEquals(4, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals("24", flyway.info().current().getVersion().getVersion());
+            assertEquals("25", flyway.info().current().getVersion().getVersion());
             // V22 widens a numeric column; V23/V24 add empty security tables.
             var after = businessData(db);
             after.keySet().removeIf(name -> name.startsWith("security_rate_"));
             assertEquals(before, after);
-            assertEquals(24, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
+            assertEquals(25, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE script LIKE 'B%'", Integer.class));
         }
     }
@@ -111,10 +111,10 @@ class ProductionMigrationPathTest {
             var before = businessData(db);
             var history = db.jdbc.queryForList("SELECT * FROM flyway_schema_history ORDER BY installed_rank");
             Flyway flyway = db.production();
+            assertEquals(1, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals(before, businessData(db));
-            assertEquals(history, db.jdbc.queryForList("SELECT * FROM flyway_schema_history ORDER BY installed_rank"));
+            assertEquals(history, db.jdbc.queryForList("SELECT * FROM flyway_schema_history WHERE installed_rank <= 24 ORDER BY installed_rank"));
             db.jdbc.update("UPDATE flyway_schema_history SET checksum=checksum+1 WHERE version='11'");
             var changed = db.jdbc.queryForObject("SELECT checksum FROM flyway_schema_history WHERE version='11'", Integer.class);
             assertThrows(org.flywaydb.core.api.exception.FlywayValidateException.class, flyway::migrate);
@@ -141,7 +141,7 @@ class ProductionMigrationPathTest {
         for (String column : List.of("nome_empresarial", "cnpj", "responsavel", "telefone", "email", "logradouro", "numero", "bairro", "cep", "municipio", "uf"))
             assertNull(row.get(column), "A new configuration must not invent identity/contact data: " + column);
         for (var entry : businessData(db).entrySet()) {
-            int expected = switch (entry.getKey()) { case "configuracao_oficina", "roles" -> 1; case "categorias" -> 6; default -> 0; };
+            int expected = switch (entry.getKey()) { case "configuracao_oficina" -> 1; case "categorias" -> 6; default -> 0; };
             assertEquals(expected, entry.getValue().size(), "Unexpected seed rows in " + entry.getKey());
         }
     }
@@ -163,7 +163,9 @@ class ProductionMigrationPathTest {
 
     private static Map<String, List<String>> businessData(Database db) {
         Map<String, List<String>> result = new LinkedHashMap<>();
-        for (String table : db.jdbc.queryForList("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'flyway_schema_history' ORDER BY tablename", String.class)) {
+        for (String table : db.jdbc.queryForList("SELECT tablename FROM pg_tables WHERE schemaname='public' "
+                + "AND tablename NOT IN ('flyway_schema_history','roles','role_permissoes','permissoes',"
+                + "'convites_usuarios','eventos_administrativos') ORDER BY tablename", String.class)) {
             assertTrue(table.matches("[a-z_]+"));
             result.put(table, db.jdbc.queryForList("SELECT row_to_json(t)::text FROM " + table + " t ORDER BY row_to_json(t)::text", String.class));
         }

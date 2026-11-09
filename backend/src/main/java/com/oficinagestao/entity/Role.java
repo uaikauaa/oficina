@@ -5,10 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "roles")
@@ -23,6 +29,12 @@ public class Role {
 
     @Column(length = 255)
     private String descricao;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "role_permissoes",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permissao_id"))
+    private Set<Permissao> permissoes = new HashSet<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -65,6 +77,8 @@ public class Role {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
+    public Set<Permissao> getPermissoes() { return permissoes; }
 
     public OffsetDateTime getCreatedAt() {
         return createdAt;

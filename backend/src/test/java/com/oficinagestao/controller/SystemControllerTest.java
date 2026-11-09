@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class SystemControllerTest {
 
     @Test
     @DisplayName("GET /api/system/status autenticado com ROLE_ADMIN deve retornar 200 com informações operacionais seguras")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturnSystemStatusWhenAuthenticatedAsAdmin() throws Exception {
         mockMvc.perform(get("/api/system/status"))
                 .andExpect(status().isOk())

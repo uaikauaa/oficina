@@ -96,8 +96,38 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/2fa/**").permitAll()
-                            // Qualquer outro endpoint da API exige autenticação com ROLE_ADMIN
-                            .requestMatchers("/api/**").hasAuthority("ROLE_ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/auth/convites/aceitar").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+                            .requestMatchers(HttpMethod.PUT, "/api/auth/alterar-senha").authenticated();
+
+                    for (OperationalPermissionCatalog.Rule rule : OperationalPermissionCatalog.RULES) {
+                        auth.requestMatchers(rule.method(), rule.path())
+                                .hasAuthority("PERM_" + rule.permission());
+                    }
+                    auth.requestMatchers(HttpMethod.GET, "/api/admin/resumo").hasAuthority("PERM_usuarios.visualizar")
+                            .requestMatchers(HttpMethod.GET, "/api/admin/usuarios").hasAuthority("PERM_usuarios.visualizar")
+                            .requestMatchers(HttpMethod.PATCH, "/api/admin/usuarios/{id}/status")
+                            .hasAuthority("PERM_usuarios.gerenciar")
+                            .requestMatchers(HttpMethod.PUT, "/api/admin/usuarios/{id}/papeis")
+                            .hasAuthority("PERM_usuarios.gerenciar")
+                            .requestMatchers(HttpMethod.POST, "/api/admin/usuarios/{id}/revogar-sessoes")
+                            .hasAuthority("PERM_seguranca.revogar")
+                            .requestMatchers(HttpMethod.POST, "/api/admin/convites")
+                            .hasAuthority("PERM_usuarios.gerenciar")
+                            .requestMatchers(HttpMethod.POST, "/api/admin/provisionamento/super-admin")
+                            .hasAuthority("ROLE_ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/admin/papeis", "/api/admin/permissoes")
+                            .hasAuthority("PERM_papeis.gerenciar")
+                            .requestMatchers(HttpMethod.POST, "/api/admin/papeis")
+                            .hasAuthority("PERM_papeis.gerenciar")
+                            .requestMatchers(HttpMethod.PUT, "/api/admin/papeis/{id}")
+                            .hasAuthority("PERM_papeis.gerenciar")
+                            .requestMatchers(HttpMethod.GET, "/api/admin/auditoria")
+                            .hasAuthority("PERM_auditoria.visualizar")
+                            .requestMatchers(HttpMethod.GET, "/api/admin/infraestrutura")
+                            .hasAuthority("PERM_infraestrutura.visualizar")
+                            .requestMatchers("/api/admin/**").denyAll()
+                            .requestMatchers("/api/**").denyAll()
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(ex -> ex

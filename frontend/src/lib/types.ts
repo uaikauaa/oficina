@@ -114,6 +114,7 @@ export interface CurrentUser {
   nome: string;
   email: string;
   roles: string[];
+  permissoes?: string[];
 }
 
 export interface LoginPayload {
