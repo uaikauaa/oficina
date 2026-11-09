@@ -1,5 +1,7 @@
 # Release pré-homologação — auditoria de 03/11/2026
 
+> Registro histórico dessa release. As decisões de preservação e os caminhos abaixo descrevem o inventário de 03/11; a [revisão posterior do PR #21](../repository-audit/README.md) registra novas consolidações e os testes atuais.
+
 **Escopo:** integração de código e limpeza documental. Nenhum deploy, acesso ao Neon de produção ou exclusão de branch remota foi realizado. O estado abaixo é verificado por SHA; a homologação Google Cloud será uma tarefa separada.
 
 ## Vereditos

@@ -1,20 +1,40 @@
 # Oficina Gestão
 
+Sistema web para organizar o atendimento e a operação de uma oficina técnica. Reúne clientes, equipamentos, ordens de serviço, produtos, estoque, usuários e relatórios em uma interface responsiva.
+
 WebApp para operação de oficina técnica. O navegador acessa o frontend Next.js pela mesma origem; o frontend encaminha `/api/*` ao backend Spring Boot por REST/JSON; somente o backend acessa o PostgreSQL no Neon. Regras de negócio, autenticação, 2FA, validações e migrations permanecem no backend.
+
+## Funcionalidades
+
+- Cadastro e consulta de clientes, máquinas e produtos.
+- Abertura e acompanhamento de ordens de serviço, movimentações de estoque e relatórios com exportação PDF/CSV.
+- Gestão de usuários e permissões; autenticação com JWT, segundo fator por e-mail, proteção CSRF e limitação de requisições.
+- Interface responsiva com instalação PWA opcional.
 
 ## Stack e arquitetura
 
 - Frontend: Next.js 16.4.1 (App Router), React 19, TypeScript, Tailwind CSS, React Hook Form e Zod. Node.js 22 para build.
 - Backend: Java 21, Spring Boot 4.0.9, Spring Security, Spring Data JPA, Flyway, Jakarta Validation e OpenAPI. Maven Wrapper incluído.
-- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelas migrations Flyway V1–V24.
+- Banco: PostgreSQL no Neon; schema controlado exclusivamente pelo Flyway. As migrations históricas V1–V24 permanecem imutáveis; a baseline B24 inicializa bancos novos com schema equivalente e dados iniciais neutros. Bancos existentes mantêm seu histórico versionado.
 - Homologação planejada: dois serviços Google Cloud Run. O frontend é público; o backend deve ser **privado por IAM** e aceitar somente a identidade de serviço do frontend. O proxy do Next.js obtém o ID token no servidor, preservando cookies, CSRF e downloads PDF/CSV.
 - 2FA: envio de código por SMTP configurado no backend. Use um remetente e banco isolados para homologação.
 
 Nenhum deploy ou conexão com serviços de produção está implícito neste estado do repositório. **Homologação Google Cloud pendente; produção NO-GO.**
 
+## Estrutura do repositório
+
+| Diretório | Conteúdo |
+| --- | --- |
+| `backend/` | API Spring Boot, regras de negócio, testes e migrations Flyway |
+| `frontend/` | Aplicação Next.js, componentes, testes unitários e Playwright |
+| `docs/` | Guias de arquitetura, instalação, segurança e registros históricos |
+| `scripts/` | Verificações, build de imagens e rotinas operacionais |
+| `.github/workflows/` | CI, integração real e verificações de release |
+| `nginx/`, `ops/` | Configuração de proxy e backup |
+
 ## Configuração
 
-Os modelos são [desenvolvimento](.env.example), [homologação](.env.homolog.example) e [produção](.env.production.example). Copie o modelo apropriado para um arquivo `.env` local ignorado pelo Git ou configure as variáveis no serviço; nunca versione credenciais. Em Cloud Run, use referências distintas do Secret Manager.
+Os modelos são [desenvolvimento](.env.example), [homologação](.env.homolog.example) e [produção](.env.production.example). Copie o modelo apropriado para um arquivo `.env` local ignorado pelo Git ou configure as variáveis no serviço; nunca versione credenciais. Todos os arquivos `.env.*` sem sufixo `.example` são ignorados pelo Git. Em Cloud Run, use referências distintas do Secret Manager.
 
 | Variável | Destino | Finalidade |
 | --- | --- | --- |
@@ -51,9 +71,11 @@ A interface fica em `http://localhost:3000`; a API local fica em `http://localho
 
 O `clean verify` exige PostgreSQL **descartável** em loopback, banco `oficina_gestao_test`, variáveis `TEST_DB_URL`, `TEST_DB_EXPECTED_PORT`, `TEST_DB_USERNAME`, `TEST_DB_PASSWORD` e `TEST_FLYWAY_LOCATION` apontando para `backend/src/test/resources/db/synthetic-migration`. O guard de testes rejeita fallback para `DB_URL` operacional. A CI executa essa configuração e também aplica as migrations reais em outro job isolado.
 
+Configure primeiro o banco descartável e exporte as variáveis conforme o [guia de desenvolvimento e testes](docs/development.md). O profile `test` não carrega o `.env` local; apenas copiar o modelo não configura a suíte.
+
 ```powershell
 cd backend
-.\mvnw.cmd -B -ntp clean verify
+.\mvnw.cmd -B -ntp clean verify '-Djunit.jupiter.execution.parallel.enabled=false'
 ```
 
 ```powershell
@@ -68,6 +90,8 @@ npx playwright test --project=chromium
 ```
 
 A integração real de navegador, PostgreSQL, Flyway e SMTP sintético roda pelo workflow dedicado e por `node scripts/test-real-stack-local.mjs` em ambiente isolado.
+
+Para contribuir, abra uma branch a partir de `main`, mantenha mudanças de código e migrations em PRs revisáveis e execute os testes afetados. Não use dados do Neon operacional em testes. A CI verifica builds, testes, Flyway, Playwright e segredos no histórico. A branch principal exige revisão e verificações; confirme as regras atuais no GitHub antes de fazer merge.
 
 ## Documentação vigente
 
