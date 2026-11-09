@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oficinagestao.dto.StatusUpdateDTO;
@@ -64,7 +65,7 @@ class ProdutoControllerTest {
 
     @Test
     @DisplayName("GET /api/produtos com enum inválido deve retornar 400 Bad Request (UX-006)")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar400QuandoEnumInvalidoNaUrl() throws Exception {
         mockMvc.perform(get("/api/produtos").param("tipo", "ENUM_INEXISTENTE"))
                 .andExpect(status().isBadRequest())
@@ -75,7 +76,7 @@ class ProdutoControllerTest {
 
     @Test
     @DisplayName("GET /api/produtos/{id} com ID não numérico deve retornar 400 Bad Request (UX-006)")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar400QuandoIdNaoNumerico() throws Exception {
         mockMvc.perform(get("/api/produtos/id-invalido"))
                 .andExpect(status().isBadRequest())
@@ -86,7 +87,7 @@ class ProdutoControllerTest {
 
     @Test
     @DisplayName("PATCH /api/produtos/{id}/status com payload correto deve inativar produto com sucesso (UX-006)")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveInativarProdutoComSucesso() throws Exception {
         Produto p = criarProdutoTeste("TEST-P01", "Diodo Rápido 60A", TipoProduto.PECA, true);
 
@@ -102,7 +103,7 @@ class ProdutoControllerTest {
 
     @Test
     @DisplayName("PATCH /api/produtos/{id}/status com payload correto deve reativar produto com sucesso (UX-006)")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveReativarProdutoComSucesso() throws Exception {
         Produto p = criarProdutoTeste("TEST-P02", "IGBT 1200V", TipoProduto.PECA, false);
 
@@ -118,7 +119,7 @@ class ProdutoControllerTest {
 
     @Test
     @DisplayName("PATCH /api/produtos/{id}/status sem corpo deve retornar 400 Bad Request (contrato preservado)")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void deveRetornar400QuandoPatchStatusSemCorpo() throws Exception {
         Produto p = criarProdutoTeste("TEST-P03", "Bico Tocha TIG", TipoProduto.CONSUMIVEL, true);
 

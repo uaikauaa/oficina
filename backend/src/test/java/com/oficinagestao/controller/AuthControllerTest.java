@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oficinagestao.dto.*;
@@ -333,7 +334,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("GET /api/auth/me autenticado com ROLE_ADMIN deve retornar 200 com dados da usuária")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn200WhenAuthenticated() throws Exception {
         CurrentUserResponse user = new CurrentUserResponse(1L, "Proprietária", "admin@oficina.com", Set.of("ROLE_ADMIN"));
         when(authService.getCurrentUser("admin@oficina.com")).thenReturn(user);
@@ -371,7 +372,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("PUT /api/auth/alterar-senha autenticado com dados válidos deve retornar 200 e mensagem de sucesso")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn200OnSuccessfulAlterarSenha() throws Exception {
         AlterarSenhaRequest request = new AlterarSenhaRequest("SenhaAtual@123", "NovaSenha@1234", "NovaSenha@1234");
 
@@ -386,7 +387,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("PUT /api/auth/alterar-senha com senha atual incorreta deve retornar 400")
-    @WithMockUser(username = "admin@oficina.com", authorities = {"ROLE_ADMIN"})
+    @WithOperationalUser
     void shouldReturn400WhenCurrentPasswordIsIncorrect() throws Exception {
         org.mockito.Mockito.doThrow(new com.oficinagestao.exception.BusinessException("Senha atual incorreta."))
                 .when(authService).alterarSenha(eq("admin@oficina.com"), any(AlterarSenhaRequest.class), any());

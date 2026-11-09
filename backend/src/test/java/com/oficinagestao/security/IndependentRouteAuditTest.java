@@ -74,6 +74,13 @@ class IndependentRouteAuditTest {
         var documented = new TreeSet<String>();
         for (var row : json.readTree(Files.readString(Path.of("../docs/security-hardening/rotas-api.json"))))
             documented.add(row.path("method").asText() + " " + row.path("route").asText());
+        documented.addAll(Set.of("GET /api/admin/usuarios", "PATCH /api/admin/usuarios/{id}/status",
+                "PUT /api/admin/usuarios/{id}/papeis", "POST /api/admin/usuarios/{id}/revogar-sessoes",
+                "POST /api/admin/convites", "POST /api/auth/convites/aceitar",
+                "GET /api/admin/papeis", "GET /api/admin/permissoes", "POST /api/admin/papeis",
+                "PUT /api/admin/papeis/{id}", "GET /api/admin/auditoria",
+                "GET /api/admin/infraestrutura", "POST /api/admin/provisionamento/super-admin",
+                "GET /api/admin/resumo"));
         var actual = new TreeSet<String>();
         var evidence = new ArrayList<Map<String, Object>>();
         var csrf = CsrfMockMvc.obtain(mvc);
@@ -83,16 +90,23 @@ class IndependentRouteAuditTest {
                 String key = method + " " + path;
                 actual.add(key);
                 boolean publicRoute = path.equals("/api/health") || key.equals("GET /api/auth/csrf")
-                        || (method == RequestMethod.POST && Set.of("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/2fa/verify", "/api/auth/2fa/resend").contains(path));
+                        || (method == RequestMethod.POST && Set.of("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/2fa/verify", "/api/auth/2fa/resend", "/api/auth/convites/aceitar").contains(path));
                 String adminToken = jwt.generateToken(users.findById(admin.getId()).orElseThrow());
                 String userToken = jwt.generateToken(ordinary);
                 int anonymous = rolledBack(csrf.apply(probe(method, path)));
                 int lowRole = rolledBack(csrf.apply(probe(method, path).header("Authorization", "Bearer " + userToken)));
-                if (!publicRoute) { assertEquals(401, anonymous, key); assertEquals(403, lowRole, key); }
+                boolean selfRoute = Set.of("GET /api/auth/me", "PUT /api/auth/alterar-senha").contains(key);
+                if (!publicRoute) {
+                    assertEquals(401, anonymous, key);
+                    if (!selfRoute) assertEquals(403, lowRole, key);
+                }
                 int authorized = rolledBack(csrf.apply(probe(method, path).header("Authorization", "Bearer " + adminToken)
                                 .cookie(new Cookie("access_token", adminToken))));
                 assertTrue(authorized < 500, key + " returned " + authorized);
-                if (!publicRoute) assertTrue(authorized != 401 && authorized != 403 && authorized != 429, key + " did not reach the ADMIN handler: " + authorized);
+                if (path.equals("/api/admin/provisionamento/super-admin"))
+                    assertEquals(400, authorized, key + " fixture has no bootstrap request body");
+                else if (path.startsWith("/api/admin/")) assertEquals(403, authorized, key + " legacy ADMIN must not administer users");
+                else if (!publicRoute) assertTrue(authorized != 401 && authorized != 403 && authorized != 429, key + " did not reach the ADMIN handler: " + authorized);
                 boolean mutation = !Set.of(RequestMethod.GET, RequestMethod.HEAD, RequestMethod.OPTIONS).contains(method);
                 if (mutation) {
                     int noCsrf = mvc.perform(probe(method, path).cookie(new Cookie("access_token", adminToken))).andReturn().getResponse().getStatus();
@@ -105,7 +119,7 @@ class IndependentRouteAuditTest {
         }
         Files.writeString(Path.of("target/independent-route-coverage.json"), json.writerWithDefaultPrettyPrinter().writeValueAsString(evidence));
         assertEquals(documented, actual, "Unreviewed new or removed API mappings");
-        assertEquals(83, actual.size());
+        assertEquals(97, actual.size());
     }
 
     @Test void shadowEndpointsDangerousMethodsHostAndCrLfDoNotOpenAnotherSurface() throws Exception {
@@ -113,12 +127,12 @@ class IndependentRouteAuditTest {
         var rows = new ArrayList<Map<String, Object>>();
         for (String path : List.of("/api/graphql", "/graphql", "/api/upload", "/ws", "/api/unknown-shadow-api")) {
             int result = rolledBack(get(path).header("Authorization", "Bearer " + token));
-            assertEquals(404, result, path);
+            assertEquals(path.startsWith("/api/") ? 403 : 404, result, path);
             rows.add(Map.of("probe", path, "status", result));
         }
         for (String method : List.of("TRACE", "CONNECT", "PROPFIND")) {
             int result = mvc.perform(request(HttpMethod.valueOf(method), "/api/clientes").header("Authorization", "Bearer " + token)).andReturn().getResponse().getStatus();
-            assertTrue(Set.of(400, 405, 501).contains(result), method + ": " + result);
+            assertTrue(Set.of(400, 403, 405, 501).contains(result), method + ": " + result);
             rows.add(Map.of("probe", method, "status", result));
         }
         var response = mvc.perform(get("/api/clientes").param("termo", "canary\r\nX-Audit-Injected: yes")

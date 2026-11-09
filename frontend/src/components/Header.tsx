@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Settings,
+  Shield,
   Bell,
   ChevronDown,
   CheckSquare,
@@ -85,6 +86,11 @@ export default function Header({ user }: HeaderProps) {
   const isEstoqueActive = pathname.startsWith('/estoque');
   const isRelatoriosActive = pathname.startsWith('/relatorios');
   const isConfiguracaoActive = pathname.startsWith('/configuracoes');
+  const isAdminActive = pathname.startsWith('/administracao');
+  const canManageUsers = user?.roles?.includes('ROLE_SUPER_ADMIN') === true;
+  const canViewInfrastructure = user?.permissoes?.includes('infraestrutura.visualizar') === true;
+  const canAdminister = canManageUsers || canViewInfrastructure;
+  const adminHome = canManageUsers ? '/administracao' : '/administracao/infraestrutura';
 
   const [isBuscaOpen, setIsBuscaOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -551,6 +557,13 @@ export default function Header({ user }: HeaderProps) {
                       <span>Configurações</span>
                     </Link>
 
+                    {canAdminister && (
+                      <Link href={adminHome} role="menuitem" onClick={() => setIsUserMenuOpen(false)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-colors ${isAdminActive ? 'bg-accent/15 text-accent font-semibold' : 'text-ink hover:bg-elevated/60'}`}>
+                        <Shield className="w-4 h-4" aria-hidden="true" /> Administração
+                      </Link>
+                    )}
+
                     <button
                       id="header-logout-btn"
                       type="button"
@@ -688,6 +701,10 @@ export default function Header({ user }: HeaderProps) {
                     <Settings aria-hidden="true" className="w-4 h-4" />
                     <span>Configurações</span>
                   </Link>
+                  {canAdminister && <Link href={adminHome} onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 bg-elevated border border-control">
+                    <Shield aria-hidden="true" className="w-4 h-4" /> Administração
+                  </Link>}
                   <button
                     id="header-mobile-logout-btn"
                     type="button"

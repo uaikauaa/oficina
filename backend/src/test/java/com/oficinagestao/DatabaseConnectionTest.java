@@ -56,8 +56,8 @@ class DatabaseConnectionTest {
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("24", current.getVersion().getVersion(), "A versão atual da migration deve ser 24.");
-        assertEquals("rate limit key generation", current.getDescription());
+        assertEquals("25", current.getVersion().getVersion(), "A versão atual da migration deve ser 25.");
+        assertEquals("admin rbac", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
@@ -223,11 +223,11 @@ class DatabaseConnectionTest {
                 }
             }
 
-            assertEquals(1, existingRoles.size(), "A tabela roles deve conter exatamente 1 papel no MVP.");
+            assertEquals(9, existingRoles.size(), "O catálogo RBAC deve conter os 9 papéis padrão.");
             assertTrue(existingRoles.contains("ROLE_ADMIN"), "O papel ROLE_ADMIN deve existir.");
-            assertFalse(existingRoles.contains("ROLE_GERENTE"), "ROLE_GERENTE não deve existir no MVP.");
+            assertTrue(existingRoles.contains("ROLE_GERENTE"), "ROLE_GERENTE deve existir no RBAC.");
             assertFalse(existingRoles.contains("ROLE_MECANICO"), "ROLE_MECANICO não deve existir no MVP.");
-            assertFalse(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE não deve existir no MVP.");
+            assertTrue(existingRoles.contains("ROLE_ATENDENTE"), "ROLE_ATENDENTE deve existir no RBAC.");
 
             // 2. Validar que nenhum usuário possui papel diferente de ROLE_ADMIN
             try (ResultSet rs = stmt.executeQuery(

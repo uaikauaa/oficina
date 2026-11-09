@@ -70,6 +70,28 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendInvitation(String to, String acceptanceUrl) {
+        if (mailSender == null || isHostMissing(mailSender)) {
+            throw new com.oficinagestao.exception.BusinessException("Serviço de e-mail indisponível para convites.");
+        }
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject("Convite de acesso — Oficina Gestão");
+            message.setText("Você recebeu um convite para criar sua conta no Oficina Gestão.\n\n"
+                    + "Abra o link abaixo, defina sua senha e conclua o login com 2FA:\n\n"
+                    + acceptanceUrl + "\n\nO link expira em 24 horas e pode ser usado uma vez. "
+                    + "Se você não esperava este convite, ignore esta mensagem.");
+            mailSender.send(message);
+            log.info("Convite de acesso enviado.");
+        } catch (Exception e) {
+            log.error("Falha no transporte SMTP de convite; tipo={}", e.getClass().getSimpleName());
+            throw new com.oficinagestao.exception.BusinessException("Não foi possível enviar o convite.");
+        }
+    }
+
     private boolean isHostMissing(JavaMailSender sender) {
         if (sender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
             return impl.getHost() == null || impl.getHost().isBlank();

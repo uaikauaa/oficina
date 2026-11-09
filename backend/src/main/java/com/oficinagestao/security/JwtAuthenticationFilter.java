@@ -1,6 +1,8 @@
 package com.oficinagestao.security;
 
 import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.entity.Permissao;
+import com.oficinagestao.entity.Usuario;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -42,12 +44,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && jwtService.validateToken(token)) {
             String email = jwtService.extractEmail(token);
             Long userId = jwtService.extractUserId(token);
-            Set<String> roles = jwtService.extractRoles(token);
             Integer tokenVersion = jwtService.extractTokenVersion(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (isTokenVersionValida(userId, email, tokenVersion)) {
-                    List<SimpleGrantedAuthority> authorities = roles.stream()
+                    // Authorization is based on current database grants, never on JWT role claims.
+                    Optional<Usuario> current = userId == null ? usuarioRepository.findByEmail(email)
+                            : usuarioRepository.findById(userId);
+                    if (current.isEmpty() || !Boolean.TRUE.equals(current.get().getAtivo())
+                            || !email.equalsIgnoreCase(current.get().getEmail())) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                    Set<String> grants = current.get().getRoles().stream()
+                            .flatMap(role -> java.util.stream.Stream.concat(
+                                    java.util.stream.Stream.of(role.getNome()),
+                                    role.getPermissoes().stream().map(Permissao::getCodigo).map(code -> "PERM_" + code)))
+                            .collect(Collectors.toSet());
+                    List<SimpleGrantedAuthority> authorities = grants.stream()
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());
 

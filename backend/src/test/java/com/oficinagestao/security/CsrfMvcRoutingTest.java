@@ -5,6 +5,9 @@ import com.oficinagestao.controller.AuthController;
 import com.oficinagestao.controller.CsrfController;
 import com.oficinagestao.dto.LoginChallengeResponse;
 import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.entity.Usuario;
+import com.oficinagestao.entity.Role;
+import com.oficinagestao.entity.Permissao;
 import com.oficinagestao.service.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.MappingMatch;
@@ -64,7 +67,7 @@ class CsrfMvcRoutingTest {
     @RestController
     static class Probe {
         final AtomicInteger calls = new AtomicInteger();
-        @PostMapping("/api/csrf-probe") String mutate() { calls.incrementAndGet(); return "ok"; }
+        @PostMapping("/api/clientes") String mutate() { calls.incrementAndGet(); return "ok"; }
     }
 
     @Autowired WebApplicationContext context;
@@ -85,6 +88,12 @@ class CsrfMvcRoutingTest {
         when(jwt.extractRoles("synthetic-valid")).thenReturn(Set.of("ROLE_ADMIN"));
         when(jwt.extractTokenVersion("synthetic-valid")).thenReturn(0);
         when(users.findActiveTokenVersionById(71L)).thenReturn(Optional.of(0));
+        Usuario current = new Usuario("CSRF test", "csrf@example.invalid", "unused", true);
+        current.setId(71L);
+        Role operational = new Role("ROLE_ADMIN", "Legacy operational");
+        operational.getPermissoes().add(new Permissao("clientes.post", "POST /api/clientes"));
+        current.addRole(operational);
+        when(users.findById(71L)).thenReturn(Optional.of(current));
     }
 
     private MockHttpServletRequestBuilder login(String path) {
@@ -123,16 +132,16 @@ class CsrfMvcRoutingTest {
     }
 
     @Test void bearerOnlyBusinessWorksButCookiesCannotBypassCsrf() throws Exception {
-        mvc.perform(post("/api/csrf-probe").header("Authorization", "Bearer synthetic-valid"))
+        mvc.perform(post("/api/clientes").header("Authorization", "Bearer synthetic-valid"))
                 .andExpect(status().isOk());
         for (String bearer : new String[]{"synthetic-valid", "forged"}) {
-            mvc.perform(post("/api/csrf-probe").header("Authorization", "Bearer " + bearer)
+            mvc.perform(post("/api/clientes").header("Authorization", "Bearer " + bearer)
                             .cookie(new Cookie("access_token", "synthetic-valid")))
                     .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("CSRF_INVALID"));
         }
-        mvc.perform(withCsrf(mvc, post("/api/csrf-probe"))
+        mvc.perform(withCsrf(mvc, post("/api/clientes"))
                         .cookie(new Cookie("access_token", "synthetic-valid"))).andExpect(status().isOk());
-        mvc.perform(post("/api/csrf-probe").header("Authorization", "Bearer forged"))
+        mvc.perform(post("/api/clientes").header("Authorization", "Bearer forged"))
                 .andExpect(status().isUnauthorized());
         assertEquals(2, probe.calls.get());
     }
@@ -172,8 +181,11 @@ class CsrfMvcRoutingTest {
     }
 
     @Test void validCsrfDoesNotGrantAdministrativeAuthority() throws Exception {
-        when(jwt.extractRoles("synthetic-valid")).thenReturn(Set.of("ROLE_USER"));
-        mvc.perform(withCsrf(mvc, post("/api/csrf-probe"))
+        Usuario restricted = new Usuario("CSRF test", "csrf@example.invalid", "unused", true);
+        restricted.setId(71L);
+        restricted.addRole(new Role("ROLE_USER", "Synthetic limited"));
+        when(users.findById(71L)).thenReturn(Optional.of(restricted));
+        mvc.perform(withCsrf(mvc, post("/api/clientes"))
                         .cookie(new Cookie("access_token", "synthetic-valid")))
                 .andExpect(status().isForbidden()).andExpect(jsonPath("$.error").value("FORBIDDEN"));
         assertEquals(0, probe.calls.get());

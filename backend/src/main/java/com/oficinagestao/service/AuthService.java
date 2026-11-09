@@ -283,7 +283,8 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                roles
+                roles,
+                permissionsFor(usuario)
         );
 
         return new LoginResult(
@@ -406,7 +407,8 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                roles
+                roles,
+                permissionsFor(usuario)
         );
 
         return new LoginResult(
@@ -442,8 +444,14 @@ public class AuthService {
                 usuario.getId(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                roles
+                roles,
+                permissionsFor(usuario)
         );
+    }
+
+    private Set<String> permissionsFor(Usuario usuario) {
+        return usuario.getRoles().stream().flatMap(role -> role.getPermissoes().stream())
+                .map(com.oficinagestao.entity.Permissao::getCodigo).collect(Collectors.toSet());
     }
 
     @Transactional

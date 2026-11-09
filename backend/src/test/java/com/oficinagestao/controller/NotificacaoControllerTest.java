@@ -1,4 +1,5 @@
 package com.oficinagestao.controller;
+import com.oficinagestao.testsupport.WithOperationalUser;
 
 import com.oficinagestao.dto.NotificacaoResponseDTO;
 import com.oficinagestao.dto.NotificacoesResumoDTO;
@@ -45,7 +46,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("GET /api/notificacoes autenticado deve retornar 200 OK com resumo")
     void deveRetornar200ComResumoQuandoAutenticado() throws Exception {
         NotificacaoResponseDTO notifDto = new NotificacaoResponseDTO(
@@ -75,7 +76,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("PATCH /api/notificacoes/{id}/ler deve marcar notificação como lida e retornar 200 OK")
     void deveMarcarComoLidaViaPatch() throws Exception {
         NotificacaoResponseDTO lidaDto = new NotificacaoResponseDTO(
@@ -102,7 +103,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("PUT /api/notificacoes/{id}/ler deve marcar notificação como lida e retornar 200 OK")
     void deveMarcarComoLidaViaPut() throws Exception {
         NotificacaoResponseDTO lidaDto = new NotificacaoResponseDTO(
@@ -129,7 +130,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("PATCH /api/notificacoes/{id}/ler com ID inexistente deve retornar 404")
     void deveRetornar404AoMarcarInexistente() throws Exception {
         when(notificacaoService.marcarComoLida(999L)).thenThrow(new ResourceNotFoundException("Notificação não encontrada"));
@@ -139,7 +140,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("PATCH /api/notificacoes/ler-todas deve marcar todas e retornar 204 No Content")
     void deveMarcarTodasComoLidasViaPatch() throws Exception {
         mockMvc.perform(patch("/api/notificacoes/ler-todas"))
@@ -149,7 +150,7 @@ class NotificacaoControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ROLE_ADMIN")
+    @WithOperationalUser
     @DisplayName("PUT /api/notificacoes/ler-todas deve marcar todas e retornar 204 No Content")
     void deveMarcarTodasComoLidasViaPut() throws Exception {
         mockMvc.perform(put("/api/notificacoes/ler-todas"))
