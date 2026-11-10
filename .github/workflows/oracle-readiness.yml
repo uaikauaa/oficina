@@ -34,6 +34,7 @@ jobs:
           DB_PASSWORD: synthetic-ci-only
           JWT_SECRET: synthetic-ci-secret-strong-enough-not-for-production-2026
           RATE_LIMIT_SECRET: synthetic-ci-rate-secret-distinct-from-jwt-2026
+          INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
           CORS_ALLOWED_ORIGINS: https://app.example.invalid
           MAIL_HOST: smtp.example.invalid
           MAIL_USERNAME: synthetic

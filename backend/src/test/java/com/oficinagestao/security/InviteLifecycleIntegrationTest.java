@@ -7,6 +7,7 @@ import com.oficinagestao.repository.RoleRepository;
 import com.oficinagestao.repository.UsuarioRepository;
 import com.oficinagestao.service.EmailService;
 import com.oficinagestao.service.InviteService;
+import com.oficinagestao.service.InviteOutbox;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,29 +34,42 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 class InviteLifecycleIntegrationTest {
     @Autowired InviteService invites;
+    @Autowired InviteOutbox outbox;
     @Autowired UsuarioRepository users;
     @Autowired RoleRepository roles;
     @Autowired PasswordEncoder passwords;
     @Autowired JdbcTemplate jdbc;
     @MockitoBean EmailService mail;
+    String actorEmail;
+    String invitedEmail;
 
-    @AfterEach void clear() { SecurityContextHolder.clearContext(); }
+    @AfterEach void clear() {
+        SecurityContextHolder.clearContext();
+        if (invitedEmail != null) jdbc.update("DELETE FROM convites_usuarios WHERE email=?", invitedEmail);
+        if (invitedEmail != null) jdbc.update("DELETE FROM usuarios WHERE email=?", invitedEmail);
+        if (actorEmail != null) jdbc.update("DELETE FROM usuarios WHERE email=?", actorEmail);
+    }
 
     @Test
-    @Transactional
     void emailProofCreatesOneAccountWithoutPublicRoleSelection() {
         String actorPassword = "SyntheticActorPassword1!";
         Usuario actor = new Usuario("Synthetic owner", "owner-" + UUID.randomUUID() + "@example.invalid",
                 passwords.encode(actorPassword), true);
         actor.addRole(roles.findByNome("ROLE_SUPER_ADMIN").orElseThrow());
         actor = users.saveAndFlush(actor);
+        actorEmail = actor.getEmail();
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 new AuthenticatedUser(actor.getId(), actor.getEmail()), null,
                 List.of(new SimpleGrantedAuthority("ROLE_SUPER_ADMIN"))));
 
         String email = "invited-" + UUID.randomUUID() + "@example.invalid";
+        invitedEmail = email;
         invites.create(new CreateInviteRequest(email, "ROLE_CONSULTA", "Convite sintético autorizado",
                 actorPassword, "CRIAR_CONVITE"));
+        verifyNoInteractions(mail);
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM invite_delivery_outbox o "
+                + "JOIN convites_usuarios c ON c.id=o.invite_id WHERE c.email=? AND o.status='PENDING'", Integer.class, email));
+        assertTrue(outbox.dispatchOne());
         var url = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(mail).sendInvitation(eq(email), url.capture());
         String token = URI.create(url.getValue()).getRawQuery().substring("token=".length());

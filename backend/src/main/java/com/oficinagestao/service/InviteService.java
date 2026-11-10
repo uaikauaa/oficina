@@ -43,15 +43,14 @@ public class InviteService {
     private final RoleRepository roles;
     private final AdminUserService admin;
     private final PasswordEncoder passwords;
-    private final EmailService mail;
+    private final InviteOutbox outbox;
     private final SharedRateLimitService limits;
     private final IpAddressResolver addresses;
-    private final String publicUrl;
     private final String bootstrapEmail;
     private final SecureRandom random = new SecureRandom();
 
     public InviteService(JdbcTemplate jdbc, UsuarioRepository users, RoleRepository roles,
-                         AdminUserService admin, PasswordEncoder passwords, EmailService mail,
+                         AdminUserService admin, PasswordEncoder passwords, InviteOutbox outbox,
                          SharedRateLimitService limits, IpAddressResolver addresses,
                          @Value("${app.public-url}") String publicUrl,
                          @Value("${security.super-admin-bootstrap.email:}") String bootstrapEmail,
@@ -61,14 +60,14 @@ public class InviteService {
         this.roles = roles;
         this.admin = admin;
         this.passwords = passwords;
-        this.mail = mail;
+        this.outbox = outbox;
         this.limits = limits;
         this.addresses = addresses;
-        this.publicUrl = validatePublicUrl(publicUrl);
+        String validatedPublicUrl = validatePublicUrl(publicUrl);
         this.bootstrapEmail = bootstrapEmail == null ? "" : bootstrapEmail.trim().toLowerCase(Locale.ROOT);
         if (environment.acceptsProfiles(Profiles.of("prod", "production"))
-                && (this.publicUrl.startsWith("http://") || this.publicUrl.contains("localhost")
-                    || this.publicUrl.contains("127.0.0.1"))) {
+                && (validatedPublicUrl.startsWith("http://") || validatedPublicUrl.contains("localhost")
+                    || validatedPublicUrl.contains("127.0.0.1"))) {
             throw new IllegalStateException("APP_PUBLIC_URL pública HTTPS obrigatória em produção");
         }
     }
@@ -115,15 +114,19 @@ public class InviteService {
         if (users.existsByEmail(email)) throw new ConflictException("Já existe uma conta para esse e-mail.");
         jdbc.update("UPDATE convites_usuarios SET revogado_em=now() WHERE lower(email)=? "
                 + "AND usado_em IS NULL AND revogado_em IS NULL", email);
+        jdbc.update("UPDATE invite_delivery_outbox o SET status='CANCELLED',nonce=NULL,ciphertext=NULL,"
+                + "last_failure='REISSUED' FROM convites_usuarios c WHERE c.id=o.invite_id "
+                + "AND lower(c.email)=? AND o.status='PENDING'", email);
         byte[] bytes = new byte[32];
         random.nextBytes(bytes);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         String hash = TokenHashUtil.hashStatic(token);
-        jdbc.update("INSERT INTO convites_usuarios(email,token_hash,role_id,criado_por,expira_em) "
-                + "VALUES (?,?,?,?,now()+interval '24 hours')", email, hash, role.getId(), actor.getId());
+        Long inviteId = jdbc.queryForObject("INSERT INTO convites_usuarios(email,token_hash,role_id,criado_por,expira_em) "
+                + "VALUES (?,?,?,?,now()+interval '24 hours') RETURNING id", Long.class,
+                email, hash, role.getId(), actor.getId());
+        outbox.enqueue(inviteId, token);
         jdbc.update("INSERT INTO eventos_administrativos(ator_id,acao,motivo,detalhes) VALUES (?,?,?,?)",
                 actor.getId(), "CONVITE_CRIADO", reason.trim(), "Convite para " + email + ", papel " + role.getNome());
-        mail.sendInvitation(email, publicUrl + "/convite?token=" + token);
     }
 
     @Transactional
