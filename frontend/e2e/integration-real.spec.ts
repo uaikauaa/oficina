@@ -331,6 +331,44 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
       expect((await operatorContext.request.get('/api/admin/usuarios')).status()).toBe(403);
       expect((await operatorContext.request.get('/api/clientes')).status()).toBe(200);
       expect((await operatorContext.request.get('/api/relatorios/clientes')).status()).toBe(200);
+      const clientCreated = await operatorContext.request.post('/api/clientes', {
+        headers: await csrfHeader(operatorContext),
+        data: { tipoPessoa: 'FISICA', nomeRazaoSocial: 'Cliente Operador Sintético' },
+      });
+      expect(clientCreated.status(), await clientCreated.text()).toBe(201);
+      const operatorClientId = (await clientCreated.json() as { id: number }).id;
+      const machineCreated = await operatorContext.request.post('/api/maquinas', {
+        headers: await csrfHeader(operatorContext),
+        data: { clienteId: operatorClientId, tipoEquipamento: 'MAQUINA_SOLDA', marca: 'Marca CI',
+          modelo: 'Modelo operador', numeroSerie: `OP-${Date.now()}` },
+      });
+      expect(machineCreated.status(), await machineCreated.text()).toBe(201);
+      const operatorMachineId = (await machineCreated.json() as { id: number }).id;
+      const productCreated = await operatorContext.request.post('/api/produtos', {
+        headers: await csrfHeader(operatorContext),
+        data: { nome: `Peça operador ${Date.now()}`, tipo: 'PECA', precoCusto: 10,
+          precoVenda: 20, estoqueMinimo: 1, estoqueInicial: 2 },
+      });
+      expect(productCreated.status(), await productCreated.text()).toBe(201);
+      const operatorProductId = (await productCreated.json() as { id: number }).id;
+      const stock = await operatorContext.request.post('/api/estoque/movimentar', {
+        headers: await csrfHeader(operatorContext),
+        data: { produtoId: operatorProductId, tipoMovimentacao: 'ENTRADA', quantidade: 2,
+          valorUnitario: 10, motivo: 'Entrada sintética do operador' },
+      });
+      expect(stock.status(), await stock.text()).toBe(201);
+      const orderCreated = await operatorContext.request.post('/api/ordens-servico', {
+        headers: await csrfHeader(operatorContext),
+        data: { clienteId: operatorClientId, maquinaId: operatorMachineId,
+          problemaRelatado: 'Teste sintético de OS por operador' },
+      });
+      expect(orderCreated.status(), await orderCreated.text()).toBe(201);
+      const operatorOrderId = (await orderCreated.json() as { id: number }).id;
+      const pdf = await operatorContext.request.get(`/api/ordens-servico/${operatorOrderId}/pdf`);
+      expect(pdf.status()).toBe(200);
+      expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
+      expect((await operatorContext.request.get('/api/estoque/movimentacoes')).status()).toBe(200);
+      expect((await operatorContext.request.get('/api/relatorios/ordens-servico')).status()).toBe(200);
       await operatorPage.goto('/administracao');
       await expect(operatorPage.getByText('Acesso restrito')).toBeVisible();
     } finally { await operatorContext.close(); }

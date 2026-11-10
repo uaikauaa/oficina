@@ -118,6 +118,20 @@ class InviteOutboxIntegrationTest {
         assertFalse(outbox.dispatchOne());
     }
 
+    @Test void smtpRecipient5xxIsTerminalWithoutRetry() throws Exception {
+        issue();
+        var rejected = new org.eclipse.angus.mail.smtp.SMTPAddressFailedException(
+                new jakarta.mail.internet.InternetAddress(email), "RCPT TO", 550, "synthetic rejection");
+        doThrow(new org.springframework.mail.MailSendException("synthetic 5xx", rejected))
+                .when(mail).sendInvitation(anyString(), anyString());
+        assertTrue(outbox.dispatchOne());
+        assertEquals("EXHAUSTED", state());
+        assertEquals("SMTP_PERMANENT", jdbc.queryForObject("SELECT o.last_failure FROM invite_delivery_outbox o "
+                + "JOIN convites_usuarios c ON c.id=o.invite_id WHERE c.email=?", String.class, email));
+        assertFalse(outbox.dispatchOne());
+        verify(mail, times(1)).sendInvitation(anyString(), anyString());
+    }
+
     @Test void reissueCancelsOldPayloadAndExpiryPreventsSend() {
         issue();
         issue();

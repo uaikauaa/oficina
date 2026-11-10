@@ -13,8 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.ArrayDeque;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 @Service
@@ -110,8 +112,7 @@ public class InviteOutbox {
             try {
                 mail.sendInvitation(delivery.email(), publicUrl + "/convite?token=" + token);
             } catch (RuntimeException error) {
-                if (error instanceof org.springframework.mail.MailAuthenticationException
-                        || error instanceof org.springframework.mail.MailParseException)
+                if (permanentSmtp(error))
                     terminal(delivery, "EXHAUSTED", "SMTP_PERMANENT");
                 else failure(delivery, "SMTP_FAILURE");
                 return true;
@@ -146,6 +147,28 @@ public class InviteOutbox {
     private void audit(Delivery d, String action, String details) {
         jdbc.update("INSERT INTO eventos_administrativos(acao,detalhes) VALUES (?,?)", action,
                 "Convite " + d.inviteId() + ": " + details);
+    }
+
+    private static boolean permanentSmtp(Throwable error) {
+        if (error instanceof org.springframework.mail.MailAuthenticationException
+                || error instanceof org.springframework.mail.MailParseException) return true;
+        var pending = new ArrayDeque<Throwable>();
+        var seen = new IdentityHashMap<Throwable, Boolean>();
+        pending.add(error);
+        while (!pending.isEmpty()) {
+            Throwable current = pending.removeFirst();
+            if (seen.put(current, true) != null) continue;
+            int code = current instanceof org.eclipse.angus.mail.smtp.SMTPSendFailedException send
+                    ? send.getReturnCode() : current instanceof org.eclipse.angus.mail.smtp.SMTPAddressFailedException address
+                    ? address.getReturnCode() : 0;
+            if (code >= 500 && code <= 599) return true;
+            if (current.getCause() != null) pending.add(current.getCause());
+            if (current instanceof jakarta.mail.MessagingException mailError && mailError.getNextException() != null)
+                pending.add(mailError.getNextException());
+            if (current instanceof org.springframework.mail.MailSendException sendError)
+                for (Exception messageError : sendError.getMessageExceptions()) pending.add(messageError);
+        }
+        return false;
     }
 
     private static byte[] crypt(int mode, SecretKeySpec key, byte[] nonce, long inviteId, byte[] input) {

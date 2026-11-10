@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { once } from 'node:events';
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, randomBytes, createHash, createCipheriv } from 'node:crypto';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const docker = args => execFileSync('docker', args, { encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
 // Every run starts with a genuinely empty database; never reuse a prior seeded volume.
@@ -41,11 +41,12 @@ try {
         '-e', 'POSTGRES_USER=ci_isolado', '-e', 'POSTGRES_PASSWORD=ci-integration-db-only', 'postgres:16-alpine']
         : ['-p', '127.0.0.1:1025:1025', '-p', '127.0.0.1:8025:8025', 'axllent/mailpit:latest'])]);
   }
-  const startBackend = (port, jwtSecret = 'ci-integration-only-jwt-2026-synthetic-value-never-for-production') => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
+  const startBackend = (port, jwtSecret = 'ci-integration-only-jwt-2026-synthetic-value-never-for-production', pollMs = 5000) => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
     stdio: ['ignore', log, log], env: { ...process.env, SPRING_PROFILES_ACTIVE: 'dev', PORT: String(port), TRUSTED_PROXIES: '',
       DB_URL: 'jdbc:postgresql://127.0.0.1:15433/oficina_integracao_ci', DB_USERNAME: 'ci_isolado', DB_PASSWORD: 'ci-integration-db-only',
       JWT_SECRET: jwtSecret, RATE_LIMIT_SECRET: 'ci-integration-independent-rate-secret-only-2026', SECURITY_COOKIE_SECURE: 'false',
       INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+      INVITE_OUTBOX_POLL_MS: String(pollMs),
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',
       MAIL_USERNAME: 'ci.integration@oficina.invalid', MAIL_PASSWORD: 'ci-smtp-only', MAIL_FROM: 'ci.integration@oficina.invalid',
       MAIL_SMTP_AUTH: 'false', MAIL_SMTP_STARTTLS: 'false', INITIAL_ADMIN_NAME: 'Admin Sintetico CI',
@@ -87,6 +88,37 @@ try {
   assert.equal((await attempt(8080, 100)).status, 429);
   assert.equal((await attempt(8082, 101)).status, 429);
   console.log('PASS: two real JVMs, 12 concurrent distributed attempts, exact shared request budget, forged XFF ignored, restart with JWT key rotation preserved the block.');
+
+  // Persist a synthetic pending delivery while both processes exist, then restart
+  // both workers. Only a hash enters the invite table and only GCM ciphertext enters the outbox.
+  const recipient = 'ci.restart@oficina.invalid';
+  const inviteToken = randomBytes(32).toString('base64url');
+  const tokenHash = createHash('sha256').update(inviteToken).digest('hex');
+  const psql = sql => docker(['exec', names[0], 'psql', '-U', 'ci_isolado', '-d', 'oficina_integracao_ci', '-tA', '-c', sql]).trim();
+  const inviteId = Number(psql(`INSERT INTO convites_usuarios(email,token_hash,role_id,expira_em)
+    VALUES ('${recipient}','${tokenHash}',(SELECT id FROM roles WHERE nome='ROLE_CONSULTA'),now()+interval '24 hours') RETURNING id`).split('\n')[0]);
+  assert.ok(Number.isSafeInteger(inviteId) && inviteId > 0);
+  const nonce = randomBytes(12);
+  const cipher = createCipheriv('aes-256-gcm', Buffer.alloc(32), nonce);
+  cipher.setAAD(Buffer.from(String(inviteId), 'ascii'));
+  const payload = Buffer.concat([cipher.update(inviteToken, 'ascii'), cipher.final(), cipher.getAuthTag()]);
+  psql(`INSERT INTO invite_delivery_outbox(invite_id,key_version,nonce,ciphertext,next_attempt_at)
+    VALUES (${inviteId},1,decode('${nonce.toString('hex')}','hex'),decode('${payload.toString('hex')}','hex'),now()+interval '30 seconds')`);
+  assert.equal(psql(`SELECT status FROM invite_delivery_outbox WHERE invite_id=${inviteId}`), 'PENDING');
+  await stop(backend); await stop(replica);
+  backend = startBackend(8080, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250);
+  replica = startBackend(8082, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250);
+  await Promise.all([waitReady(backend, 8080), waitReady(replica, 8082)]);
+  let delivered = false;
+  for (let i = 0; i < 90; i++) {
+    if (psql(`SELECT status FROM invite_delivery_outbox WHERE invite_id=${inviteId}`) === 'SENT') { delivered = true; break; }
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  assert.ok(delivered, 'pending encrypted invitation survives restart and is delivered');
+  const messages = await (await fetch('http://127.0.0.1:8025/api/v1/messages')).json();
+  assert.equal(messages.messages.filter(message => message.To?.some(to => to.Address?.toLowerCase() === recipient)).length, 1);
+  assert.equal(psql(`SELECT ciphertext IS NULL AND nonce IS NULL FROM invite_delivery_outbox WHERE invite_id=${inviteId}`), 't');
+  console.log('PASS: pending encrypted invitation survived restart, two real JVM workers produced one Mailpit message, and ciphertext was erased.');
 } finally {
   await stop(backend); await stop(replica);
   closeSync(log);
