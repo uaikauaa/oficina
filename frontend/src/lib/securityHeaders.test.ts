@@ -1,11 +1,20 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import nextConfig from '../../next.config.ts';
 import {
   buildContentSecurityPolicy,
   getSecurityHeaders,
 } from './securityHeaders.ts';
 
 describe('SEC-002: Security Headers & CSP (PSQ-SaaS-001)', () => {
+  it('protege o token do convite contra envio no Referer', async () => {
+    const rules = await nextConfig.headers?.();
+    assert.ok(rules);
+    const inviteRules = rules.filter((rule) => rule.source === '/:path*' || rule.source === '/convite');
+    const referrer = inviteRules.flatMap((rule) => rule.headers)
+      .filter((header) => header.key.toLowerCase() === 'referrer-policy');
+    assert.strictEqual(referrer.at(-1)?.value, 'no-referrer');
+  });
   describe('buildContentSecurityPolicy', () => {
     it('deve conter default-src restrito a self em prod e dev', () => {
       assert.ok(buildContentSecurityPolicy(true).includes("default-src 'self'"));

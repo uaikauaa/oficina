@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: getSecurityHeaders(process.env.NODE_ENV === 'production').filter(header => header.key !== 'Content-Security-Policy'),
       },
+      {
+        source: '/convite',
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      },
     ];
   },
 };

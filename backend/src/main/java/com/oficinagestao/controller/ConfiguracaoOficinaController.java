@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller de configuração central da oficina.
  *
- * GET  /api/configuracao-oficina  — público (autenticado): retorna dados da oficina
- * PUT  /api/configuracao-oficina  — restrito (ROLE_ADMIN): atualiza dados da oficina
+ * GET  /api/configuracao-oficina  — consulta conforme permissão RBAC.
+ * PUT  /api/configuracao-oficina  — atualização operacional conforme permissão RBAC.
  *
  * IMPORTANTE: Este controller NÃO emite NFS-e. Apenas gerencia os dados
  * cadastrais e de referência fiscal da oficina.
@@ -54,11 +54,11 @@ public class ConfiguracaoOficinaController {
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PERM_configuracao.oficina.put')")
     @Operation(
             summary = "Atualizar dados da oficina",
             description = "Atualiza os dados cadastrais e fiscais de referência da oficina. " +
-                    "Operação restrita ao administrador do sistema. " +
+                    "Operação restrita à permissão de configuração da oficina. " +
                     "ATENÇÃO: Não valida regras fiscais — a responsabilidade pelos dados corretos é do usuário.",
             security = { @SecurityRequirement(name = "cookieAuth"), @SecurityRequirement(name = "bearerAuth") }
     )
@@ -66,7 +66,7 @@ public class ConfiguracaoOficinaController {
             @ApiResponse(responseCode = "200", description = "Dados atualizados com sucesso"),
             @ApiResponse(responseCode = "400", description = "Dados inválidos"),
             @ApiResponse(responseCode = "401", description = "Não autenticado"),
-            @ApiResponse(responseCode = "403", description = "Acesso negado — papel ROLE_ADMIN necessário"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — permissão de configuração necessária"),
             @ApiResponse(responseCode = "404", description = "Configuração não encontrada — execute as migrations")
     })
     public ResponseEntity<ConfiguracaoOficinaResponseDTO> atualizar(

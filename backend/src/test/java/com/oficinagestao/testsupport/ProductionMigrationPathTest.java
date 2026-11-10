@@ -51,26 +51,26 @@ class ProductionMigrationPathTest {
         try (var db = new Database()) {
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public'", Integer.class));
             Flyway flyway = db.production();
-            assertEquals(2, flyway.migrate().migrationsExecuted);
+            assertEquals(3, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals(List.of("B24__neutral_initial_schema.sql", "V25__admin_rbac.sql"), db.jdbc.queryForList(
+            assertEquals(List.of("B24__neutral_initial_schema.sql", "V25__admin_rbac.sql", "V26__restrict_consulta_permissions.sql"), db.jdbc.queryForList(
                     "SELECT script FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank", String.class));
             assertEquals("SQL_BASELINE", db.jdbc.queryForObject("SELECT type FROM flyway_schema_history WHERE version='24'", String.class));
-            assertEquals("25", flyway.info().current().getVersion().getVersion());
+            assertEquals("26", flyway.info().current().getVersion().getVersion());
             assertNeutralDatabase(db);
             var before = businessData(db);
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals(before, businessData(db));
 
             // Prove that B24 does not prevent future versioned migrations from running normally.
-            Path future = directory.resolve("V26__synthetic_future_probe.sql");
+            Path future = directory.resolve("V27__synthetic_future_probe.sql");
             Files.writeString(future, "CREATE TABLE synthetic_future_probe (id integer PRIMARY KEY);\n");
             Flyway next = Flyway.configure().dataSource(db.source)
                     .locations("classpath:db/migration", "filesystem:" + directory.toAbsolutePath())
                     .baselineOnMigrate(false).load();
             assertEquals(1, next.migrate().migrationsExecuted);
             next.validate();
-            assertEquals("26", next.info().current().getVersion().getVersion());
+            assertEquals("27", next.info().current().getVersion().getVersion());
         }
     }
 
@@ -78,7 +78,7 @@ class ProductionMigrationPathTest {
     void productionBaselineHasTheSameSchemaAsTheFullHistoricalChain() throws Exception {
         try (var fresh = new Database(); var legacy = new Database()) {
             fresh.production().migrate();
-            legacy.synthetic("25").migrate();
+            legacy.synthetic("26").migrate();
             assertEquals(schema(legacy), schema(fresh), "Columns, defaults, constraints, indexes, sequences, functions and triggers must match");
             assertEquals(legacy.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"), fresh.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"));
             assertEquals(legacy.jdbc.queryForList("SELECT nome, descricao, ativo FROM categorias ORDER BY nome"),
@@ -92,14 +92,14 @@ class ProductionMigrationPathTest {
             legacyFixture(db, resolver, "21");
             var before = businessData(db);
             Flyway flyway = db.production();
-            assertEquals(4, flyway.migrate().migrationsExecuted);
+            assertEquals(5, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals("25", flyway.info().current().getVersion().getVersion());
+            assertEquals("26", flyway.info().current().getVersion().getVersion());
             // V22 widens a numeric column; V23/V24 add empty security tables.
             var after = businessData(db);
             after.keySet().removeIf(name -> name.startsWith("security_rate_"));
             assertEquals(before, after);
-            assertEquals(25, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
+            assertEquals(26, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE script LIKE 'B%'", Integer.class));
         }
     }
@@ -111,7 +111,7 @@ class ProductionMigrationPathTest {
             var before = businessData(db);
             var history = db.jdbc.queryForList("SELECT * FROM flyway_schema_history ORDER BY installed_rank");
             Flyway flyway = db.production();
-            assertEquals(1, flyway.migrate().migrationsExecuted);
+            assertEquals(2, flyway.migrate().migrationsExecuted);
             flyway.validate();
             assertEquals(before, businessData(db));
             assertEquals(history, db.jdbc.queryForList("SELECT * FROM flyway_schema_history WHERE installed_rank <= 24 ORDER BY installed_rank"));
@@ -121,6 +121,35 @@ class ProductionMigrationPathTest {
             assertEquals(changed, db.jdbc.queryForObject("SELECT checksum FROM flyway_schema_history WHERE version='11'", Integer.class));
             assertEquals(before, businessData(db));
         }
+    }
+
+    @Test
+    void existingV25RestrictsOnlyConsultaAndKeepsOperationalRoles() throws Exception {
+        try (var db = new Database(); var resolver = new Database()) {
+            legacyFixture(db, resolver, "25");
+            var before = businessData(db);
+            var operatorBefore = grants(db, "ROLE_OPERADOR_GERAL");
+            var superBefore = grants(db, "ROLE_SUPER_ADMIN");
+            assertTrue(grants(db, "ROLE_CONSULTA").contains("relatorios.ordens.servico.get"));
+
+            Flyway flyway = db.production();
+            assertEquals(1, flyway.migrate().migrationsExecuted);
+            flyway.validate();
+            assertEquals("26", flyway.info().current().getVersion().getVersion());
+            assertEquals(List.of("categorias.ativas.get", "categorias.get", "categorias.id.get",
+                    "clientes.get", "clientes.id.get", "fornecedores.get", "fornecedores.id.get",
+                    "maquinas.get", "maquinas.id.get"), grants(db, "ROLE_CONSULTA"));
+            assertEquals(operatorBefore, grants(db, "ROLE_OPERADOR_GERAL"));
+            assertEquals(superBefore, grants(db, "ROLE_SUPER_ADMIN"));
+            assertEquals(before, businessData(db));
+            assertEquals(0, flyway.migrate().migrationsExecuted);
+        }
+    }
+
+    private static List<String> grants(Database db, String role) {
+        return db.jdbc.queryForList("SELECT p.codigo FROM role_permissoes rp "
+                + "JOIN roles r ON r.id=rp.role_id JOIN permissoes p ON p.id=rp.permissao_id "
+                + "WHERE r.nome=? ORDER BY p.codigo", String.class, role);
     }
 
     @Test
