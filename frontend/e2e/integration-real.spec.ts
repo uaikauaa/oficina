@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext, type BrowserContext } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 
 /**
  * Real stack smoke: Chromium -> Next.js /api rewrite -> Spring Boot -> PostgreSQL.
@@ -9,7 +10,7 @@ import { readFile } from 'node:fs/promises';
 const MAILPIT = 'http://127.0.0.1:8025';
 const ADMIN_EMAIL = 'ci.integration@oficina.invalid';
 
-async function readMailpitCode(request: APIRequestContext): Promise<string> {
+async function readMailpitCode(request: APIRequestContext, recipient = ADMIN_EMAIL): Promise<string> {
   let messageId = '';
   await expect.poll(async () => {
     const response = await request.get(MAILPIT + '/api/v1/messages');
@@ -18,7 +19,7 @@ async function readMailpitCode(request: APIRequestContext): Promise<string> {
       messages?: Array<{ ID: string; To?: Array<{ Address?: string }> }>;
     };
     messageId = body.messages?.find(message =>
-      message.To?.some(recipient => recipient.Address?.toLowerCase() === ADMIN_EMAIL)
+      message.To?.some(address => address.Address?.toLowerCase() === recipient)
     )?.ID || '';
     return messageId;
   }, { timeout: 30000, intervals: [250, 500, 1000] }).not.toBe('');
@@ -202,4 +203,179 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   await expect(page.locator('#header-logout-btn')).toHaveCount(0);
   const afterLogout = await context.request.get('/api/auth/me');
   expect(afterLogout.status(), 'Logout must invalidate the authenticated session').toBe(401);
+});
+
+test('admin real isolado: provisionamento, convite, RBAC e telas @integration-real', async ({ page, context, request, browser }) => {
+  test.skip(process.env.RUN_REAL_INTEGRATION !== 'true');
+  test.setTimeout(180000);
+  const ownerEmail = 'ci.superadmin@oficina.invalid';
+  const ownerPassword = 'SyntheticSuperAdmin#2026!';
+  const login = async (target: typeof page, email: string, password: string) => {
+    const container = process.env.CI_INTEGRATION_POSTGRES_CONTAINER;
+    expect(container).toMatch(/^oficina-hml-postgres-[a-f0-9]{8}$/);
+    execFileSync('docker', ['exec', container!, 'psql', '-U', 'ci_isolado', '-d', 'oficina_integracao_ci',
+      '-c', 'DELETE FROM security_rate_limits'], { windowsHide: true });
+    const remaining = execFileSync('docker', ['exec', container!, 'psql', '-U', 'ci_isolado', '-d', 'oficina_integracao_ci',
+      '-tA', '-c', 'SELECT count(*) FROM security_rate_limits'], { encoding: 'utf8', windowsHide: true }).trim();
+    expect(remaining).toBe('0');
+    await target.goto('/login');
+    await target.locator('#email').fill(email);
+    await target.locator('#senha').fill(password);
+    await target.locator('button[type="submit"]').first().click();
+    await expect(target.locator('#two-factor-code')).toBeVisible({ timeout: 15000 });
+    await target.locator('#two-factor-code').fill(await readMailpitCode(request, email));
+    await target.locator('#verify-2fa-submit-btn').click();
+    await expect(target).toHaveURL(/\/dashboard(?:\?|$)/, { timeout: 20000 });
+  };
+  const inviteToken = async (recipient: string) => {
+    let id = '';
+    await expect.poll(async () => {
+      const response = await request.get(MAILPIT + '/api/v1/messages');
+      const data = await response.json() as { messages?: Array<{ ID: string; To?: Array<{ Address?: string }> }> };
+      id = data.messages?.find(message => message.To?.some(to => to.Address?.toLowerCase() === recipient))?.ID || '';
+      return id;
+    }, { timeout: 30000, intervals: [250, 500, 1000] }).not.toBe('');
+    const response = await request.get(MAILPIT + '/api/v1/message/' + encodeURIComponent(id));
+    const data = await response.json() as { Text?: string };
+    const token = data.Text?.match(/\/convite\?token=([A-Za-z0-9_-]{43})/)?.[1];
+    expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    return token!;
+  };
+
+  // The preceding operational test used this same synthetic bootstrap account.
+  // AuthService enforces a 30-second gap between 2FA challenges per account.
+  await page.waitForTimeout(31000);
+  await login(page, ADMIN_EMAIL, process.env.CI_INTEGRATION_ADMIN_PASSWORD!);
+  const bootstrap = await context.request.post('/api/admin/provisionamento/super-admin', {
+    headers: await csrfHeader(context),
+    data: { senhaAtual: process.env.CI_INTEGRATION_ADMIN_PASSWORD, motivo: 'Provisionamento sintético em banco descartável',
+      confirmacao: 'PROVISIONAR_SUPER_ADMIN' },
+  });
+  expect(bootstrap.status(), await bootstrap.text()).toBe(202);
+  const token = await inviteToken(ownerEmail);
+  await page.goto('/convite?token=' + token);
+  await expect(page).toHaveURL(/\/convite$/);
+  await page.getByLabel('Seu nome').fill('Super Admin Sintético');
+  await page.getByLabel('Crie sua senha').fill(ownerPassword);
+  await page.getByRole('button', { name: 'Ativar conta' }).click();
+  await expect(page.getByText('Conta criada.')).toBeVisible();
+  const replay = await context.request.post('/api/auth/convites/aceitar', {
+    headers: await csrfHeader(context), data: { token, nome: 'Replay', senha: ownerPassword },
+  });
+  expect(replay.status()).toBeGreaterThanOrEqual(400);
+
+  const ownerContext = await browser.newContext({ baseURL: test.info().project.use.baseURL });
+  try {
+    const ownerPage = await ownerContext.newPage();
+    await login(ownerPage, ownerEmail, ownerPassword);
+    const me = await ownerContext.request.get('/api/auth/me');
+    expect((await me.json() as { roles: string[] }).roles).toContain('ROLE_SUPER_ADMIN');
+    for (const path of ['/administracao', '/administracao/usuarios', '/administracao/papeis',
+      '/administracao/auditoria', '/administracao/infraestrutura', '/convite']) {
+      await ownerPage.goto(path);
+      await expect(ownerPage.locator('main h1')).toBeVisible();
+      await expect(ownerPage.getByText('Acesso restrito')).toHaveCount(0);
+      for (const [width, height] of [[320, 568], [390, 844], [768, 1024], [1366, 768], [1920, 1080]]) {
+        await ownerPage.setViewportSize({ width, height });
+        await expect.poll(() => ownerPage.evaluate(() => document.documentElement.scrollWidth))
+          .toBeLessThanOrEqual(width);
+      }
+    }
+    for (const endpoint of ['/api/admin/usuarios?search=ci.superadmin&page=0&size=1',
+      '/api/admin/papeis', '/api/admin/permissoes', '/api/admin/auditoria', '/api/admin/infraestrutura']) {
+      const response = await ownerContext.request.get(endpoint);
+      expect(response.status(), endpoint + ': ' + await response.text()).toBe(200);
+    }
+    const ownerSearch = await ownerContext.request.get('/api/admin/usuarios?search=ci.superadmin&size=1');
+    const ownerRows = await ownerSearch.json() as { content: Array<{ id: number }> };
+    const ownerId = ownerRows.content[0]?.id;
+    expect(ownerId).toBeGreaterThan(0);
+    const selfDisable = await ownerContext.request.patch(`/api/admin/usuarios/${ownerId}/status`, {
+      headers: await csrfHeader(ownerContext),
+      data: { motivo: 'Negativo sintético de autodesativação', senhaAtual: ownerPassword,
+        confirmacao: 'ALTERAR_STATUS', ativo: false },
+    });
+    expect(selfDisable.status()).toBe(403);
+    const newRole = await ownerContext.request.post('/api/admin/papeis', {
+      headers: await csrfHeader(ownerContext),
+      data: { nome: 'ROLE_CUSTOM_STAGE32', descricao: 'Papel sintético de ensaio', permissoes: ['clientes.get'],
+        motivo: 'Criação de papel sintético para ensaio', senhaAtual: ownerPassword, confirmacao: 'GERENCIAR_PAPEL' },
+    });
+    expect(newRole.status(), await newRole.text()).toBe(201);
+    const roleId = (await newRole.json() as { id: number }).id;
+    const changedRole = await ownerContext.request.put(`/api/admin/papeis/${roleId}`, {
+      headers: await csrfHeader(ownerContext),
+      data: { nome: 'ROLE_CUSTOM_STAGE32', descricao: 'Papel sintético atualizado',
+        permissoes: ['clientes.get', 'maquinas.get'], motivo: 'Atualização de permissão sintética',
+        senhaAtual: ownerPassword, confirmacao: 'GERENCIAR_PAPEL' },
+    });
+    expect(changedRole.status(), await changedRole.text()).toBe(200);
+    const operatorEmail = 'ci.operator@oficina.invalid';
+    const operatorPassword = 'SyntheticOperator#2026!';
+    const created = await ownerContext.request.post('/api/admin/convites', {
+      headers: await csrfHeader(ownerContext),
+      data: { email: operatorEmail, role: 'ROLE_OPERADOR_GERAL', motivo: 'Operador sintético para validação isolada',
+        senhaAtual: ownerPassword, confirmacao: 'CRIAR_CONVITE' },
+    });
+    expect(created.status(), await created.text()).toBe(202);
+    const operatorToken = await inviteToken(operatorEmail);
+    const accepted = await ownerContext.request.post('/api/auth/convites/aceitar', {
+      headers: await csrfHeader(ownerContext),
+      data: { token: operatorToken, nome: 'Operador Sintético', senha: operatorPassword },
+    });
+    expect(accepted.status(), await accepted.text()).toBe(204);
+    const operatorContext = await browser.newContext({ baseURL: test.info().project.use.baseURL });
+    try {
+      const operatorPage = await operatorContext.newPage();
+      await login(operatorPage, operatorEmail, operatorPassword);
+      expect((await operatorContext.request.get('/api/admin/usuarios')).status()).toBe(403);
+      expect((await operatorContext.request.get('/api/clientes')).status()).toBe(200);
+      expect((await operatorContext.request.get('/api/relatorios/clientes')).status()).toBe(200);
+      await operatorPage.goto('/administracao');
+      await expect(operatorPage.getByText('Acesso restrito')).toBeVisible();
+    } finally { await operatorContext.close(); }
+    const operatorSearch = await ownerContext.request.get('/api/admin/usuarios?search=ci.operator&size=1');
+    const operatorRows = await operatorSearch.json() as { content: Array<{ id: number }> };
+    const operatorId = operatorRows.content[0]?.id;
+    expect(operatorId).toBeGreaterThan(0);
+    const revoke = await ownerContext.request.post(`/api/admin/usuarios/${operatorId}/revogar-sessoes`, {
+      headers: await csrfHeader(ownerContext),
+      data: { motivo: 'Revogação sintética de sessões de operador', senhaAtual: ownerPassword,
+        confirmacao: 'REVOGAR_SESSOES' },
+    });
+    expect(revoke.status(), await revoke.text()).toBe(204);
+    const changeRole = await ownerContext.request.put(`/api/admin/usuarios/${operatorId}/papeis`, {
+      headers: await csrfHeader(ownerContext),
+      data: { motivo: 'Atribuição sintética de papel personalizado', senhaAtual: ownerPassword,
+        confirmacao: 'ALTERAR_PAPEIS', roles: ['ROLE_CUSTOM_STAGE32'] },
+    });
+    expect(changeRole.status(), await changeRole.text()).toBe(200);
+    const audit = await ownerContext.request.get('/api/admin/auditoria');
+    expect(audit.status()).toBe(200);
+    expect((await audit.json() as { totalElements: number }).totalElements).toBeGreaterThan(0);
+    const consultEmail = 'ci.consulta@oficina.invalid';
+    const consultPassword = 'SyntheticConsulta#2026!';
+    const consultInvite = await ownerContext.request.post('/api/admin/convites', {
+      headers: await csrfHeader(ownerContext),
+      data: { email: consultEmail, role: 'ROLE_CONSULTA', motivo: 'Consulta sintética para validação RBAC',
+        senhaAtual: ownerPassword, confirmacao: 'CRIAR_CONVITE' },
+    });
+    expect(consultInvite.status(), await consultInvite.text()).toBe(202);
+    const consultToken = await inviteToken(consultEmail);
+    const consultAccept = await ownerContext.request.post('/api/auth/convites/aceitar', {
+      headers: await csrfHeader(ownerContext),
+      data: { token: consultToken, nome: 'Consulta Sintética', senha: consultPassword },
+    });
+    expect(consultAccept.status(), await consultAccept.text()).toBe(204);
+    const consultContext = await browser.newContext({ baseURL: test.info().project.use.baseURL });
+    try {
+      const consultPage = await consultContext.newPage();
+      await login(consultPage, consultEmail, consultPassword);
+      expect((await consultContext.request.get('/api/clientes')).status()).toBe(200);
+      for (const path of ['/api/admin/usuarios', '/api/ordens-servico', '/api/produtos',
+        '/api/relatorios/clientes', '/api/configuracao-oficina']) {
+        expect((await consultContext.request.get(path)).status(), path).toBe(403);
+      }
+    } finally { await consultContext.close(); }
+  } finally { await ownerContext.close(); }
 });

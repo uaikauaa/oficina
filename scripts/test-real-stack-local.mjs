@@ -45,9 +45,11 @@ try {
     stdio: ['ignore', log, log], env: { ...process.env, SPRING_PROFILES_ACTIVE: 'dev', PORT: String(port), TRUSTED_PROXIES: '',
       DB_URL: 'jdbc:postgresql://127.0.0.1:15433/oficina_integracao_ci', DB_USERNAME: 'ci_isolado', DB_PASSWORD: 'ci-integration-db-only',
       JWT_SECRET: jwtSecret, RATE_LIMIT_SECRET: 'ci-integration-independent-rate-secret-only-2026', SECURITY_COOKIE_SECURE: 'false',
+      INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',
       MAIL_USERNAME: 'ci.integration@oficina.invalid', MAIL_PASSWORD: 'ci-smtp-only', MAIL_FROM: 'ci.integration@oficina.invalid',
       MAIL_SMTP_AUTH: 'false', MAIL_SMTP_STARTTLS: 'false', INITIAL_ADMIN_NAME: 'Admin Sintetico CI',
+      SUPER_ADMIN_BOOTSTRAP_EMAIL: 'ci.superadmin@oficina.invalid',
       INITIAL_ADMIN_EMAIL: 'ci.integration@oficina.invalid', INITIAL_ADMIN_PASSWORD: 'CiIntegration#2026Secure!',
     } });
   backend = startBackend(8080);
@@ -55,6 +57,7 @@ try {
   const tests = spawn(process.execPath, ['node_modules/@playwright/test/cli.js', 'test', 'e2e/integration-real.spec.ts', '--workers=1'], {
     cwd: path.join(root, 'frontend'), stdio: 'inherit', windowsHide: true, env: { ...process.env, RUN_REAL_INTEGRATION: 'true',
       CI_INTEGRATION_ADMIN_EMAIL: 'ci.integration@oficina.invalid', CI_INTEGRATION_ADMIN_PASSWORD: 'CiIntegration#2026Secure!',
+      CI_INTEGRATION_POSTGRES_CONTAINER: names[0],
       INTERNAL_BACKEND_URL: 'http://127.0.0.1:8080',
     },
   });

@@ -86,6 +86,9 @@ public class EmailServiceImpl implements EmailService {
                     + "Se você não esperava este convite, ignore esta mensagem.");
             mailSender.send(message);
             log.info("Convite de acesso enviado.");
+        } catch (org.springframework.mail.MailException e) {
+            log.error("Falha no transporte SMTP de convite; tipo={}", e.getClass().getSimpleName());
+            throw e;
         } catch (Exception e) {
             log.error("Falha no transporte SMTP de convite; tipo={}", e.getClass().getSimpleName());
             throw new com.oficinagestao.exception.BusinessException("Não foi possível enviar o convite.");

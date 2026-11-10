@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
       setInvitePassword('');
       setInviteReason('');
       setInviteEmail('');
-      setNotice('Convite enviado. A pessoa poderá definir a senha pelo link recebido.');
+      setNotice('Convite registrado. O envio do e-mail está em processamento.');
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Falha ao enviar convite.');
     } finally { setBusy(false); }

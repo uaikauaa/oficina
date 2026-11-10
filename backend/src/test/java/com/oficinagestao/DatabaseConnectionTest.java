@@ -56,8 +56,8 @@ class DatabaseConnectionTest {
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("26", current.getVersion().getVersion(), "A versão atual da migration deve ser 26.");
-        assertEquals("restrict consulta permissions", current.getDescription());
+        assertEquals("27", current.getVersion().getVersion(), "A versão atual da migration deve ser 27.");
+        assertEquals("invite delivery outbox", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];

@@ -1,5 +1,7 @@
 # Etapa 3.1 — auditoria e remediação isolada
 
+Continuação: [Etapa 3.2 — outbox de convites e validação isolada](independent-audit-stage3-2.md). Os vereditos abaixo são históricos da Etapa 3.1.
+
 Data local: 09/11/2026. Referência inicial: PR #23, SHA `9842bda1fef3969ddb6fc176f9a34306b1707ab0`. Branch: `audit/admin-rbac-security-validation`, baseada no head de #23. Os PRs #21, #22 e #23 estavam abertos em cadeia; #22 e #23 em draft. Os oito checks de #23 eram do SHA antigo. O SHA final e o CI das correções devem ser conferidos no novo PR. Nenhum merge, deploy ou acesso ao Neon original ocorreu nesta etapa. O [relatório inicial](independent-audit-stage3-initial.md) foi preservado separadamente.
 
 O working tree inicial tinha alterações em `AGENTS.md`, `SECURITY.md`, `frontend/next.config.ts` e `frontend/src/lib/securityHeaders.test.ts`. As mudanças de governança foram preservadas fora da correção funcional. PNGs gerados novamente pelo Playwright foram restaurados ao estado inicial após a execução.
