@@ -1,6 +1,6 @@
 # Etapa 3.2 — outbox de convites e validação isolada
 
-Data: 09/11/2026. Base: `09728bf6feffd8d50bf60994680e2162bee7a6c4` (PR #24). Branch de trabalho: `fix/admin-invite-outbox-stage32`. PR e SHA final: registrar após publicação. Os PRs #21–#24 foram conferidos como abertos antes da alteração; #24 tinha oito checks aprovados somente no SHA inicial. `AGENTS.md` e `SECURITY.md` já modificados localmente foram preservados e excluídos desta entrega. Não houve conexão ao Neon original, migração remota, conta real, deploy ou merge.
+Data: 09/11/2026. Base: `09728bf6feffd8d50bf60994680e2162bee7a6c4` (PR #24). Branch de trabalho: `fix/admin-invite-outbox-stage32`. PR draft: #25. SHA da implementação: `023b7b189e204ad4c465e9bafbd4a01a388c37df`; o SHA final é o head do PR #25, atualizado ao publicar este relatório. Os PRs #21–#24 foram conferidos como abertos antes da alteração; #24 tinha oito checks aprovados somente no SHA inicial. `AGENTS.md` e `SECURITY.md` já modificados localmente foram preservados e excluídos desta entrega. Não houve conexão ao Neon original, migração remota, conta real, deploy ou merge.
 
 ## A3-03
 
