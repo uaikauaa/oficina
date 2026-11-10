@@ -58,7 +58,7 @@ public class ConfiguracaoOficinaService {
 
     /**
      * Atualiza os dados da configuração da oficina.
-     * Operação restrita a ROLE_ADMIN.
+     * A autorização de atualização é aplicada pelo controller via permissão RBAC.
      */
     @Transactional
     public ConfiguracaoOficinaResponseDTO atualizar(ConfiguracaoOficinaUpdateDTO dto) {

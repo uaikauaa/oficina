@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Service
@@ -38,7 +39,7 @@ public class AdminUserService {
 
     @Transactional(readOnly = true)
     public Page<AdminUserResponse> list(String search, Boolean ativo, String role, int page, int size) {
-        String normalized = search == null || search.isBlank() ? null : search.trim();
+        String normalized = search == null || search.isBlank() ? "%" : "%" + search.trim().toLowerCase(Locale.ROOT) + "%";
         String roleFilter = role == null || role.isBlank() ? null : role.trim();
         return users.searchAdmin(normalized, ativo, roleFilter,
                         PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 100))))

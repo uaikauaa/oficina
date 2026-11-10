@@ -27,8 +27,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     @Query("SELECT DISTINCT u FROM Usuario u LEFT JOIN u.roles r WHERE "
-            + "(:search IS NULL OR LOWER(u.nome) LIKE LOWER(CONCAT('%', :search, '%')) "
-            + "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) "
+            + "(LOWER(u.nome) LIKE :search OR LOWER(u.email) LIKE :search) "
             + "AND (:ativo IS NULL OR u.ativo = :ativo) "
             + "AND (:role IS NULL OR r.nome = :role)")
     Page<Usuario> searchAdmin(@Param("search") String search, @Param("ativo") Boolean ativo,

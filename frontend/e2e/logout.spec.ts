@@ -14,21 +14,22 @@ interface LogoutResponse {
 }
 
 async function prepare(page: Page, context: BrowserContext, responses: LogoutResponse[]) {
+  const origin = new URL(test.info().project.use.baseURL ?? process.env.E2E_BASE_URL ?? 'http://localhost:3000');
   const state = { logoutCalls: 0, csrfCalls: 0, refreshCalls: 0, meAfterLogout: 0, signedOut: false };
   const unexpected: string[] = [];
   const warnings: string[] = [];
   const csrfHeaders: string[] = [];
   page.on('console', message => warnings.push(message.text()));
   await context.addCookies([
-    { name: 'access_token', value: PRIVATE_MARKER, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' },
-    { name: 'refresh_token', value: PRIVATE_MARKER, domain: 'localhost', path: '/api/auth', httpOnly: true, sameSite: 'Strict' },
+    { name: 'access_token', value: PRIVATE_MARKER, domain: origin.hostname, path: '/', httpOnly: true, sameSite: 'Lax' },
+    { name: 'refresh_token', value: PRIVATE_MARKER, domain: origin.hostname, path: '/api/auth', httpOnly: true, sameSite: 'Strict' },
   ]);
 
   // Fail closed: every API response is synthetic; external requests are blocked.
   await context.route('**/*', async route => {
     const request = route.request();
     const url = new URL(request.url());
-    if (url.origin !== new URL(process.env.E2E_BASE_URL || 'http://localhost:3000').origin) {
+    if (url.origin !== origin.origin) {
       unexpected.push('external request');
       await route.abort();
       return;
