@@ -1,6 +1,6 @@
 # Etapa 3.3 — relatório de pré-homologação
 
-Data: 11/11/2026. Base: PR #25, `bae5104d08d85ae1671284cdf814226ba2462ccb`. Branch funcional: `feat/admin-stage33-prehomologation`. SHA final e estado do CI: preencher após publicação do draft. Os PRs #21–#25 permaneciam abertos; #22 depende de #21, #23 de #22, #24 de #23 e #25 de #24. Nenhum merge, deploy, e-mail real, conta real ou acesso ao Neon original ocorreu nesta etapa.
+Data: 11/11/2026. Base: PR #25, `bae5104d08d85ae1671284cdf814226ba2462ccb`. Commit funcional validado: `a177516b3a0b15c071721fccb7b4c3acd9f8fac2`. Branch e SHA final do relatório: head do [PR #27](https://github.com/uaikauaa/oficina/pull/27), em draft sobre o PR #25; consultar os checks associados ao head para o estado do CI. Os PRs #21–#25 permaneciam abertos; #22 depende de #21, #23 de #22, #24 de #23 e #25 de #24. Nenhum merge, deploy, e-mail real, conta real ou acesso ao Neon original ocorreu nesta etapa.
 
 ## Mudanças e migrations
 
