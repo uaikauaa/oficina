@@ -57,13 +57,13 @@ Configuração: as fontes declaradas são variáveis do processo/Secret Manager;
 | Playwright integrado, Next → Spring → PostgreSQL → Mailpit | 3 cenários passaram; duas JVMs, rate limit compartilhado, reinício e entrega pendente única passaram |
 | SMTP 550 por rede com PostgreSQL e worker | Convite: 14 testes focados; recuperação: 7 testes focados; 0 falhas/skips |
 | Playwright mockado | 115 passaram; 0 falhas/skips |
-| Verificação de segredos no novo SHA | Pendente do CI final; sem scanner local instalado |
-| CI do novo SHA | Pendente de publicação e conclusão dos workflows |
+| Verificação de segredos no SHA funcional 3.4 | Gitleaks, Trivy e SBOM passaram no CI; sem scanner local instalado |
+| CI do SHA funcional 3.4 `3463f75945c69d647252183bc18b1ed6eee389bf` | 4/4 workflows passaram: CI Pipeline, Flyway/E2E complementar, integração real e Oracle Readiness |
 
 Houve uma invocação Maven intermediária inválida por interpretação PowerShell do parâmetro `-D`; a execução corrigida passou. O `npm ci` registrou sete alertas moderados de dependências; sem avaliação de explorabilidade nesta etapa.
 
 ## Veredito e handoff
 
-**NO-GO para declarar a pré-homologação técnica definitivamente encerrada ou iniciar operações no Neon original.** Há evidência forte para os fluxos centrais isolados e a falha SMTP 550, porém a matriz de mutações por papel, os estados completos do painel, a política de revogação administrativa, a medição temporal da recuperação e os gates finais do novo SHA permanecem abertos. Um futuro **GO para preparar a homologação** permitiria apenas diagnóstico controlado e preparação do backup, sem autorizar migrations, startup no Neon original, contas, papéis, merge ou deploy.
+**NO-GO para declarar a pré-homologação técnica definitivamente encerrada ou iniciar operações no Neon original.** Há evidência forte para os fluxos centrais isolados e a falha SMTP 550, porém a matriz de mutações por papel, os estados completos do painel, a política de revogação administrativa e a medição temporal da recuperação permanecem abertos. O CI do commit documental final deve ser reconferido no PR. Um futuro **GO para preparar a homologação** permitiria apenas diagnóstico controlado e preparação do backup, sem autorizar migrations, startup no Neon original, contas, papéis, merge ou deploy.
 
 Etapa 4, em ordem e mediante autorização específica para cada operação real: (1) confirmar identidade do projeto/branch/banco/role Neon; (2) preparar credenciais privadas e segregadas; (3) validar TLS `verify-full`; (4) criar backup cifrado; (5) restaurá-lo e comparar integridade; (6) ensaiar V25–V28 na cópia; (7) auditar efeitos de startup; (8) preparar identidade e provisionamento do SUPER_ADMIN; (9) preparar transição reversível da Geisa; (10) definir parada e rollback; (11) solicitar autorização explícita para cada ação no destino original. Nenhum desses passos foi executado nesta etapa.
