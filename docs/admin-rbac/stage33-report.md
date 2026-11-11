@@ -22,7 +22,9 @@ Data: 11/11/2026. Base: PR #25, `bae5104d08d85ae1671284cdf814226ba2462ccb`. Comm
 | Duas JVMs e outbox | Aprovado | Rate limit distribuído e convite pendente após reinício; uma mensagem no Mailpit e ciphertext apagado. |
 | SMTP 550 por TCP loopback | Aprovado no teste unitário de transporte | Propagação do 550 comprovada; classificação terminal na outbox é coberta separadamente por exceção sintética. A combinação ponta a ponta ainda requer teste. |
 | Flyway V28 | Aprovado pela suíte de migrations | Somente PostgreSQL descartável; sem Neon original. |
-| Segredos | Placeholders revisados, sem segredos novos intencionais no Git | Scanner CI no SHA final pendente. |
+| Segredos | Placeholders revisados; Gitleaks CI aprovado em `dac77588001683846cbbdb483fc9589e6cb5371b` | Segredos operacionais não foram fornecidos nem testados. |
+
+Os quatro workflows GitHub Actions de `dac77588001683846cbbdb483fc9589e6cb5371b` concluíram com sucesso: CI Pipeline (backend, frontend e Gitleaks), Flyway/E2E complementar (incluindo Playwright, imagens, Trivy e SBOM), integração real e Oracle Readiness. Esta atualização documental posterior não modifica código executável; os checks do head atual do PR devem ser consultados antes de revisão/merge.
 
 ## Matriz de autorização verificada
 
@@ -39,8 +41,8 @@ O teste `RoleMatrixRouteIntegrationTest` percorre todas as regras do catálogo H
 
 ## Pendências separadas
 
-**Testes não executados:** matriz integral de formulários e mutações reais para cada papel; todas as combinações de erro, estado vazio, expiração e acessibilidade do painel no browser com stack real; SMTP 550 atravessando toda a outbox por rede; scanner de segredos e CI do SHA final. **Falhas comprovadas:** nenhuma na suíte final ou no Playwright; um rerun intermediário de `clean verify` falhou porque as JVMs do ensaio real ainda mantinham o JAR aberto no Windows. Após o encerramento, o rerun final passou. **Riscos potenciais:** access JWT de sessão revogada individualmente pode valer até 15 minutos; SMTP pode aceitar a mensagem e falhar antes do ack, permitindo reenvio; enumeração por tempo de resposta da solicitação de recuperação não foi medida. **Melhorias opcionais:** exportação auditada após política de retenção e identidade de dispositivo somente com coleta consentida e fonte verificável.
+**Testes não executados:** matriz integral de formulários e mutações reais para cada papel; todas as combinações de erro, estado vazio, expiração e acessibilidade do painel no browser com stack real; SMTP 550 atravessando toda a outbox por rede. **Falhas comprovadas:** nenhuma na suíte final ou no Playwright; um rerun intermediário de `clean verify` falhou porque as JVMs do ensaio real ainda mantinham o JAR aberto no Windows. Após o encerramento, o rerun final passou. **Riscos potenciais:** access JWT de sessão revogada individualmente pode valer até 15 minutos; SMTP pode aceitar a mensagem e falhar antes do ack, permitindo reenvio; enumeração por tempo de resposta da solicitação de recuperação não foi medida. **Melhorias opcionais:** exportação auditada após política de retenção e identidade de dispositivo somente com coleta consentida e fonte verificável.
 
 ## Veredito e gates
 
-**NO-GO para declarar a Etapa 3.3 tecnicamente concluída ou produção pronta.** Os fluxos essenciais implementados e os testes sintéticos locais avançaram, mas a matriz Playwright real integral, a validação SMTP 5xx de ponta a ponta, o CI final e a homologação operacional permanecem gates. A Etapa 4 está apenas planejada; backup/restauração do Neon original, TLS e identidade no destino, Secret Manager, conta principal com 2FA, transição da Geisa e rollback exigem autorização e execução futuras.
+**NO-GO para declarar a Etapa 3.3 tecnicamente concluída ou produção pronta.** Os fluxos essenciais implementados, os testes sintéticos locais e os quatro workflows CI avançaram, mas a matriz Playwright real integral, a validação SMTP 5xx de ponta a ponta e a homologação operacional permanecem gates. A Etapa 4 está apenas planejada; backup/restauração do Neon original, TLS e identidade no destino, Secret Manager, conta principal com 2FA, transição da Geisa e rollback exigem autorização e execução futuras.
