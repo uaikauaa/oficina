@@ -17,4 +17,5 @@ public record LoginResult(
     ) {
         this(accessToken, refreshToken, accessExpiresIn, refreshExpiresIn, user, false);
     }
+    @Override public String toString() { return "LoginResult[redacted]"; }
 }

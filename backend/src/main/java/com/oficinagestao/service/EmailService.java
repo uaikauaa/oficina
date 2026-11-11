@@ -5,4 +5,5 @@ public interface EmailService {
     void sendTwoFactorCode(String to, String code);
 
     void sendInvitation(String to, String acceptanceUrl);
+    void sendPasswordRecovery(String to, String recoveryUrl);
 }

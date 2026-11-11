@@ -4,4 +4,4 @@ public record LoginChallengeResponse(
         boolean twoFactorRequired,
         String challengeToken,
         String mensagem
-) {}
+) { @Override public String toString() { return "LoginChallengeResponse[redacted]"; } }

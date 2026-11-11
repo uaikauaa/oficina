@@ -80,7 +80,10 @@ class IndependentRouteAuditTest {
                 "GET /api/admin/papeis", "GET /api/admin/permissoes", "POST /api/admin/papeis",
                 "PUT /api/admin/papeis/{id}", "GET /api/admin/auditoria",
                 "GET /api/admin/infraestrutura", "POST /api/admin/provisionamento/super-admin",
-                "GET /api/admin/resumo"));
+                "GET /api/admin/resumo", "POST /api/auth/recuperacao/solicitar",
+                "POST /api/auth/recuperacao/concluir", "GET /api/auth/sessoes",
+                "DELETE /api/auth/sessoes", "DELETE /api/auth/sessoes/outras",
+                "DELETE /api/auth/sessoes/{id}"));
         var actual = new TreeSet<String>();
         var evidence = new ArrayList<Map<String, Object>>();
         var csrf = CsrfMockMvc.obtain(mvc);
@@ -90,12 +93,14 @@ class IndependentRouteAuditTest {
                 String key = method + " " + path;
                 actual.add(key);
                 boolean publicRoute = path.equals("/api/health") || key.equals("GET /api/auth/csrf")
-                        || (method == RequestMethod.POST && Set.of("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/2fa/verify", "/api/auth/2fa/resend", "/api/auth/convites/aceitar").contains(path));
+                        || (method == RequestMethod.POST && Set.of("/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/2fa/verify", "/api/auth/2fa/resend", "/api/auth/convites/aceitar", "/api/auth/recuperacao/solicitar", "/api/auth/recuperacao/concluir").contains(path));
                 String adminToken = jwt.generateToken(users.findById(admin.getId()).orElseThrow());
                 String userToken = jwt.generateToken(ordinary);
                 int anonymous = rolledBack(csrf.apply(probe(method, path)));
                 int lowRole = rolledBack(csrf.apply(probe(method, path).header("Authorization", "Bearer " + userToken)));
-                boolean selfRoute = Set.of("GET /api/auth/me", "PUT /api/auth/alterar-senha").contains(key);
+                boolean selfRoute = Set.of("GET /api/auth/me", "PUT /api/auth/alterar-senha",
+                        "GET /api/auth/sessoes", "DELETE /api/auth/sessoes",
+                        "DELETE /api/auth/sessoes/outras", "DELETE /api/auth/sessoes/{id}").contains(key);
                 if (!publicRoute) {
                     assertEquals(401, anonymous, key);
                     if (!selfRoute) assertEquals(403, lowRole, key);
@@ -119,7 +124,7 @@ class IndependentRouteAuditTest {
         }
         Files.writeString(Path.of("target/independent-route-coverage.json"), json.writerWithDefaultPrettyPrinter().writeValueAsString(evidence));
         assertEquals(documented, actual, "Unreviewed new or removed API mappings");
-        assertEquals(97, actual.size());
+        assertEquals(103, actual.size());
     }
 
     @Test void shadowEndpointsDangerousMethodsHostAndCrLfDoNotOpenAnotherSurface() throws Exception {

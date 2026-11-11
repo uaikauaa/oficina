@@ -95,6 +95,27 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendPasswordRecovery(String to, String recoveryUrl) {
+        if (mailSender == null || isHostMissing(mailSender))
+            throw new com.oficinagestao.exception.BusinessException("Serviço de e-mail indisponível.");
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject("Recuperação de acesso — Oficina Gestão");
+            message.setText("Foi solicitada a recuperação de senha da sua conta.\n\n"
+                    + "Abra o link abaixo para definir uma nova senha:\n\n" + recoveryUrl
+                    + "\n\nO link tem validade limitada e pode ser usado uma vez. "
+                    + "Se você não solicitou a recuperação, ignore esta mensagem.");
+            mailSender.send(message);
+            log.info("E-mail de recuperação de acesso enviado.");
+        } catch (org.springframework.mail.MailException error) {
+            log.error("Falha no transporte SMTP de recuperação; tipo={}", error.getClass().getSimpleName());
+            throw error;
+        }
+    }
+
     private boolean isHostMissing(JavaMailSender sender) {
         if (sender instanceof org.springframework.mail.javamail.JavaMailSenderImpl impl) {
             return impl.getHost() == null || impl.getHost().isBlank();

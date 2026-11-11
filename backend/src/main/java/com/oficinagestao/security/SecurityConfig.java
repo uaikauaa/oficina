@@ -97,7 +97,11 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/2fa/**").permitAll()
                             .requestMatchers(HttpMethod.POST, "/api/auth/convites/aceitar").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/api/auth/recuperacao/solicitar", "/api/auth/recuperacao/concluir").permitAll()
                             .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
+                            .requestMatchers(HttpMethod.GET, "/api/auth/sessoes").authenticated()
+                            .requestMatchers(HttpMethod.DELETE, "/api/auth/sessoes", "/api/auth/sessoes/outras",
+                                    "/api/auth/sessoes/{id}").authenticated()
                             .requestMatchers(HttpMethod.PUT, "/api/auth/alterar-senha").authenticated();
 
                     for (OperationalPermissionCatalog.Rule rule : OperationalPermissionCatalog.RULES) {

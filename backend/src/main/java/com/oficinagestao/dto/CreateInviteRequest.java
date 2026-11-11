@@ -10,4 +10,4 @@ public record CreateInviteRequest(
         @NotBlank @Size(min = 10, max = 500) String motivo,
         @NotBlank String senhaAtual,
         @NotBlank String confirmacao
-) {}
+) { @Override public String toString() { return "CreateInviteRequest[redacted]"; } }

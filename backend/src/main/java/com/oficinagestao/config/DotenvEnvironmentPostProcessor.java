@@ -24,7 +24,8 @@ public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor 
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        if (environment.acceptsProfiles(Profiles.of("test"))) {
+        // Production and synthetic tests receive configuration exclusively from their environment.
+        if (environment.acceptsProfiles(Profiles.of("test", "prod", "production"))) {
             return;
         }
 

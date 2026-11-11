@@ -13,20 +13,30 @@ export default function AuditPage() {
   const { user } = useAuth();
   const authorized = user?.roles.includes('ROLE_SUPER_ADMIN') === true;
   const [page, setPage] = useState(0);
+  const [acao, setAcao] = useState('');
+  const [usuarioId, setUsuarioId] = useState('');
+  const [de, setDe] = useState('');
+  const [ate, setAte] = useState('');
+  const [ordem, setOrdem] = useState('desc');
   const [data, setData] = useState<EventPage | null>(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!authorized) return;
     let active = true;
-    apiFetch(`/api/admin/auditoria?page=${page}&size=20`)
+    const params = new URLSearchParams({ page: String(page), size: '20', ordem });
+    if (acao.trim()) params.set('acao', acao.trim());
+    if (usuarioId.trim()) params.set('usuarioId', usuarioId.trim());
+    if (de) params.set('de', new Date(de).toISOString());
+    if (ate) params.set('ate', new Date(ate).toISOString());
+    apiFetch(`/api/admin/auditoria?${params}`)
       .then(async response => {
         if (!response.ok) throw new Error('Não foi possível carregar a auditoria.');
         const next: EventPage = await response.json();
         if (active) { setData(next); setError(''); }
       }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : 'Falha ao carregar.'); });
     return () => { active = false; };
-  }, [authorized, page]);
+  }, [authorized, page, acao, usuarioId, de, ate, ordem]);
 
   if (!authorized) return <main className="mx-auto max-w-6xl p-6"><h1 className="text-xl font-bold">Acesso restrito</h1></main>;
   return <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 space-y-6">
@@ -38,6 +48,13 @@ export default function AuditPage() {
       <Link href="/administracao/papeis" className="ui-btn">Papéis</Link>
       <Link href="/administracao/infraestrutura" className="ui-btn">Infraestrutura</Link>
     </nav>
+    <div className="grid gap-3 rounded-2xl border border-line bg-surface p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <label className="text-sm">Ação<input className="ui-input mt-1 w-full" value={acao} onChange={e => { setAcao(e.target.value); setPage(0); }} maxLength={80} /></label>
+      <label className="text-sm">ID do usuário<input className="ui-input mt-1 w-full" type="number" min="1" value={usuarioId} onChange={e => { setUsuarioId(e.target.value); setPage(0); }} /></label>
+      <label className="text-sm">De<input className="ui-input mt-1 w-full" type="datetime-local" value={de} onChange={e => { setDe(e.target.value); setPage(0); }} /></label>
+      <label className="text-sm">Até<input className="ui-input mt-1 w-full" type="datetime-local" value={ate} onChange={e => { setAte(e.target.value); setPage(0); }} /></label>
+      <label className="text-sm">Ordem<select className="ui-input mt-1 w-full" value={ordem} onChange={e => { setOrdem(e.target.value); setPage(0); }}><option value="desc">Mais recentes</option><option value="asc">Mais antigos</option></select></label>
+    </div>
     {error && <p role="alert" className="text-sm text-danger">{error}</p>}
     {!data && !error && <p className="text-sm text-subtle">Carregando...</p>}
     {data && <><p className="text-xs text-subtle">{data.totalElements} evento(s)</p>

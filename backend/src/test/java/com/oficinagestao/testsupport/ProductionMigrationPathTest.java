@@ -51,26 +51,26 @@ class ProductionMigrationPathTest {
         try (var db = new Database()) {
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM information_schema.tables WHERE table_schema='public'", Integer.class));
             Flyway flyway = db.production();
-            assertEquals(4, flyway.migrate().migrationsExecuted);
+            assertEquals(5, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals(List.of("B24__neutral_initial_schema.sql", "V25__admin_rbac.sql", "V26__restrict_consulta_permissions.sql", "V27__invite_delivery_outbox.sql"), db.jdbc.queryForList(
+            assertEquals(List.of("B24__neutral_initial_schema.sql", "V25__admin_rbac.sql", "V26__restrict_consulta_permissions.sql", "V27__invite_delivery_outbox.sql", "V28__password_recovery.sql"), db.jdbc.queryForList(
                     "SELECT script FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank", String.class));
             assertEquals("SQL_BASELINE", db.jdbc.queryForObject("SELECT type FROM flyway_schema_history WHERE version='24'", String.class));
-            assertEquals("27", flyway.info().current().getVersion().getVersion());
+            assertEquals("28", flyway.info().current().getVersion().getVersion());
             assertNeutralDatabase(db);
             var before = businessData(db);
             assertEquals(0, flyway.migrate().migrationsExecuted);
             assertEquals(before, businessData(db));
 
             // Prove that B24 does not prevent future versioned migrations from running normally.
-            Path future = directory.resolve("V28__synthetic_future_probe.sql");
+            Path future = directory.resolve("V29__synthetic_future_probe.sql");
             Files.writeString(future, "CREATE TABLE synthetic_future_probe (id integer PRIMARY KEY);\n");
             Flyway next = Flyway.configure().dataSource(db.source)
                     .locations("classpath:db/migration", "filesystem:" + directory.toAbsolutePath())
                     .baselineOnMigrate(false).load();
             assertEquals(1, next.migrate().migrationsExecuted);
             next.validate();
-            assertEquals("28", next.info().current().getVersion().getVersion());
+            assertEquals("29", next.info().current().getVersion().getVersion());
         }
     }
 
@@ -78,7 +78,7 @@ class ProductionMigrationPathTest {
     void productionBaselineHasTheSameSchemaAsTheFullHistoricalChain() throws Exception {
         try (var fresh = new Database(); var legacy = new Database()) {
             fresh.production().migrate();
-            legacy.synthetic("27").migrate();
+            legacy.synthetic("28").migrate();
             assertEquals(schema(legacy), schema(fresh), "Columns, defaults, constraints, indexes, sequences, functions and triggers must match");
             assertEquals(legacy.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"), fresh.jdbc.queryForList("SELECT id,nome,descricao FROM roles ORDER BY id"));
             assertEquals(legacy.jdbc.queryForList("SELECT nome, descricao, ativo FROM categorias ORDER BY nome"),
@@ -92,14 +92,14 @@ class ProductionMigrationPathTest {
             legacyFixture(db, resolver, "21");
             var before = businessData(db);
             Flyway flyway = db.production();
-            assertEquals(6, flyway.migrate().migrationsExecuted);
+            assertEquals(7, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals("27", flyway.info().current().getVersion().getVersion());
+            assertEquals("28", flyway.info().current().getVersion().getVersion());
             // V22 widens a numeric column; V23/V24 add empty security tables.
             var after = businessData(db);
             after.keySet().removeIf(name -> name.startsWith("security_rate_"));
             assertEquals(before, after);
-            assertEquals(27, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
+            assertEquals(28, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE type='SQL'", Integer.class));
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM flyway_schema_history WHERE script LIKE 'B%'", Integer.class));
         }
     }
@@ -111,7 +111,7 @@ class ProductionMigrationPathTest {
             var before = businessData(db);
             var history = db.jdbc.queryForList("SELECT * FROM flyway_schema_history ORDER BY installed_rank");
             Flyway flyway = db.production();
-            assertEquals(3, flyway.migrate().migrationsExecuted);
+            assertEquals(4, flyway.migrate().migrationsExecuted);
             flyway.validate();
             assertEquals(before, businessData(db));
             assertEquals(history, db.jdbc.queryForList("SELECT * FROM flyway_schema_history WHERE installed_rank <= 24 ORDER BY installed_rank"));
@@ -133,9 +133,9 @@ class ProductionMigrationPathTest {
             assertTrue(grants(db, "ROLE_CONSULTA").contains("relatorios.ordens.servico.get"));
 
             Flyway flyway = db.production();
-            assertEquals(2, flyway.migrate().migrationsExecuted);
+            assertEquals(3, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals("27", flyway.info().current().getVersion().getVersion());
+            assertEquals("28", flyway.info().current().getVersion().getVersion());
             assertEquals(List.of("categorias.ativas.get", "categorias.get", "categorias.id.get",
                     "clientes.get", "clientes.id.get", "fornecedores.get", "fornecedores.id.get",
                     "maquinas.get", "maquinas.id.get"), grants(db, "ROLE_CONSULTA"));
@@ -152,11 +152,44 @@ class ProductionMigrationPathTest {
             legacyFixture(db, resolver, "26");
             var before = businessData(db);
             Flyway flyway = db.production();
-            assertEquals(1, flyway.migrate().migrationsExecuted);
+            assertEquals(2, flyway.migrate().migrationsExecuted);
             flyway.validate();
-            assertEquals("27", flyway.info().current().getVersion().getVersion());
+            assertEquals("28", flyway.info().current().getVersion().getVersion());
             assertEquals(before, businessData(db));
             assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM invite_delivery_outbox", Integer.class));
+        }
+    }
+
+    @Test
+    void existingV27ReceivesOnlyPasswordRecoveryTables() throws Exception {
+        try (var db = new Database(); var resolver = new Database()) {
+            legacyFixture(db, resolver, "27");
+            var before = businessData(db);
+            Flyway flyway = db.production();
+            assertEquals(1, flyway.migrate().migrationsExecuted);
+            flyway.validate();
+            assertEquals("28", flyway.info().current().getVersion().getVersion());
+            assertEquals(before, businessData(db));
+            assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM password_reset_requests", Integer.class));
+        }
+    }
+
+    @Test
+    void v28BackfillsLogicalSessionWithoutChangingLegacyRefreshVerifier() throws Exception {
+        try (var db = new Database(); var resolver = new Database()) {
+            legacyFixture(db, resolver, "27");
+            Long userId = db.jdbc.queryForObject("SELECT id FROM usuarios ORDER BY id LIMIT 1", Long.class);
+            String hash = "a".repeat(64);
+            Long tokenId = db.jdbc.queryForObject("INSERT INTO refresh_tokens(usuario_id,token_hash,"
+                    + "data_expiracao,revogado,remember_me) VALUES (?,?,now()+interval '1 day',false,true) "
+                    + "RETURNING id", Long.class, userId, hash);
+            assertEquals(1, db.production().migrate().migrationsExecuted);
+            assertEquals(hash, db.jdbc.queryForObject("SELECT token_hash FROM refresh_tokens WHERE id=?",
+                    String.class, tokenId));
+            assertEquals(Boolean.FALSE, db.jdbc.queryForObject("SELECT revogado FROM refresh_tokens WHERE id=?",
+                    Boolean.class, tokenId));
+            assertNotNull(db.jdbc.queryForObject("SELECT session_id FROM refresh_tokens WHERE id=?",
+                    java.util.UUID.class, tokenId));
         }
     }
 
@@ -208,7 +241,7 @@ class ProductionMigrationPathTest {
         Map<String, List<String>> result = new LinkedHashMap<>();
         for (String table : db.jdbc.queryForList("SELECT tablename FROM pg_tables WHERE schemaname='public' "
                 + "AND tablename NOT IN ('flyway_schema_history','roles','role_permissoes','permissoes',"
-                + "'convites_usuarios','eventos_administrativos','invite_delivery_outbox') ORDER BY tablename", String.class)) {
+                + "'convites_usuarios','eventos_administrativos','invite_delivery_outbox','password_reset_requests','password_reset_outbox') ORDER BY tablename", String.class)) {
             assertTrue(table.matches("[a-z_]+"));
             result.put(table, db.jdbc.queryForList("SELECT row_to_json(t)::text FROM " + table + " t ORDER BY row_to_json(t)::text", String.class));
         }

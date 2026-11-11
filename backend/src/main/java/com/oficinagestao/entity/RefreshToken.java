@@ -12,6 +12,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -39,6 +40,9 @@ public class RefreshToken {
 
     @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm;
+
+    @Column(name = "session_id", nullable = false, updatable = false)
+    private UUID sessionId = UUID.randomUUID();
 
     public RefreshToken() {
     }
@@ -139,6 +143,9 @@ public class RefreshToken {
     public boolean isRememberMe() {
         return Boolean.TRUE.equals(this.rememberMe);
     }
+
+    public UUID getSessionId() { return sessionId; }
+    public void setSessionId(UUID sessionId) { this.sessionId = sessionId; }
 
     @Override
     public boolean equals(Object o) {
