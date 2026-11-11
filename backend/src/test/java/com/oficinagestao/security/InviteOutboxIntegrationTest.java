@@ -28,6 +28,12 @@ import java.util.List;
 import java.util.Base64;
 import java.util.UUID;
 import java.net.URI;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -130,6 +136,59 @@ class InviteOutboxIntegrationTest {
                 + "JOIN convites_usuarios c ON c.id=o.invite_id WHERE c.email=?", String.class, email));
         assertFalse(outbox.dispatchOne());
         verify(mail, times(1)).sendInvitation(anyString(), anyString());
+    }
+
+    @Test void realSmtp550TraversesCommittedInviteWorkerAndTerminalPersistence() throws Exception {
+        issue();
+        assertEquals("PENDING", state());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM convites_usuarios WHERE email=?", Integer.class, email));
+        long inviteId = jdbc.queryForObject("SELECT id FROM convites_usuarios WHERE email=?", Long.class, email);
+
+        try (ServerSocket server = new ServerSocket(0, 1, InetAddress.getLoopbackAddress());
+             var executor = Executors.newSingleThreadExecutor()) {
+            server.setSoTimeout(5000);
+            var exchange = executor.submit(() -> {
+                try (var socket = server.accept();
+                     var in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+                     var out = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.US_ASCII)) {
+                    socket.setSoTimeout(5000);
+                    out.print("220 localhost synthetic SMTP\r\n"); out.flush();
+                    int recipients = 0;
+                    for (String line; (line = in.readLine()) != null;) {
+                        String command = line.toUpperCase(java.util.Locale.ROOT);
+                        if (command.startsWith("EHLO") || command.startsWith("HELO")) out.print("250 localhost\r\n");
+                        else if (command.startsWith("MAIL FROM")) out.print("250 sender accepted\r\n");
+                        else if (command.startsWith("RCPT TO")) {
+                            out.print("550 5.1.1 synthetic recipient rejection\r\n");
+                            recipients++;
+                        } else if (command.startsWith("QUIT")) {
+                            out.print("221 bye\r\n"); out.flush(); break;
+                        } else out.print("250 ok\r\n");
+                        out.flush();
+                    }
+                    return recipients;
+                }
+            });
+            var sender = new org.springframework.mail.javamail.JavaMailSenderImpl();
+            sender.setHost("127.0.0.1");
+            sender.setPort(server.getLocalPort());
+            sender.getJavaMailProperties().put("mail.smtp.connectiontimeout", "3000");
+            sender.getJavaMailProperties().put("mail.smtp.timeout", "3000");
+            var realMail = new com.oficinagestao.service.EmailServiceImpl(sender, "sender@example.invalid");
+            var realWorker = new InviteOutbox(jdbc, tx, realMail,
+                    "1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", 1, "http://localhost:3000");
+            assertTrue(realWorker.dispatchOne());
+            assertEquals(1, exchange.get(5, TimeUnit.SECONDS));
+            assertEquals("EXHAUSTED", state());
+            assertFalse(realWorker.dispatchOne());
+            assertEquals("SMTP_PERMANENT", jdbc.queryForObject("SELECT o.last_failure FROM invite_delivery_outbox o "
+                    + "JOIN convites_usuarios c ON c.id=o.invite_id WHERE c.email=?", String.class, email));
+            assertTrue(jdbc.queryForObject("SELECT o.nonce IS NULL AND o.ciphertext IS NULL FROM invite_delivery_outbox o "
+                    + "JOIN convites_usuarios c ON c.id=o.invite_id WHERE c.email=?", Boolean.class, email));
+            assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM eventos_administrativos "
+                    + "WHERE acao='CONVITE_ENTREGA_ESGOTADA' AND detalhes=?",
+                    Integer.class, "Convite " + inviteId + ": SMTP_PERMANENT"));
+        }
     }
 
     @Test void reissueCancelsOldPayloadAndExpiryPreventsSend() {
