@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
         source: '/convite',
         headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
       },
+      {
+        source: '/recuperar-senha',
+        headers: [{ key: 'Referrer-Policy', value: 'no-referrer' }],
+      },
     ];
   },
 };

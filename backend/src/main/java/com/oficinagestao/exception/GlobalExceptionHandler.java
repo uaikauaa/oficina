@@ -25,6 +25,15 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<ApiErrorResponse> handleResponseStatus(
+            org.springframework.web.server.ResponseStatusException ex, HttpServletRequest request) {
+        int status = ex.getStatusCode().value();
+        String message = ex.getReason() != null ? ex.getReason() : "Requisição inválida.";
+        return ResponseEntity.status(ex.getStatusCode()).cacheControl(CacheControl.noStore())
+                .body(ApiErrorResponse.of(status, "HTTP_" + status, message, request.getRequestURI()));
+    }
+
     @ExceptionHandler(RateLimitException.class)
     public ResponseEntity<ApiErrorResponse> handleRateLimit(RateLimitException ex, HttpServletRequest request) {
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)

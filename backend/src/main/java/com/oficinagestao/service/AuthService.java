@@ -395,6 +395,7 @@ public class AuthService {
         String newTokenHash = tokenHashUtil.hash(newRefreshTokenValue);
         OffsetDateTime refreshExpiry = OffsetDateTime.now().plus(tokenRefreshExpiryMs, ChronoUnit.MILLIS);
         RefreshToken newToken = new RefreshToken(usuario, newTokenHash, refreshExpiry, rememberMe);
+        newToken.setSessionId(oldToken.getSessionId());
         refreshTokenRepository.save(newToken);
 
         String newAccessToken = jwtService.generateToken(usuario);

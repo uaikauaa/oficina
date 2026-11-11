@@ -24,6 +24,9 @@ public class InviteOutbox {
     private record Delivery(long id, long inviteId, int version, byte[] nonce, byte[] ciphertext,
                             String email, OffsetDateTime expiresAt, OffsetDateTime usedAt,
                             OffsetDateTime revokedAt, int attempts) { }
+    private record RecoveryDelivery(long id, long resetId, int version, byte[] nonce, byte[] ciphertext,
+                                    String email, boolean active, OffsetDateTime expiresAt,
+                                    OffsetDateTime usedAt, OffsetDateTime revokedAt, int attempts) { }
 
     private final JdbcTemplate jdbc;
     private final TransactionTemplate transactions;
@@ -70,11 +73,93 @@ public class InviteOutbox {
                 inviteId, activeVersion, nonce, encrypted);
     }
 
+    /** Uses the same versioned temporary-token transport key, with a distinct AAD domain. */
+    public void enqueueRecovery(long resetId, String token) {
+        byte[] nonce = new byte[12];
+        random.nextBytes(nonce);
+        byte[] encrypted = crypt(Cipher.ENCRYPT_MODE, keys.get(activeVersion), nonce,
+                "password-reset:" + resetId, token.getBytes(StandardCharsets.US_ASCII));
+        jdbc.update("INSERT INTO password_reset_outbox(reset_id,key_version,nonce,ciphertext) VALUES (?,?,?,?)",
+                resetId, activeVersion, nonce, encrypted);
+    }
+
     /** Workers hold a row lock through SMTP and acknowledgement; peers skip locked rows. */
     @Scheduled(fixedDelayString = "${security.invite-outbox.poll-ms:5000}",
             initialDelayString = "${security.invite-outbox.poll-ms:5000}")
     public void poll() {
         for (int i = 0; i < 10 && dispatchOne(); i++) { /* bounded batch */ }
+        for (int i = 0; i < 10 && dispatchRecoveryOne(); i++) { /* bounded batch */ }
+    }
+
+    public boolean dispatchRecoveryOne() {
+        Boolean processed = transactions.execute(status -> {
+            var rows = jdbc.query("SELECT o.id,o.reset_id,o.key_version,o.nonce,o.ciphertext,o.attempts,"
+                    + "u.email,u.ativo,r.expira_em,r.usado_em,r.revogado_em FROM password_reset_outbox o "
+                    + "JOIN password_reset_requests r ON r.id=o.reset_id JOIN usuarios u ON u.id=r.usuario_id "
+                    + "WHERE o.status='PENDING' AND o.next_attempt_at<=now() ORDER BY o.next_attempt_at,o.id "
+                    + "LIMIT 1 FOR UPDATE OF o SKIP LOCKED", (rs, index) -> new RecoveryDelivery(
+                    rs.getLong("id"), rs.getLong("reset_id"), rs.getInt("key_version"),
+                    rs.getBytes("nonce"), rs.getBytes("ciphertext"), rs.getString("email"),
+                    rs.getBoolean("ativo"), rs.getObject("expira_em", OffsetDateTime.class),
+                    rs.getObject("usado_em", OffsetDateTime.class),
+                    rs.getObject("revogado_em", OffsetDateTime.class), rs.getInt("attempts")));
+            if (rows.isEmpty()) return false;
+            RecoveryDelivery d = rows.getFirst();
+            if (!d.active() || d.usedAt() != null || d.revokedAt() != null
+                    || !d.expiresAt().isAfter(OffsetDateTime.now())) {
+                recoveryTerminal(d, "CANCELLED", "REQUEST_INACTIVE");
+                return true;
+            }
+            SecretKeySpec key = keys.get(d.version());
+            if (key == null) {
+                recoveryTerminal(d, "EXHAUSTED", "KEY_UNAVAILABLE");
+                return true;
+            }
+            String token;
+            try {
+                token = new String(crypt(Cipher.DECRYPT_MODE, key, d.nonce(),
+                        "password-reset:" + d.resetId(), d.ciphertext()), StandardCharsets.US_ASCII);
+            } catch (IllegalStateException error) {
+                recoveryTerminal(d, "EXHAUSTED", "DECRYPTION_FAILED");
+                return true;
+            }
+            try {
+                mail.sendPasswordRecovery(d.email(), publicUrl + "/recuperar-senha#token=" + token);
+            } catch (RuntimeException error) {
+                if (permanentSmtp(error)) recoveryTerminal(d, "EXHAUSTED", "SMTP_PERMANENT");
+                else recoveryFailure(d);
+                return true;
+            }
+            jdbc.update("UPDATE password_reset_outbox SET status='SENT',nonce=NULL,ciphertext=NULL,"
+                    + "sent_at=now(),attempts=attempts+1,last_failure=NULL WHERE id=?", d.id());
+            recoveryAudit(d, "RECUPERACAO_ENTREGUE", "SMTP aceito");
+            return true;
+        });
+        return Boolean.TRUE.equals(processed);
+    }
+
+    private void recoveryFailure(RecoveryDelivery d) {
+        int attempts = d.attempts() + 1;
+        if (attempts >= 5) recoveryTerminal(d, "EXHAUSTED", "SMTP_FAILURE");
+        else {
+            long delay = Math.min(3600, 30L << (attempts - 1));
+            jdbc.update("UPDATE password_reset_outbox SET attempts=?,last_failure='SMTP_FAILURE',"
+                    + "next_attempt_at=now()+(? * interval '1 second') WHERE id=?", attempts, delay, d.id());
+            recoveryAudit(d, "RECUPERACAO_ENTREGA_FALHOU", "SMTP_FAILURE");
+        }
+    }
+
+    private void recoveryTerminal(RecoveryDelivery d, String state, String category) {
+        jdbc.update("UPDATE password_reset_outbox SET status=?,nonce=NULL,ciphertext=NULL,"
+                + "last_failure=?,attempts=CASE WHEN ?='EXHAUSTED' THEN LEAST(attempts+1,5) ELSE attempts END WHERE id=?",
+                state, category, state, d.id());
+        recoveryAudit(d, "EXHAUSTED".equals(state) ? "RECUPERACAO_ENTREGA_ESGOTADA"
+                : "RECUPERACAO_ENTREGA_CANCELADA", category);
+    }
+
+    private void recoveryAudit(RecoveryDelivery d, String action, String category) {
+        jdbc.update("INSERT INTO eventos_administrativos(acao,detalhes) VALUES (?,?)", action,
+                "Recuperação " + d.resetId() + ": " + category);
     }
 
     public boolean dispatchOne() {
@@ -172,10 +257,14 @@ public class InviteOutbox {
     }
 
     private static byte[] crypt(int mode, SecretKeySpec key, byte[] nonce, long inviteId, byte[] input) {
+        return crypt(mode, key, nonce, Long.toString(inviteId), input);
+    }
+
+    private static byte[] crypt(int mode, SecretKeySpec key, byte[] nonce, String aad, byte[] input) {
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(mode, key, new GCMParameterSpec(128, nonce));
-            cipher.updateAAD(Long.toString(inviteId).getBytes(StandardCharsets.US_ASCII));
+            cipher.updateAAD(aad.getBytes(StandardCharsets.US_ASCII));
             return cipher.doFinal(input);
         } catch (Exception error) {
             throw new IllegalStateException("Invitation payload cryptography failed");

@@ -564,6 +564,11 @@ export default function Header({ user }: HeaderProps) {
                       </Link>
                     )}
 
+                    <Link href="/sessoes" role="menuitem" onClick={() => setIsUserMenuOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-ink hover:bg-elevated/60">
+                      <Shield className="w-4 h-4" aria-hidden="true" /> Sessões
+                    </Link>
+
                     <button
                       id="header-logout-btn"
                       type="button"
@@ -705,6 +710,8 @@ export default function Header({ user }: HeaderProps) {
                     className="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 bg-elevated border border-control">
                     <Shield aria-hidden="true" className="w-4 h-4" /> Administração
                   </Link>}
+                  <Link href="/sessoes" onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-elevated border border-control">Sessões</Link>
                   <button
                     id="header-mobile-logout-btn"
                     type="button"

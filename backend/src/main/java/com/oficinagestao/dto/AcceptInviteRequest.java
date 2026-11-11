@@ -7,4 +7,4 @@ public record AcceptInviteRequest(
         @NotBlank String token,
         @NotBlank @Size(max = 100) String nome,
         @NotBlank String senha
-) {}
+) { @Override public String toString() { return "AcceptInviteRequest[redacted]"; } }

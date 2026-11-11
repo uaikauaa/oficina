@@ -1,0 +1,161 @@
+package com.oficinagestao.security;
+
+import com.oficinagestao.dto.CompletePasswordRecoveryRequest;
+import com.oficinagestao.entity.RefreshToken;
+import com.oficinagestao.entity.Usuario;
+import com.oficinagestao.repository.RefreshTokenRepository;
+import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.service.EmailService;
+import com.oficinagestao.service.InviteOutbox;
+import com.oficinagestao.service.PasswordRecoveryService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mail.MailSendException;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.net.URI;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+@ActiveProfiles("test")
+class PasswordRecoveryIntegrationTest {
+    @Autowired PasswordRecoveryService recovery;
+    @Autowired InviteOutbox outbox;
+    @Autowired UsuarioRepository users;
+    @Autowired RefreshTokenRepository refreshTokens;
+    @Autowired PasswordEncoder passwords;
+    @Autowired JdbcTemplate jdbc;
+    @Autowired TransactionTemplate tx;
+    @MockitoBean EmailService mail;
+    Usuario user;
+    MockHttpServletRequest http;
+
+    @BeforeEach void setup() {
+        user = users.saveAndFlush(new Usuario("Synthetic recovery", "recover-" + UUID.randomUUID()
+                + "@example.invalid", passwords.encode("OriginalPassword1!"), true));
+        http = new MockHttpServletRequest("POST", "/api/auth/recuperacao/solicitar");
+        http.setRemoteAddr("192.0.2." + (10 + Math.floorMod(user.getId().intValue(), 200)));
+    }
+
+    @AfterEach void cleanup() { users.deleteById(user.getId()); }
+
+    private String requestAndDeliver() {
+        recovery.request(user.getEmail(), http);
+        verifyNoInteractions(mail);
+        assertTrue(outbox.dispatchRecoveryOne());
+        var url = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(mail).sendPasswordRecovery(eq(user.getEmail()), url.capture());
+        return URI.create(url.getValue()).getRawFragment().substring("token=".length());
+    }
+
+    @Test void genericResponseAndNoPrecommitMail() {
+        recovery.request("unknown-" + UUID.randomUUID() + "@example.invalid", http);
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        recovery.request(user.getEmail(), http);
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_outbox o JOIN "
+                + "password_reset_requests r ON r.id=o.reset_id WHERE r.usuario_id=? AND o.status='PENDING'",
+                Integer.class, user.getId()));
+        verifyNoInteractions(mail);
+    }
+
+    @Test void recoveryRevokesSessionsAndRejectsReplay() {
+        RefreshToken existing = refreshTokens.saveAndFlush(new RefreshToken(user,
+                TokenHashUtil.hashStatic("synthetic-old-refresh"), OffsetDateTime.now().plusDays(1)));
+        int version = user.getTokenVersion();
+        String token = requestAndDeliver();
+        String hash = jdbc.queryForObject("SELECT token_hash FROM password_reset_requests WHERE usuario_id=?",
+                String.class, user.getId());
+        assertNotEquals(token, hash);
+        assertEquals(TokenHashUtil.hashStatic(token), hash);
+        recovery.complete(new CompletePasswordRecoveryRequest(token, "UpdatedPassword1!", "UpdatedPassword1!"), http);
+        Usuario changed = users.findById(user.getId()).orElseThrow();
+        assertTrue(passwords.matches("UpdatedPassword1!", changed.getSenha()));
+        assertEquals(version + 1, changed.getTokenVersion());
+        assertTrue(refreshTokens.findById(existing.getId()).orElseThrow().getRevogado());
+        assertThrows(com.oficinagestao.exception.BusinessException.class,
+                () -> recovery.complete(new CompletePasswordRecoveryRequest(token,
+                        "AnotherPassword1!", "AnotherPassword1!"), http));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM eventos_administrativos WHERE detalhes LIKE ?",
+                Integer.class, "%" + token + "%"));
+    }
+
+    @Test void rollbackLeavesNeitherVerifierNorDelivery() {
+        assertThrows(IllegalStateException.class, () -> tx.execute(status -> {
+            recovery.request(user.getEmail(), http);
+            throw new IllegalStateException("synthetic rollback");
+        }));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        assertFalse(outbox.dispatchRecoveryOne());
+        verifyNoInteractions(mail);
+    }
+
+    @Test void reissueRevokesOldLinkAndExpiryRejectsNewLink() {
+        String old = requestAndDeliver();
+        clearInvocations(mail);
+        recovery.request(user.getEmail(), http);
+        assertTrue(outbox.dispatchRecoveryOne());
+        var url = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(mail).sendPasswordRecovery(eq(user.getEmail()), url.capture());
+        String current = URI.create(url.getValue()).getRawFragment().substring("token=".length());
+        assertThrows(com.oficinagestao.exception.BusinessException.class,
+                () -> recovery.complete(new CompletePasswordRecoveryRequest(old, "UpdatedPassword1!", "UpdatedPassword1!"), http));
+        jdbc.update("UPDATE password_reset_requests SET created_at=now()-interval '2 seconds',"
+                + "expira_em=now()-interval '1 second' WHERE token_hash=?", TokenHashUtil.hashStatic(current));
+        assertThrows(com.oficinagestao.exception.BusinessException.class,
+                () -> recovery.complete(new CompletePasswordRecoveryRequest(current,
+                        "UpdatedPassword1!", "UpdatedPassword1!"), http));
+    }
+
+    @Test void smtpFailureBacksOffAndCiphertextNeverAppearsInAudit() {
+        recovery.request(user.getEmail(), http);
+        doThrow(new MailSendException("synthetic SMTP outage")).when(mail).sendPasswordRecovery(anyString(), anyString());
+        assertTrue(outbox.dispatchRecoveryOne());
+        assertEquals("PENDING", jdbc.queryForObject("SELECT o.status FROM password_reset_outbox o JOIN "
+                + "password_reset_requests r ON r.id=o.reset_id WHERE r.usuario_id=?", String.class, user.getId()));
+        assertFalse(outbox.dispatchRecoveryOne());
+        Long resetId = jdbc.queryForObject("SELECT id FROM password_reset_requests WHERE usuario_id=?",
+                Long.class, user.getId());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM eventos_administrativos "
+                + "WHERE acao='RECUPERACAO_ENTREGA_FALHOU' AND detalhes LIKE ?", Integer.class,
+                "% " + resetId + ": SMTP_FAILURE"));
+    }
+
+    @Test void concurrentCompletionAllowsExactlyOneUse() throws Exception {
+        String token = requestAndDeliver();
+        var request = new CompletePasswordRecoveryRequest(token, "UpdatedPassword1!", "UpdatedPassword1!");
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var start = new CountDownLatch(1);
+            var first = executor.submit(() -> { start.await(); return finish(request); });
+            var second = executor.submit(() -> { start.await(); return finish(request); });
+            start.countDown();
+            assertEquals(1, (first.get(10, TimeUnit.SECONDS) ? 1 : 0)
+                    + (second.get(10, TimeUnit.SECONDS) ? 1 : 0));
+        }
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests "
+                + "WHERE usuario_id=? AND usado_em IS NOT NULL", Integer.class, user.getId()));
+    }
+
+    private boolean finish(CompletePasswordRecoveryRequest request) {
+        try { recovery.complete(request, http); return true; }
+        catch (com.oficinagestao.exception.BusinessException expected) { return false; }
+    }
+}

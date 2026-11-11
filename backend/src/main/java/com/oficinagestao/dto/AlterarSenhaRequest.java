@@ -17,4 +17,5 @@ public record AlterarSenhaRequest(
         @Schema(description = "Confirmação exata da nova senha", example = "NovaSenhaSegura@2026")
         String confirmacaoNovaSenha
 ) {
+    @Override public String toString() { return "AlterarSenhaRequest[redacted]"; }
 }

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -82,5 +83,54 @@ class ConsultaPermissionIntegrationTest {
         assertEquals(200, status(superAdmin, "/api/admin/papeis"));
         assertEquals(200, configurationUpdateStatus(operator));
         assertEquals(200, configurationUpdateStatus(superAdmin));
+    }
+
+    @Test
+    @Transactional
+    void consultaReceivesMinimizedClientFieldsWhileOperatorRetainsOperationalContact() throws Exception {
+        Usuario operator = create("ROLE_OPERADOR_GERAL");
+        Usuario consulta = create("ROLE_CONSULTA");
+        String privateEmail = "private-" + UUID.randomUUID() + "@example.invalid";
+        var created = mvc.perform(post("/api/clientes")
+                .header("Authorization", "Bearer " + jwt.generateToken(operator))
+                .contentType("application/json")
+                .content("{\"tipoPessoa\":\"FISICA\",\"nomeRazaoSocial\":\"Cliente consulta sintético\","
+                        + "\"email\":\"" + privateEmail + "\"}"))
+                .andReturn().getResponse();
+        assertEquals(201, created.getStatus(), created.getContentAsString());
+        long id = new com.fasterxml.jackson.databind.ObjectMapper().readTree(created.getContentAsString())
+                .path("id").asLong();
+        var operatorResponse = mvc.perform(get("/api/clientes/" + id)
+                .header("Authorization", "Bearer " + jwt.generateToken(operator)))
+                .andReturn().getResponse();
+        assertTrue(operatorResponse.getContentAsString().contains(privateEmail));
+        var consultaResponse = mvc.perform(get("/api/clientes/" + id)
+                .header("Authorization", "Bearer " + jwt.generateToken(consulta)))
+                .andReturn().getResponse();
+        assertEquals(200, consultaResponse.getStatus());
+        assertFalse(consultaResponse.getContentAsString().contains(privateEmail));
+        assertTrue(consultaResponse.getContentAsString().contains("Cliente consulta sintético"));
+    }
+    @Test
+    @Transactional
+    void consultaAddedToOperatorDoesNotRemoveOperationalContactAccess() throws Exception {
+        Usuario operator = create("ROLE_OPERADOR_GERAL");
+        operator.addRole(roles.findByNome("ROLE_CONSULTA").orElseThrow());
+        operator = users.saveAndFlush(operator);
+        String privateEmail = "private-" + UUID.randomUUID() + "@example.invalid";
+        var created = mvc.perform(post("/api/clientes")
+                .header("Authorization", "Bearer " + jwt.generateToken(operator))
+                .contentType("application/json")
+                .content("{\"tipoPessoa\":\"FISICA\",\"nomeRazaoSocial\":\"Cliente conjunto\","
+                        + "\"email\":\"" + privateEmail + "\"}"))
+                .andReturn().getResponse();
+        assertEquals(201, created.getStatus(), created.getContentAsString());
+        long id = new com.fasterxml.jackson.databind.ObjectMapper().readTree(created.getContentAsString())
+                .path("id").asLong();
+        var response = mvc.perform(get("/api/clientes/" + id)
+                .header("Authorization", "Bearer " + jwt.generateToken(operator)))
+                .andReturn().getResponse();
+        assertEquals(200, response.getStatus());
+        assertTrue(response.getContentAsString().contains(privateEmail));
     }
 }

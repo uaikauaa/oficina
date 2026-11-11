@@ -270,6 +270,11 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
     await login(ownerPage, ownerEmail, ownerPassword);
     const me = await ownerContext.request.get('/api/auth/me');
     expect((await me.json() as { roles: string[] }).roles).toContain('ROLE_SUPER_ADMIN');
+    await ownerPage.goto('/sessoes');
+    await expect(ownerPage.getByRole('heading', { name: 'Sessões' })).toBeVisible();
+    const sessions = await ownerContext.request.get('/api/auth/sessoes');
+    expect(sessions.status()).toBe(200);
+    expect((await sessions.json() as Array<{ atual: boolean }>).some(s => s.atual)).toBe(true);
     for (const path of ['/administracao', '/administracao/usuarios', '/administracao/papeis',
       '/administracao/auditoria', '/administracao/infraestrutura', '/convite']) {
       await ownerPage.goto(path);
@@ -391,6 +396,12 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
     const audit = await ownerContext.request.get('/api/admin/auditoria');
     expect(audit.status()).toBe(200);
     expect((await audit.json() as { totalElements: number }).totalElements).toBeGreaterThan(0);
+    const filteredAudit = await ownerContext.request.get('/api/admin/auditoria?acao=CONVITE&ordem=asc&size=1');
+    expect(filteredAudit.status()).toBe(200);
+    expect((await filteredAudit.json() as { content: Array<{ acao: string }> }).content[0]?.acao).toContain('CONVITE');
+    await ownerPage.goto('/administracao/auditoria');
+    await ownerPage.getByRole('textbox', { name: 'Ação', exact: true }).fill('CONVITE');
+    await expect(ownerPage.getByText(/evento\(s\)/)).toBeVisible();
     const consultEmail = 'ci.consulta@oficina.invalid';
     const consultPassword = 'SyntheticConsulta#2026!';
     const consultInvite = await ownerContext.request.post('/api/admin/convites', {
@@ -416,4 +427,52 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
       }
     } finally { await consultContext.close(); }
   } finally { await ownerContext.close(); }
+});
+
+test('recuperação real isolada: Mailpit, link de uso único e novo login 2FA @integration-real', async ({ page, context, request }) => {
+  test.skip(process.env.RUN_REAL_INTEGRATION !== 'true');
+  test.setTimeout(120000);
+  expect(process.env.CI_INTEGRATION_ADMIN_EMAIL).toBe(ADMIN_EMAIL);
+  const unknown = await context.request.post('/api/auth/recuperacao/solicitar', {
+    headers: await csrfHeader(context),
+    data: { email: 'unknown-recovery@oficina.invalid' },
+  });
+  expect(unknown.status()).toBe(202);
+  await page.goto('/esqueci-senha');
+  await page.getByLabel('E-mail').fill(ADMIN_EMAIL);
+  await page.getByRole('button', { name: 'Solicitar recuperação' }).click();
+  await expect(page.getByRole('status')).toBeVisible();
+  let recoveryId = '';
+  await expect.poll(async () => {
+    const messages = await (await request.get(MAILPIT + '/api/v1/messages')).json() as {
+      messages?: Array<{ ID: string; Subject?: string; To?: Array<{ Address?: string }> }>;
+    };
+    recoveryId = messages.messages?.find(m => m.Subject?.includes('Recuperação')
+      && m.To?.some(to => to.Address?.toLowerCase() === ADMIN_EMAIL))?.ID || '';
+    return recoveryId;
+  }, { timeout: 30000 }).not.toBe('');
+  const message = await (await request.get(MAILPIT + '/api/v1/message/' + recoveryId)).json() as { Text?: string };
+  const link = message.Text?.match(/https?:\/\/[^\s]+\/recuperar-senha#token=([A-Za-z0-9_-]{43})/);
+  expect(link).toBeTruthy();
+  await page.goto(link![0]);
+  await expect(page).toHaveURL(/\/recuperar-senha$/);
+  await page.getByLabel('Nova senha').fill('RecoveredSynthetic#2026!');
+  await page.getByLabel('Confirme a senha').fill('RecoveredSynthetic#2026!');
+  await page.getByRole('button', { name: 'Atualizar senha' }).click();
+  await expect(page.getByText('Senha atualizada.')).toBeVisible();
+  const replay = await context.request.post('/api/auth/recuperacao/concluir', {
+    headers: await csrfHeader(context),
+    data: { token: link![1], senha: 'AnotherSynthetic#2026!', confirmacao: 'AnotherSynthetic#2026!' },
+  });
+  expect(replay.status()).toBeGreaterThanOrEqual(400);
+  // Existing 2FA challenge issuance has a 30-second per-account cooldown.
+  await page.waitForTimeout(31000);
+  await page.goto('/login?sessionChecked=1');
+  await page.locator('#email').fill(ADMIN_EMAIL);
+  await page.locator('#senha').fill('RecoveredSynthetic#2026!');
+  await page.locator('button[type="submit"]').first().click();
+  await expect(page.locator('#two-factor-code')).toBeVisible({ timeout: 15000 });
+  await page.locator('#two-factor-code').fill(await readMailpitCode(request));
+  await page.locator('#verify-2fa-submit-btn').click();
+  await expect(page).toHaveURL(/\/dashboard(?:\?|$)/);
 });

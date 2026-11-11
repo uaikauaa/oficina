@@ -56,8 +56,8 @@ class DatabaseConnectionTest {
 
         MigrationInfo current = flyway.info().current();
         assertNotNull(current, "Deve haver uma migration Flyway aplicada.");
-        assertEquals("27", current.getVersion().getVersion(), "A versão atual da migration deve ser 27.");
-        assertEquals("invite delivery outbox", current.getDescription());
+        assertEquals("28", current.getVersion().getVersion(), "A versão atual da migration deve ser 28.");
+        assertEquals("password recovery", current.getDescription());
 
         // Validar que a V1 também consta no histórico
         MigrationInfo v1 = flyway.info().applied()[0];
@@ -68,7 +68,8 @@ class DatabaseConnectionTest {
                 "usuarios", "roles", "usuario_roles", "clientes", "fornecedores",
                 "enderecos", "maquinas", "categorias", "produtos", "produto_maquina",
                 "ordens_servico", "ordem_servico_itens", "estoque_movimentacoes", "auditoria",
-                "refresh_tokens", "configuracao_oficina", "two_factor_challenges", "notificacoes", "security_rate_limits", "security_rate_key_state");
+                "refresh_tokens", "configuracao_oficina", "two_factor_challenges", "notificacoes", "security_rate_limits", "security_rate_key_state",
+                "password_reset_requests", "password_reset_outbox");
 
         try (Connection connection = dataSource.getConnection();
                 Statement stmt = connection.createStatement()) {

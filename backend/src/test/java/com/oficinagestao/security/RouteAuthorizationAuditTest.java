@@ -45,9 +45,11 @@ class RouteAuthorizationAuditTest {
                     boolean publicRoute = path.equals("/api/health") || (method == RequestMethod.GET && path.equals("/api/auth/csrf"))
                             || (method == RequestMethod.POST && Set.of("/api/auth/login", "/api/auth/refresh",
                             "/api/auth/logout", "/api/auth/2fa/verify", "/api/auth/2fa/resend",
-                            "/api/auth/convites/aceitar").contains(path));
+                            "/api/auth/convites/aceitar", "/api/auth/recuperacao/solicitar",
+                            "/api/auth/recuperacao/concluir").contains(path));
                     boolean selfRoute = (method == RequestMethod.GET && path.equals("/api/auth/me"))
-                            || (method == RequestMethod.PUT && path.equals("/api/auth/alterar-senha"));
+                            || (method == RequestMethod.PUT && path.equals("/api/auth/alterar-senha"))
+                            || path.startsWith("/api/auth/sessoes");
                     boolean mutation = method != RequestMethod.GET && method != RequestMethod.HEAD && method != RequestMethod.OPTIONS;
                     inventory.add(method + "\t" + path + "\t" + entry.getValue().getBeanType().getSimpleName() + "#"
                             + entry.getValue().getMethod().getName() + "\t" + (publicRoute ? "PUBLIC" : "ADMIN"));

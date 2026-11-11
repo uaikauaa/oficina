@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -667,15 +668,10 @@ function LoginForm() {
                     <span>Manter conectado</span>
                   </label>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      alert('Para recuperação de senha, contate o administrador do sistema.')
-                    }
-                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none"
-                  >
+                  <Link href="/esqueci-senha"
+                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none">
                     Esqueceu sua senha?
-                  </button>
+                  </Link>
                 </div>
 
                 {/* Botão Entrar em Destaque Âmbar */}
@@ -1078,15 +1074,10 @@ function LoginForm() {
                     <span>Manter conectado</span>
                   </label>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      alert('Para recuperação de senha, contate o administrador do sistema.')
-                    }
-                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none"
-                  >
+                  <Link href="/esqueci-senha"
+                    className="text-accent hover:text-accent transition-colors font-medium text-xs cursor-pointer focus:outline-none">
                     Esqueceu sua senha?
-                  </button>
+                  </Link>
                 </div>
 
                 {/* Botão Entrar em Destaque Âmbar */}

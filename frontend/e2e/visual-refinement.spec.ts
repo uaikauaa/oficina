@@ -214,14 +214,9 @@ test('refinamento: modal de login em viewport curta, teclado e recuperação de 
   await expect(controls.first()).toBeFocused();
   await page.keyboard.press('Shift+Tab');
   await expect(controls.last()).toBeFocused();
-  const alert = page.waitForEvent('dialog').then(async message => {
-    expect(message.message()).toBe('Para recuperação de senha, contate o administrador do sistema.');
-    await message.accept();
-  });
-  await Promise.all([alert, dialog.getByRole('button', { name: 'Esqueceu sua senha?' }).click()]);
-  await page.keyboard.press('Escape');
-  await expect(dialog).toBeHidden();
-  await expect(trigger).toBeFocused();
+  await dialog.getByRole('link', { name: 'Esqueceu sua senha?' }).click();
+  await expect(page).toHaveURL(/\/esqueci-senha$/);
+  await expect(page.getByRole('heading', { name: 'Recuperar acesso' })).toBeVisible();
 });
 
 test('refinamento: toasts preservam duração e erros de OS permanecem até fechar', async ({ page }) => {

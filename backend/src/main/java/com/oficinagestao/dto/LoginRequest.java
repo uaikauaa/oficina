@@ -22,4 +22,6 @@ public record LoginRequest(
     public boolean isRememberMe() {
         return Boolean.TRUE.equals(rememberMe);
     }
+
+    @Override public String toString() { return "LoginRequest[redacted]"; }
 }
