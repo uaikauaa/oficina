@@ -272,8 +272,7 @@ public class AuthService {
         OffsetDateTime refreshExpiry = OffsetDateTime.now().plus(tokenRefreshExpiryMs, ChronoUnit.MILLIS);
         RefreshToken refreshToken = new RefreshToken(usuario, tokenHash, refreshExpiry, rememberMe);
         refreshTokenRepository.save(refreshToken);
-        jwtService.setSessionIdForNextToken(refreshToken.getSessionId());
-        String accessToken = jwtService.generateToken(usuario);
+        String accessToken = jwtService.generateToken(usuario, refreshToken.getSessionId());
 
         Set<String> roles = usuario.getRoles().stream()
                 .map(Role::getNome)
@@ -407,8 +406,7 @@ public class AuthService {
         newToken.setSessionId(oldToken.getSessionId());
         refreshTokenRepository.save(newToken);
 
-        jwtService.setSessionIdForNextToken(newToken.getSessionId());
-        String newAccessToken = jwtService.generateToken(usuario);
+        String newAccessToken = jwtService.generateToken(usuario, newToken.getSessionId());
 
         Set<String> roles = usuario.getRoles().stream()
                 .map(Role::getNome)

@@ -286,6 +286,37 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
           .toBeLessThanOrEqual(width);
       }
     }
+    // Real DB fixtures exercise actual browser pagination, empty state and forms.
+    const panelContainer = process.env.CI_INTEGRATION_POSTGRES_CONTAINER!;
+    expect(panelContainer).toMatch(/^oficina-hml-postgres-[a-f0-9]{8}$/);
+    const ownerLabel = execFileSync('docker', ['inspect', '--format', '{{index .Config.Labels "oficina.security-hml"}}', panelContainer],
+      { encoding: 'utf8', windowsHide: true }).trim();
+    expect(panelContainer).toBe('oficina-hml-postgres-' + ownerLabel);
+    execFileSync('docker', ['exec', panelContainer, 'psql', '-U', 'ci_isolado', '-d', 'oficina_integracao_ci', '-v', 'ON_ERROR_STOP=1', '-c',
+      "INSERT INTO usuarios(nome,email,senha,ativo) SELECT 'Panel fixture '||n,'panel-'||n||'@oficina.invalid','unused-synthetic-only',true FROM generate_series(1,22) n"],
+      { windowsHide: true, stdio: 'pipe' });
+    await ownerPage.goto('/administracao/usuarios');
+    await expect(ownerPage.getByText('Página 1 de 2', { exact: true })).toBeVisible();
+    await ownerPage.getByRole('button', { name: 'Próxima', exact: true }).click();
+    await expect(ownerPage.getByText('Página 2 de 2', { exact: true })).toBeVisible();
+    await ownerPage.getByPlaceholder('Nome ou e-mail').fill('ci.superadmin');
+    await expect(ownerPage.getByRole('heading', { name: 'Super Admin Sintético', exact: true })).toBeVisible();
+    await expect(ownerPage.getByText('Página 1 de 1', { exact: true })).toBeVisible();
+    await ownerPage.getByPlaceholder('Nome ou e-mail').fill('nonexistent-stage4a');
+    await expect(ownerPage.getByText('Nenhum usuário encontrado.', { exact: true })).toBeVisible();
+    await ownerPage.getByRole('button', { name: 'Convidar usuário', exact: true }).click();
+    const inviteDialog = ownerPage.getByRole('dialog');
+    await inviteDialog.getByLabel('E-mail', { exact: true }).fill('panel-invite@oficina.invalid');
+    await inviteDialog.getByLabel('Motivo', { exact: true }).fill('Convite sintético pelo formulário real');
+    await inviteDialog.getByLabel('Confirme com sua senha').fill('WrongSyntheticPassword#2026');
+    const refused = ownerPage.waitForResponse(r => r.url().endsWith('/api/admin/convites') && r.request().method() === 'POST');
+    await inviteDialog.getByRole('button', { name: 'Enviar convite' }).click();
+    expect((await refused).status()).toBe(403);
+    await expect(inviteDialog.getByRole('alert')).toBeVisible();
+    await inviteDialog.getByLabel('Confirme com sua senha').fill(ownerPassword);
+    await inviteDialog.getByRole('button', { name: 'Enviar convite' }).click();
+    await expect(ownerPage.getByRole('status')).toContainText('Convite registrado.');
+    await expect(inviteDialog).toHaveCount(0);
     for (const endpoint of ['/api/admin/usuarios?search=ci.superadmin&page=0&size=1',
       '/api/admin/papeis', '/api/admin/permissoes', '/api/admin/auditoria', '/api/admin/infraestrutura']) {
       const response = await ownerContext.request.get(endpoint);
@@ -374,6 +405,12 @@ test('admin real isolado: provisionamento, convite, RBAC e telas @integration-re
       expect((await pdf.body()).subarray(0, 5).toString()).toBe('%PDF-');
       expect((await operatorContext.request.get('/api/estoque/movimentacoes')).status()).toBe(200);
       expect((await operatorContext.request.get('/api/relatorios/ordens-servico')).status()).toBe(200);
+      await operatorPage.goto('/relatorios');
+      await operatorPage.getByRole('button', { name: 'Clientes', exact: true }).click();
+      const operatorDownload = operatorPage.waitForEvent('download');
+      await operatorPage.getByRole('button', { name: 'Exportar Clientes (CSV)', exact: true }).click();
+      const operatorCsv = await (await operatorDownload).path();
+      expect(await readFile(operatorCsv!, 'utf8')).toContain('Cliente Operador Sintético');
       await operatorPage.goto('/administracao');
       await expect(operatorPage.getByText('Acesso restrito')).toBeVisible();
     } finally { await operatorContext.close(); }

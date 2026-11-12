@@ -134,7 +134,7 @@ class AuthServiceTest {
 
         // REGRA CRÍTICA: Nenhum token JWT ou refresh token é emitido no login antes do 2FA
         verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
-        verify(jwtService, never()).generateToken(any());
+        verify(jwtService, never()).generateToken(any(), any(java.util.UUID.class));
     }
 
     @Test
@@ -155,7 +155,7 @@ class AuthServiceTest {
 
         when(twoFactorChallengeRepository.findByChallengeToken("challenge-uuid-persist")).thenReturn(Optional.of(challenge));
         when(passwordEncoder.matches("123456", "hashed_2fa_code")).thenReturn(true);
-        when(jwtService.generateToken(usuario)).thenReturn("mock.jwt.token");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("mock.jwt.token");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         org.mockito.ArgumentCaptor<RefreshToken> tokenCaptor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
@@ -201,7 +201,7 @@ class AuthServiceTest {
 
         when(twoFactorChallengeRepository.findByChallengeToken("challenge-uuid-temp")).thenReturn(Optional.of(challenge));
         when(passwordEncoder.matches("654321", "hashed_2fa_code")).thenReturn(true);
-        when(jwtService.generateToken(usuario)).thenReturn("mock.jwt.token");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("mock.jwt.token");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         org.mockito.ArgumentCaptor<RefreshToken> tokenCaptor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
@@ -269,7 +269,7 @@ class AuthServiceTest {
 
         verify(auditoriaService, times(1)).registrarComRequest(eq(1L), eq("TwoFactorChallenge"), eq("102"), eq("2FA_INVALID_CODE"), eq(httpRequest));
         verify(refreshTokenRepository, never()).save(any());
-        verify(jwtService, never()).generateToken(any());
+        verify(jwtService, never()).generateToken(any(), any(java.util.UUID.class));
     }
 
     @Test
@@ -843,7 +843,7 @@ class AuthServiceTest {
         oldToken.setId(10L);
 
         when(refreshTokenRepository.findByTokenHash(TokenHashUtil.hashStatic("old-refresh-uuid"))).thenReturn(Optional.of(oldToken));
-        when(jwtService.generateToken(usuario)).thenReturn("new.jwt.token");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("new.jwt.token");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         LoginResult result = authService.refresh("old-refresh-uuid", httpRequest);
@@ -868,7 +868,7 @@ class AuthServiceTest {
 
         RefreshToken oldToken = new RefreshToken(usuario, TokenHashUtil.hashStatic("old-persistent-uuid"), OffsetDateTime.now().plusDays(5), true);
         when(refreshTokenRepository.findByTokenHash(TokenHashUtil.hashStatic("old-persistent-uuid"))).thenReturn(Optional.of(oldToken));
-        when(jwtService.generateToken(usuario)).thenReturn("jwt.persistent");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("jwt.persistent");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         org.mockito.ArgumentCaptor<RefreshToken> captor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
@@ -895,7 +895,7 @@ class AuthServiceTest {
 
         RefreshToken oldToken = new RefreshToken(usuario, TokenHashUtil.hashStatic("old-temp-uuid"), OffsetDateTime.now().plusHours(12), false);
         when(refreshTokenRepository.findByTokenHash(TokenHashUtil.hashStatic("old-temp-uuid"))).thenReturn(Optional.of(oldToken));
-        when(jwtService.generateToken(usuario)).thenReturn("jwt.temp");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("jwt.temp");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         org.mockito.ArgumentCaptor<RefreshToken> captor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
@@ -1183,7 +1183,7 @@ class AuthServiceTest {
 
         when(twoFactorChallengeRepository.findByChallengeToken("challenge-temp-control")).thenReturn(Optional.of(challenge));
         when(passwordEncoder.matches("123456", "hashed_code")).thenReturn(true);
-        when(jwtService.generateToken(usuario)).thenReturn("mock.jwt.token");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("mock.jwt.token");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         org.mockito.ArgumentCaptor<RefreshToken> captor = org.mockito.ArgumentCaptor.forClass(RefreshToken.class);
@@ -1221,7 +1221,7 @@ class AuthServiceTest {
                 authService.verificarTwoFactor(request, httpRequest)
         );
         assertTrue(ex.getMessage().contains("Desafio inválido ou expirado"));
-        verify(jwtService, never()).generateToken(any());
+        verify(jwtService, never()).generateToken(any(), any(java.util.UUID.class));
         verify(refreshTokenRepository, never()).save(any());
     }
 
@@ -1242,7 +1242,7 @@ class AuthServiceTest {
 
         when(twoFactorChallengeRepository.findByChallengeToken("challenge-concurrency-unit")).thenReturn(Optional.of(challenge));
         when(passwordEncoder.matches("123456", "hashed_code")).thenReturn(true);
-        when(jwtService.generateToken(usuario)).thenReturn("jwt.token.first");
+        when(jwtService.generateToken(eq(usuario), any(java.util.UUID.class))).thenReturn("jwt.token.first");
         when(jwtService.getExpirationMs()).thenReturn(900000L);
 
         TwoFactorVerifyRequest request = new TwoFactorVerifyRequest("challenge-concurrency-unit", "123456");
@@ -1259,7 +1259,7 @@ class AuthServiceTest {
         assertTrue(ex.getMessage().contains("Desafio inválido ou expirado"));
 
         // Garante que o JWT e RefreshToken só foram emitidos UMA vez
-        verify(jwtService, times(1)).generateToken(usuario);
+        verify(jwtService, times(1)).generateToken(eq(usuario), any(java.util.UUID.class));
         verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
     }
 
@@ -1287,7 +1287,7 @@ class AuthServiceTest {
         );
         assertTrue(ex.getMessage().contains("Desafio inválido ou expirado"));
         verify(passwordEncoder, never()).matches(anyString(), anyString());
-        verify(jwtService, never()).generateToken(any());
+        verify(jwtService, never()).generateToken(any(), any(java.util.UUID.class));
         verify(refreshTokenRepository, never()).save(any());
     }
 }
