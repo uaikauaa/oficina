@@ -36,6 +36,8 @@ class ProductionOpenApiSecurityTest {
 
     @Nested
     @SpringBootTest(properties = {
+            "security.password-recovery.requests-enabled=false",
+            "security.jwt.legacy-sessionless-allowed=false",
             "CORS_ALLOWED_ORIGINS=https://app.oficinagestao.com.br",
             "JWT_SECRET=chave-secreta-sintetica-de-testes-com-mais-de-32-caracteres-para-ci",
             "RATE_LIMIT_SECRET=chave-sintetica-independente-do-limitador-com-32-caracteres",

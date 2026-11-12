@@ -5,6 +5,7 @@ import com.oficinagestao.dto.PasswordRecoveryRequest;
 import com.oficinagestao.service.PasswordRecoveryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,11 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth/recuperacao")
 public class PasswordRecoveryController {
     private final PasswordRecoveryService service;
+    @Value("${security.password-recovery.requests-enabled:false}")
+    private boolean requestsEnabled;
     public PasswordRecoveryController(PasswordRecoveryService service) { this.service = service; }
 
     @PostMapping("/solicitar")
     public ResponseEntity<Void> request(@Valid @RequestBody PasswordRecoveryRequest request,
                                         HttpServletRequest http) {
+        if (!requestsEnabled) return ResponseEntity.status(503).build();
         service.request(request.email(), http);
         return ResponseEntity.accepted().build();
     }

@@ -1,0 +1,422 @@
+[
+  {
+    "n": 17,
+    "sha": "f020be0da4acaf317e2ba63c4fc36375d1e57e39",
+    "runs": [
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42165149327,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42165149448,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42165149342,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42165149271,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 18,
+    "sha": "dc8823d9fc75dd5ee78d2b62592694d188ea5c98",
+    "runs": [
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42173152903,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42173152880,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42173152884,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42173152940,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 19,
+    "sha": "80faf0eea0fc7273dfd6dc22ed867cf267b9cd24",
+    "runs": [
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42174782216,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42174782229,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42174782157,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42174782198,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 20,
+    "sha": "67e15deccf943ae6b14ba6b46e1c9e703e4843f7",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42495236430,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42495236417,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42495236409,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42495236459,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 21,
+    "sha": "5a9beb1816e10dd6c20d592f3dd04305eb476f51",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42550956624,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42550956332,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42550956403,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42550956329,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 22,
+    "sha": "ada7332e5fc6a93df712b6505ebdf1af421828a4",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42564615237,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42564615272,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42564615348,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42564615243,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 23,
+    "sha": "9842bda1fef3969ddb6fc176f9a34306b1707ab0",
+    "runs": [
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42678195469,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42678195086,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42678194922,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42678195203,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 24,
+    "sha": "09728bf6feffd8d50bf60994680e2162bee7a6c4",
+    "runs": [
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42728674984,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42728674970,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42728674715,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42728674722,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 25,
+    "sha": "bae5104d08d85ae1671284cdf814226ba2462ccb",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42865245191,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42865244519,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 42865245329,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42865244580,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 26,
+    "sha": "c5caa53b7b9db330c9af13835cace2b09e6e71c6",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 42892478541,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 42892478602,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 42892478575,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "failure",
+        "id": 42892478545,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 27,
+    "sha": "69ef399ff665548d47acfd03f3de5d001efebd50",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 43119087601,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 43119087643,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 43119087466,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 43119087640,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 28,
+    "sha": "f49707d706dc61879caa5cd821c78adffaf70bf6",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 43123411237,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 43123411203,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 43123411453,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 43123411362,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 29,
+    "sha": "ba18f6c9791f680c23bc1d8096824e927823c2c7",
+    "runs": [
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 43129283886,
+        "status": "completed"
+      },
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 43129283767,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 43129284017,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 43129284112,
+        "status": "completed"
+      }
+    ]
+  },
+  {
+    "n": 30,
+    "sha": "fc1560ab07840adfe9d47515b701de809fc6a803",
+    "runs": [
+      {
+        "name": "CI Pipeline",
+        "conclusion": "success",
+        "id": 43284214264,
+        "status": "completed"
+      },
+      {
+        "name": "Oracle Readiness - TLS e Backup",
+        "conclusion": "success",
+        "id": 43284214167,
+        "status": "completed"
+      },
+      {
+        "name": "Validacao Complementar - Flyway Real e E2E",
+        "conclusion": "success",
+        "id": 43284214221,
+        "status": "completed"
+      },
+      {
+        "name": "Integracao Real - Frontend Backend PostgreSQL 2FA",
+        "conclusion": "success",
+        "id": 43284214107,
+        "status": "completed"
+      }
+    ]
+  }
+]

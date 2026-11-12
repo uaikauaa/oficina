@@ -280,7 +280,9 @@ function LoginForm() {
     if (isModalOpen) {
       const timer = setTimeout(() => {
         const input = document.getElementById('modal-email') as HTMLInputElement | null;
-        input?.focus();
+        const dialog = input?.closest('[role="dialog"]');
+        if (input && !(dialog?.contains(document.activeElement)
+          && document.activeElement instanceof HTMLInputElement)) input.focus();
       }, 50);
       return () => clearTimeout(timer);
     }

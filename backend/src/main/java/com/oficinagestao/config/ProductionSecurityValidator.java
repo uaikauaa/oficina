@@ -36,6 +36,15 @@ public class ProductionSecurityValidator {
         if (isProduction) {
             log.info("Executando validação mandatória de segurança para o profile de Produção...");
 
+            String sessionless = environment.getProperty("security.jwt.legacy-sessionless-allowed");
+            if (sessionless != null && !"false".equalsIgnoreCase(sessionless.trim())) {
+                throw new IllegalStateException("JWT sem sessionId não é permitido em produção.");
+            }
+            String recoveryRequests = environment.getProperty("security.password-recovery.requests-enabled");
+            if (recoveryRequests != null && !"false".equalsIgnoreCase(recoveryRequests.trim())) {
+                throw new IllegalStateException("Solicitações públicas de recuperação exigem mitigação temporal antes da produção.");
+            }
+
             // 1. Validação centralizada e unificada do JWT_SECRET via JwtService
             com.oficinagestao.security.JwtService.validarSecretParaAmbiente(jwtSecret, environment);
 
