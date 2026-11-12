@@ -32,7 +32,6 @@ public class JwtService {
 
     private final SecretKey secretKey;
     private final long expirationMs;
-    private final ThreadLocal<UUID> nextSessionId = new ThreadLocal<>();
 
     @Autowired
     public JwtService(
@@ -100,21 +99,11 @@ public class JwtService {
 
     public String generateToken(Usuario usuario) {
         int tokenVersion = usuario.getTokenVersion() != null ? usuario.getTokenVersion() : 0;
-        UUID sessionId = nextSessionId.get();
-        nextSessionId.remove();
-        return generateToken(usuario, tokenVersion, sessionId);
+        return generateToken(usuario, tokenVersion, null);
     }
 
     public String generateToken(Usuario usuario, int tokenVersion) {
         return generateToken(usuario, tokenVersion, null);
-    }
-
-    public void setSessionIdForNextToken(UUID sessionId) {
-        if (sessionId == null) {
-            nextSessionId.remove();
-        } else {
-            nextSessionId.set(sessionId);
-        }
     }
 
     public String generateToken(Usuario usuario, UUID sessionId) {

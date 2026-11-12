@@ -1,5 +1,7 @@
 # Etapa 4 — plano operacional, sem execução
 
+> Atualização 12/11/2026: o procedimento detalhado vigente está em [Etapa 4A — runbook Neon](stage4a-neon-runbook.md). O provisionamento será exclusivamente por convite, com senha definida pelo titular e login 2FA; não entregar senha inicial. A transição da Geisa preserva o registro, mas o fluxo oficial revoga sessões e exige novo login. Este plano anterior permanece como histórico.
+
 Este documento descreve a ativação futura do banco Neon original. A Etapa 3.3 não executa nenhuma ação nele, não cria contas reais e não altera o acesso da Geisa.
 
 ## Pré-condições e autorização

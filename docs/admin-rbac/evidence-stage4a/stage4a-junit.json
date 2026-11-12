@@ -1,0 +1,1043 @@
+{
+  "totals": {
+    "tests": 893,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "textTests": 861,
+  "textDiscrepancies": [
+    {
+      "name": "com.oficinagestao.config.ProductionOpenApiSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 0,
+      "sha256": "6a77a7e69b00c0f6c60dd505b7020057e93b799e3763a009bd9a2c03cd6c4672"
+    },
+    {
+      "name": "com.oficinagestao.security.IpAddressResolverTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 28,
+      "textTests": 0,
+      "sha256": "5135b33d7cd8dd1074f71a19f9abb3ad5533cae8a82e812a8cf366da0404ee44"
+    }
+  ],
+  "suites": [
+    {
+      "name": "com.oficinagestao.DatabaseConnectionTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 5,
+      "textTests": 5,
+      "sha256": "38ddd725b01e709b965c4ebc73ae4e872e2163e8a3229e54b1a72f12025befc1"
+    },
+    {
+      "name": "com.oficinagestao.DatabaseIdentityRegressionTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "80874ae26bc7a4659166592fd56851fb1bba73228e1263d6a1fbac839ae836a8"
+    },
+    {
+      "name": "com.oficinagestao.OficinaGestaoApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "a3306db8a7a99040904a6768fbdf1a0231c96890646e97d6b459ba441ad84209"
+    },
+    {
+      "name": "com.oficinagestao.config.ActuatorSecurityTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 11,
+      "textTests": 11,
+      "sha256": "9b7338e6cd3c46d3a4a52b0446e2fd89cbbe36febdb016ba9fcde2d144dc18ea"
+    },
+    {
+      "name": "com.oficinagestao.config.AdminAccountBootstrapTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 8,
+      "textTests": 8,
+      "sha256": "863f37052f8de3759ba775cfefeea4902f0d11e0f94695c1daa93b55fed0c6b3"
+    },
+    {
+      "name": "com.oficinagestao.config.ConfiguracaoOficinaBootstrapTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "4dc4e960b6e7c21e5fa5ad42cfb9a2d3f598875b54d6f9fab8d29406c5260573"
+    },
+    {
+      "name": "com.oficinagestao.config.DotenvEnvironmentPostProcessorTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "9ee4eeaae85574055d51b6cfe021351213c9747f48b3a0bd1cf5c6d6859a1312"
+    },
+    {
+      "name": "com.oficinagestao.config.FlywayConfigTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "980799ff399685140e8711cfd1b5d0ee6547dbb238a97127d089fd3dc17ab133"
+    },
+    {
+      "name": "com.oficinagestao.config.FlywayEmptySchemaIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "59304bf8b6a1e88d7ef4fec325ee510797fcc2a6f9a82c685adc40dd215f0a77"
+    },
+    {
+      "name": "com.oficinagestao.config.ForwardedHeadersSecurityValidatorTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "8f6ac4626378bb5ee8c761857a03d89628f53114115ff2c1b5e0a9f5d85b8735"
+    },
+    {
+      "name": "com.oficinagestao.config.OpenApiDocumentationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "73949acf41c192f8c9828444b95640e306fa80f1e04bf7ed4e7cf84d73f53e79"
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionOpenApiSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 0,
+      "sha256": "6a77a7e69b00c0f6c60dd505b7020057e93b799e3763a009bd9a2c03cd6c4672"
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionSecurityValidatorTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 15,
+      "textTests": 15,
+      "sha256": "0c39b3df01659613a105fa15d49836199f3895642a34d8161f8dda7776289461"
+    },
+    {
+      "name": "com.oficinagestao.config.ProductionSmtpConfigurationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 14,
+      "textTests": 14,
+      "sha256": "bb09fb63a0ea736a0b91843453b91515fe84566db35203f726373e19cca1674a"
+    },
+    {
+      "name": "com.oficinagestao.config.RefreshTokenCleanupSchedulerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "1fdfdde46dbc8301e489a2a4eb68ddb5f649e953a0c78a6fb76cee2c59bbc990"
+    },
+    {
+      "name": "com.oficinagestao.config.ResourceLimitsFailureTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "f0f9073c857176c610e707149fb8051a99087e3622eeb4f1f519c8cf705534e9"
+    },
+    {
+      "name": "com.oficinagestao.config.SmtpConfigurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "94eeb2517b95c2b540308dd9aeb44dfabe8a0591d8a2bc760d9f8ccb486f839a"
+    },
+    {
+      "name": "com.oficinagestao.config.SmtpDowngradeAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "530d90b94b2c994de320018080cb619ff29bc77ffad9b74196a4a8adc3ee4add"
+    },
+    {
+      "name": "com.oficinagestao.controller.AuthControllerTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 21,
+      "textTests": 21,
+      "sha256": "2c5c396a71fccf531dd7c1ab0ce870f3f1662c18fda5f944f9adbded410df82f"
+    },
+    {
+      "name": "com.oficinagestao.controller.ClienteControllerTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 15,
+      "textTests": 15,
+      "sha256": "e3d3e697dc454ece91faa67a0eaebf75bdbffde0c246bee1634a4f353eabb808"
+    },
+    {
+      "name": "com.oficinagestao.controller.ConfiguracaoOficinaControllerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "460053daac304b44c7162c355f43c33e548c085ea8d808700c974e632f0ee9a2"
+    },
+    {
+      "name": "com.oficinagestao.controller.ConfiguracaoOficinaHttpIsolationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "df3f9a8fce52eac6753c231acd0c7534a58250289442623794a476fb0fbfb631"
+    },
+    {
+      "name": "com.oficinagestao.controller.HealthControllerTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "349097f88e2c83a3c66adb8366dea4c32795f6f6124c95358800a2a5b0daea89"
+    },
+    {
+      "name": "com.oficinagestao.controller.HealthControllerUnitTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "0311a962af3d58a43359ec7a2980e8ad079caf46427d7774049445f052b8b76d"
+    },
+    {
+      "name": "com.oficinagestao.controller.NotificacaoControllerTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "eec05a5ac083208ba3873f133065a4f3181068026e6db8ff18c37cd6a916226f"
+    },
+    {
+      "name": "com.oficinagestao.controller.OrdemServicoControllerTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 14,
+      "textTests": 14,
+      "sha256": "d5ba980268a88094d3770652633261203d86942f9ca6dd943e66d08d85521426"
+    },
+    {
+      "name": "com.oficinagestao.controller.ProdutoControllerTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "376d79f813ab3d251a9f13742022710b18b18ecbfca9b5e098ec60faf6273ab3"
+    },
+    {
+      "name": "com.oficinagestao.controller.SystemControllerTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "ead63d2dc657d47b2f2ef60e6e27ab52ede16b701752e66cb00050d5dca464d8"
+    },
+    {
+      "name": "com.oficinagestao.entity.UsuarioTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "75da3a8ccca6a83ada06d1a99ac2198d38642a981b162b2ebd662affc5462f4b"
+    },
+    {
+      "name": "com.oficinagestao.exception.GlobalExceptionHandlerTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 10,
+      "textTests": 10,
+      "sha256": "57bcf0a4c8a380e91de7d6fd17bdbe9f797deba5d019bcec90fcc1260a2b3bd5"
+    },
+    {
+      "name": "com.oficinagestao.security.AccessTokenSessionBindingIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "3499fe90a579efb88ceb908f2ad6fe6ebd66f442cf3cc358df61ebedf4ccbab0"
+    },
+    {
+      "name": "com.oficinagestao.security.AdminAuditFilterIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "168a6d1e92e30a08fbf0fcc93a8c6be35084b167700ef1866988c5f8d911625a"
+    },
+    {
+      "name": "com.oficinagestao.security.AdminUserLifecycleIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "1dbf53b4b1f4c698823d37abd1d90c848101c9a68152d9529c6d10ce3319709f"
+    },
+    {
+      "name": "com.oficinagestao.security.AuthLifecycleAuditIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "d80a7014bfa53bccd5192d2ef75569b5cf1d2a02c317bdd661ed462b5ffc03ae"
+    },
+    {
+      "name": "com.oficinagestao.security.ConsultaPermissionIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "3f46d3a8aea0c0ad7bc40f07f5996da05fe91e70e9d7b5626dc8534d81600647"
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfAndCorsSecurityTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 13,
+      "textTests": 13,
+      "sha256": "32f8d78477a2d90fcb08f6f613f94fd8e473a391651a9721098ee2368fe1913d"
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfIsolationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 5,
+      "textTests": 5,
+      "sha256": "35025b30b4630fc94d2e2934001234880cd69fe81cb26ad0faf9376297fa4927"
+    },
+    {
+      "name": "com.oficinagestao.security.CsrfMvcRoutingTest",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 15,
+      "textTests": 15,
+      "sha256": "dfd16366cd5a17829e7507a73fc271957bbcbe2c4842dd3c0ec8d2a1d3823274"
+    },
+    {
+      "name": "com.oficinagestao.security.CurrentGrantJwtFilterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "127562fd4cf013beec1b3f521d09ebccd2e7f968192ab01ca430333cf389057b"
+    },
+    {
+      "name": "com.oficinagestao.security.CustomRoleRevocationIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "17e8c3760b9103b435d1e1cb6078941864104027766e87e6d6f6ed2cb6a1c8f2"
+    },
+    {
+      "name": "com.oficinagestao.security.ForwardedHeadersSpringIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "064e02f72110f93ba99561731303217293211846266daa34f505947840ec5279"
+    },
+    {
+      "name": "com.oficinagestao.security.IndependentRouteAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "39f3e67462c65a677a5a643b5b6fb98cc6a79066c0bc6733b5a9795b21070c90"
+    },
+    {
+      "name": "com.oficinagestao.security.InfrastructureMonitoringIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "2ffa4cc7cbeba78e97fd3c6fe4f52a7d7e64c4efb6309ec9148e56bd48429b86"
+    },
+    {
+      "name": "com.oficinagestao.security.InviteLifecycleIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "8bd836327e8cccbedbd03335627c9d9f3d256a5b4a87f99185da3f43c47a3dc8"
+    },
+    {
+      "name": "com.oficinagestao.security.InviteOutboxIntegrationTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 14,
+      "textTests": 14,
+      "sha256": "75d602cbe9168e1596c16b26a0884e1e1924948d82cbef79edd212e99442e071"
+    },
+    {
+      "name": "com.oficinagestao.security.IpAddressResolverTest",
+      "tests": 28,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 28,
+      "textTests": 0,
+      "sha256": "5135b33d7cd8dd1074f71a19f9abb3ad5533cae8a82e812a8cf366da0404ee44"
+    },
+    {
+      "name": "com.oficinagestao.security.JwtBoundaryAuditTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "06c86d7fdef864e8405f42a1cf5d3deb60d6f1ebebee79e96d2ab57bd4a4ddd1"
+    },
+    {
+      "name": "com.oficinagestao.security.JwtServiceTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 17,
+      "textTests": 17,
+      "sha256": "a59fd1918ca1a1d3c30fc41fca69e772abefd4c05a85d1654fdec88c6c1a0fbb"
+    },
+    {
+      "name": "com.oficinagestao.security.LoginAttemptServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 13,
+      "textTests": 13,
+      "sha256": "8cb8fad3b3d9aaadc2ab867632e9db9dfa44286bc16a000a590736e561f7cf63"
+    },
+    {
+      "name": "com.oficinagestao.security.OperationalCriticalFlowsIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "51d5b43ad4daba0e59283b5ef231868b47fc03303eda8cf51d9c3d4825c94541"
+    },
+    {
+      "name": "com.oficinagestao.security.PasswordPolicyValidatorTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 16,
+      "textTests": 16,
+      "sha256": "e933cf6f68542751ffcd2ecb9e9ff3e660dd5ce52f09c93fa02dd2acb1b924d5"
+    },
+    {
+      "name": "com.oficinagestao.security.PasswordRecoveryIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "eda0d6ab14de178d67833cc1b71f57c90b3743415d7a60559d471d4d9e087114"
+    },
+    {
+      "name": "com.oficinagestao.security.PasswordRecoveryTimingIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "5b86a10370cb673968331cfa079edbe0d64a336f88da4b79a413d50c39421275"
+    },
+    {
+      "name": "com.oficinagestao.security.ProductionSessionParityIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "abe7762a86bfd05868cef50d5d08401c19ba7a283912a784f4edf9b87d9414ba"
+    },
+    {
+      "name": "com.oficinagestao.security.ProxyClientContextVerifierTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 5,
+      "textTests": 5,
+      "sha256": "bb1944a452acd4a7a1c1817fc3efcdc7481742ea3c665100a6322a8f62f81866"
+    },
+    {
+      "name": "com.oficinagestao.security.RateKeyRotationAuditTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "0fa6ed5a6c0cc7740942f27ed1420210ecb5c17a43873c965925543c29ca73db"
+    },
+    {
+      "name": "com.oficinagestao.security.RefreshReusePersistenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "6398178f080b6f0cd77a18243026c275282366b56ec6e6a694cecb981a1ba4aa"
+    },
+    {
+      "name": "com.oficinagestao.security.RefreshTokenHashSecurityTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 10,
+      "textTests": 10,
+      "sha256": "e2463d5dcefbd30db4f8349fcfd05448b823652adaf8123fb188892313abbdb5"
+    },
+    {
+      "name": "com.oficinagestao.security.ResourceLimitsIntegrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 5,
+      "textTests": 5,
+      "sha256": "1ea497119f78421c6df2e6def143fa52a315d2d801cf8e6b1e59637c7bc62e29"
+    },
+    {
+      "name": "com.oficinagestao.security.RoleMatrixRouteIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "1d25bf18b189c129f1ce98d3b624887316755a3ceca96b068431de0add847835"
+    },
+    {
+      "name": "com.oficinagestao.security.RouteAuthorizationAuditTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "419996997454a5ba9c79bd874f6e913c807ec6211d79d10333b263c67e457394"
+    },
+    {
+      "name": "com.oficinagestao.security.SecurityUtilsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "cd0ef39d78ebe5af711d738b72ba0a51681bc9a23dd11054a2ac0c88606f7d79"
+    },
+    {
+      "name": "com.oficinagestao.security.SensitiveOutputAuditTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "63c5081b02baf8b1b2dfbb5541c908f375324482f477a5032b7f130da5c55165"
+    },
+    {
+      "name": "com.oficinagestao.security.SessionControllerIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 2,
+      "textTests": 2,
+      "sha256": "64b75904422c609ad95bf2dad1702680d072edbe34679a3497ba128278fc5f8e"
+    },
+    {
+      "name": "com.oficinagestao.security.SharedRateLimitIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 4,
+      "textTests": 4,
+      "sha256": "390e3252a4a2ad56e707fa370b014fc123762b3f1cd970edf8861a2e590b1867"
+    },
+    {
+      "name": "com.oficinagestao.security.SuperAdminBootstrapIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "591778d7d0c04c5ec318918e656fc834a237c2aaad9371066bd7c70991fc286f"
+    },
+    {
+      "name": "com.oficinagestao.security.TokenHashUtilTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "52ebc660a63caff420e0715e51b1390754c86a9baaf93e98012dbdbce86c777b"
+    },
+    {
+      "name": "com.oficinagestao.security.TokenVersionSecurityTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 9,
+      "textTests": 9,
+      "sha256": "db5819f7aee2ef912a3a01f3694a7fee4dd919049d242f64e60c40dc8930c078"
+    },
+    {
+      "name": "com.oficinagestao.service.AuditoriaIpSecurityTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "6081dd2377b0a188ceb3f45f7e0d7d0414937c811f4ab5dd3fafc670d1bc2adb"
+    },
+    {
+      "name": "com.oficinagestao.service.AuthServiceTest",
+      "tests": 50,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 50,
+      "textTests": 50,
+      "sha256": "b741ee82412acca448ff20408df5be6e25a94efe4316097b77b8c6819719969c"
+    },
+    {
+      "name": "com.oficinagestao.service.CategoriaServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 8,
+      "textTests": 8,
+      "sha256": "54002b0191311e49ebf6c776eb103d0edec96b4880994e950215dd3af447ec60"
+    },
+    {
+      "name": "com.oficinagestao.service.ClienteServiceTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 8,
+      "textTests": 8,
+      "sha256": "9f8316795c4dc102474deeb881c70599b535d817c132b4d1fb9bdb8a9b1ad585"
+    },
+    {
+      "name": "com.oficinagestao.service.ConfiguracaoOficinaServiceIntegrityTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 9,
+      "textTests": 9,
+      "sha256": "6ef4a89edd06c4eab66098a79079c0b27359a57a8a09baac44c19bcdcd25b68d"
+    },
+    {
+      "name": "com.oficinagestao.service.EstoqueServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "7f1bf3afb2c7c05ac64bf8b6c54f6201900fe7f037682dc3129973d903d31c48"
+    },
+    {
+      "name": "com.oficinagestao.service.FinanceRegressionIntegrationTest",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 21,
+      "textTests": 21,
+      "sha256": "3333fdbfbb19b0273b2c6e862f7d057a83e82d7f5fa26ecd480673c46d4d57bc"
+    },
+    {
+      "name": "com.oficinagestao.service.FormClearIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "a990d5fdcc64438ac80a4374b1729308a6a7826b9d1d762bb4ea96f9bb3f016f"
+    },
+    {
+      "name": "com.oficinagestao.service.FornecedorServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 5,
+      "textTests": 5,
+      "sha256": "33ba89047808c3e55a42161c4c8292ce27667e3ac78574d61859b26f5bdb5c56"
+    },
+    {
+      "name": "com.oficinagestao.service.HistoricoBuscaTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "d6ed7d5467b7fa9b864663eebd6d5ac1d6b69a51b951cbcc492594430c7d40ec"
+    },
+    {
+      "name": "com.oficinagestao.service.ImpressaoConfigPdfIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "a6f13c3009b3ccf8f4a3519bc29ef71d45d623a23447f00384ce56c69eb4d926"
+    },
+    {
+      "name": "com.oficinagestao.service.IntegracaoEstoqueOSTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "b50050be81c98fd82082d93018955acc4326cfba56394812ecc93c18dc4df8e1"
+    },
+    {
+      "name": "com.oficinagestao.service.MaquinaServiceTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 13,
+      "textTests": 13,
+      "sha256": "af400c83e77f2b82c119d59b85249ddf0f075dcda78a648c791b07a9452f5f84"
+    },
+    {
+      "name": "com.oficinagestao.service.NotificacaoConcurrencyIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "07cce37438a4e4cea00176254d896b72cd95adaf570f248ba52268e6c6abf739"
+    },
+    {
+      "name": "com.oficinagestao.service.NotificacaoServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 10,
+      "textTests": 10,
+      "sha256": "9b29b7ae92dd2855d3fd4541eb7da450baa5d34142ee54fdd76ba641724d4fd5"
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoConcurrencyIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "f9fa850cdc031f4bcd32762c9b79bfb75bdb1c5d6e52717a21240bf67997d244"
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoFinanceiroTest",
+      "tests": 33,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 33,
+      "textTests": 33,
+      "sha256": "270b75aa323dd30daf8b1c7469ed4ad17040ad9892dc26135547cc862b8cffde"
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoItemServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "356415e0840fb113ea4449c6862187409f73dcd8d4baae8001bd0bd30aaec04b"
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoPdfTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 22,
+      "textTests": 22,
+      "sha256": "a6af8b8a3b73a3cf97dec2f102007be0460a7be412fbb30a64790ca07099ea6b"
+    },
+    {
+      "name": "com.oficinagestao.service.OrdemServicoServiceTest",
+      "tests": 42,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 42,
+      "textTests": 42,
+      "sha256": "ceed6a5e372d38d4e489b731601141e49f2ebecc16643bf1b3b23d4cba3deb3e"
+    },
+    {
+      "name": "com.oficinagestao.service.PdfConfiguracaoOficinaIsolationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "1761b57c3c210991344ade9902fae428f22882c21c819ce7d651e47a53c6dd2e"
+    },
+    {
+      "name": "com.oficinagestao.service.ProdutoEstoqueConcurrencyIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "3f52a2d89d846ae344967329b4dd6dd8abc136646398eb8dac379f5198930ad4"
+    },
+    {
+      "name": "com.oficinagestao.service.ProdutoServiceTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 12,
+      "textTests": 12,
+      "sha256": "6ce1df939d3c93d2ad1ad62bfae7073751ab7d99466bf2d237bb93e7b09add50"
+    },
+    {
+      "name": "com.oficinagestao.service.RefreshTokenConcurrencyIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "a673001c2433f1126b73c51f9c8f56a35a75dab8665aa96ca9059947da2b1faa"
+    },
+    {
+      "name": "com.oficinagestao.service.RelatorioRegressionIntegrationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 3,
+      "textTests": 3,
+      "sha256": "4fff1ebe7e5f189dbe82c0f430b7c1ae6799babff80ed25d83dcefbe2daa553f"
+    },
+    {
+      "name": "com.oficinagestao.service.RelatorioServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 7,
+      "textTests": 7,
+      "sha256": "cce9ba12812726517e2baa259e24363e06cf50c5186ae85cb4d5a93fc0cb818f"
+    },
+    {
+      "name": "com.oficinagestao.service.ReleaseSmokeTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "24cf2942f9e9376400126f62f34f0efd7479b4132a415774c50db65bb1e5808c"
+    },
+    {
+      "name": "com.oficinagestao.service.SmtpNetwork5xxTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 1,
+      "textTests": 1,
+      "sha256": "2a8a68613af8193a824500dc3eaff1cacf2994f88f7594c36654e97fe421ab45"
+    },
+    {
+      "name": "com.oficinagestao.service.TwoFactorConcurrencyIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 6,
+      "textTests": 6,
+      "sha256": "6653dce63e12b3cb2c2f3d45ebe8ee0cf33df53ae57dfebfa13793c4d142bf6f"
+    },
+    {
+      "name": "com.oficinagestao.testsupport.ProductionMigrationPathTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 9,
+      "textTests": 9,
+      "sha256": "46346bb8428a8261ac4c63857cb6e7c91ae401f179e9078919584b0ce472ea99"
+    },
+    {
+      "name": "com.oficinagestao.testsupport.SyntheticMigrationsTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 11,
+      "textTests": 11,
+      "sha256": "a9b273ab1a6f21b557362da2a06c8d4873d946edb062f89cba10713b47a0cfa9"
+    },
+    {
+      "name": "com.oficinagestao.testsupport.TestDatabaseSafetyAutoConfigurationTest",
+      "tests": 66,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 66,
+      "textTests": 66,
+      "sha256": "b1ea72147c5130123deca3ed80721fcbb1d52750c4e96f5aebc65c7263030beb"
+    },
+    {
+      "name": "com.oficinagestao.testsupport.TestDatabaseSafetyGuardTest",
+      "tests": 107,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": 107,
+      "textTests": 107,
+      "sha256": "b834e6068001feded6da052dcd43730ad7ff90786ac34891a05ca60fb7e9962d"
+    }
+  ]
+}

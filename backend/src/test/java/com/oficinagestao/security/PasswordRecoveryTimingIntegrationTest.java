@@ -3,58 +3,61 @@ package com.oficinagestao.security;
 import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.repository.UsuarioRepository;
 import com.oficinagestao.service.PasswordRecoveryService;
+import com.oficinagestao.service.EmailService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-/**
- * Timing evidence for the generic recovery response path.  The test uses only
- * disposable accounts and distinct RFC-5737 source addresses so the shared
- * limiter does not turn the sample into a false comparison.
- */
-@SpringBootTest
+/** Diagnostic experiment, NOT an assertion of timing equivalence or a security gate. */
+@SpringBootTest(properties = {"logging.level.org.springframework.jdbc=OFF", "logging.level.org.hibernate.SQL=OFF",
+        "security.invite-outbox.poll-ms=3600000"})
 @ActiveProfiles("test")
 class PasswordRecoveryTimingIntegrationTest {
     @Autowired PasswordRecoveryService recovery;
     @Autowired UsuarioRepository users;
-    @Autowired PasswordEncoder passwords;
+    @Autowired JdbcTemplate jdbc;
+    @MockitoBean EmailService mail;
 
-    @Test
-    void existingAndUnknownAddressesStayWithinBoundedTimingEnvelope() {
-        List<Long> existing = new ArrayList<>();
-        List<Long> unknown = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            Usuario user = users.saveAndFlush(new Usuario("Synthetic timing " + i,
-                    "timing-" + UUID.randomUUID() + "@example.invalid",
-                    passwords.encode("SyntheticPassword1!"), true));
+    @Test void randomizedPairedRecoveryTimingExperiment() throws Exception {
+        jdbc.update("DELETE FROM security_rate_limits");
+        int warmup = 20, pairs = 120;
+        Random order = new Random(42026);
+        List<String> csv = new ArrayList<>(List.of("pair,existing_first,existing_ns,unknown_ns"));
+        String run = UUID.randomUUID().toString();
+        // No password hashing, fixture creation, SQL logging or SMTP in the timed region.
+        // Each address/IP is used once; verify the existing path did not short circuit.
+        for (int i = -warmup; i < pairs; i++) {
+            String email = "timing-" + run + "-" + (i + warmup) + "@example.invalid";
+            Usuario user = users.saveAndFlush(new Usuario("Synthetic timing", email, "unused", true));
+            boolean first = order.nextBoolean();
+            String unknown = "absent-" + run + "-" + (i + warmup) + "@example.invalid";
+            int suffix = i + warmup + 1;
             try {
-                existing.add(measure(user.getEmail(), "198.51.100." + (10 + i)));
-                unknown.add(measure("unknown-" + UUID.randomUUID() + "@example.invalid",
-                        "203.0.113." + (10 + i)));
-            } finally {
-                users.deleteById(user.getId());
-            }
+                long existingNs, unknownNs;
+                if (first) {
+                    existingNs = measure(email, "198.51.100." + suffix);
+                    unknownNs = measure(unknown, "203.0.113." + suffix);
+                } else {
+                    unknownNs = measure(unknown, "203.0.113." + suffix);
+                    existingNs = measure(email, "198.51.100." + suffix);
+                }
+                assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                        Integer.class, user.getId()), "existing path must not have been rate limited");
+                if (i >= 0) csv.add(i + "," + first + "," + existingNs + "," + unknownNs);
+            } finally { users.deleteById(user.getId()); }
         }
-
-        long existingMedian = median(existing);
-        long unknownMedian = median(unknown);
-        long slower = Math.max(existingMedian, unknownMedian);
-        long faster = Math.max(1L, Math.min(existingMedian, unknownMedian));
-        double ratio = (double) slower / faster;
-        System.out.printf("RECOVERY_TIMING existing_median_us=%d unknown_median_us=%d ratio=%.2f existing_p95_us=%d unknown_p95_us=%d%n",
-                existingMedian / 1_000, unknownMedian / 1_000, ratio,
-                percentile(existing, .95) / 1_000, percentile(unknown, .95) / 1_000);
-        assertTrue(ratio < 30.0, "recovery paths diverged beyond the broad diagnostic envelope");
+        Files.createDirectories(Path.of("target"));
+        Files.write(Path.of("target/recovery-timing.csv"), csv);
+        assertEquals(pairs + 1, csv.size());
+        System.out.println("RECOVERY_TIMING: 120 randomized pairs after 20 warmup pairs; analyze target/recovery-timing.csv");
     }
 
     private long measure(String email, String ip) {
@@ -63,15 +66,5 @@ class PasswordRecoveryTimingIntegrationTest {
         long start = System.nanoTime();
         recovery.request(email, request);
         return System.nanoTime() - start;
-    }
-
-    private static long median(List<Long> values) {
-        return percentile(values, .50);
-    }
-
-    private static long percentile(List<Long> values, double fraction) {
-        List<Long> sorted = values.stream().sorted(Comparator.naturalOrder()).toList();
-        int index = Math.min(sorted.size() - 1, (int) Math.ceil(sorted.size() * fraction) - 1);
-        return sorted.get(index);
     }
 }

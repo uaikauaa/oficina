@@ -1,0 +1,27 @@
+{
+  "pairs": 120,
+  "warmupPairs": 20,
+  "seed": 42026,
+  "iterations": 10000,
+  "existing": {
+    "medianMs": 13.835,
+    "p95Ms": 21.7684
+  },
+  "unknown": {
+    "medianMs": 8.6162,
+    "p95Ms": 13.4667
+  },
+  "pairedMedianDifferenceMs": 5.276999999999999,
+  "pairedBootstrap95Ms": [
+    4.9331000000000005,
+    5.514100000000001
+  ],
+  "medianRatio": 1.6056962466052322,
+  "pairedBootstrapRatio95": [
+    1.57492795389049,
+    1.6622718781434114
+  ],
+  "pairedPermutationP": 0.00009999000099990002,
+  "cliffsDelta": 0.9163194444444445,
+  "conclusion": "Diagnostic only; significant separation is NOT timing equivalence. Local service+commit, not WAN latency."
+}

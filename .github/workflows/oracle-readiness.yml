@@ -29,12 +29,13 @@ jobs:
           ! grep -F '80:8080' docker-compose.yml
       - name: Conferir interpolacao Compose com credenciais sinteticas
         env:
-          DB_URL: jdbc:postgresql://example.invalid/neondb?sslmode=require
+          DB_URL: jdbc:postgresql://example.invalid/neondb?sslmode=verify-full
           DB_USERNAME: synthetic
           DB_PASSWORD: synthetic-ci-only
           JWT_SECRET: synthetic-ci-secret-strong-enough-not-for-production-2026
           RATE_LIMIT_SECRET: synthetic-ci-rate-secret-distinct-from-jwt-2026
           INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
+          APP_PUBLIC_URL: https://app.example.invalid
           CORS_ALLOWED_ORIGINS: https://app.example.invalid
           MAIL_HOST: smtp.example.invalid
           MAIL_USERNAME: synthetic

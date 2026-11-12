@@ -1,5 +1,7 @@
 # Etapa 3.5 — fechamento das pendências críticas
 
+> Retificação da Etapa 4A (12/11/2026): o SHA final do PR #29 é `ba18f6c9791f680c23bc1d8096824e927823c2c7`. O total correto dos XMLs locais é **889**, igual ao CI. A soma de 857 veio dos resumos `.txt`, que registraram zero para os containers de testes aninhados `IpAddressResolverTest` (28 casos no XML) e `ProductionOpenApiSecurityTest` (4 casos no XML). Não houve remoção de testes. O SHA no rodapé e a contagem abaixo são registros históricos incorretos, substituídos por esta retificação. Evidências e estado atual: [relatório 4A](stage4a-prehomologation.md).
+
 Data: 11/11/2026. Branch: `audit/admin-stage35-final`. Base isolada: PR #28, `f49707d706dc61879caa5cd821c78adffaf70bf6`. Este relatório registra somente evidências reproduzidas em ambiente sintético local. Nenhuma conexão, migration, bootstrap, conta, papel, e-mail, merge ou deploy foi executado no Neon original.
 
 ## Resultado executivo

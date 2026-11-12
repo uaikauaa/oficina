@@ -1,0 +1,135 @@
+{
+  "referenceCommit": "ba18f6c9791f680c23bc1d8096824e927823c2c7",
+  "branch": "audit/admin-stage4a",
+  "scope": "Synthetic loopback PostgreSQL and SMTP only; no original Neon access",
+  "gates": [
+    {
+      "name": "backend",
+      "log": "stage4a-maven.log",
+      "sha256": "17196c0a5d6af747e3de9f6ef2ff8b91ccc72b423590ecce7376a8910b443857",
+      "completedAt": "2026-11-12T11:40:36.838Z"
+    },
+    {
+      "name": "build",
+      "log": "stage4a-build.log",
+      "sha256": "d66afee6e142c7f63eda2998ba26389b94d8676b03a0edeca52c199d51867890",
+      "completedAt": "2026-11-12T11:38:35.874Z"
+    },
+    {
+      "name": "real-browser",
+      "log": "stage4a-real.log",
+      "sha256": "5f5b8d5ae84de3350e707ddd7f5711c6b58e5d4666a900be880eedc7d41cc779",
+      "completedAt": "2026-11-12T11:50:35.955Z"
+    },
+    {
+      "name": "same-key-jvm-restart",
+      "log": "stage4a-real.log",
+      "sha256": "5f5b8d5ae84de3350e707ddd7f5711c6b58e5d4666a900be880eedc7d41cc779",
+      "completedAt": "2026-11-12T11:50:35.955Z"
+    },
+    {
+      "name": "distributed-limiter",
+      "log": "stage4a-real.log",
+      "sha256": "5f5b8d5ae84de3350e707ddd7f5711c6b58e5d4666a900be880eedc7d41cc779",
+      "completedAt": "2026-11-12T11:50:35.955Z"
+    },
+    {
+      "name": "outbox-restart",
+      "log": "stage4a-real.log",
+      "sha256": "5f5b8d5ae84de3350e707ddd7f5711c6b58e5d4666a900be880eedc7d41cc779",
+      "completedAt": "2026-11-12T11:50:35.955Z"
+    },
+    {
+      "name": "timing-diagnostic-only",
+      "log": "stage4a-timing.log",
+      "sha256": "8561f512eda53d3b279985259b783cfa9940929bb04970829bf7c85bb854a634",
+      "completedAt": "2026-11-12T11:43:13.599Z"
+    },
+    {
+      "name": "lint",
+      "log": "stage4a-lint.log",
+      "sha256": "1fab52d0ac089f94c4f67e4832298abdbb06382ba5033aefa09d34d1a6711727",
+      "completedAt": "2026-11-12T11:44:51.680Z"
+    },
+    {
+      "name": "e2e-types",
+      "log": "stage4a-e2e-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "completedAt": "2026-11-12T11:46:15.097Z"
+    },
+    {
+      "name": "production-npm-audit",
+      "log": "stage4a-audit.log",
+      "sha256": "6bf1428f41151b18d1fe822a2d1402d6477b743301d6e154ed2920c59819024a",
+      "completedAt": "2026-11-12T11:45:04.525Z"
+    },
+    {
+      "name": "tls-smtp-and-config-sanitization",
+      "log": "stage4a-tools.log",
+      "sha256": "67f983e7d3d3c18bd1666c2304da1e7769e86b9001fe1c2f17404ca457b325b9",
+      "completedAt": "2026-11-12T11:45:36.806Z"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "file": ".github/workflows/oracle-readiness.yml",
+      "sha256LF": "d7494c73120e9203febda23c496b62b4e34c809d010bbba5e4a206327571e962"
+    },
+    {
+      "file": "backend/src/main/java/com/oficinagestao/security/JwtService.java",
+      "sha256LF": "d5ee6cac29caf40ce60f9efec3fb4fa4c2b65dff06897601f4a1c5801ef0b941"
+    },
+    {
+      "file": "backend/src/main/java/com/oficinagestao/service/AuthService.java",
+      "sha256LF": "ae4afcd14d166fc9788cad4882685875513340e6882b33017eeab9ccfc300006"
+    },
+    {
+      "file": "backend/src/test/java/com/oficinagestao/security/AccessTokenSessionBindingIntegrationTest.java",
+      "sha256LF": "fb15e7b2fc2a19cb8a21e010aa2df0277c2c9ba74b0718291ce0930649ad4966"
+    },
+    {
+      "file": "backend/src/test/java/com/oficinagestao/security/OperationalCriticalFlowsIntegrationTest.java",
+      "sha256LF": "93d0f415a4f65cc398548555ad7d5d7b24b64027dd759aacdcbe323a2a73b3b6"
+    },
+    {
+      "file": "backend/src/test/java/com/oficinagestao/security/PasswordRecoveryTimingIntegrationTest.java",
+      "sha256LF": "aad5736cd64faf2e0846e2561102728f567a534c8c924a0b0adeb2d2328573fa"
+    },
+    {
+      "file": "backend/src/test/java/com/oficinagestao/security/ProductionSessionParityIntegrationTest.java",
+      "sha256LF": "263de353b36ecf7978228161b0700a6f6b165913bbd790606da70d67b133a5e7"
+    },
+    {
+      "file": "backend/src/test/java/com/oficinagestao/service/AuthServiceTest.java",
+      "sha256LF": "864f27dc784eb3864b09e96610f70c950e8608b3dc416c7e7fc71f9672ed3db0"
+    },
+    {
+      "file": "frontend/e2e/integration-real.spec.ts",
+      "sha256LF": "6fce880f82c690ef87a45ccdacf49afa0e606657a4d1b4c84005a1865d13e58d"
+    },
+    {
+      "file": "scripts/analyze-recovery-timing.mjs",
+      "sha256LF": "e9159b9b44ad0667aebaf43c4a70bcba424156a69ac572ce92ade9fde1672951"
+    },
+    {
+      "file": "scripts/audit-private-config.mjs",
+      "sha256LF": "10331092424ebbf6f9a3d5c20ad34f8687d9626d3385a9bb3c57d9e16d5dbaf8"
+    },
+    {
+      "file": "scripts/audit-private-config.test.mjs",
+      "sha256LF": "be730eee2cd934ac09fc74dfe6aa4604a19c658cd269fd980a6ca701389748a6"
+    },
+    {
+      "file": "scripts/collect-stage4a-evidence.mjs",
+      "sha256LF": "04b98040cbcd0d8a07679de30bb93db11e70b461211fa19f9419071a7628e01b"
+    },
+    {
+      "file": "scripts/summarize-maven-reports.mjs",
+      "sha256LF": "28e39af06fd1aa848d1c6650aa8568b6a00c00d6283786471249a51209537936"
+    },
+    {
+      "file": "scripts/test-real-stack-local.mjs",
+      "sha256LF": "ad81a41ce77c4460162db7a857131ad5f5b406b6be9fad7e7ccf707c4329a1ad"
+    }
+  ]
+}

@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(properties = "security.jwt.legacy-sessionless-allowed=false")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 class AccessTokenSessionBindingIntegrationTest {
@@ -94,6 +94,7 @@ class AccessTokenSessionBindingIntegrationTest {
                 passwords.encode("SyntheticPassword1!"), true));
         String access = jwt.generateToken(user, UUID.randomUUID());
         requestMe(access, 401);
+        requestMe(jwt.generateToken(user), 401);
     }
 
     private void persistToken(String raw, UUID sessionId) {
