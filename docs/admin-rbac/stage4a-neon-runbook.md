@@ -128,6 +128,8 @@ Os testes `ProductionMigrationPathTest` exercitam esses caminhos com dados sint�
 
 Exigem autorizações separadas: diagnóstico; backup; ensaio com dados restaurados; migrations no original; ativação do serviço; convite real; transição da Geisa. Definir responsável, janela, duração máxima e canal de incidente, RPO/RTO aprovados e gates mensuráveis do relatório antes da execução.
 
+Na candidata da auditoria 4A.1, `PASSWORD_RECOVERY_REQUESTS_ENABLED=false` bloqueia novas solicitações públicas com 503 e o validator proíbe habilitá-las no profile de produção enquanto o risco temporal REC-01 não tiver mitigação validada. A conclusão de links já emitidos permanece disponível. Não remover esse bloqueio como ajuste de configuração na janela; aprovação de diagnóstico/migration não autoriza expor o endpoint vulnerável. Decidir e comunicar o procedimento alternativo de suporte antes de qualquer ativação.
+
 1. Guardar imagem/artefato anterior, versões de secrets e configuração, baseline de dados e backup restaurável. Confirmar acesso operacional atual e recuperação administrativa independente.
 2. Conter tráfego/pausar escritores somente na janela autorizada. Uma instância migradora; validar o original antes e depois. Não executar `clean`, `repair`, baseline ou down-migrations improvisadas.
 3. Injetar configuração produção conferida; remover credenciais `INITIAL_ADMIN_*`; habilitar bootstrap por convite apenas durante a janela aprovada. Conferir todas as filas pendentes e suas chaves antes de liberar workers SMTP.

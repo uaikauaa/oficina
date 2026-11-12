@@ -52,6 +52,7 @@ try {
       DB_URL: 'jdbc:postgresql://127.0.0.1:15433/oficina_integracao_ci', DB_USERNAME: 'ci_isolado', DB_PASSWORD: 'ci-integration-db-only',
       JWT_SECRET: jwtSecret, RATE_LIMIT_SECRET: 'ci-integration-independent-rate-secret-only-2026', SECURITY_COOKIE_SECURE: 'false',
       SECURITY_JWT_LEGACY_SESSIONLESS_ALLOWED: 'false',
+      PASSWORD_RECOVERY_REQUESTS_ENABLED: 'true',
       INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
       INVITE_OUTBOX_POLL_MS: String(pollMs),
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Production security properties with the mandatory isolated PostgreSQL guard. */
 @SpringBootTest(properties = {
-    "security.jwt.legacy-sessionless-allowed=false", "security.cookie.secure=true",
+    "security.jwt.legacy-sessionless-allowed=false", "security.password-recovery.requests-enabled=false", "security.cookie.secure=true",
     "CORS_ALLOWED_ORIGINS=https://synthetic.example.invalid",
     "JWT_SECRET=stage4a-production-parity-synthetic-secret-2026",
     "MAIL_HOST=localhost", "MAIL_USERNAME=synthetic@example.invalid", "MAIL_PASSWORD=synthetic",

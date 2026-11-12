@@ -1,6 +1,7 @@
 package com.oficinagestao.config;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,6 +20,29 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductionSecurityValidatorTest {
+
+    @BeforeEach
+    void safeFeatureDefaults() {
+        lenient().when(environment.getProperty(any(String.class))).thenReturn(null);
+    }
+
+    @Test
+    void productionRejectsLegacySessionlessOverride() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.legacy-sessionless-allowed")).thenReturn("true");
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> new ProductionSecurityValidator(environment).validate());
+        assertTrue(failure.getMessage().contains("sem sessionId"));
+    }
+
+    @Test
+    void productionRejectsUnsafeRecoveryRequestOverride() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.password-recovery.requests-enabled")).thenReturn("true");
+        IllegalStateException failure = assertThrows(IllegalStateException.class,
+                () -> new ProductionSecurityValidator(environment).validate());
+        assertTrue(failure.getMessage().contains("mitigação temporal"));
+    }
 
     @Mock
     private Environment environment;

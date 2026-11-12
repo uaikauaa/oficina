@@ -1,0 +1,9 @@
+# Next.js, proxy e interface
+
+Frontend candidato usa App Router, proxy `src/server/backendProxy.ts`, validação de origem e allowlist de headers. Não acessa PostgreSQL diretamente. Proxy não propaga headers de identidade fornecidos pelo navegador, aplica limite de corpo, timeout, não segue redirect externo e faz streaming PDF/CSV; cache `no-store`. A sessão de aplicação permanece nos cookies emitidos pelo backend, sujeitos a CSRF. Next `next.config.ts` aplica headers gerais, e rotas de convite/recuperação usam `Referrer-Policy: no-referrer`. Conferir headers efetivos no alvo aprovado antes de produção.
+
+As suítes frontend cobrem formulários, loading, erros, vazios, busca, paginação, navegação e acessibilidade básica. Stage 4A executou 3 jornadas reais Next→Spring→PostgreSQL→Mailpit e 115 mocks; este ciclo repete os mocks e runner real. Os cinco viewports de referência são 320, 390, 768, 1366 e 1920 px (testes `visual-refinement.spec.ts`). A cobertura mockada não atesta persistência; o runner real verifica mutações e leituras.
+
+**Falha encontrada nesta auditoria:** um teste mockado 390 px falhou 1/115 durante execução paralela. Screenshot e snapshot mostram senha sintética inserida no e-mail e campo senha vazio. `login/page.tsx` agenda foco no e-mail 50 ms após abrir modal; se a pessoa começou a preencher senha antes do timer, ele roubava foco. A primeira correção preservava qualquer foco dentro do diálogo e revelou falha no teste de autofocus inicial. Correção final: preservar um input já ativo dentro do diálogo, mantendo autofocus ao abrir. O teste 390 px agora verifica foco e valores após avançar o relógio; 115/115 passaram. Nenhum timeout foi ampliado.
+
+Limites: auditoria de teclado/leitor de tela e medição de bundle/performance em dispositivo real ainda não foram executadas; tratar acessibilidade/responsividade como parciais. O PR #18 Firebase/`__session` não foi integrado.
