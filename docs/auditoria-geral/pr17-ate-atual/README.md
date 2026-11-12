@@ -51,7 +51,7 @@ A cadeia funcional é testável e os dois riscos de segurança identificados nes
 | ACESSIBILIDADE | **PARCIAL** | teclado/foco básicos; leitor de tela não medido |
 | TESTES AUTOMATIZADOS | **APROVADO** | Maven 897 XML, frontend 379, build/lint/tipos |
 | TESTES REAIS ISOLADOS | **APROVADO** | 3 Playwright reais e duas JVMs passaram nesta branch; sem dados reais |
-| CI/CD | **PENDENTE** | SHA final desta branch ainda precisa 4 workflows |
+| CI/CD | **APROVADO** | 4/4 no SHA funcional `578af98`; conferir [checks do head atual do PR #31](https://github.com/uaikauaa/oficina/pull/31/checks) antes de usar este veredito |
 | GOVERNANÇA CODEX | **PARCIAL** | AGENTS revisados; PR #26 paralelo com check falho |
 | PRONTIDÃO PARA DIAGNÓSTICO NEON | **PARCIAL** | runbook pronto; alvo/credencial/autorização específicos pendentes |
 | PRONTIDÃO PARA MIGRATIONS REAIS | **REPROVADO** | sem backup/restore/dados legados/ensaio |
@@ -60,7 +60,7 @@ A cadeia funcional é testável e os dois riscos de segurança identificados nes
 
 ## Decisões independentes
 
-1. **Auditoria técnica:** GO condicionado aos 4 workflows do SHA final; bloqueios residuais estão formalizados em `achados-e-correcoes.md`.
+1. **Auditoria técnica:** GO com os bloqueios residuais formalizados em `achados-e-correcoes.md`, condicionado a 4/4 no head publicado do PR #31.
 2. **Solicitar autorização de diagnóstico read-only Neon:** GO para **pedir** autorização específica, após preencher alvo/role/credencial privados; nenhuma conexão autorizada por este relatório.
 3. **Preparar janela futura de alteração:** NO-GO até diagnóstico, backup cifrado restaurado, V25–V28 ensaiadas e configuração efetiva corrigida.
 4. **Produção:** NO-GO. Recuperação pública está bloqueada, e configuração/TLS/contas reais/rollback exigem gates próprios.
