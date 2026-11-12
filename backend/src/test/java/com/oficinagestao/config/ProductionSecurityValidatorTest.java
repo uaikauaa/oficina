@@ -29,7 +29,7 @@ class ProductionSecurityValidatorTest {
     @Test
     void productionRejectsLegacySessionlessOverride() {
         when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
-        when(environment.getProperty("security.jwt.legacy-sessionless-allowed")).thenReturn("true");
+        when(environment.getProperty("security.jwt.legacy-sessionless-allowed")).thenReturn(" true ");
         IllegalStateException failure = assertThrows(IllegalStateException.class,
                 () -> new ProductionSecurityValidator(environment).validate());
         assertTrue(failure.getMessage().contains("sem sessionId"));
@@ -38,7 +38,7 @@ class ProductionSecurityValidatorTest {
     @Test
     void productionRejectsUnsafeRecoveryRequestOverride() {
         when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
-        when(environment.getProperty("security.password-recovery.requests-enabled")).thenReturn("true");
+        when(environment.getProperty("security.password-recovery.requests-enabled")).thenReturn("on");
         IllegalStateException failure = assertThrows(IllegalStateException.class,
                 () -> new ProductionSecurityValidator(environment).validate());
         assertTrue(failure.getMessage().contains("mitigação temporal"));
