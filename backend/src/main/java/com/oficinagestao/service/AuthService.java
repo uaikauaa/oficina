@@ -264,8 +264,6 @@ public class AuthService {
         auditoriaService.registrarComRequest(usuario.getId(), "Usuario", usuario.getId().toString(), "LOGIN", httpRequest);
 
         // Emitir tokens e criar sessão
-        String accessToken = jwtService.generateToken(usuario);
-
         boolean rememberMe = Boolean.TRUE.equals(challenge.getRememberMe());
         long tokenRefreshExpiryMs = rememberMe ? refreshExpirationMs : refreshExpirationTempMs;
 
@@ -274,6 +272,8 @@ public class AuthService {
         OffsetDateTime refreshExpiry = OffsetDateTime.now().plus(tokenRefreshExpiryMs, ChronoUnit.MILLIS);
         RefreshToken refreshToken = new RefreshToken(usuario, tokenHash, refreshExpiry, rememberMe);
         refreshTokenRepository.save(refreshToken);
+        jwtService.setSessionIdForNextToken(refreshToken.getSessionId());
+        String accessToken = jwtService.generateToken(usuario);
 
         Set<String> roles = usuario.getRoles().stream()
                 .map(Role::getNome)
@@ -368,6 +368,15 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Refresh token não encontrado."));
 
         if (Boolean.TRUE.equals(oldToken.getRevogado())) {
+            java.util.Optional<Boolean> explicitlyRevoked = oldToken.getSessionId() == null
+                    ? java.util.Optional.empty()
+                    : refreshTokenRepository.wasExplicitlyRevoked(oldToken.getSessionId());
+            // A session explicitly revoked from the session panel must not
+            // punish unrelated sessions. Reuse of a rotated token has no such
+            // audit marker and retains the global replay response below.
+            if (explicitlyRevoked.orElse(false)) {
+                throw new BadCredentialsException("Refresh token revogado.");
+            }
             if (oldToken.getUsuario() != null) {
                 refreshTokenRepository.revokeAllByUsuarioId(oldToken.getUsuario().getId());
             }
@@ -398,6 +407,7 @@ public class AuthService {
         newToken.setSessionId(oldToken.getSessionId());
         refreshTokenRepository.save(newToken);
 
+        jwtService.setSessionIdForNextToken(newToken.getSessionId());
         String newAccessToken = jwtService.generateToken(usuario);
 
         Set<String> roles = usuario.getRoles().stream()

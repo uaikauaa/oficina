@@ -1,6 +1,7 @@
 package com.oficinagestao.security;
 
 import com.oficinagestao.repository.UsuarioRepository;
+import com.oficinagestao.repository.RefreshTokenRepository;
 import com.oficinagestao.entity.Permissao;
 import com.oficinagestao.entity.Usuario;
 import jakarta.servlet.FilterChain;
@@ -13,12 +14,16 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,10 +31,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UsuarioRepository usuarioRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final boolean legacySessionlessAllowed;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
+    @Autowired
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UsuarioRepository usuarioRepository,
+                                   RefreshTokenRepository refreshTokenRepository,
+                                   @Value("${security.jwt.legacy-sessionless-allowed:false}") boolean legacySessionlessAllowed) {
         this.jwtService = jwtService;
         this.usuarioRepository = usuarioRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.legacySessionlessAllowed = legacySessionlessAllowed;
+    }
+
+    public JwtAuthenticationFilter(JwtService jwtService, UsuarioRepository usuarioRepository) {
+        this(jwtService, usuarioRepository, null, true);
     }
 
     @Override
@@ -45,9 +62,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtService.extractEmail(token);
             Long userId = jwtService.extractUserId(token);
             Integer tokenVersion = jwtService.extractTokenVersion(token);
+            UUID sessionId = jwtService.extractSessionId(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (isTokenVersionValida(userId, email, tokenVersion)) {
+                if (isTokenVersionValida(userId, email, tokenVersion)
+                        && isSessionValida(userId, sessionId)) {
                     // Authorization is based on current database grants, never on JWT role claims.
                     Optional<Usuario> current = userId == null ? usuarioRepository.findByEmail(email)
                             : usuarioRepository.findById(userId);
@@ -76,6 +95,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isSessionValida(Long userId, UUID sessionId) {
+        if (sessionId == null) {
+            return legacySessionlessAllowed;
+        }
+        if (userId == null || refreshTokenRepository == null) {
+            return false;
+        }
+        return refreshTokenRepository.existsActiveSession(userId, sessionId, OffsetDateTime.now())
+                .orElse(false);
     }
 
     private boolean isTokenVersionValida(Long userId, String email, Integer tokenVersionInJwt) {
