@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,7 @@ public class JwtService {
 
     private final SecretKey secretKey;
     private final long expirationMs;
+    private final ThreadLocal<UUID> nextSessionId = new ThreadLocal<>();
 
     @Autowired
     public JwtService(
@@ -98,10 +100,29 @@ public class JwtService {
 
     public String generateToken(Usuario usuario) {
         int tokenVersion = usuario.getTokenVersion() != null ? usuario.getTokenVersion() : 0;
-        return generateToken(usuario, tokenVersion);
+        UUID sessionId = nextSessionId.get();
+        nextSessionId.remove();
+        return generateToken(usuario, tokenVersion, sessionId);
     }
 
     public String generateToken(Usuario usuario, int tokenVersion) {
+        return generateToken(usuario, tokenVersion, null);
+    }
+
+    public void setSessionIdForNextToken(UUID sessionId) {
+        if (sessionId == null) {
+            nextSessionId.remove();
+        } else {
+            nextSessionId.set(sessionId);
+        }
+    }
+
+    public String generateToken(Usuario usuario, UUID sessionId) {
+        int tokenVersion = usuario.getTokenVersion() != null ? usuario.getTokenVersion() : 0;
+        return generateToken(usuario, tokenVersion, sessionId);
+    }
+
+    private String generateToken(Usuario usuario, int tokenVersion, UUID sessionId) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMs);
 
@@ -109,7 +130,7 @@ public class JwtService {
                 .map(Role::getNome)
                 .collect(Collectors.toList());
 
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .subject(usuario.getEmail())
                 .issuer(ISSUER)
                 .audience().add(AUDIENCE).and()
@@ -117,9 +138,11 @@ public class JwtService {
                 .claim("roles", roles)
                 .claim("tokenVersion", tokenVersion)
                 .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(secretKey, Jwts.SIG.HS256)
-                .compact();
+                .expiration(expiryDate);
+        if (sessionId != null) {
+            builder.claim("sessionId", sessionId.toString());
+        }
+        return builder.signWith(secretKey, Jwts.SIG.HS256).compact();
     }
 
     public boolean validateToken(String token) {
@@ -152,6 +175,15 @@ public class JwtService {
                 return number.intValue();
             }
             return null;
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public UUID extractSessionId(String token) {
+        try {
+            Object value = extractClaims(token).get("sessionId");
+            return value == null ? null : UUID.fromString(value.toString());
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
