@@ -18,6 +18,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class InviteOutbox {
@@ -81,6 +82,24 @@ public class InviteOutbox {
                 "password-reset:" + resetId, token.getBytes(StandardCharsets.US_ASCII));
         jdbc.update("INSERT INTO password_reset_outbox(reset_id,key_version,nonce,ciphertext) VALUES (?,?,?,?)",
                 resetId, activeVersion, nonce, encrypted);
+    }
+
+    /** The public path stores only a versioned AES-GCM email payload, never account state. */
+    public void enqueueRecoveryRequest(String normalizedEmail) {
+        UUID id = UUID.randomUUID();
+        byte[] nonce = new byte[12];
+        random.nextBytes(nonce);
+        byte[] encrypted = crypt(Cipher.ENCRYPT_MODE, keys.get(activeVersion), nonce,
+                "password-recovery-request:" + id, normalizedEmail.getBytes(StandardCharsets.UTF_8));
+        jdbc.update("INSERT INTO password_recovery_request_jobs(id,key_version,nonce,ciphertext) VALUES (?,?,?,?)",
+                id, activeVersion, nonce, encrypted);
+    }
+
+    public String decryptRecoveryRequest(UUID id, int version, byte[] nonce, byte[] ciphertext) {
+        SecretKeySpec key = keys.get(version);
+        if (key == null) throw new IllegalStateException("Recovery request key unavailable");
+        return new String(crypt(Cipher.DECRYPT_MODE, key, nonce,
+                "password-recovery-request:" + id, ciphertext), StandardCharsets.UTF_8);
     }
 
     /** Workers hold a row lock through SMTP and acknowledgement; peers skip locked rows. */

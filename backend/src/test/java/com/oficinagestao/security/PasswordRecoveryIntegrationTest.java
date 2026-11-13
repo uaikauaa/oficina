@@ -60,11 +60,15 @@ class PasswordRecoveryIntegrationTest {
         http.setRemoteAddr("192.0.2." + (10 + Math.floorMod(user.getId().intValue(), 200)));
     }
 
-    @AfterEach void cleanup() { users.deleteById(user.getId()); }
+    @AfterEach void cleanup() {
+        jdbc.update("DELETE FROM password_recovery_request_jobs");
+        users.deleteById(user.getId());
+    }
 
     private String requestAndDeliver() {
         recovery.request(user.getEmail(), http);
         verifyNoInteractions(mail);
+        assertTrue(recovery.dispatchRequestOne());
         assertTrue(outbox.dispatchRecoveryOne());
         var url = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(mail).sendPasswordRecovery(eq(user.getEmail()), url.capture());
@@ -73,13 +77,96 @@ class PasswordRecoveryIntegrationTest {
 
     @Test void genericResponseAndNoPrecommitMail() {
         recovery.request("unknown-" + UUID.randomUUID() + "@example.invalid", http);
+        assertTrue(recovery.dispatchRequestOne());
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
                 Integer.class, user.getId()));
         recovery.request(user.getEmail(), http);
+        assertTrue(recovery.dispatchRequestOne());
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_outbox o JOIN "
                 + "password_reset_requests r ON r.id=o.reset_id WHERE r.usuario_id=? AND o.status='PENDING'",
                 Integer.class, user.getId()));
         verifyNoInteractions(mail);
+    }
+
+    @Test void inactiveAndUnknownAccountsAreScrubbedWithoutDelivery() {
+        user.setAtivo(false);
+        users.saveAndFlush(user);
+        recovery.request(user.getEmail(), http);
+        recovery.request("unknown-" + UUID.randomUUID() + "@example.invalid", http);
+        assertTrue(recovery.dispatchRequestOne());
+        assertTrue(recovery.dispatchRequestOne());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
+                + "WHERE status='PENDING' OR nonce IS NOT NULL OR ciphertext IS NOT NULL", Integer.class));
+        assertFalse(outbox.dispatchRecoveryOne());
+        verifyNoInteractions(mail);
+    }
+
+    @Test void duplicateRequestsIssueOnlyLatestUsableTokenAcrossConcurrentWorkers() throws Exception {
+        recovery.request(user.getEmail(), http);
+        recovery.request(user.getEmail(), http);
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var start = new CountDownLatch(1);
+            var first = executor.submit(() -> { start.await(); return recovery.dispatchRequestOne(); });
+            var second = executor.submit(() -> { start.await(); return recovery.dispatchRequestOne(); });
+            start.countDown();
+            assertTrue(first.get(10, TimeUnit.SECONDS));
+            assertTrue(second.get(10, TimeUnit.SECONDS));
+        }
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests "
+                + "WHERE usuario_id=? AND revogado_em IS NULL", Integer.class, user.getId()));
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_outbox o JOIN "
+                + "password_reset_requests r ON r.id=o.reset_id WHERE r.usuario_id=? AND o.status='PENDING'",
+                Integer.class, user.getId()));
+        assertEquals(2, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
+                + "WHERE status='PROCESSED' AND nonce IS NULL AND ciphertext IS NULL", Integer.class));
+    }
+
+    @Test void expiredQueueJobNeverIssuesToken() {
+        recovery.request(user.getEmail(), http);
+        jdbc.update("UPDATE password_recovery_request_jobs SET created_at=now()-interval '2 hours',"
+                + "expires_at=now()-interval '1 hour' WHERE status='PENDING'");
+        assertTrue(recovery.dispatchRequestOne());
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        assertEquals("EXPIRED", jdbc.queryForObject("SELECT status FROM password_recovery_request_jobs",
+                String.class));
+    }
+
+    @Test void perIdentityLimitBoundsQueuedRequests() {
+        for (int i=0; i<4; i++) recovery.request(user.getEmail().toUpperCase(java.util.Locale.ROOT), http);
+        assertEquals(3, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
+                + "WHERE status='PENDING'", Integer.class));
+        verifyNoInteractions(mail);
+    }
+
+    @Test void workerRollbackRetainsEncryptedJobForRetry() {
+        recovery.request(user.getEmail(), http);
+        assertThrows(IllegalStateException.class, () -> tx.execute(status -> {
+            assertTrue(recovery.dispatchRequestOne());
+            throw new IllegalStateException("synthetic worker commit failure");
+        }));
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
+                + "WHERE status='PENDING' AND nonce IS NOT NULL AND ciphertext IS NOT NULL", Integer.class));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        assertTrue(recovery.dispatchRequestOne());
+        assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+    }
+
+    @Test void corruptedQueuedCiphertextFailsClosedAndIsScrubbed() {
+        recovery.request(user.getEmail(), http);
+        jdbc.update("UPDATE password_recovery_request_jobs SET ciphertext=decode('00000000000000000000000000000000','hex') "
+                + "WHERE status='PENDING'");
+        assertTrue(recovery.dispatchRequestOne());
+        assertEquals("EXHAUSTED", jdbc.queryForObject("SELECT status FROM password_recovery_request_jobs",
+                String.class));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
+                Integer.class, user.getId()));
+        assertTrue(jdbc.queryForObject("SELECT nonce IS NULL AND ciphertext IS NULL "
+                + "FROM password_recovery_request_jobs", Boolean.class));
     }
 
     @Test void recoveryRevokesSessionsAndRejectsReplay() {
@@ -110,6 +197,7 @@ class PasswordRecoveryIntegrationTest {
         }));
         assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_reset_requests WHERE usuario_id=?",
                 Integer.class, user.getId()));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs", Integer.class));
         assertFalse(outbox.dispatchRecoveryOne());
         verifyNoInteractions(mail);
     }
@@ -118,6 +206,7 @@ class PasswordRecoveryIntegrationTest {
         String old = requestAndDeliver();
         clearInvocations(mail);
         recovery.request(user.getEmail(), http);
+        assertTrue(recovery.dispatchRequestOne());
         assertTrue(outbox.dispatchRecoveryOne());
         var url = org.mockito.ArgumentCaptor.forClass(String.class);
         verify(mail).sendPasswordRecovery(eq(user.getEmail()), url.capture());
@@ -133,6 +222,7 @@ class PasswordRecoveryIntegrationTest {
 
     @Test void smtpFailureBacksOffAndCiphertextNeverAppearsInAudit() {
         recovery.request(user.getEmail(), http);
+        assertTrue(recovery.dispatchRequestOne());
         doThrow(new MailSendException("synthetic SMTP outage")).when(mail).sendPasswordRecovery(anyString(), anyString());
         assertTrue(outbox.dispatchRecoveryOne());
         assertEquals("PENDING", jdbc.queryForObject("SELECT o.status FROM password_reset_outbox o JOIN "
@@ -147,6 +237,7 @@ class PasswordRecoveryIntegrationTest {
 
     @Test void realSmtp550TerminatesCommittedRecoveryWithoutRetry() throws Exception {
         recovery.request(user.getEmail(), http);
+        assertTrue(recovery.dispatchRequestOne());
         Long resetId = jdbc.queryForObject("SELECT id FROM password_reset_requests WHERE usuario_id=?",
                 Long.class, user.getId());
         assertEquals(1, jdbc.queryForObject("SELECT count(*) FROM password_reset_outbox "

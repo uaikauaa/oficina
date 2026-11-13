@@ -7,7 +7,10 @@ const names = ['DB_URL','DB_USERNAME','DB_PASSWORD','JWT_SECRET','RATE_LIMIT_SEC
   'MAIL_FROM','MAIL_SMTP_AUTH','MAIL_SMTP_STARTTLS','APP_PUBLIC_URL','SUPER_ADMIN_BOOTSTRAP_EMAIL',
   'SPRING_PROFILES_ACTIVE','SECURITY_COOKIE_SECURE','CORS_ALLOWED_ORIGINS','INTERNAL_BACKEND_URL',
   'TRUSTED_PROXY_HOPS','TRUSTED_PROXIES','SECURITY_JWT_LEGACY_SESSIONLESS_ALLOWED',
-  'INITIAL_ADMIN_EMAIL','INITIAL_ADMIN_PASSWORD','NEON_PROJECT_ID','NEON_API_KEY'];
+  'INITIAL_ADMIN_EMAIL','INITIAL_ADMIN_PASSWORD','NEON_PROJECT_ID','NEON_API_KEY',
+  'PASSWORD_RECOVERY_REQUESTS_ENABLED','PASSWORD_RECOVERY_QUEUE_POLL_MS',
+  'MAIL_CONNECTION_TIMEOUT','MAIL_READ_TIMEOUT','MAIL_WRITE_TIMEOUT',
+  'GOOGLE_CLOUD_PROJECT_ID','GOOGLE_CLOUD_RUN_SERVICE','GOOGLE_APPLICATION_CREDENTIALS'];
 function assess(env) {
   const present = key => typeof env[key] === 'string' && env[key].trim() !== '';
   let db, publicUrl, origins;
@@ -45,6 +48,14 @@ function assess(env) {
     profileProduction:env.SPRING_PROFILES_ACTIVE?.split(',').some(p=>['prod','production'].includes(p.trim())) || false,
     cookieSecureExplicit:env.SECURITY_COOKIE_SECURE==='true',
     sessionlessOverrideEnabled:env.SECURITY_JWT_LEGACY_SESSIONLESS_ALLOWED==='true',
+    recoveryRequestsDisabled:!present('PASSWORD_RECOVERY_REQUESTS_ENABLED') ||
+      env.PASSWORD_RECOVERY_REQUESTS_ENABLED==='false',
+    recoveryQueuePollValid:!present('PASSWORD_RECOVERY_QUEUE_POLL_MS') ||
+      (Number.isInteger(Number(env.PASSWORD_RECOVERY_QUEUE_POLL_MS)) &&
+       Number(env.PASSWORD_RECOVERY_QUEUE_POLL_MS)>=100 &&
+       Number(env.PASSWORD_RECOVERY_QUEUE_POLL_MS)<=3600000),
+    googleRuntimeIdentityDeclared:present('GOOGLE_APPLICATION_CREDENTIALS') ||
+      (present('GOOGLE_CLOUD_PROJECT_ID') && present('GOOGLE_CLOUD_RUN_SERVICE')),
     publicSecretVariableNames:Object.keys(env).filter(k=>/^NEXT_PUBLIC_.*(SECRET|PASSWORD|DB_URL|OUTBOX_KEYS)/.test(k)),
   }};
 }
