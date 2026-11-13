@@ -2,6 +2,12 @@
 
 > Atualização 12/11/2026: o procedimento detalhado vigente está em [Etapa 4A — runbook Neon](stage4a-neon-runbook.md). O provisionamento será exclusivamente por convite, com senha definida pelo titular e login 2FA; não entregar senha inicial. A transição da Geisa preserva o registro, mas o fluxo oficial revoga sessões e exige novo login. Este plano anterior permanece como histórico.
 
+> Atualização 4A.2: incluir V29 na cópia restaurada somente depois do diagnóstico autorizado,
+> backup aprovado e verificação do histórico Flyway. A fila de pedidos de recuperação
+> deve estar vazia antes de qualquer ativação; preservar as versões das chaves AES-GCM
+> enquanto houver payloads pendentes. Solicitações públicas seguem bloqueadas em produção
+> até revisão independente e autorização operacional.
+
 Este documento descreve a ativação futura do banco Neon original. A Etapa 3.3 não executa nenhuma ação nele, não cria contas reais e não altera o acesso da Geisa.
 
 ## Pré-condições e autorização
@@ -25,7 +31,7 @@ Este documento descreve a ativação futura do banco Neon original. A Etapa 3.3 
 ## Migração e provisionamento
 
 1. Obter janela de manutenção e impedir escritas concorrentes durante avaliação do schema. Registrar versão Flyway e checksums antes da execução. Aplicar apenas migrations incrementais pendentes com uma instância migradora; verificar efeitos e row counts após cada passo.
-2. Provisionar a conta principal pelo fluxo aprovado, com identidade e e-mail reais confirmados fora do Git, senha inicial entregue por canal seguro e 2FA validado. Remover a referência de bootstrap imediatamente.
+2. Provisionar a conta principal pelo fluxo aprovado de convite, com identidade e e-mail confirmados fora do Git, senha definida pelo titular e 2FA validado. Remover a referência de bootstrap imediatamente.
 3. Conferir permissões atuais da Geisa antes de qualquer transição. Planejar a mudança mínima e reversível, colher aprovação específica, executar somente após a conta principal estar funcional e verificar acesso operacional e administrativo de ambas as contas. Não remover acesso da Geisa por suposição.
 4. Validar convite, recuperação, sessões, operações essenciais, relatório PDF/CSV, auditoria e envio SMTP controlado. Registrar evidências sanitizadas.
 

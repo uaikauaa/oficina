@@ -41,7 +41,7 @@ class ProductionSecurityValidatorTest {
         when(environment.getProperty("security.password-recovery.requests-enabled")).thenReturn("on");
         IllegalStateException failure = assertThrows(IllegalStateException.class,
                 () -> new ProductionSecurityValidator(environment).validate());
-        assertTrue(failure.getMessage().contains("mitigação temporal"));
+        assertTrue(failure.getMessage().contains("revisão independente"));
     }
 
     @Mock

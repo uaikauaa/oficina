@@ -47,7 +47,7 @@ try {
         '-e', 'POSTGRES_USER=ci_isolado', '-e', 'POSTGRES_PASSWORD=ci-integration-db-only', 'postgres:16-alpine']
         : ['-p', '127.0.0.1:1025:1025', '-p', '127.0.0.1:8025:8025', 'axllent/mailpit:latest'])]);
   }
-  const startBackend = (port, jwtSecret = 'ci-integration-only-jwt-2026-synthetic-value-never-for-production', pollMs = 5000) => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
+  const startBackend = (port, jwtSecret = 'ci-integration-only-jwt-2026-synthetic-value-never-for-production', pollMs = 5000, queuePollMs = 1000) => spawn('java', ['-jar', 'backend/target/backend-0.0.1-SNAPSHOT.jar'], { cwd: root, windowsHide: true,
     stdio: ['ignore', log, log], env: { ...process.env, SPRING_PROFILES_ACTIVE: 'dev', PORT: String(port), TRUSTED_PROXIES: '',
       DB_URL: 'jdbc:postgresql://127.0.0.1:15433/oficina_integracao_ci', DB_USERNAME: 'ci_isolado', DB_PASSWORD: 'ci-integration-db-only',
       JWT_SECRET: jwtSecret, RATE_LIMIT_SECRET: 'ci-integration-independent-rate-secret-only-2026', SECURITY_COOKIE_SECURE: 'false',
@@ -55,6 +55,7 @@ try {
       PASSWORD_RECOVERY_REQUESTS_ENABLED: 'true',
       INVITE_OUTBOX_KEYS: '1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
       INVITE_OUTBOX_POLL_MS: String(pollMs),
+      PASSWORD_RECOVERY_QUEUE_POLL_MS: String(queuePollMs),
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',
       MAIL_USERNAME: 'ci.integration@oficina.invalid', MAIL_PASSWORD: 'ci-smtp-only', MAIL_FROM: 'ci.integration@oficina.invalid',
       MAIL_SMTP_AUTH: 'false', MAIL_SMTP_STARTTLS: 'false', INITIAL_ADMIN_NAME: 'Admin Sintetico CI',
@@ -199,6 +200,37 @@ try {
   assert.equal(messages.messages.filter(message => message.To?.some(to => to.Address?.toLowerCase() === recipient)).length, 1);
   assert.equal(psql(`SELECT ciphertext IS NULL AND nonce IS NULL FROM invite_delivery_outbox WHERE invite_id=${inviteId}`), 't');
   console.log('PASS: pending encrypted invitation survived restart, two real JVM workers produced one Mailpit message, and ciphertext was erased.');
+
+  // Hold the new request queue across a full JVM replacement, then let both
+  // workers compete for the same row. The original service and Neon are untouched.
+  await stop(backend); await stop(replica);
+  backend = startBackend(8080, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250, 3600000);
+  replica = startBackend(8082, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250, 3600000);
+  await Promise.all([waitReady(backend, 8080), waitReady(replica, 8082)]);
+  psql('DELETE FROM security_rate_limits');
+  await fetch('http://127.0.0.1:8025/api/v1/messages',{method:'DELETE'});
+  const recoveryClient = client();
+  assert.equal((await recoveryClient.request('/api/auth/recuperacao/solicitar','POST',{email:sessionEmail})).status,202);
+  const jobId = psql("SELECT id FROM password_recovery_request_jobs WHERE status='PENDING' ORDER BY created_at DESC LIMIT 1");
+  assert.match(jobId, /^[0-9a-f-]{36}$/);
+  assert.equal(psql(`SELECT nonce IS NOT NULL AND ciphertext IS NOT NULL FROM password_recovery_request_jobs WHERE id='${jobId}'`), 't');
+  await stop(backend); await stop(replica);
+  backend = startBackend(8080, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250, 250);
+  replica = startBackend(8082, 'ci-integration-rotated-jwt-key-distinct-from-rate-2026', 250, 250);
+  await Promise.all([waitReady(backend, 8080), waitReady(replica, 8082)]);
+  let recovered = false;
+  for(let i=0;i<60;i++) {
+    if(psql(`SELECT status FROM password_recovery_request_jobs WHERE id='${jobId}'`) === 'PROCESSED') {
+      const latest=psql("SELECT o.status FROM password_reset_outbox o JOIN password_reset_requests r ON r.id=o.reset_id JOIN usuarios u ON u.id=r.usuario_id WHERE u.email='ci.integration@oficina.invalid' ORDER BY r.id DESC LIMIT 1");
+      if(latest==='SENT'){ recovered=true; break; }
+    }
+    await new Promise(resolve=>setTimeout(resolve,1000));
+  }
+  assert.ok(recovered,'durable recovery request survived restart and reached the SMTP outbox');
+  const recoveryMessages=await (await fetch('http://127.0.0.1:8025/api/v1/messages')).json();
+  assert.equal(recoveryMessages.messages.filter(m=>m.To?.some(to=>to.Address===sessionEmail)).length,1);
+  assert.equal(psql(`SELECT nonce IS NULL AND ciphertext IS NULL FROM password_recovery_request_jobs WHERE id='${jobId}'`),'t');
+  console.log('PASS: encrypted recovery request survived JVM restart; two workers emitted one synthetic Mailpit message.');
 } finally {
   await stop(backend); await stop(replica);
   closeSync(log);

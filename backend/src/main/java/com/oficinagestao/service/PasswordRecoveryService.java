@@ -17,7 +17,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -25,11 +29,17 @@ import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class PasswordRecoveryService {
+    private static final Logger log = LoggerFactory.getLogger(PasswordRecoveryService.class);
+    public enum RequestOutcome { ACCEPTED, SATURATED }
     private record Reset(long id, long userId, OffsetDateTime expiresAt,
                          OffsetDateTime usedAt, OffsetDateTime revokedAt) { }
+    private record RequestJob(UUID id, int keyVersion, byte[] nonce, byte[] ciphertext,
+                              OffsetDateTime expiresAt) { }
     private final JdbcTemplate jdbc;
     private final UsuarioRepository users;
     private final RefreshTokenRepository refreshTokens;
@@ -38,15 +48,20 @@ public class PasswordRecoveryService {
     private final SharedRateLimitService limits;
     private final IpAddressResolver addresses;
     private final InviteOutbox outbox;
+    private final TransactionTemplate transactions;
+    private final AtomicLong saturationEvents = new AtomicLong();
     private final SecureRandom random = new SecureRandom();
     @Value("${security.password-recovery.expiration-minutes:30}")
     private int expiryMinutes;
+    @Value("${security.password-recovery.queue-poll-ms:1000}")
+    private long queuePollMs;
 
     public PasswordRecoveryService(JdbcTemplate jdbc, UsuarioRepository users,
                                    RefreshTokenRepository refreshTokens,
                                    TwoFactorChallengeRepository challenges,
                                    PasswordEncoder passwords, SharedRateLimitService limits,
-                                   IpAddressResolver addresses, InviteOutbox outbox) {
+                                   IpAddressResolver addresses, InviteOutbox outbox,
+                                   TransactionTemplate transactions) {
         this.jdbc = jdbc;
         this.users = users;
         this.refreshTokens = refreshTokens;
@@ -55,21 +70,91 @@ public class PasswordRecoveryService {
         this.limits = limits;
         this.addresses = addresses;
         this.outbox = outbox;
+        this.transactions = transactions;
     }
 
     @PostConstruct
     void validateConfiguration() {
         if (expiryMinutes < 5 || expiryMinutes > 60) throw new IllegalStateException(
                 "PASSWORD_RECOVERY_EXPIRATION_MINUTES deve estar entre 5 e 60.");
+        if (queuePollMs < 100 || queuePollMs > 3600000) throw new IllegalStateException(
+                "PASSWORD_RECOVERY_QUEUE_POLL_MS deve estar entre 100 e 3600000.");
     }
 
-    /** Always returns the same HTTP response, including for unknown or inactive addresses. */
+    /** No account lookup or account-dependent write occurs before the public response. */
     @Transactional
-    public void request(String suppliedEmail, HttpServletRequest http) {
+    public RequestOutcome request(String suppliedEmail, HttpServletRequest http) {
         String email = suppliedEmail.trim().toLowerCase(Locale.ROOT);
         String ip = addresses.extrairIp(http);
-        if (!limits.consume("password-recovery-ip", ip, 10, Duration.ofMinutes(15)).allowed()
-                || !limits.consume("password-recovery-email", email, 3, Duration.ofHours(1)).allowed()) return;
+        // Global saturation is independent of account state and must not consume budgets.
+        jdbc.queryForList("SELECT pg_advisory_xact_lock(63701002291234)");
+        Long pending = jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs WHERE status='PENDING'", Long.class);
+        if (pending != null && pending >= 10000) {
+            if (saturationEvents.incrementAndGet() == 1)
+                log.warn("Password recovery queue saturated; HTTP 503; pending={}", pending);
+            return RequestOutcome.SATURATED;
+        }
+        if (!limits.consumeInCurrentTransaction("password-recovery-ip", ip, 10, Duration.ofMinutes(15)).allowed()
+                || !limits.consumeInCurrentTransaction("password-recovery-email", email, 3, Duration.ofHours(1)).allowed())
+            return RequestOutcome.ACCEPTED;
+        outbox.enqueueRecoveryRequest(email);
+        return RequestOutcome.ACCEPTED;
+    }
+
+    @Scheduled(fixedDelayString = "${security.password-recovery.queue-poll-ms:1000}",
+            initialDelayString = "${security.password-recovery.queue-poll-ms:1000}")
+    public void pollRequests() {
+        for (int i = 0; i < 50 && dispatchRequestOne(); i++) { /* bounded batch */ }
+    }
+
+    @Scheduled(fixedDelayString = "${security.password-recovery.queue-cleanup-ms:3600000}",
+            initialDelayString = "${security.password-recovery.queue-cleanup-ms:3600000}")
+    public void cleanupCompletedRequests() {
+        jdbc.update("DELETE FROM password_recovery_request_jobs WHERE status<>'PENDING' "
+                + "AND processed_at < now()-interval '7 days'");
+    }
+
+    /** Aggregate only; never log submitted addresses or request payloads. */
+    @Scheduled(fixedDelay = 60000, initialDelay = 60000)
+    public void reportSaturation() {
+        long count = saturationEvents.getAndSet(0);
+        if (count > 0) log.warn("Password recovery queue saturation events in the last interval={}", count);
+    }
+
+    /** Row locks and the reset/outbox insert share one transaction across JVMs and restarts. */
+    public boolean dispatchRequestOne() {
+        return Boolean.TRUE.equals(transactions.execute(status -> {
+            var jobs = jdbc.query("SELECT id,key_version,nonce,ciphertext,expires_at "
+                    + "FROM password_recovery_request_jobs WHERE status='PENDING' "
+                    + "ORDER BY created_at,id LIMIT 1 FOR UPDATE SKIP LOCKED",
+                    (rs, row) -> new RequestJob(rs.getObject("id", UUID.class), rs.getInt("key_version"),
+                            rs.getBytes("nonce"), rs.getBytes("ciphertext"),
+                            rs.getObject("expires_at", OffsetDateTime.class)));
+            if (jobs.isEmpty()) return false;
+            RequestJob job = jobs.getFirst();
+            if (!job.expiresAt().isAfter(OffsetDateTime.now())) {
+                finishJob(job.id(), "EXPIRED", "QUEUE_EXPIRED");
+                return true;
+            }
+            String email;
+            try {
+                email = outbox.decryptRecoveryRequest(job.id(), job.keyVersion(), job.nonce(), job.ciphertext());
+            } catch (IllegalStateException error) {
+                finishJob(job.id(), "EXHAUSTED", "DECRYPTION_FAILED");
+                return true;
+            }
+            issueRecovery(email);
+            finishJob(job.id(), "PROCESSED", null);
+            return true;
+        }));
+    }
+
+    private void finishJob(UUID id, String state, String category) {
+        jdbc.update("UPDATE password_recovery_request_jobs SET status=?,nonce=NULL,ciphertext=NULL,"
+                + "processed_at=now(),failure_category=? WHERE id=?", state, category, id);
+    }
+
+    private void issueRecovery(String email) {
         Usuario user = users.findByEmailForUpdate(email).orElse(null);
         if (user == null || !Boolean.TRUE.equals(user.getAtivo())) return;
         jdbc.update("UPDATE password_reset_requests SET revogado_em=now() WHERE usuario_id=? "

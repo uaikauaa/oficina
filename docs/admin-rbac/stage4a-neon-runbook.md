@@ -94,7 +94,13 @@ Referências oficiais: [Neon — pg_dump e conexão direta](https://github.com/n
 5. Comparar contas por ID, hash da senha **somente em comparação privada booleana**, ativo, token_version e papéis; nenhuma recriação, reset de senha ou renumeração. Comparar histórico Flyway/checksums e históricos de negócio. Emitir apenas contagens/deltas, nunca hashes ou dados pessoais, no relatório.
 6. Não iniciar aplicação completa sobre a cópia enquanto houver egress ou filas contendo destinatários reais. Bloquear egress primeiro; direcionar SMTP somente ao sink local. Usar uma cópia adicional sanitizada para testes funcionais com contas sintéticas. A cópia de evidência deve permanecer intacta.
 
-## 6. Ensaio V25–V28 na cópia
+## 6. Ensaio V25–V29 na cópia
+
+**Atualização 4A.2:** o artefato candidato acrescenta V29 (fila cifrada de pedidos de
+recuperação). Após verificar o histórico real, ensaiar também V29 na cópia restaurada,
+isoladamente, registrar duração/locks/checksum, conferir a tabela vazia e a ausência
+de alterações nas contas. Se o original já estiver acima de V29, parar para plano
+específico.
 
 Usar o artefato e a versão Flyway fixados pelo commit aprovado. Executar Flyway como migrador isolado, **não via startup de Spring**. Configuração do migrador: datasource local conferido, `baselineOnMigrate=false`, `cleanDisabled=true`, `validateOnMigrate=true`, `locations` de produção do artefato. Fazer `info` e `validate`, comparar checksums V1–V24 com o manifesto do repo. Nunca usar `repair`, `baseline`, editar histórico ou ignorar divergência para conseguir prosseguir.
 
@@ -104,8 +110,9 @@ Usar o artefato e a versão Flyway fixados pelo commit aprovado. Executar Flyway
 | V26 | Reduz somente permissões de CONSULTA | ADMIN/OPERADOR/SUPER_ADMIN conservam operações; contatos sensíveis minimizados pela API |
 | V27 | Outbox cifrada de convites | Nenhuma entrega disparada pelo migrador |
 | V28 | `refresh_tokens.session_id`, índices e recuperação | Hashes de refresh/revogação preservados; UUID em cada linha existente; não agrupar famílias históricas por suposição |
+| V29 | Fila cifrada de pedidos de recuperação | Nova tabela vazia; contas, hashes, sessões e histórico anterior intactos; nenhum e-mail disparado pelo migrador |
 
-Se schema estiver em V24, aplicar sucessivamente `target=25`, 26, 27 e 28, coletando tempo, locks, versão/checksum e deltas em cada passo. Se estiver V25–27, ensaiar somente as pendentes. Se estiver abaixo de V24, acima de V28, com migrations falhas ou sem histórico numa base não vazia, parar e propor plano específico. B24 é baseline de **banco vazio**, não deve substituir V1–V24 de uma base existente. Executar `validate` final e `migrate` novamente na cópia: zero pendentes, nenhum delta inesperado.
+Se schema estiver em V24, aplicar sucessivamente `target=25`, 26, 27, 28 e 29, coletando tempo, locks, versão/checksum e deltas em cada passo. Se estiver V25–28, ensaiar somente as pendentes. Se estiver abaixo de V24, acima de V29, com migrations falhas ou sem histórico numa base não vazia, parar e propor plano específico. B24 é baseline de **banco vazio**, não deve substituir V1–V24 de uma base existente. Executar `validate` final e `migrate` novamente na cópia: zero pendentes, nenhum delta inesperado.
 
 Os testes `ProductionMigrationPathTest` exercitam esses caminhos com dados sintéticos; não substituem o ensaio sobre o backup real. Os JWTs anteriores sem `sessionId` serão rejeitados pela política nova. Refresh legado válido pode ser rotacionado para obter JWT com sessão; testar essa transição na cópia. Nunca habilitar o bypass `SECURITY_JWT_LEGACY_SESSIONLESS_ALLOWED` em produção para esconder uma regressão.
 
@@ -117,6 +124,8 @@ Os testes `ProductionMigrationPathTest` exercitam esses caminhos com dados sint�
 | Startup, base vazia e credenciais iniciais presentes | `AdminAccountBootstrap` | Cria ROLE_ADMIN/usuário com senha inicial; proibido para provisionar o titular nesta etapa |
 | ApplicationReadyEvent | `NotificacaoService.sincronizarNotificacoesIniciais` | Cria/resolve/atualiza notificações de OS e estoque |
 | Timer após `INVITE_OUTBOX_POLL_MS` | `InviteOutbox.poll` | Consome filas de convite e recuperação, envia SMTP, atualiza tentativas/status/ciphertext e auditoria |
+| Timer após `PASSWORD_RECOVERY_QUEUE_POLL_MS` (padrão 1s) | `PasswordRecoveryService.pollRequests` | Consome pedidos cifrados com `SKIP LOCKED`, consulta contas, emite reset/outbox para contas ativas, apaga payload processado |
+| Timer de limpeza da fila (padrão 1h) | `PasswordRecoveryService.cleanupCompletedRequests` | Apaga metadados terminais de pedidos após sete dias |
 | Timer a cada 10s por padrão | `SharedRateLimitService.cleanup` | Apaga budgets expirados |
 | Cron 03:00 no timezone da JVM por padrão | `RefreshTokenCleanupScheduler` | Remove refresh tokens conforme política de retenção; conferir timezone explicitamente |
 | Primeiro tráfego do limitador | `SharedRateLimitService.ensureKeyGeneration/consume` | Inicializa/atualiza fingerprint e budgets; rotações podem falhar com budgets ativos |

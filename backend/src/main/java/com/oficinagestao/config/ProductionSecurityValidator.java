@@ -42,7 +42,7 @@ public class ProductionSecurityValidator {
             }
             String recoveryRequests = environment.getProperty("security.password-recovery.requests-enabled");
             if (recoveryRequests != null && !"false".equalsIgnoreCase(recoveryRequests.trim())) {
-                throw new IllegalStateException("Solicitações públicas de recuperação exigem mitigação temporal antes da produção.");
+                throw new IllegalStateException("Solicitações públicas de recuperação aguardam revisão independente e autorização operacional.");
             }
 
             // 1. Validação centralizada e unificada do JWT_SECRET via JwtService
