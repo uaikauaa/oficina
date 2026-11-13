@@ -121,7 +121,10 @@ jobs:
           ./mvnw -B -ntp clean verify -Djunit.jupiter.execution.parallel.enabled=false
 
       - name: Validar distribuição temporal HTTP da recuperação
-        run: node scripts/analyze-recovery-http-timing.mjs
+        run: |
+          node scripts/analyze-recovery-http-timing.mjs
+          node scripts/analyze-recovery-http-timing.mjs backend/target/recovery-active-worker-idle.csv
+          node scripts/analyze-recovery-http-timing.mjs backend/target/recovery-active-worker-loaded.csv
 
   frontend:
     name: Frontend — Lint & Build

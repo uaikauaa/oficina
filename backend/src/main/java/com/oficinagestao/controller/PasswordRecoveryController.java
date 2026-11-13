@@ -24,7 +24,8 @@ public class PasswordRecoveryController {
     public ResponseEntity<Void> request(@Valid @RequestBody PasswordRecoveryRequest request,
                                         HttpServletRequest http) {
         if (!requestsEnabled) return ResponseEntity.status(503).build();
-        service.request(request.email(), http);
+        if (service.request(request.email(), http) == PasswordRecoveryService.RequestOutcome.SATURATED)
+            return ResponseEntity.status(503).build();
         return ResponseEntity.accepted().build();
     }
 

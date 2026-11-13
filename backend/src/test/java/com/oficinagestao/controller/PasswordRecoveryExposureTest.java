@@ -30,4 +30,17 @@ class PasswordRecoveryExposureTest {
         assertEquals(202, controller.request(new PasswordRecoveryRequest("someone@example.test"), http).getStatusCode().value());
         verify(service).request("someone@example.test", http);
     }
+
+    @Test
+    void fullQueueReturnsUnavailableWithoutClaimingDelivery() {
+        PasswordRecoveryService service = mock(PasswordRecoveryService.class);
+        PasswordRecoveryController controller = new PasswordRecoveryController(service);
+        ReflectionTestUtils.setField(controller, "requestsEnabled", true);
+        HttpServletRequest http = mock(HttpServletRequest.class);
+        when(service.request("someone@example.test", http))
+                .thenReturn(PasswordRecoveryService.RequestOutcome.SATURATED);
+
+        assertEquals(503, controller.request(new PasswordRecoveryRequest("someone@example.test"), http)
+                .getStatusCode().value());
+    }
 }

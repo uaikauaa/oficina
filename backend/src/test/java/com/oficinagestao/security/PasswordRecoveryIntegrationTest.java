@@ -1,6 +1,8 @@
 package com.oficinagestao.security;
 
 import com.oficinagestao.dto.CompletePasswordRecoveryRequest;
+import com.oficinagestao.dto.PasswordRecoveryRequest;
+import com.oficinagestao.controller.PasswordRecoveryController;
 import com.oficinagestao.entity.RefreshToken;
 import com.oficinagestao.entity.Usuario;
 import com.oficinagestao.repository.RefreshTokenRepository;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 class PasswordRecoveryIntegrationTest {
     @Autowired PasswordRecoveryService recovery;
+    @Autowired PasswordRecoveryController controller;
     @Autowired InviteOutbox outbox;
     @Autowired UsuarioRepository users;
     @Autowired RefreshTokenRepository refreshTokens;
@@ -62,6 +65,7 @@ class PasswordRecoveryIntegrationTest {
 
     @AfterEach void cleanup() {
         jdbc.update("DELETE FROM password_recovery_request_jobs");
+        jdbc.update("DELETE FROM security_rate_limits");
         users.deleteById(user.getId());
     }
 
@@ -139,6 +143,86 @@ class PasswordRecoveryIntegrationTest {
         assertEquals(3, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
                 + "WHERE status='PENDING'", Integer.class));
         verifyNoInteractions(mail);
+    }
+
+    @Test void saturatedQueueDoesNotClaimAcceptanceOrSpendIdentityBudget() {
+        jdbc.update("DELETE FROM security_rate_limits");
+        jdbc.update("INSERT INTO password_recovery_request_jobs(id,key_version,nonce,ciphertext) "
+                + "SELECT gen_random_uuid(),1,decode(lpad(to_hex(g),24,'0'),'hex'),"
+                + "decode('00000000000000000000000000000000','hex') "
+                + "FROM generate_series(1,10000) AS g");
+        assertEquals(503, controller.request(new PasswordRecoveryRequest(user.getEmail()), http)
+                .getStatusCode().value());
+        assertEquals(503, controller.request(new PasswordRecoveryRequest("unknown-" + UUID.randomUUID()
+                + "@example.invalid"), http).getStatusCode().value());
+        user.setAtivo(false);
+        users.saveAndFlush(user);
+        assertEquals(503, controller.request(new PasswordRecoveryRequest(user.getEmail()), http)
+                .getStatusCode().value());
+        assertEquals(10000, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs",
+                Integer.class));
+        assertEquals(0, jdbc.queryForObject("SELECT count(*) FROM security_rate_limits", Integer.class));
+
+        jdbc.update("DELETE FROM password_recovery_request_jobs WHERE id="
+                + "(SELECT id FROM password_recovery_request_jobs LIMIT 1)");
+        user.setAtivo(true);
+        users.saveAndFlush(user);
+        assertEquals(202, controller.request(new PasswordRecoveryRequest(user.getEmail()), http)
+                .getStatusCode().value());
+        assertEquals(10000, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs",
+                Integer.class));
+        assertEquals(2, jdbc.queryForObject("SELECT count(*) FROM security_rate_limits", Integer.class));
+    }
+
+    @Test void advisoryCapacityLockAllowsOnlyOneOfTwoConcurrentFinalSlots() throws Exception {
+        jdbc.update("DELETE FROM security_rate_limits");
+        jdbc.update("INSERT INTO password_recovery_request_jobs(id,key_version,nonce,ciphertext) "
+                + "SELECT gen_random_uuid(),1,decode(lpad(to_hex(g),24,'0'),'hex'),"
+                + "decode('00000000000000000000000000000000','hex') "
+                + "FROM generate_series(1,9999) AS g");
+        try (var executor = Executors.newFixedThreadPool(2)) {
+            var start = new CountDownLatch(1);
+            var first = executor.submit(() -> {
+                start.await();
+                return controller.request(new PasswordRecoveryRequest("capacity-a@example.invalid"), http)
+                        .getStatusCode().value();
+            });
+            var second = executor.submit(() -> {
+                start.await();
+                return controller.request(new PasswordRecoveryRequest("capacity-b@example.invalid"), http)
+                        .getStatusCode().value();
+            });
+            start.countDown();
+            assertEquals(java.util.Set.of(202,503), java.util.Set.of(first.get(10, TimeUnit.SECONDS),
+                    second.get(10, TimeUnit.SECONDS)));
+        }
+        assertEquals(10000, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs",
+                Integer.class));
+        assertEquals(2, jdbc.queryForObject("SELECT count(*) FROM security_rate_limits", Integer.class));
+    }
+
+    @Test void concurrentRequestsAbovePoolSizeDoNotRequireNestedConnections() throws Exception {
+        jdbc.update("DELETE FROM security_rate_limits");
+        int requests = 12; // Hikari test pool has ten connections.
+        try (var executor = Executors.newFixedThreadPool(requests)) {
+            var start = new CountDownLatch(1);
+            var futures = new java.util.ArrayList<java.util.concurrent.Future<Integer>>();
+            for (int i = 0; i < requests; i++) {
+                int index = i;
+                futures.add(executor.submit(() -> {
+                    var request = new MockHttpServletRequest("POST", "/api/auth/recuperacao/solicitar");
+                    request.setRemoteAddr("192.0.2." + (20 + index));
+                    start.await();
+                    return controller.request(new PasswordRecoveryRequest("pool-" + index
+                            + "@example.invalid"), request).getStatusCode().value();
+                }));
+            }
+            start.countDown();
+            for (var future : futures) assertEquals(202, future.get(20, TimeUnit.SECONDS));
+        }
+        assertEquals(requests, jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs "
+                + "WHERE status='PENDING'", Integer.class));
+        assertEquals(requests * 2, jdbc.queryForObject("SELECT count(*) FROM security_rate_limits", Integer.class));
     }
 
     @Test void workerRollbackRetainsEncryptedJobForRetry() {

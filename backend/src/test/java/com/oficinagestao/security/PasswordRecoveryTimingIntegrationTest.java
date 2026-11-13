@@ -35,6 +35,7 @@ class PasswordRecoveryTimingIntegrationTest {
     @Value("${local.server.port}") int port;
     @Autowired UsuarioRepository users;
     @Autowired JdbcTemplate jdbc;
+    @Autowired SharedRateLimitService limits;
     @Autowired ObjectMapper json;
     @MockitoBean EmailService mail;
 
@@ -84,6 +85,46 @@ class PasswordRecoveryTimingIntegrationTest {
             jdbc.update("DELETE FROM password_recovery_request_jobs");
             jdbc.update("DELETE FROM security_rate_limits");
             users.deleteById(user.getId());
+        }
+    }
+
+    @Test void saturatedHttpIsUniformAndDoesNotConsumeBudgets() throws Exception {
+        jdbc.update("DELETE FROM security_rate_limits");
+        Usuario active = users.saveAndFlush(new Usuario("Synthetic active", "cap-active-" + UUID.randomUUID()
+                + "@example.invalid", "unused", true));
+        Usuario inactive = users.saveAndFlush(new Usuario("Synthetic inactive", "cap-inactive-" + UUID.randomUUID()
+                + "@example.invalid", "unused", false));
+        CookieManager cookies = new CookieManager();
+        HttpClient client = HttpClient.newBuilder().cookieHandler(cookies).build();
+        var csrf = client.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port
+                + "/api/auth/csrf")).GET().build(), HttpResponse.BodyHandlers.ofString());
+        assertEquals(200, csrf.statusCode());
+        String token = json.readTree(csrf.body()).get("token").asText();
+        String unknown = "cap-unknown-" + UUID.randomUUID() + "@example.invalid";
+        try {
+            jdbc.update("INSERT INTO password_recovery_request_jobs(id,key_version,nonce,ciphertext) "
+                    + "SELECT gen_random_uuid(),1,decode(lpad(to_hex(g),24,'0'),'hex'),"
+                    + "decode('00000000000000000000000000000000','hex') "
+                    + "FROM generate_series(1,10000) AS g");
+            for (String email : List.of(active.getEmail(), inactive.getEmail(), unknown)) {
+                String body = json.writeValueAsString(java.util.Map.of("email", email));
+                var response = client.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port
+                        + "/api/auth/recuperacao/solicitar"))
+                        .header("Content-Type", "application/json").header("X-XSRF-TOKEN", token)
+                        .POST(HttpRequest.BodyPublishers.ofString(body)).build(),
+                        HttpResponse.BodyHandlers.ofString());
+                assertEquals(503, response.statusCode());
+                assertEquals("", response.body());
+            }
+            assertEquals(10000, jdbc.queryForObject(
+                    "SELECT count(*) FROM password_recovery_request_jobs", Integer.class));
+            for (String email : List.of(active.getEmail(), inactive.getEmail(), unknown))
+                assertEquals(0, limits.inspect("password-recovery-email", email, 3).used());
+        } finally {
+            jdbc.update("DELETE FROM password_recovery_request_jobs");
+            jdbc.update("DELETE FROM security_rate_limits");
+            users.deleteById(active.getId());
+            users.deleteById(inactive.getId());
         }
     }
 

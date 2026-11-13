@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -50,9 +51,20 @@ public class SharedRateLimitService {
 
     public Decision consume(String scope, String subject, int limit, Duration window) {
         if (limit < 1 || window.isNegative() || window.isZero()) throw new IllegalArgumentException("Invalid rate policy");
-        return transaction.execute(status -> {
-            ensureKeyGeneration();
-            return jdbc.queryForObject("""
+        return transaction.execute(status -> consumeStatement(scope, subject, limit, window));
+    }
+
+    /** For callers that atomically reserve capacity and budget in one existing transaction. */
+    public Decision consumeInCurrentTransaction(String scope, String subject, int limit, Duration window) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive())
+            throw new IllegalStateException("An active transaction is required for atomic rate consumption");
+        if (limit < 1 || window.isNegative() || window.isZero()) throw new IllegalArgumentException("Invalid rate policy");
+        return consumeStatement(scope, subject, limit, window);
+    }
+
+    private Decision consumeStatement(String scope, String subject, int limit, Duration window) {
+        ensureKeyGeneration();
+        return jdbc.queryForObject("""
             INSERT INTO security_rate_limits (bucket_key, used, expires_at)
             VALUES (?, 1, statement_timestamp() + (? * interval '1 millisecond'))
             ON CONFLICT (bucket_key) DO UPDATE SET
@@ -63,7 +75,6 @@ public class SharedRateLimitService {
             RETURNING used, GREATEST(1, CEIL(EXTRACT(EPOCH FROM (expires_at - statement_timestamp())))) AS retry
             """, (rs, row) -> new Decision(rs.getLong("used") <= limit, rs.getLong("used"), rs.getLong("retry")),
                 bucket(scope, subject), window.toMillis(), window.toMillis());
-        });
     }
 
     public Decision inspect(String scope, String subject, int limit) {

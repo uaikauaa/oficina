@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 import java.time.Duration;
@@ -28,9 +30,12 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class PasswordRecoveryService {
+    private static final Logger log = LoggerFactory.getLogger(PasswordRecoveryService.class);
+    public enum RequestOutcome { ACCEPTED, SATURATED }
     private record Reset(long id, long userId, OffsetDateTime expiresAt,
                          OffsetDateTime usedAt, OffsetDateTime revokedAt) { }
     private record RequestJob(UUID id, int keyVersion, byte[] nonce, byte[] ciphertext,
@@ -44,6 +49,7 @@ public class PasswordRecoveryService {
     private final IpAddressResolver addresses;
     private final InviteOutbox outbox;
     private final TransactionTemplate transactions;
+    private final AtomicLong saturationEvents = new AtomicLong();
     private final SecureRandom random = new SecureRandom();
     @Value("${security.password-recovery.expiration-minutes:30}")
     private int expiryMinutes;
@@ -77,16 +83,22 @@ public class PasswordRecoveryService {
 
     /** No account lookup or account-dependent write occurs before the public response. */
     @Transactional
-    public void request(String suppliedEmail, HttpServletRequest http) {
+    public RequestOutcome request(String suppliedEmail, HttpServletRequest http) {
         String email = suppliedEmail.trim().toLowerCase(Locale.ROOT);
         String ip = addresses.extrairIp(http);
-        if (!limits.consume("password-recovery-ip", ip, 10, Duration.ofMinutes(15)).allowed()
-                || !limits.consume("password-recovery-email", email, 3, Duration.ofHours(1)).allowed()) return;
-        // Serialize the capacity check across instances; saturation still returns 202.
+        // Global saturation is independent of account state and must not consume budgets.
         jdbc.queryForList("SELECT pg_advisory_xact_lock(63701002291234)");
         Long pending = jdbc.queryForObject("SELECT count(*) FROM password_recovery_request_jobs WHERE status='PENDING'", Long.class);
-        if (pending != null && pending >= 10000) return;
+        if (pending != null && pending >= 10000) {
+            if (saturationEvents.incrementAndGet() == 1)
+                log.warn("Password recovery queue saturated; HTTP 503; pending={}", pending);
+            return RequestOutcome.SATURATED;
+        }
+        if (!limits.consumeInCurrentTransaction("password-recovery-ip", ip, 10, Duration.ofMinutes(15)).allowed()
+                || !limits.consumeInCurrentTransaction("password-recovery-email", email, 3, Duration.ofHours(1)).allowed())
+            return RequestOutcome.ACCEPTED;
         outbox.enqueueRecoveryRequest(email);
+        return RequestOutcome.ACCEPTED;
     }
 
     @Scheduled(fixedDelayString = "${security.password-recovery.queue-poll-ms:1000}",
@@ -100,6 +112,13 @@ public class PasswordRecoveryService {
     public void cleanupCompletedRequests() {
         jdbc.update("DELETE FROM password_recovery_request_jobs WHERE status<>'PENDING' "
                 + "AND processed_at < now()-interval '7 days'");
+    }
+
+    /** Aggregate only; never log submitted addresses or request payloads. */
+    @Scheduled(fixedDelay = 60000, initialDelay = 60000)
+    public void reportSaturation() {
+        long count = saturationEvents.getAndSet(0);
+        if (count > 0) log.warn("Password recovery queue saturation events in the last interval={}", count);
     }
 
     /** Row locks and the reset/outbox insert share one transaction across JVMs and restarts. */
