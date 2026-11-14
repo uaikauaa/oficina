@@ -1,5 +1,5 @@
 // Private variables stay in the existing .env; this launcher never prints or copies them.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { resolve, dirname, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
@@ -13,7 +13,9 @@ const source = process.env.OFICINA_PRIVATE_ENV_FILE;
 const mode = process.argv[2] || '--check';
 if (!source || !resolve(source).startsWith(resolve(root, '..') + sep) || !existsSync(source))
   throw Error('Set OFICINA_PRIVATE_ENV_FILE to the approved external private .env');
-if (existsSync(join(root, '.env')) || existsSync(join(root, 'backend', '.env')))
+const nextDotenv = ['.env','.env.local','.env.development','.env.development.local'];
+if (existsSync(join(root, '.env')) || existsSync(join(root, 'backend', '.env')) ||
+    readdirSync(join(root, 'frontend')).some(name => nextDotenv.includes(name)))
   throw Error('Candidate checkout must not contain a second .env');
 const values = Object.create(null);
 for (const line of readFileSync(source, 'utf8').split(/\r?\n/)) {
