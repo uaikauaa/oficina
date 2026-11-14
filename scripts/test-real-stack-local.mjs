@@ -59,6 +59,10 @@ try {
       CORS_ALLOWED_ORIGINS: 'http://localhost:3000', MAIL_HOST: '127.0.0.1', MAIL_PORT: '1025',
       MAIL_USERNAME: 'ci.integration@oficina.invalid', MAIL_PASSWORD: 'ci-smtp-only', MAIL_FROM: 'ci.integration@oficina.invalid',
       MAIL_SMTP_AUTH: 'false', MAIL_SMTP_STARTTLS: 'false', INITIAL_ADMIN_NAME: 'Admin Sintetico CI',
+      // Mailpit is a loopback-only fake SMTP server. The separate TLS suite proves
+      // the real dev defaults require STARTTLS and hostname verification.
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_REQUIRED: 'false',
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_CHECKSERVERIDENTITY: 'false',
       SUPER_ADMIN_BOOTSTRAP_EMAIL: 'ci.superadmin@oficina.invalid',
       INITIAL_ADMIN_EMAIL: 'ci.integration@oficina.invalid', INITIAL_ADMIN_PASSWORD: 'CiIntegration#2026Secure!',
     } });

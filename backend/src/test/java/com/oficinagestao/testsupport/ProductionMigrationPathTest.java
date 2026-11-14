@@ -6,6 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
+import com.oficinagestao.service.EmailService;
+import com.oficinagestao.service.InitialSuperAdminProvisioner;
+import com.oficinagestao.service.InviteOutbox;
+import com.oficinagestao.security.TokenHashUtil;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.nio.file.Files;
@@ -72,6 +78,88 @@ class ProductionMigrationPathTest {
             next.validate();
             assertEquals("30", next.info().current().getVersion().getVersion());
         }
+    }
+
+    @Test
+    void initialSuperAdminCreatesOnlyOneEncryptedAuditedInviteInEmptyDatabase() throws Exception {
+        try (var db = new Database()) {
+            db.production().migrate();
+            var mail = new CapturingMail();
+            var initial = initialProvisioner(db, mail);
+            initial.provision("owner@example.invalid", "APPROVAL-SYNTHETIC-01");
+            assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM usuarios", Integer.class));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM convites_usuarios WHERE criado_por IS NULL "
+                    + "AND usado_em IS NULL AND revogado_em IS NULL", Integer.class));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM invite_delivery_outbox "
+                    + "WHERE status='PENDING' AND nonce IS NOT NULL AND ciphertext IS NOT NULL", Integer.class));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM eventos_administrativos "
+                    + "WHERE acao='SUPER_ADMIN_INICIAL_CONVITE' AND ator_id IS NULL", Integer.class));
+            assertThrows(IllegalStateException.class,
+                    () -> initial.provision("second@example.invalid", "APPROVAL-SYNTHETIC-02"));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM convites_usuarios", Integer.class));
+            assertTrue(mail.lastUrl == null);
+            assertTrue(outbox(db, mail).dispatchOne());
+            String token = java.net.URI.create(mail.lastUrl).getQuery().substring("token=".length());
+            assertEquals(TokenHashUtil.hashStatic(token), db.jdbc.queryForObject(
+                    "SELECT token_hash FROM convites_usuarios", String.class));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM invite_delivery_outbox "
+                    + "WHERE status='SENT' AND nonce IS NULL AND ciphertext IS NULL", Integer.class));
+        }
+    }
+
+    @Test
+    void concurrentInitialProvisionersAllowExactlyOneAndRejectExistingUser() throws Exception {
+        try (var db = new Database()) {
+            db.production().migrate();
+            var initial = initialProvisioner(db, new CapturingMail());
+            try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+                var start = new java.util.concurrent.CountDownLatch(1);
+                var a = executor.submit(() -> { start.await(); return attempt(initial, "a@example.invalid"); });
+                var b = executor.submit(() -> { start.await(); return attempt(initial, "b@example.invalid"); });
+                start.countDown();
+                assertEquals(java.util.Set.of(true, false), java.util.Set.of(
+                        a.get(10, java.util.concurrent.TimeUnit.SECONDS),
+                        b.get(10, java.util.concurrent.TimeUnit.SECONDS)));
+            }
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM convites_usuarios", Integer.class));
+            assertEquals(1, db.jdbc.queryForObject("SELECT count(*) FROM invite_delivery_outbox", Integer.class));
+        }
+        try (var db = new Database()) {
+            db.production().migrate();
+            db.jdbc.update("INSERT INTO usuarios(nome,email,senha,ativo) VALUES ('Synthetic','prior@example.invalid','unused',true)");
+            assertThrows(IllegalStateException.class, () -> initialProvisioner(db, new CapturingMail())
+                    .provision("owner@example.invalid", "APPROVAL-SYNTHETIC-03"));
+            assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM convites_usuarios", Integer.class));
+        }
+        try (var db = new Database()) {
+            db.production().migrate();
+            db.jdbc.update("INSERT INTO clientes(tipo_pessoa,nome_razao_social) VALUES ('FISICA','Synthetic customer')");
+            assertThrows(IllegalStateException.class, () -> initialProvisioner(db, new CapturingMail())
+                    .provision("owner@example.invalid", "APPROVAL-SYNTHETIC-05"));
+            assertEquals(0, db.jdbc.queryForObject("SELECT count(*) FROM convites_usuarios", Integer.class));
+        }
+    }
+
+    private static boolean attempt(InitialSuperAdminProvisioner provisioner, String email) {
+        try { provisioner.provision(email, "APPROVAL-SYNTHETIC-04"); return true; }
+        catch (IllegalStateException rejected) { return false; }
+    }
+
+    private static InitialSuperAdminProvisioner initialProvisioner(Database db, CapturingMail mail) {
+        return new InitialSuperAdminProvisioner(db.jdbc,
+                new TransactionTemplate(new DataSourceTransactionManager(db.source)), outbox(db, mail));
+    }
+
+    private static InviteOutbox outbox(Database db, CapturingMail mail) {
+        return new InviteOutbox(db.jdbc, new TransactionTemplate(new DataSourceTransactionManager(db.source)),
+                mail, "1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", 1, "http://localhost:3000");
+    }
+
+    private static final class CapturingMail implements EmailService {
+        volatile String lastUrl;
+        public void sendTwoFactorCode(String to, String code) { throw new AssertionError("unexpected 2FA"); }
+        public void sendInvitation(String to, String url) { lastUrl = url; }
+        public void sendPasswordRecovery(String to, String url) { throw new AssertionError("unexpected recovery"); }
     }
 
     @Test
