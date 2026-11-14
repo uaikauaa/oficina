@@ -1,6 +1,6 @@
 # Etapa 5A — preparação offline do novo Neon
 
-Data: 13/11/2026. Base: PR #32 draft, `dfdd803df1618efa6a15dffba9cc9264e04ee30a`, checkout candidato `stage4a2`. Este trabalho diz respeito ao projeto **novo**; os procedimentos e a ficha do Neon original não autorizam uso neste alvo.
+Data: 13/11/2026. Base: PR #32 draft, `dfdd803df1618efa6a15dffba9cc9264e04ee30a`, checkout candidato `stage4a2`. Entrega: PR #33 draft empilhado sobre #32, sem merge ou deploy. Este trabalho diz respeito ao projeto **novo**; os procedimentos e a ficha do Neon original não autorizam uso neste alvo.
 
 ## Correções e estado privado
 
