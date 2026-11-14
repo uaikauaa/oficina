@@ -37,6 +37,8 @@ O verificador privado leu valores apenas na memória e emitiu estados booleanos:
 
 Os testes sintéticos usam somente containers identificados como próprios da etapa. O checkout antigo mantém as alterações que já existiam. O teste visual gerou imagens temporárias, removidas/restauradas após a aprovação.
 
+No primeiro CI do PR #33, o build da imagem recebeu HTTP 429 do Maven Central antes do scan; o rerun passou sem mudar dependências nem critérios. A integração real teve uma ocorrência de `CSRF_INVALID` no helper do teste: o token da resposta e o cookie compartilhado podiam ser lidos em instantes diferentes enquanto o painel carregava. O helper agora fixa o par token/cookies de um mesmo snapshot; TypeScript, ESLint e a stack real sintética completa passaram novamente. O CI do head que contém essa correção deve ser conferido separadamente.
+
 ## Operação futura: gates separados
 
 1. **Primeira conexão somente leitura:** preencher a ficha privada `stage5a-new-neon-target-template.md` fora do Git pelo painel oficial do projeto novo: organização, Project ID, branch/compute, hostname direto, banco, role de leitura, referência da credencial, CA, responsável e janela. Comparar com a configuração privada sem publicar identificadores. Pedir autorização específica com SELECTs, TLS, timeouts, `psql -X`, `REPEATABLE READ READ ONLY` e `ROLLBACK`. Sem aprovação, não conectar. A ficha do Neon antigo não serve.
