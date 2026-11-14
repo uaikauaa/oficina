@@ -37,7 +37,17 @@ async function csrfHeader(context: BrowserContext) {
   expect(response.status(), 'CSRF token endpoint').toBe(200);
   const payload = await response.json() as { token: string };
   expect(payload.token).toBeTruthy();
-  return { 'X-XSRF-TOKEN': payload.token };
+  // Browser navigation can refresh the shared cookie jar just after this GET.
+  // Pin the CSRF header and authentication cookies from one snapshot so the
+  // subsequent API request carries a coherent pair even during page loading.
+  const cookies = await context.cookies();
+  const csrfCookie = cookies.find(cookie => cookie.name === 'XSRF-TOKEN');
+  expect(csrfCookie, 'CSRF cookie must accompany the token response').toBeTruthy();
+  expect(decodeURIComponent(csrfCookie!.value)).toBe(payload.token);
+  return {
+    'X-XSRF-TOKEN': payload.token,
+    Cookie: cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; '),
+  };
 }
 
 test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integration-real', async ({ page, context, request }) => {
