@@ -28,12 +28,12 @@ function* files(directory) {
   }
 }
 
-// Next 16.4.1 has no supported preview-key environment setting. Its standalone
+// Next 16.4.1 and 16.4.6 have no supported preview-key environment setting. Their standalone
 // runtime reads these two manifests. Normalize only those private inputs after
 // compilation, with fail-closed checks for any additional key consumer. Do not
 // patch framework code, global randomness, timestamps or authentication logic.
 export function normalizePreviewKeys(standalone, keys, nextVersion) {
-  ensure(nextVersion === '16.4.1', 'Review preview manifest compatibility when upgrading Next');
+  ensure(['16.4.1', '16.4.6'].includes(nextVersion), 'Review preview manifest compatibility when upgrading Next');
   const manifestPath = path.join(standalone, '.next/prerender-manifest.json');
   const propsPath = path.join(standalone, '.next/server/preview-props.json');
   const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));

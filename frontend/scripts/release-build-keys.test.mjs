@@ -36,6 +36,9 @@ test('preview normalization preserves routes and fails closed for an unknown con
     normalizePreviewKeys(directory, replacement, '16.4.1');
     assert.deepEqual(JSON.parse(readFileSync(propsPath)), replacement.preview);
     assert.deepEqual(JSON.parse(readFileSync(manifestPath)).routes, { '/': { initialRevalidateSeconds: false } });
+    normalizePreviewKeys(directory, old, '16.4.6');
+    assert.deepEqual(JSON.parse(readFileSync(propsPath)), old.preview);
+    assert.deepEqual(JSON.parse(readFileSync(manifestPath)).preview, old.preview);
   } finally { rmSync(directory, { recursive: true }); }
 });
 

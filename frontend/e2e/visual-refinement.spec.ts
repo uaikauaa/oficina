@@ -248,8 +248,20 @@ for (const width of [390, 1366]) {
     await page.goto('/login');
     const mobile = width < 1024;
     if (mobile) await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-    await page.locator(mobile ? '#modal-email' : '#email').fill('pessoa@oficina.invalid');
-    await page.locator(mobile ? '#modal-senha' : '#senha').fill('SenhaSintetica!123');
+    const email = page.locator(mobile ? '#modal-email' : '#email');
+    const password = page.locator(mobile ? '#modal-senha' : '#senha');
+    if (mobile) await expect(email).toBeFocused();
+    await email.fill('pessoa@oficina.invalid');
+    if (mobile) {
+      await password.focus();
+      await page.clock.runFor(60);
+      await expect(password).toBeFocused();
+      await page.keyboard.type('SenhaSintetica!123');
+    } else {
+      await password.fill('SenhaSintetica!123');
+    }
+    await expect(email).toHaveValue('pessoa@oficina.invalid');
+    await expect(password).toHaveValue('SenhaSintetica!123');
     await page.locator('button[type="submit"]:visible').click();
     const code = page.locator(mobile ? '#modal-two-factor-code' : '#two-factor-code');
     await expect(code).toBeVisible();

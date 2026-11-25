@@ -10,6 +10,11 @@ test('Cloud Run cannot disable identity or use HTTP; local HTTP is restricted', 
   assert.throws(() => proxyConfig({ INTERNAL_BACKEND_URL: 'http://outside.invalid' }));
   assert.equal(proxyConfig({ K_SERVICE: 'test', INTERNAL_BACKEND_URL: 'https://backend.invalid',
     SERVICE_PROXY_SECRET: 'synthetic-shared-service-context-secret-2026', TRUSTED_PROXY_HOPS: '1' }).iam, true);
+  const local = proxyConfig({ INTERNAL_BACKEND_URL: 'http://backend:8080',
+    SERVICE_PROXY_SECRET: 'synthetic-shared-service-context-secret-2026', TRUSTED_PROXY_HOPS: '1' });
+  assert.equal(local.iam, false);
+  assert.equal(local.clientContext?.hops, 1);
+  assert.throws(() => proxyConfig({ INTERNAL_BACKEND_URL: 'http://backend:8080', TRUSTED_PROXY_HOPS: '1' }));
 });
 
 test('client IP context is newly signed from the configured trusted suffix, never copied from the browser', async () => {

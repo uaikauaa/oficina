@@ -44,7 +44,11 @@ public class ProductionSecurityValidator {
                 throw new IllegalStateException("FALHA DE CONFIGURAÇÃO EM PRODUÇÃO: A variável CORS_ALLOWED_ORIGINS é mandatória e não pode estar vazia.");
             }
 
-            if (corsOrigins.contains("localhost") || corsOrigins.contains("127.0.0.1")) {
+            // Explicit local HTTPS deployment: only this exact loopback origin is allowed.
+            // All other production checks (JWT, Secure cookies, SMTP, etc.) still run.
+            boolean localHttpsLoopback = "true".equalsIgnoreCase(environment.getProperty("LOCAL_HTTPS_LOOPBACK", "false"));
+            if ((corsOrigins.contains("localhost") || corsOrigins.contains("127.0.0.1"))
+                    && !(localHttpsLoopback && "https://localhost:3000".equals(corsOrigins))) {
                 throw new IllegalStateException("FALHA DE SEGURANÇA EM PRODUÇÃO: CORS_ALLOWED_ORIGINS não pode conter referências a 'localhost' ou '127.0.0.1' em ambiente de produção.");
             }
 

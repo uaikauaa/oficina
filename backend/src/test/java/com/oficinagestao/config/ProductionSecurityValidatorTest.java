@@ -1,6 +1,7 @@
 package com.oficinagestao.config;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -25,6 +26,11 @@ class ProductionSecurityValidatorTest {
 
     private static final String STRONG_SECRET = "chave-secreta-de-producao-com-mais-de-32-caracteres-para-hmac-sha256";
     private static final String VALID_PROD_CORS = "https://app.oficinagestao.com.br";
+
+    @BeforeEach
+    void defaultLocalHttpsOptInIsDisabled() {
+        lenient().when(environment.getProperty("LOCAL_HTTPS_LOOPBACK", "false")).thenReturn("false");
+    }
 
     private void stubSecureSmtp() {
         when(environment.getProperty("spring.mail.host")).thenReturn("smtp.example.invalid");
@@ -90,6 +96,29 @@ class ProductionSecurityValidatorTest {
 
         IllegalStateException ex = assertThrows(IllegalStateException.class, validator::validate);
         assertTrue(ex.getMessage().contains("não pode conter referências a 'localhost'"));
+    }
+
+    @Test
+    @DisplayName("HTTPS local explícito permite apenas a origem exata com controles de produção")
+    void shouldAllowOnlyExplicitLocalHttpsOriginInProduction() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn("https://localhost:3000");
+        when(environment.getProperty("LOCAL_HTTPS_LOOPBACK", "false")).thenReturn("true");
+        when(environment.getProperty("security.cookie.secure")).thenReturn("true");
+        stubSecureSmtp();
+
+        assertDoesNotThrow(new ProductionSecurityValidator(environment)::validate);
+    }
+
+    @Test
+    @DisplayName("HTTPS local sem opt-in permanece bloqueado em produção")
+    void shouldRejectLocalHttpsOriginWithoutOptIn() {
+        when(environment.acceptsProfiles(any(Profiles.class))).thenReturn(true);
+        when(environment.getProperty("security.jwt.secret")).thenReturn(STRONG_SECRET);
+        when(environment.getProperty("cors.allowed-origins")).thenReturn("https://localhost:3000");
+
+        assertThrows(IllegalStateException.class, new ProductionSecurityValidator(environment)::validate);
     }
 
     @Test
