@@ -81,12 +81,17 @@ async function extractedPdfText(context: BrowserContext, url: string, filename: 
   const pdf = await response.body();
   expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
   writeFileSync(file, pdf);
+  return extractPdfBytes(pdf);
+}
+
+function extractPdfBytes(pdf: Buffer) {
   const home = process.env.USERPROFILE || process.env.HOME;
   expect(home).toBeTruthy();
   const jar = path.join(home!, '.m2', 'repository', 'com', 'github', 'librepdf',
     'openpdf', '2.0.3', 'openpdf-2.0.3.jar');
   const source = path.resolve(process.cwd(), '..', 'backend', 'src', 'test', 'java', 'PdfTextProbe.java');
-  return execFileSync('java', ['-Dfile.encoding=UTF-8', '-cp', jar, source, file], { encoding: 'utf8', windowsHide: true });
+  return execFileSync('java', ['-Dfile.encoding=UTF-8', '-cp', jar, source],
+    { encoding: 'utf8', input: pdf, windowsHide: true });
 }
 
 test.beforeEach(() => {
@@ -397,6 +402,7 @@ test('OS: peça e valores pela UI, total e filtros do relatório persistidos @re
     expect(text).toContain(productName);
     expect(text).toContain('183,15');
   }
+  expect(() => extractPdfBytes(Buffer.from('%PDF-corrupt'))).toThrow();
 });
 
 test('estoque: duas saídas concorrentes não vendem acima do saldo @real-p1', async ({ page, context, request }) => {
