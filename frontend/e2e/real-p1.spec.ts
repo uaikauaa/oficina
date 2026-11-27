@@ -2,6 +2,7 @@ import { test, expect, type APIRequestContext, type BrowserContext, type Page } 
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { formatarDataLocalYmd } from '../src/lib/relatorioDateHelper';
 
 // This suite is run only by the disposable PostgreSQL + Mailpit harness.
 const mailpit = 'http://127.0.0.1:8025';
@@ -375,11 +376,12 @@ test('OS: peça e valores pela UI, total e filtros do relatório persistidos @re
   await page.getByLabel('Status da Ordem:').selectOption('CONCLUIDA');
   await page.getByLabel('Data Inicial:').fill('2099-01-01');
   await expect(reportRow).toHaveCount(0);
-  await page.getByLabel('Data Inicial:').fill(order.dataEntrada.slice(0, 10));
+  const orderDayInShopTimezone = formatarDataLocalYmd(new Date(order.dataEntrada));
+  await page.getByLabel('Data Inicial:').fill(orderDayInShopTimezone);
   await expect(reportRow).toBeVisible();
   await page.getByLabel('Data Final:').fill('2000-01-01');
   await expect(reportRow).toHaveCount(0);
-  await page.getByLabel('Data Final:').fill(order.dataEntrada.slice(0, 10));
+  await page.getByLabel('Data Final:').fill(orderDayInShopTimezone);
   await expect(reportRow).toBeVisible();
 
   await page.goto('/configuracoes');
