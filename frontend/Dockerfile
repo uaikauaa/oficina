@@ -31,6 +31,7 @@ ENV INTERNAL_BACKEND_URL=http://backend:8080
 ARG SOURCE_REVISION=development
 LABEL org.opencontainers.image.source="https://github.com/uaikauaa/oficina" \
       org.opencontainers.image.revision=${SOURCE_REVISION}
+RUN apk add --no-cache 'libcrypto3=3.5.9-r1' 'libssl3=3.5.9-r1' 'zlib=1.4-r0' && rm -f /var/log/apk.log
 RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /opt/yarn-* \
     && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 

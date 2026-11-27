@@ -182,6 +182,108 @@ test('integração real: login 2FA, cadastro, estoque e ordem de serviço @integ
   expect(await page.evaluate(() => Object.hasOwn(window, 'auditXss')), 'Stored text must not execute HTML').toBe(false);
   expect(await page.evaluate(() => Object.hasOwn(Object.prototype, 'auditPrototypeCanary'))).toBe(false);
 
+  // Persisted edits and relationships are checked through fresh API reads and browser navigation.
+  const editedName = 'Cliente CI Editado';
+  const editedClient = await context.request.put(`/api/clientes/${client.id}`, {
+    headers: await csrfHeader(context),
+    data: { tipoPessoa: 'FISICA', nomeRazaoSocial: editedName,
+      telefone: `149${Date.now().toString().slice(-8)}`, email: `editado.${client.id}@oficina.invalid` },
+  });
+  expect(editedClient.status(), await editedClient.text()).toBe(200);
+  expect((await (await context.request.get(`/api/clientes/${client.id}`)).json()).nomeRazaoSocial).toBe(editedName);
+  await page.reload();
+  await expect(page.getByText(editedName, { exact: true }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Editar', exact: true }).first().click();
+  const clientDialog = page.getByRole('dialog');
+  await clientDialog.getByLabel('Nome Completo *').fill('Cliente UI CI');
+  await clientDialog.getByRole('button', { name: 'Salvar Alterações' }).click();
+  await expect(clientDialog).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText('Cliente UI CI', { exact: true }).first()).toBeVisible();
+  expect((await (await context.request.get(`/api/clientes/${client.id}`)).json()).nomeRazaoSocial).toBe('Cliente UI CI');
+
+  const machineHistory = await context.request.get(`/api/maquinas/${machine.id}/historico`);
+  expect(machineHistory.status()).toBe(200);
+  expect(((await machineHistory.json()) as { content: Array<{ id: number }> }).content.some(row => row.id === order.id)).toBe(true);
+  const editedMachine = await context.request.put(`/api/maquinas/${machine.id}`, {
+    headers: await csrfHeader(context),
+    data: { tipoEquipamento: 'MAQUINA_SOLDA', marca: 'ESAB CI', modelo: 'Modelo Editado CI',
+      numeroSerie: `CI-SYNTH-EDIT-${machine.id}` },
+  });
+  expect(editedMachine.status(), await editedMachine.text()).toBe(200);
+  const persistedMachine = await (await context.request.get(`/api/maquinas/${machine.id}`)).json() as {
+    clienteId: number; modelo: string;
+  };
+  expect(persistedMachine).toMatchObject({ clienteId: client.id, modelo: 'Modelo Editado CI' });
+  await page.goto(`/maquinas/${machine.id}`);
+  await expect(page.getByText('Modelo Editado CI').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Editar', exact: true }).first().click();
+  const machineDialog = page.getByRole('dialog');
+  await machineDialog.getByLabel('Modelo *').fill('Modelo UI CI');
+  await machineDialog.getByRole('button', { name: 'Salvar Alterações' }).click();
+  await expect(machineDialog).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText('Modelo UI CI').first()).toBeVisible();
+  expect((await (await context.request.get(`/api/maquinas/${machine.id}`)).json()).modelo).toBe('Modelo UI CI');
+
+  const rejectedStockExit = await context.request.post('/api/estoque/saida', {
+    headers: await csrfHeader(context),
+    data: { produtoId: product.id, quantidade: 999, motivo: 'Saída sintética acima do saldo' },
+  });
+  expect(rejectedStockExit.status()).toBe(400);
+  expect(Number((await (await context.request.get(`/api/produtos/${product.id}`)).json()).estoqueAtual)).toBe(5);
+
+  const financial = await context.request.put(`/api/ordens-servico/${order.id}`, {
+    headers: await csrfHeader(context),
+    data: { diagnostico: 'Placa testada em bancada', solucaoAplicada: 'Reparo sintético concluído',
+      valorMaoObra: 125.35, valorDesconto: 5.10 },
+  });
+  expect(financial.status(), await financial.text()).toBe(200);
+  expect(Number((await financial.json()).valorTotal)).toBe(120.25);
+  const changeStatus = async (status: string, testesRealizados?: string) => context.request.patch(
+    `/api/ordens-servico/${order.id}/status`, {
+      headers: await csrfHeader(context), data: { status, testesRealizados },
+    },
+  );
+  expect((await changeStatus('CONCLUIDA')).status(), 'Skipping required states must be rejected').toBe(400);
+  for (const status of ['EM_DIAGNOSTICO', 'EM_MANUTENCAO']) {
+    const changed = await changeStatus(status);
+    expect(changed.status(), await changed.text()).toBe(200);
+  }
+  expect((await changeStatus('PRONTA')).status(), 'Bench tests are mandatory').toBe(400);
+  expect((await changeStatus('PRONTA', 'Teste sintético sob carga por quinze minutos')).status()).toBe(200);
+  expect((await changeStatus('CONCLUIDA')).status()).toBe(200);
+  expect((await changeStatus('EM_MANUTENCAO')).status(), 'Terminal order cannot reopen').toBe(400);
+  const persistedOrder = await (await context.request.get(`/api/ordens-servico/${order.id}`)).json() as {
+    status: string; valorTotal: number; dataConclusao: string;
+  };
+  expect(persistedOrder.status).toBe('CONCLUIDA');
+  expect(Number(persistedOrder.valorTotal)).toBe(120.25);
+  expect(persistedOrder.dataConclusao).toBeTruthy();
+  const report = await context.request.get('/api/relatorios/ordens-servico');
+  expect(report.status()).toBe(200);
+  const reportData = await report.json() as { resumo: { totalOs: number; concluidas: number; valorTotalConcluidas: number } };
+  expect(reportData.resumo.totalOs).toBe(2);
+  expect(reportData.resumo.concluidas).toBe(1);
+  expect(Number(reportData.resumo.valorTotalConcluidas)).toBe(120.25);
+  await page.goto(`/ordens-servico/${order.id}`);
+  await expect(page.getByText('Concluída').first()).toBeVisible();
+
+  const configName = 'Oficina Sintética CI';
+  const configSaved = await context.request.put('/api/configuracao-oficina', {
+    headers: await csrfHeader(context), data: { nomeFantasia: configName },
+  });
+  expect(configSaved.status(), await configSaved.text()).toBe(200);
+  expect((await (await context.request.get('/api/configuracao-oficina')).json()).nomeFantasia).toBe(configName);
+  await page.goto('/configuracoes');
+  await expect(page.getByText(configName).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Editar', exact: true }).click();
+  await page.getByLabel('Nome Fantasia / Comercial *').fill('Oficina UI CI');
+  await page.getByRole('button', { name: 'Salvar Configuração' }).click();
+  await expect(page.getByText('Oficina UI CI').first()).toBeVisible();
+  await page.reload();
+  expect((await (await context.request.get('/api/configuracao-oficina')).json()).nomeFantasia).toBe('Oficina UI CI');
+
   const formulaClient = await context.request.post('/api/clientes', {
     headers: await csrfHeader(context), data: { tipoPessoa: 'FISICA', nomeRazaoSocial: '=1+1' },
   });

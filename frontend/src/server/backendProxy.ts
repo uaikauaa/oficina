@@ -12,10 +12,10 @@ export function proxyConfig(env: Record<string, string | undefined> = process.en
     throw new Error('HTTP permitido somente no ambiente local isolado.');
   }
   let clientContext: ProxyConfig['clientContext'];
-  if (env.K_SERVICE) {
+  if (env.K_SERVICE || env.TRUSTED_PROXY_HOPS) {
     const hops = Number(env.TRUSTED_PROXY_HOPS);
     if (!Number.isInteger(hops) || hops < 1 || hops > 5 || !env.SERVICE_PROXY_SECRET || env.SERVICE_PROXY_SECRET.length < 32) {
-      throw new Error('Cloud Run requer cadeia de proxies validada e SERVICE_PROXY_SECRET.');
+      throw new Error('Proxy requer cadeia de proxies validada e SERVICE_PROXY_SECRET.');
     }
     clientContext = { secret: env.SERVICE_PROXY_SECRET, hops };
   }

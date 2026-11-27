@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, Suspense } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -275,13 +275,10 @@ function LoginForm() {
   }, [isModalOpen, fecharModal]);
 
   // Foco no primeiro campo do modal ao abrir
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isModalOpen) {
-      const timer = setTimeout(() => {
-        const input = document.getElementById('modal-email') as HTMLInputElement | null;
-        input?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
+      const input = document.getElementById('modal-email') as HTMLInputElement | null;
+      input?.focus();
     }
   }, [isModalOpen]);
 
